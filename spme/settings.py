@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'spme_web',
-    'spme_api'
+    'spme_api',
+    'spme_estructuracion',
 ]
 
 MIDDLEWARE = [
