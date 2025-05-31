@@ -9,21 +9,27 @@ from .domain.models.response.libroResponse import LibroResponse
 from rest_framework.response import Response
 from rest_framework import status
 
-from .presenters.libroPresenter import LibroPresenter
-
+#from .presenters.libroPresenter import LibroPresenter
+from .container.presenterContainer import PresenterContainer
 
 
 class getLibro(APIView):
+    def __init__(self):
+        self.contenedor = PresenterContainer()
+        self.libroPresenter = self.contenedor.libroPresenter()
     #POST
     def post(self, request, *args, **kwargs):
 	#Request: El serializer es un request	
         libroRequest =  LibroRequest(data=request.data)
 
         if libroRequest.is_valid():
-            libroPresenter = LibroPresenter()
-            libro = libroPresenter.getLibro(libroRequest.validated_data)
+            #libroPresenter = LibroPresenter()
+            #libro = libroPresenter.getLibro(libroRequest.validated_data)
             # Crear un diccionario con los datos de respuesta
+            
         
+            
+            libro = self.libroPresenter.getLibro(libroRequest.validated_data)
             # Pasar los datos al serializer de respuesta
             libroResponse = LibroResponse(libro)
                         
