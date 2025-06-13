@@ -1,5 +1,6 @@
 from ..domain.models.response.listPeiResponse import ListaPeiResponse,PeiResponse
 from ..mappers.listPeiMapper import ListPeiMapper
+from ..domain.usecases.obtenerListaPeiUseCase import ObtenerListaPeiUseCase
 
 class ObtenerPeiPresenter:
 
@@ -26,5 +27,6 @@ class ObtenerPeiPresenter:
         # peiSerializer.is_valid(raise_exception=True)
         #------------------------------------------
         #listaPei = [peiSerializer.data] #objeto de tipo list
-        listaPei = obtenerListaPeiUseCase.listaPei()  # Obtiene la lista de PEI desde el caso de uso
-        return ListPeiMapper.toListPeiResponse(listaPei) #pone los datos en el formato esperado
+        listaPeiUseCase = ObtenerListaPeiUseCase()
+        qsPei = listaPeiUseCase.execute()  # Obtiene la lista de PEI desde el caso de uso
+        return ListPeiMapper.toListPeiResponse(qsPei) #pone los datos en el formato esperado
