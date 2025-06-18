@@ -7,5 +7,5 @@ class ObjetivoEspecificoDataAccess:
         return objetivoEspecifico
     
     def objetivoEspecificoPorId(self, id):
-        objetivoEspecifico = ObjetivoEspecificoProyecto.objects.filter(id=id).first()
-        return objetivoEspecifico
+        lista = ObjetivoEspecificoProyecto.objects.filter(id=id).first()
+        return lista

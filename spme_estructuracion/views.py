@@ -5,6 +5,7 @@ from .domain.models.response.listPeiResponse import ListaPeiResponse
 from .presenters.obtenerPeiPresenter import ObtenerPeiPresenter
 from .domain.models.response.ObjetivoEspecificoResponse import ObjetivoEspecificoResponseList
 from spme_estructuracion.container.objeticoEspecificoPresenterContainer import ObjetivoEspecificoPresenterContainer
+from common.MessageManager import MessageType
 
 class ObtenerPei(APIView):
     def get(self, request, *args, **kwargs):
@@ -24,11 +25,11 @@ class ObtenerObjetivoEspecifico(APIView):
 
     def get(self, request, *args, **kwargs):
 
-       
         response = self.objetivoEspecificoPresenter.ObjetivoEspecifico()
-
        
         objetivoEspecificoResponseLista = ObjetivoEspecificoResponseList(data=response)
-        objetivoEspecificoResponseLista.is_valid(raise_exception=True)
 
-        return Response(objetivoEspecificoResponseLista.data, status=status.HTTP_200_OK)
+        if(objetivoEspecificoResponseLista.is_valid()):
+            return Response(objetivoEspecificoResponseLista.data, status=status.HTTP_200_OK)
+
+        return Response({"mensaje": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)

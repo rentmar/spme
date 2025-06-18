@@ -1,9 +1,13 @@
-from ..domain.usecases.ObjetivoEspecificoUseCase import ObjetivoEspecificoUseCase
+from container.objetivoEspecificoUseCaseContainer import ObjetivoEspecificoUseCaseContainer
 from ..mappers.ObjetivoEspecificoMapper import ObjetivoEspecificoMapper
 
 class ObjetivoEspecificoPresenter:
+    def __init__(self):
+        self.contenedor = ObjetivoEspecificoUseCaseContainer()
+        self.objetivoEspecificoRepository = self.contenedor.objetivoEspecificoUseCase()
+
     def ObjetivoEspecifico(self):
-        #objetivoEspecificoUseCase = ObjetivoEspecificoUseCase()  #no instanciar clase USAR DI        
-        lista = objetivoEspecificoUseCase.execute()
+       
+        lista = self.objetivoEspecificoRepository.execute()
 
         return ObjetivoEspecificoMapper.toObjetivoEspecificoResponse(lista)

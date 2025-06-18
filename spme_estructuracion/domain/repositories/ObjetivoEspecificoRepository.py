@@ -1,7 +1,10 @@
-from ...dataaccess.ObjetivoEspecificoDataAccess import ObjetivoEspecificoDataAccess
+from container.objetivoEspecificoDataAccessContainer import ObjetivoEspecificoDataAccessContainer
 
 class ObjetivoEspecificoRepository:
+    def __init__(self):
+        self.contenedor = ObjetivoEspecificoDataAccessContainer()
+        self.objetivoEspecificoDataAccess = self.contenedor.objetivoEspecificoDataAccess()
+
     def objetivoEspecificoTodo(self):
-        objetivoEspecificoDataAccess = ObjetivoEspecificoDataAccess()
-        objetivoEspecifico = objetivoEspecificoDataAccess.objetivoEspecificoTodo()
-        return objetivoEspecifico
+        lista = self.objetivoEspecificoDataAccess.objetivoEspecificoTodo()
+        return lista
