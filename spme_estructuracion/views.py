@@ -5,7 +5,7 @@ from .domain.models.response.listPeiResponse import ListaPeiResponse
 from .presenters.obtenerPeiPresenter import ObtenerPeiPresenter
 from .domain.models.response.ObjetivoEspecificoResponse import ObjetivoEspecificoResponseList
 from spme_estructuracion.container.objeticoEspecificoPresenterContainer import ObjetivoEspecificoPresenterContainer
-from common.MessageManager import MessageType
+from spme_estructuracion.common.MessageManager import MessageType
 
 class ObtenerPei(APIView):
     def get(self, request, *args, **kwargs):

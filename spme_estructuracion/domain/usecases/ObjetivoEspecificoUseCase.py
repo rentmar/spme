@@ -1,4 +1,4 @@
-from container.objetivoEspecificoRepositoryContainer import ObjetivoEspecificoRepositoryContainer
+from spme_estructuracion.container.objetivoEspecificoRepositoryContainer import ObjetivoEspecificoRepositoryContainer
 
 class ObjetivoEspecificoUseCase:
     def __init__(self):

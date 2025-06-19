@@ -1,4 +1,4 @@
-from container.objetivoEspecificoDataAccessContainer import ObjetivoEspecificoDataAccessContainer
+from spme_estructuracion.container.objetivoEspecificoDataAccessContainer import ObjetivoEspecificoDataAccessContainer
 
 class ObjetivoEspecificoRepository:
     def __init__(self):

@@ -1,4 +1,4 @@
-from container.objetivoEspecificoUseCaseContainer import ObjetivoEspecificoUseCaseContainer
+from spme_estructuracion.container.objetivoEspecificoUseCaseContainer import ObjetivoEspecificoUseCaseContainer
 from ..mappers.ObjetivoEspecificoMapper import ObjetivoEspecificoMapper
 
 class ObjetivoEspecificoPresenter:
