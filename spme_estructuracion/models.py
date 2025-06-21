@@ -25,7 +25,7 @@ class Pei(models.Model):
 
 #ObjetivoGeneralPei
 class ObjetivoPei(models.Model):
-    codigo = models.CharField(max_length=50)
+    codigo = models.CharField(max_length=50, blank=True, null=True)
     descripcion = models.TextField()
     pei = models.ForeignKey(
         Pei, 
@@ -46,7 +46,7 @@ class ObjetivoPei(models.Model):
 
 # Indicadores del PEI
 class IndicadorPeiBase(PolymorphicModel):
-    codigo = models.CharField(max_length=15)
+    codigo = models.CharField(max_length=50, null=True, blank=True)
     descripcion = models.TextField(verbose_name='Indicador')
     captura_informacion = models.TextField(blank=True, null=True)
     responsabilidad = models.CharField(max_length=255, blank=True, null=True)
@@ -66,6 +66,16 @@ class IndicadorPeiBase(PolymorphicModel):
         blank=True
     )
 
+    #Relacion al Pei
+    """
+    pei = models.ForeignKey(
+        Pei,
+        on_delete=models.CASCADE,
+        related_name='indicador_pei_pei',
+        null=True,
+        blank=True,
+    )
+    """
 
 
     class Meta:
@@ -74,7 +84,7 @@ class IndicadorPeiBase(PolymorphicModel):
         ordering = ['codigo']
 
     def __str__(self):
-        return f"{self.codigo} - {self.descripcion}"
+        return f"{self.id}, {self.codigo} - {self.descripcion}"
     
 #Indicador Cuantitativo
 class IndicadorPeiCuantitativo(IndicadorPeiBase):
@@ -113,7 +123,7 @@ class IndicadorPeiCualitativo(IndicadorPeiBase):
 
 #Definicion de la Instancia gestora.
 class InstanciaGestora(models.Model):
-    codigo = models.CharField(max_length=10)
+    codigo = models.CharField(max_length=50, null=True, blank=True)
     clasificador = models.CharField(max_length=5, null=True, blank=True)
     instancia = models.CharField(max_length=255)
 
@@ -133,8 +143,8 @@ class Proyecto(models.Model):
         ('EP','En Planificacion'),
     ]
     #Informacion basica
-    codigo = models.CharField(max_length=20, unique=True)
-    titulo = models.CharField(max_length=200)
+    codigo = models.CharField(max_length=50, unique=True)
+    titulo = models.CharField(max_length=500)
     descripcion = models.TextField(blank=True, null=True)
 
     #Fechas
@@ -143,7 +153,7 @@ class Proyecto(models.Model):
     fecha_finalizacion = models.DateField(null=True, blank=True)
 
     #Presupuesto
-    presupuesto = models.DecimalField(blank=True, null=True, max_digits=8, decimal_places=2)
+    presupuesto = models.DecimalField(blank=True, null=True, max_digits=15, decimal_places=2)
 
     #Estados
     estado = models.CharField(max_length=2, choices=ESTADO_OPCIONES, default='ES')
@@ -172,17 +182,19 @@ class Proyecto(models.Model):
 
 # Objetivo General DEL PROYECTO
 class ObjetivoGeneralProyecto(models.Model):
-    codigo = models.CharField(max_length=10, null=True, blank=True)
+    codigo = models.CharField(max_length=50, null=True, blank=True)
     descripcion = models.TextField(null=True, blank=True)
-    supuestos = models.TextField(blank=True)
-    riesgos = models.TextField(blank=True)
+    supuestos = models.TextField(null=True, blank=True)
+    riesgos = models.TextField(null=True, blank=True)
 
     #Relaciones
     proyecto = models.OneToOneField(
         Proyecto,
         on_delete=models.CASCADE,
         related_name='objetivo_general',
-        verbose_name='Proyecto asociado'
+        verbose_name='Proyecto asociado',
+        null=True,
+        blank=True,
     )
     
     class Meta:
@@ -194,8 +206,8 @@ class ObjetivoGeneralProyecto(models.Model):
 
 # KPI
 class Kpi(models.Model):
-    codigo = models.CharField(max_length=10, null=True, blank=True)
-    descripcion = models.TextField(verbose_name="Redaccion del KPI")
+    codigo = models.CharField(max_length=50, null=True, blank=True)
+    descripcion = models.TextField(verbose_name="Redaccion del KPI", null=True, blank=True)
     #Relaciones
     objetivo_general = models.ForeignKey(
         ObjetivoGeneralProyecto,
@@ -209,17 +221,31 @@ class Kpi(models.Model):
 
 # Objetivo Específico DEL PROYECTO
 class ObjetivoEspecificoProyecto(models.Model):
-    codigo = models.CharField(max_length=10)
-    descripcion = models.TextField()
+    codigo = models.CharField(max_length=50, null=True, blank=True)
+    descripcion = models.TextField(null=True, blank=True)
     supuestos = models.TextField(blank=True, null=True)
     riesgos = models.TextField(blank=True, null=True)
     
     #Relaciones
     proyecto = models.ForeignKey(
         Proyecto,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='objetivos_especificos',
         verbose_name='Proyecto asociado',
+        help_text='Proyecto al que contribuye este objetivo especifico'
+        
+    )
+
+    objetivo_general = models.ForeignKey(
+        ObjetivoGeneralProyecto,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='objetivos_especificos_og',
+        verbose_name='Objetivo general asociado',
+        help_text='Objetivo general al que contribuye este objetivo especifico'
     )
     
     class Meta:
@@ -228,40 +254,34 @@ class ObjetivoEspecificoProyecto(models.Model):
 
     def __str__(self):
         return f"{self.codigo} - {self.descripcion[:50]}..."    
-    
-#Procesos - Linea de Accion
-class Proceso(models.Model):
-    codigo = models.CharField(max_length=15)
-    titulo = models.CharField(max_length=255)
-    descripcion = models.TextField(blank=True, null=True)
-
-    class Meta:
-        verbose_name = 'Proceso'
-        verbose_name_plural = 'Procesos'
 
 
 
 # Resultado
 class ResultadoProyecto(PolymorphicModel):
-    codigo = models.CharField(max_length=10, blank=True, null=True)
+    codigo = models.CharField(max_length=20, blank=True, null=True)
     descripcion = models.TextField(blank=True)
     supuestos = models.TextField(blank=True)
     riesgos = models.TextField(blank=True)
+    
     class Meta:
         verbose_name = 'Resultado de Proyecto'
         verbose_name_plural = 'Resultados de Proyecto'
 
     def __str__(self):
-        return f"{self.codigo} - {self.descripcion[:30]}..."
+        return f"{self.id}-{self.codigo} - {self.descripcion[:30]}..."
 
 #Resultado de Objetivo General
 class ResultadoOG(ResultadoProyecto):
-    proceso = models.OneToOneField(
-        Proceso,
+    #Relaciones
+    objetivo_general = models.ForeignKey(
+        ObjetivoGeneralProyecto,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='resultado_og'
+        related_name='resultados_og',
+        verbose_name='Objetivo General Asociado',
+        help_text='Objetivo General al que contribuye este resultado'
     )
     class Meta:
         verbose_name = 'Resultado Objetivo General'
@@ -269,12 +289,14 @@ class ResultadoOG(ResultadoProyecto):
 
 #Resultado de Objetivo Especifico
 class ResultadoOE(ResultadoProyecto):
-    proceso = models.OneToOneField(
-        Proceso,
+    objetivo_especifico = models.ForeignKey(
+        ObjetivoEspecificoProyecto,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='resultado_oe'
+        related_name='resultados_oe',
+        verbose_name='Objetivo Específico Asociado',
+        help_text='Objetivo específico al que están relacionados estos resultados'
     )
     class Meta:
         verbose_name = 'Resultado Objetivo Especifico'
@@ -282,7 +304,7 @@ class ResultadoOE(ResultadoProyecto):
 
 # Producto
 class ProductoProyecto(PolymorphicModel):
-    codigo = models.CharField(max_length=150)
+    codigo = models.CharField(max_length=50, null=True, blank=True)
     descripcion = models.TextField(blank=True, null=True), 
     supuestos = models.TextField(blank=True, null=True)
     riesgos = models.TextField(blank=True, null=True)
@@ -293,17 +315,19 @@ class ProductoProyecto(PolymorphicModel):
         verbose_name_plural = 'Productos del Proyecto'
 
     def __str__(self):
-        return {self.codigo} - self.descripcion[:50]    
+        return f"{self.codigo}"
 
 
 #Producto Objetivo Especifico
 class ProductoOE(ProductoProyecto):
-    proceso = models.OneToOneField(
-        Proceso,
+    objetivo_especifico = models.ForeignKey(
+        ObjetivoEspecificoProyecto,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='producto_oe'
+        related_name='productos_oe',
+        verbose_name='Objetivo Especifico Asociado',
+        help_text='Producto Esperado del Objetivo Especifico'
     )
     class Meta:
         verbose_name = 'Producto Objetivo Especifico'
@@ -312,6 +336,18 @@ class ProductoOE(ProductoProyecto):
 
 #Producto de Resultado Objetivo Especifico
 class ProductoResultadoOE(ProductoProyecto):
+    #relaciones
+    resultado_oe = models.ForeignKey(
+        ResultadoOE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='productos_res_oe',
+        verbose_name='Producto del ResultadoOE Asociado',
+        help_text='Producto Esperado del Resultado OE'
+
+    )
+
     class Meta:
         verbose_name = 'Producto del Resultado Objetivo Especifico'
         verbose_name_plural = 'Productos del Resultado Objetivo Especifico'
@@ -332,10 +368,10 @@ class IndicadorProyecto(PolymorphicModel):
     ]
 
     # Campos comunes a todos los indicadores
-    codigo = models.CharField(max_length=20)
-    redaccion = models.CharField(max_length=5, choices=TIPO_INDICADOR)
-    fuente_verificacion = models.TextField()
-    target_poblacion = models.CharField(max_length=255)
+    codigo = models.CharField(max_length=50, null=True, blank=True)
+    redaccion = models.CharField(max_length=5, choices=TIPO_INDICADOR, blank=True, null=True)
+    fuente_verificacion = models.TextField(blank=True, null=True)
+    target_poblacion = models.CharField(max_length=255, blank=True, null=True)
     tipo = models.CharField(max_length=5, choices=TIPO, default='A-Z')
 
     #Campos
@@ -392,7 +428,9 @@ class IndicadorResultadoObjGral(IndicadorProyecto):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='indicador_res_og'
+        related_name='indicador_res_og',
+        verbose_name='Resultado de Objetivo General Asociado',
+        help_text='Indicador que mide al Resultado de OG',
     )
     class Meta:
         verbose_name = 'Indicador Resultado Objetivo General de Proyecto'
@@ -423,4 +461,178 @@ class IndicadorResultadoObjEspecifico(IndicadorProyecto):
     class Meta:
         verbose_name = 'Indicador Resultado de Objetivo Especifico'
         verbose_name_plural = 'Indicadores Resultado Objetivo Especifico'
+
+
+
+#Almacenamiento de Diagrama de estructura
+class DiagramaEstructura(models.Model):
+    codigoProyecto = models.CharField(max_length=50)
+    nodos = models.JSONField(blank=True)
+    conexiones = models.JSONField(blank=True)
+    sincronizado = models.BooleanField(default=True)
+    #Adicionales
+    creado = models.DateTimeField(auto_now_add=True)
+    actualizado = models.DateTimeField(auto_now=True)
+    #Relaciones
+    proyecto = models.OneToOneField(
+        Proyecto,
+        on_delete=models.CASCADE,
+        related_name='mapa_nodo',
+        null=True,
+        blank=True,
+    )
+    
+    class Meta:
+        verbose_name = 'Diagrama Estructura'
+        verbose_name_plural = 'Diagramas Estructura'
+
+    def __str__(self):
+        return f"Mapa: {self.codigoProyecto}"
+    
+
+
+#Procesos - Linea de Accion
+class Proceso(models.Model):
+    codigo = models.CharField(max_length=20, null=True, blank=True)
+    titulo = models.CharField(max_length=255, null=True, blank=True)
+    descripcion = models.TextField(blank=True, null=True)
+    #Relaciones
+    resultado_og = models.OneToOneField(
+        ResultadoOG,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='proceso_resultado_og',
+        verbose_name='Procesos asociados al Resultado del Objetivo General',
+        help_text='Procesos que se ejecutan para alcanzar el Resultado OG'
+    )
+
+    resultado_oe = models.OneToOneField(
+        ResultadoOE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='proceso_resultado_oe',
+        verbose_name='Procesos asociados al Resuldato del Objetivo Especifico',
+        help_text='Procesos que se ejecutan para alcanzar el Resultado OE',
+    )
+
+    producto_oe = models.OneToOneField(
+        ProductoOE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='proceso_producto_oe',
+        verbose_name='Procesos asociadoa al Producto del Objetivo Especifico',
+        help_text='Procesos que se ejecutan para alcanzar el Producto OE',
+    )
+
+
+    class Meta:
+        verbose_name = 'Proceso'
+        verbose_name_plural = 'Procesos'
+
+    def __str__(self):
+        return f'Proceso: {self.titulo}'    
+
+#Actividad
+class Actividad(models.Model):
+    ESTADOS_ACTIVIDAD = [
+        ('SPLAN', 'Sin Planificar'),
+        ('PLAN', 'Planificado'),
+        ('EJEC', 'En Ejecución'),
+        ('POST', 'Postergado'),
+        ('CANC', 'Cancelado'),
+        ('COMP', 'Completado'),
+    ]
+    PROCEDENCIA_FONDOS = [
+        ('UG', 'Fondos de la Institucion'),
+        ('PROY', 'Fondos del proyecto'),
+    ]
+    TIPO_ACTIVIDAD = [
+        ('NODEF', 'No definido'),
+        ('ACAP', 'Actividad de Capacitacion'),
+        ('PRIN', 'Proyecto de Investigacion'),
+        ('AOP', 'Actividad Operativa'),
+        ('CSNS', 'Campaña de Sensibilizacion'),
+        ('PDES', 'Proyecto de Desarrollo'),
+        ('AINC', 'Actividad de Incidencia'),
+        ('AART', 'Actividad de Articulacion'),
+    ]
+    codigo = models.CharField(max_length=20, blank=True, null=True)
+    descripcion = models.TextField(null=True, blank=True)
+    tipo = models.CharField(max_length=30, choices=TIPO_ACTIVIDAD, default='NODEF')
+    fecha_programada = models.DateField(null=True, blank=True)
+    duracion = models.IntegerField(null=True, blank=True)
+    fecha_inicio = models.DateField(null=True, blank=True)
+    fecha_cierre = models.DateField(null=True, blank=True)
+    #Presupuesto
+    presupuesto = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+
+    #Forndo de PEI
+    presupuesto_pei = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    #Estado de la actividad
+    estado = models.CharField(max_length=15, choices=ESTADOS_ACTIVIDAD, default='SPLAN')
+
+    #Seleccion
+    #- UG
+    #- Fondos del Proyecto
+    procedencia_fondos = models.CharField(max_length=25, choices=PROCEDENCIA_FONDOS, default='PROY')
+
+    #Nuevos Campos
+    objetivo_de_actividad = models.TextField(null=True, blank=True) #Nuevo datos
+    descripcion_evaluacion = models.TextField(null=True, blank=True) #Toda la informacion de la planificacion de la actividad
+    justificacion_modificacion = models.TextField(null=True, blank=True) #Motivos de modificacion 
+    
+    #Datos de la actividad segun su tipo
+    datos_actividad = models.JSONField(null=True, blank=True)
+
+    #Relaciones
+    proceso = models.ForeignKey(
+        Proceso,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='actividad_proceso',
+        verbose_name='Actividades relacionadas al Proceso',
+        help_text='Actividades que se realizan para completar un proceso'
+    )
+
+    resultado_og = models.ForeignKey(
+        ResultadoOG,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='actividad_resultado_og',
+        verbose_name='Actividades relacionadas al Resultado OG',
+        help_text='Actividades realizadas para completar el Resultado OG'
+    )
+
+    resultado_oe = models.ForeignKey(
+        ResultadoOE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='actividad_resultado_oe',
+        verbose_name='Actividades relacionadas al Resultado OE',
+        help_text='Actividades realizadas para completar el Resultado OE',
+    )
+
+    producto_oe = models.ForeignKey(
+        ProductoOE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='actividad_producto_oe',
+        verbose_name='Actividades relacionadas al Producto OE',
+        help_text='Actividades realizadas para completar el Producto OE',
+    )
+
+    class Meta:
+        verbose_name = 'Actividad'
+        verbose_name_plural = 'Actividades'
+
+    def __str__(self):
+        return f'Actividad: {self.codigo}'    
+
 
