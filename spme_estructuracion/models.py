@@ -23,6 +23,7 @@ class Pei(models.Model):
         return self.titulo
 
 
+
 #ObjetivoGeneralPei
 class ObjetivoPei(models.Model):
     codigo = models.CharField(max_length=50, blank=True, null=True)
@@ -41,6 +42,27 @@ class ObjetivoPei(models.Model):
 
     def __str__(self):
         return self.codigo
+
+
+#Factores criticos
+class FactoresCriticos(models.Model):
+    factor_critico = models.TextField(null=True, blank=True)
+    #Relaciones
+    objetivo_especifico = models.ForeignKey(
+        ObjetivoPei,
+        on_delete=models.SET_NULL,
+        related_name='factores_criticos',
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = 'Factor critico'
+        verbose_name_plural = 'Factores criticos'
+
+    def __str__(self):
+        return self.factor_critico    
+
 
 
 
@@ -136,12 +158,25 @@ class InstanciaGestora(models.Model):
         return f"{self.codigo} - {self.instancia}"    
 
 
+#Registrar Procedencia de fondos
+class ProcedenciaFondos(models.Model):
+    sigla = models.CharField(max_length=15, null=True, blank=True)
+    financiera = models.CharField(max_length=255, null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Procedencia de Fondos'
+        verbose_name_plural = 'Procedencia de Fondos'
+
+    def __str__(self):
+        return f"{self.sigla} - {self.financiera}"    
+
 #Definicion de la clase Proyecto
 class Proyecto(models.Model):
     ESTADO_OPCIONES = [
         ('ES','Estructuracion'),
         ('EP','En Planificacion'),
     ]
+
     #Informacion basica
     codigo = models.CharField(max_length=50, unique=True)
     titulo = models.CharField(max_length=500)
@@ -168,6 +203,14 @@ class Proyecto(models.Model):
         on_delete=models.PROTECT,
         related_name='proyectos', #Nombre para la relacion inversa
         verbose_name='PEI asociado',
+    )
+
+    procedencia_fondos = models.ManyToManyField(
+        ProcedenciaFondos,
+        blank=True,
+        related_name='procedencia_fondos',
+        verbose_name='Financiador(es) proyecto',
+        help_text='Financiador(es) del proyecto'
     )
 
     class Meta:
@@ -352,7 +395,6 @@ class ProductoResultadoOE(ProductoProyecto):
         verbose_name = 'Producto del Resultado Objetivo Especifico'
         verbose_name_plural = 'Productos del Resultado Objetivo Especifico'
 
-
     
 #Indicadores
 class IndicadorProyecto(PolymorphicModel):
@@ -497,7 +539,7 @@ class Proceso(models.Model):
     titulo = models.CharField(max_length=255, null=True, blank=True)
     descripcion = models.TextField(blank=True, null=True)
     #Relaciones
-    resultado_og = models.OneToOneField(
+    resultado_og = models.ForeignKey(
         ResultadoOG,
         on_delete=models.SET_NULL,
         null=True,
@@ -507,7 +549,7 @@ class Proceso(models.Model):
         help_text='Procesos que se ejecutan para alcanzar el Resultado OG'
     )
 
-    resultado_oe = models.OneToOneField(
+    resultado_oe = models.ForeignKey(
         ResultadoOE,
         on_delete=models.SET_NULL,
         null=True,
@@ -517,7 +559,7 @@ class Proceso(models.Model):
         help_text='Procesos que se ejecutan para alcanzar el Resultado OE',
     )
 
-    producto_oe = models.OneToOneField(
+    producto_oe = models.ForeignKey(
         ProductoOE,
         on_delete=models.SET_NULL,
         null=True,
@@ -634,5 +676,97 @@ class Actividad(models.Model):
 
     def __str__(self):
         return f'Actividad: {self.codigo}'    
+
+
+#PRoducto vinculado a todos los nodos
+class ProductoGeneral(ProductoProyecto):
+    #relaciones
+    objetivo_general = models.ForeignKey(
+        ObjetivoGeneralProyecto, 
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='productos_generales_og',
+        verbose_name='Producto general asociado a Objetivo General',
+        help_text='Producto que puede asociarse a todos los nodos',
+    )
+    objetivo_especifico = models.ForeignKey(
+        ObjetivoEspecificoProyecto,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True, 
+        related_name='productos_generales_oe',
+        verbose_name='Producto general asociado a objetivo especifico',
+        help_text='Producto que puede asociarse a todos los nodos',
+    )
+
+    indicador_og = models.ForeignKey(
+        IndicadorObjetivoGeneral,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='productos_gral_indicador_og',
+        verbose_name='Producto gral asociado al indicador OG',
+        help_text='Producto que puede asociarse a todos los nodos',
+    )
+
+    indicador_oe = models.ForeignKey(
+        IndicadorObjetivoEspecifico,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='productos_gral_indicador_oe',
+        verbose_name='Producto gral asociado al indicador OE',
+        help_text='Producto que puede asociarse a todos los nodos',
+    )
+
+    resultado_og = models.ForeignKey(
+        ResultadoOG,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='productos_gral_resultado_og',
+        verbose_name='Producto gral asociado al Resultado OG',
+        help_text='Producto que puede asociarse a todos los nodos',
+    )
+
+    resultado_oe = models.ForeignKey(
+        ResultadoOE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='productos_gral_resultado_oe',
+        verbose_name='Producto gral asociado al Resultado OE',
+        help_text='Producto que puede asociarse a todos los nodos',
+    )
+
+    indicador_resultado_og =models.ForeignKey(
+        IndicadorResultadoObjGral,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='productos_gral_indicador_resultado_og',
+        verbose_name='Producto gral asociado al Indicador Resultado OG',
+        help_text='Producto que puede asociarse a todos los nodos',
+    )
+
+    indicador_resultado_oe =models.ForeignKey(
+        IndicadorResultadoObjEspecifico,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='productos_gral_indicador_resultado_oe',
+        verbose_name='Producto gral asociado al Indicador Resultado OE',
+        help_text='Producto que puede asociarse a todos los nodos',
+    )
+
+
+
+    #relaciones
+    class Meta:
+        verbose_name = 'Producto general (a toda la estructura)'
+        verbose_name_plural = 'Productos generales (a toda la estructura)'
+
+
 
 
