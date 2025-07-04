@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from spme_estructuracion.common.MessageManager import MessageType
+from spme_autenticacion.common.MessageManager import MessageType
 from .domain.models.request.userRequest import GetUserRequest, CreateUserRequest
 from .domain.models.response.userResponse import UserResponse, CreateUserResponse
 from .container.presenterContainer import UsuarioPresenterContainer

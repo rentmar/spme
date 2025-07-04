@@ -40,8 +40,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'spme_web',
     'spme_api',
-    'spme_estructuracion',
     'spme_autenticacion',
+    'spme_estructuracion_pei',
 ]
 
 MIDDLEWARE = [
