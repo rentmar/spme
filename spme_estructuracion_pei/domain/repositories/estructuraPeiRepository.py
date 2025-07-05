@@ -13,3 +13,7 @@ class EstructuracionPeiRepository:
         :return: Estructuracion PEI creado.
         """
         return self.estructuracionPeiDataAccess.createEstructuraPei(estructuraPei)
+    
+    def obtenerEstructuraPei(self):
+        
+        return self.estructuracionPeiDataAccess.obtenerEstructuraPei()

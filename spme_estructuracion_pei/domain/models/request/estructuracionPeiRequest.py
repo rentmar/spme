@@ -28,3 +28,12 @@ class CrearEstructuraPEIRequest(serializers.Serializer):
             'creado_el': internal_value['creado_el'],
             'modificado_el': internal_value['modificado_el']
         }
+    
+class ObtenerEstructuraPEIRequest(serializers.Serializer):
+    correlation_id = serializers.CharField(max_length=50, required= True)
+
+    def to_internal_value(self, data):
+        internal_value =  super().to_internal_value(data)
+        return {
+            'correlation_id' : internal_value['correlation_id']
+        }

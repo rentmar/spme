@@ -31,3 +31,6 @@ class EstructuracionPeiDataAccess:
             creado_el = estructuraPei['creado_el'],
             modificado_el = estructuraPei['modificado_el'],
         )
+    
+    def obtenerEstructuraPei(self):
+        return EstructuraPei.objects.all().first()
