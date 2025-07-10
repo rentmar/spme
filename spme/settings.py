@@ -38,10 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt',
     'spme_web',
     'spme_api',
     'spme_autenticacion',
     'spme_estructuracion_pei',
+    'spme_actividades',
 ]
 
 MIDDLEWARE = [
@@ -103,7 +105,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
