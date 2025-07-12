@@ -628,6 +628,9 @@ class Actividad(models.Model):
     #Datos de la actividad segun su tipo
     datos_actividad = models.JSONField(null=True, blank=True)
 
+    #Responsable
+    responsable = models.IntegerField(null=True, blank=True)
+
     #Relaciones
     proceso = models.ForeignKey(
         Proceso,

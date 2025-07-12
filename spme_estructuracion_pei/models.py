@@ -18,3 +18,4 @@ class EstructuraPei(models.Model):
         db_table = 'spme_estructuracion_pei'
         verbose_name = 'Estructuracion_pei'
         verbose_name_plural = 'No definidos'
+
