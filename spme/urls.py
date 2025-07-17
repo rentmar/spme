@@ -26,4 +26,5 @@ urlpatterns = [
     path('', include('spme_web.urls')),
     path('estructuracionPei_api/', include('spme_estructuracion_pei.urls')),
     path('actividades_api/', include('spme_actividades.urls')),
+    path('monitoreo_api/', include('spme_monitoreo.urls')),
 ]

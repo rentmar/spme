@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'spme_autenticacion',
     'spme_estructuracion_pei',
     'spme_actividades',
+    'spme_monitoreo',
 ]
 
 MIDDLEWARE = [
