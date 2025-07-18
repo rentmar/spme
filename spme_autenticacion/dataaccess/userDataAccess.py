@@ -7,14 +7,31 @@ class UserDataAccess:
     def __init__(self):
         pass
 
-    def getUserByName(self, userName):
+    def autenticarUsuario(self, userName, password):
+        """
+        Autentica un usuario por su nombre de usuario y contraseña.
+        :param userName: Nombre de usuario.
+        :param password: Contraseña del usuario.
+        :return: Usuario autenticado o None si no existe.
+        """
+        usuario = Usuario.objects.filter(username=userName).first()
+        if usuario and usuario.check_password(password):
+            return usuario
+        return None
+
+    def usuarioPorUsername(self, userName):
         """
         Obtiene un usuario por su nombre de usuario.
         :param user_name: Nombre de usuario a buscar.
         :return: Usuario encontrado o None si no existe.
         """
-        return Usuario.objects.filter(usuario=userName).first()
-    
+        print(f"Buscando usuario por nombre: {userName}")
+        usuario = Usuario.objects.get(username=userName)
+        print(f"Usuario encontrado: {usuario}")
+        if usuario is not None:
+            return usuario
+        return None
+        
     def createUser(self, user):
         """
         Crea un nuevo usuario.
@@ -22,7 +39,7 @@ class UserDataAccess:
         :return: Usuario creado.
         """
         return Usuario.objects.create(
-            usuario=user.usuario.value,
+            username=user.username.value,
             password=user.password.value,
             permisos=user.permisos.value
         )

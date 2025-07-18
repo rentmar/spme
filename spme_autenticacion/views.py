@@ -2,11 +2,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from spme_autenticacion.common.MessageManager import MessageType
-from .domain.models.request.userRequest import GetUserRequest, CreateUserRequest
-from .domain.models.response.userResponse import UserResponse, CreateUserResponse
+from .domain.models.request.userRequest import ObtenerUsuarioRequest, CrearUsuarioRequest, AutenticacionUsuarioRequest
+from .domain.models.response.userResponse import UsuarioResponse, CreateUserResponse, AutenticacionUsuarioResponse
 from .container.presenterContainer import UsuarioPresenterContainer
 
-class GetUserByName(APIView):
+class ObtenerUsuario(APIView):
     """
     API view obtener usuario.
     """
@@ -16,22 +16,22 @@ class GetUserByName(APIView):
 
     def get(self, request, *args, **kwargs):
         
-        getUserRequest = GetUserRequest(data=request.data)
+        obtenerUsuarioRequestRequest = ObtenerUsuarioRequest(data=request.data)
 
-        if(getUserRequest.is_valid()):
+        if obtenerUsuarioRequestRequest.is_valid():
 
-            response = self.usurioPresenter.getUsuario(getUserRequest.validated_data)
+            usuarioResponse = self.usurioPresenter.obtenerUsuario(obtenerUsuarioRequestRequest.validated_data)
 
-            userResponse =  UserResponse(data=response)
+            response =  UsuarioResponse(data=usuarioResponse)
 
-            if userResponse.is_valid():
-                return Response(userResponse.data, status=status.HTTP_200_OK)
+            if response.is_valid():
+                return Response(response.data, status=status.HTTP_200_OK)
             else:
                 return Response({"mensaje": MessageType.NOT_FOUND.value}, status=status.HTTP_404_NOT_FOUND)
         
         return Response({"mensaje": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
     
-class CreateUser(APIView):
+class CrearUsuario(APIView):
     """
     API view crear usuario.
     """
@@ -41,7 +41,7 @@ class CreateUser(APIView):
 
     def post(self, request, *args, **kwargs):
         
-        userRequest = CreateUserRequest(data=request.data)
+        userRequest = CrearUsuarioRequest(data=request.data)
 
         if userRequest.is_valid():
 
@@ -49,10 +49,64 @@ class CreateUser(APIView):
 
             response = CreateUserResponse(data=createResponse)
 
-            if response.is_valid() and response.data['id'] is not None:
-                response.data['mensaje'] = MessageType.SUCCESS.value
+            if response.is_valid():
                 return Response(response.data, status=status.HTTP_201_CREATED)
             else:
                 return Response({"mensaje": MessageType.ERROR.value}, status=status.HTTP_400_BAD_REQUEST)
         
         return Response({"mensaje": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
+    
+class AutenticacionUsuario(APIView):
+    """
+    API view autenticación usuario.
+    """
+    def __init__(self):
+        self.contenedor = UsuarioPresenterContainer()
+        self.usurioPresenter = self.contenedor.usuarioPresenter()
+
+    def post(self, request, *args, **kwargs):
+
+        userRequest = AutenticacionUsuarioRequest(data=request.data)
+
+        if userRequest.is_valid():
+
+            userResponse = self.usurioPresenter.autenticarUsuario(userRequest.validated_data)
+
+            response = AutenticacionUsuarioResponse(data=userResponse)
+
+            if response.is_valid():
+                return Response(response.data, status=status.HTTP_200_OK)
+            else:
+                return Response({"mensaje": MessageType.NOT_FOUND.value}, status=status.HTTP_404_NOT_FOUND)
+        
+        return Response({"mensaje": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
+    
+class ListaUsuarios(APIView):
+    """
+    API view lista usuarios.
+    """
+    def __init__(self):
+        self.contenedor = UsuarioPresenterContainer()
+        self.usurioPresenter = self.contenedor.usuarioPresenter()
+
+    def get(self, request, *args, **kwargs):
+        """
+        Obtiene la lista de usuarios.
+        """
+        listaUsuarios = {
+            "usuarios": [
+                {
+                    "id": 1,
+                    "usuario": "Will Smith"
+                },
+                {
+                    "id": 2,
+                    "usuario": "Gorg Selva"
+                },
+                {
+                    "id": 3,
+                    "usuario": "Jaime Dunn"
+                }
+            ]
+        }
+        return Response(listaUsuarios, status=status.HTTP_200_OK)

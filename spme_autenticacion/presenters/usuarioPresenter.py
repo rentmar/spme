@@ -6,24 +6,38 @@ class UsuarioPresenter:
         self.contenedor = UserUseCaseContainer()
         self.userUseCase = self.contenedor.getUserUseCase()
         self.createUserUseCase = self.contenedor.createUserUseCase()
+        self.autenticarUsuarioUseCase = self.contenedor.autenticarUsuarioUseCase()
 
-    def getUsuario(self,userRequest):
+    def obtenerUsuario(self,userRequest):
         """
         Obtiene el usuario a partir de la solicitud.
         """
         usuario = self.userUseCase.execute(userRequest)
+        
         if usuario is not None:
-            return UserMapper.toUserResponse(usuario)
+            return UserMapper.toUsuarioResponse(usuario)
         else:
-            return None
+            return UserMapper.toErrorResponse("Usuario no encontrado")
         
     def createUsuario(self, userRequest):
         """
         Crea un nuevo usuario a partir de la solicitud.
         """
-        userRequestEntity = UserMapper.toUserEntity(userRequest)
+        userRequestEntity = UserMapper.toSuccessResponse(userRequest)
+
         usuario = self.createUserUseCase.execute(userRequestEntity)
         if usuario is not None:
             return UserMapper.toSuccessResponse(usuario)
         else:
-            return None
+            return UserMapper.toErrorResponse("Error al crear el usuario")
+        
+    def autenticarUsuario(self, userRequest):
+        """
+        Autentica un usuario a partir de la solicitud.
+        """
+        usuario = self.autenticarUsuarioUseCase.execute(userRequest)
+        
+        if usuario is not None:
+            return UserMapper.toAutenticacionSuccessResponse(usuario)
+        else:
+            return UserMapper.toAutenticacionErrorResponse("Credenciales inválidas")

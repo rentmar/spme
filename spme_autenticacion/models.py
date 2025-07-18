@@ -30,6 +30,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     nombre = models.CharField(max_length=30, blank=True)
     paterno = models.CharField(max_length=30, blank=True)
     materno = models.CharField(max_length=150, blank=True)
+    permisos= models.CharField(max_length=20,blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
@@ -38,7 +39,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     objects = UsuarioManager()
 
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['nombre', 'paterno', 'materno']
+    REQUIRED_FIELDS = ['nombre', 'paterno', 'materno','permisos']
 
     groups = models.ManyToManyField(
         'auth.Group',
@@ -70,4 +71,4 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         return full_name.strip()
 
     def get_short_name(self):
-        return self.nombre
+        return self.username

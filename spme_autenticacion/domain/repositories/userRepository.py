@@ -6,17 +6,13 @@ class UserRepository:
         self.contenedor = UserDataAccessContainer()
         self.userDataAccess = self.contenedor.userDataAccess()
 
-    def getUserByName(self, userName):
+    def obtenerUsuarioPorUsername(self, userName):
         """
         Obtiene un usuario por su Nombre.
         :param user_name: Nombre del usuario a buscar.
         :return: Usuario encontrado o None si no existe.
         """
-        user = self.userDataAccess.getUserByName(userName)
-        if user is not None:
-            return user 
-        else:
-            return None
+        return self.userDataAccess.usuarioPorUsername(userName)
         
     def createUser(self, userEntity):
         """
@@ -25,3 +21,12 @@ class UserRepository:
         :return: Usuario creado.
         """
         return self.userDataAccess.createUser(userEntity)
+    
+    def autenticarUsuario(self,userRequest):
+        """
+        Autentica un usuario por su nombre de usuario y contraseña.
+        :param userName: Nombre de usuario.
+        :param password: Contraseña del usuario.
+        :return: Usuario autenticado o None si no existe.
+        """
+        return self.userDataAccess.autenticarUsuario(userRequest['username'], userRequest['password'])

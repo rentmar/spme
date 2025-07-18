@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-class GetUserRequest(serializers.Serializer):
+class ObtenerUsuarioRequest(serializers.Serializer):
     """
     Usuario request user_name requerido.
     """
@@ -11,9 +11,9 @@ class GetUserRequest(serializers.Serializer):
         campo user_name se convierte a usuario.
         """
         internal_value = super().to_internal_value(data)
-        return {'usuario': internal_value['usuario']} 
+        return {'username': internal_value['usuario']} 
     
-class CreateUserRequest(serializers.Serializer):
+class CrearUsuarioRequest(serializers.Serializer):
     """
     Usuario request para crear un usuario.
     """
@@ -26,7 +26,24 @@ class CreateUserRequest(serializers.Serializer):
         """
         internal_value = super().to_internal_value(data)
         return {
-            'usuario': internal_value['usuario'],
+            'username': internal_value['usuario'],
             'password': internal_value['password'],
             'permisos': internal_value['permisos']
+        }
+    
+class AutenticacionUsuarioRequest(serializers.Serializer):
+    """
+    Request para autenticar un usuario.
+    """
+    usuario = serializers.CharField(max_length=50, required=True, allow_blank=False)
+    password = serializers.CharField(max_length=150, required=True, allow_blank=False)
+
+    def to_internal_value(self, data):
+        """
+        Convierte los campos a un formato interno.
+        """
+        internal_value = super().to_internal_value(data)
+        return {
+            'username': internal_value['usuario'],
+            'password': internal_value['password']
         }

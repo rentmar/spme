@@ -6,7 +6,9 @@ router = DefaultRouter()
 
 urlpatterns = [
     path('', include(router.urls)),
-    path(r'obtenerUsuario/',views.GetUserByName.as_view(), name='obtenerUsuario'),
-    path(r'crearUsuario/',views.CreateUser.as_view(), name='crearUsuario'),
+    path(r'obtenerUsuario/',views.ObtenerUsuario.as_view(), name='obtenerUsuario'),
+    path(r'crearUsuario/',views.CrearUsuario.as_view(), name='crearUsuario'),
+    path(r'autenticarUsuario/',views.AutenticacionUsuario.as_view(), name='autenticarUsuario'),
+    path(r'listaUsuarios/',views.ListaUsuarios.as_view(), name='listaUsuarios'),
 ]
 urlpatterns += router.urls
