@@ -580,11 +580,12 @@ class Proceso(models.Model):
 class Actividad(models.Model):
     ESTADOS_ACTIVIDAD = [
         ('SPLAN', 'Sin Planificar'),
-        ('PLAN', 'Planificado'),
-        ('EJEC', 'En Ejecución'),
-        ('POST', 'Postergado'),
-        ('CANC', 'Cancelado'),
-        ('COMP', 'Completado'),
+        ('PLAN', 'Planificada'),
+        ('RET', 'Retraso'),
+        ('REP', 'Reprogramacion'),
+        ('EJEC', 'En Ejecucion'),
+        ('REP', 'En Reporte'),
+        ('FIN', 'Finalizado')
     ]
     PROCEDENCIA_FONDOS = [
         ('UG', 'Fondos de la Institucion'),
