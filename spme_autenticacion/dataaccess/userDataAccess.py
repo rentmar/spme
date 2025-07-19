@@ -38,8 +38,20 @@ class UserDataAccess:
         :param user: Objeto Usuario a crear.
         :return: Usuario creado.
         """
+
         return Usuario.objects.create(
-            username=user.username.value,
-            password=user.password.value,
-            permisos=user.permisos.value
+            username=user["username"],
+            nombre=user["nombre"],
+            paterno=user["paterno"],
+            materno=user["materno"],
+            is_active=user["is_active"],
+            password=user["password"],
+            permisos=user["permisos"],
+            is_staff=user["is_staff"]
         )
+    def obtenerListaUsuarios(self):
+        """
+        Obtiene la lista de usuarios.
+        :return: Lista de usuarios.
+        """
+        return Usuario.objects.filter(is_superuser=False, is_active=True)

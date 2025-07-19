@@ -14,14 +14,14 @@ class UserRepository:
         """
         return self.userDataAccess.usuarioPorUsername(userName)
         
-    def createUser(self, userEntity):
+    def createUser(self, userRequest):
         """
         Crea un nuevo usuario.
         :param user: Objeto Usuario a crear.
         :return: Usuario creado.
         """
-        return self.userDataAccess.createUser(userEntity)
-    
+        return self.userDataAccess.createUser(userRequest)
+
     def autenticarUsuario(self,userRequest):
         """
         Autentica un usuario por su nombre de usuario y contraseña.
@@ -30,3 +30,10 @@ class UserRepository:
         :return: Usuario autenticado o None si no existe.
         """
         return self.userDataAccess.autenticarUsuario(userRequest['username'], userRequest['password'])
+    
+    def obtenerListaUsuarios(self):
+        """
+        Obtiene la lista de usuarios.
+        :return: Lista de usuarios.
+        """
+        return self.userDataAccess.obtenerListaUsuarios()

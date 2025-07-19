@@ -45,7 +45,7 @@ class CrearUsuario(APIView):
 
         if userRequest.is_valid():
 
-            createResponse = self.usurioPresenter.createUsuario(userRequest)
+            createResponse = self.usurioPresenter.createUsuario(userRequest.validated_data)
 
             response = CreateUserResponse(data=createResponse)
 
@@ -93,6 +93,10 @@ class ListaUsuarios(APIView):
         """
         Obtiene la lista de usuarios.
         """
+        listResponse = self.usurioPresenter.obtenerListaUsuarios()
+
+        print("ListResponse:", listResponse)
+
         listaUsuarios = {
             "usuarios": [
                 {

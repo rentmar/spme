@@ -50,3 +50,13 @@ class UserMapper:
             "validacion": False,
             "mensaje": error_message,
         }
+    
+
+    @staticmethod
+    def toListResponse(lista):
+        """
+        Convierte una lista de usuarios a un formato de respuesta.
+        """
+        return {
+            "usuarios": [UserMapper.toUsuarioResponse(user) for user in lista]
+        }

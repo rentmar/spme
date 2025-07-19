@@ -1,5 +1,5 @@
 from dependency_injector import containers, providers
-from ..domain.usecases.userUseCase import GetUserUseCase, CreateUserUseCase,AutenticarUsuarioUseCase
+from ..domain.usecases.userUseCase import GetUserUseCase, CreateUserUseCase,AutenticarUsuarioUseCase,ObtenerUsuariosUseCase
 
 class UserUseCaseContainer(containers.DeclarativeContainer):
     # Config del contenedor
@@ -11,4 +11,6 @@ class UserUseCaseContainer(containers.DeclarativeContainer):
     createUserUseCase = providers.Singleton(CreateUserUseCase)
 
     autenticarUsuarioUseCase = providers.Singleton(AutenticarUsuarioUseCase)
+
+    obtenerUsuariosUseCase = providers.Singleton(ObtenerUsuariosUseCase)
 
