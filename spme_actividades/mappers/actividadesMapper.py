@@ -34,3 +34,22 @@ class ActividadesMapper:
         return {
             "actividades": lista
         }
+    
+    @staticmethod
+    def toActividadesKantResponse(actividades):
+        lista = []
+        for actividad in actividades:
+            act = {
+                "codigo": actividad['codigo'],
+                "descripcion": actividad['descripcion'],
+                "tipo": actividad['tipo'],
+                "fecha_programada": actividad['fecha_programada'],
+                "duracion": actividad['duracion'],
+                "fecha_inicio": actividad['fecha_inicio'],
+                "fecha_cierre": actividad['fecha_cierre'],
+                "estado": actividad['estado'],
+            }
+            lista.append(act)
+        return {
+            "actividades": lista
+        }

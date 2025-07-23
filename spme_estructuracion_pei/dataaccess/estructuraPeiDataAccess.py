@@ -6,14 +6,6 @@ class EstructuracionPeiDataAccess:
     """
     def __init__(self):
         pass
-
-    # def getUserByName(self, userName):
-    #     """
-    #     Obtiene un usuario por su nombre de usuario.
-    #     :param user_name: Nombre de usuario a buscar.
-    #     :return: Usuario encontrado o None si no existe.
-    #     """
-    #     return Usuario.objects.filter(usuario=userName).first()
     
     def createEstructuraPei(self, estructuraPei):
         """

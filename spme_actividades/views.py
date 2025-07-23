@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .common.MessageManager import MessageType
 from .domain.models.request.actividadesRequest import ObtenerActividadesUsuarioRequest
-from .domain.models.response.actividadesResponse import ActividadesUsuarioResponse
+from .domain.models.response.actividadesResponse import ActividadesUsuarioResponse,ActividadesKantResponse
 from .container.presenterContainer import ActividadesPresenterContainer
 
 class ObtenerActividadesUsuario(APIView):
@@ -32,3 +32,25 @@ class ObtenerActividadesUsuario(APIView):
         
         else: 
              return Response({"mensaje": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
+        
+class ObtenerActividadesKant(APIView):
+    """
+    API para obtener las actividades del diagrama de Kant
+    """
+    def __init__(self):
+        self.contenedor = ActividadesPresenterContainer()
+        self.actividadesPresenter = self.contenedor.actividadesPresenter()
+
+    def get(self, request, *args, **kwargs):
+
+        actividadesKant = self.actividadesPresenter.obtenerActividadesKant()
+        print(f"Obteniendo actividades por Kfsdfsfsdfant {actividadesKant}")
+        response = ActividadesKantResponse(data = actividadesKant)
+        print (f"Response is valid: {response.is_valid()}")
+        if response.is_valid():
+            return Response(response.data,status=status.HTTP_200_OK)
+        else:
+            return Response({"mensaje": MessageType.NOT_FOUND.value},status = status.HTTP_404_NOT_FOUND)
+
+        
+       

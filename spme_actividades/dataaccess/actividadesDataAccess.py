@@ -13,3 +13,19 @@ class ActividadesDataAccess:
         """
         #return Actividad.objects.filter(usuario_id=usuarioId)
         return Actividad.objects.all()
+    
+    def obtenerActividadesPorKant(self):
+        """
+        Obtiene las actividades asociadas al diagrama de Kant.
+        :return: Lista de actividades del diagrama de Kant.
+        """
+        return Actividad.objects.all().values(
+        'codigo',
+        'descripcion',
+        'tipo',
+        'fecha_programada',
+        'duracion',
+        'fecha_inicio',
+        'fecha_cierre',
+        'estado'
+    )

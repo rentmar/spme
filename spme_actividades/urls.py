@@ -7,5 +7,6 @@ router = DefaultRouter()
 urlpatterns = [
     path('', include(router.urls)),
     path(r'obtenerActividadesUsuario/',views.ObtenerActividadesUsuario.as_view(), name='obtenerActividadesUsuario'),
+    path(r'obtenerActividadesKant/',views.ObtenerActividadesKant.as_view(), name='obtenerActividadesKant'),
 ]
 urlpatterns += router.urls
