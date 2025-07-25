@@ -1,11 +1,11 @@
 from spme.common.MessageManager import MessageType
 
-class SolicitudFondosMapper:
+class ReponseMapper:
         
     @staticmethod
-    def toSuccessResponse(solicitudFondosResponse):
+    def toSuccessResponse(response):
         return {
-            "id": solicitudFondosResponse.id,
+            "id": response.id,
             "mensaje": MessageType.SUCCESS.value,
         }
     
