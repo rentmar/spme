@@ -14,7 +14,7 @@ class ObtenerUsuario(APIView):
         self.contenedor = UsuarioPresenterContainer()
         self.usurioPresenter = self.contenedor.usuarioPresenter()
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         
         obtenerUsuarioRequestRequest = ObtenerUsuarioRequest(data=request.data)
 

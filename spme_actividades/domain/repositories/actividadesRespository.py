@@ -10,4 +10,7 @@ class ActividadesRepository:
 
     def obtenerActividadesPorKant(self):
         return self.actividadesDataAccess.obtenerActividadesPorKant()
+    
+    def crearActividad(self,actividadRequest):
+        return self.actividadesDataAccess.crearActividad(actividadRequest)
         

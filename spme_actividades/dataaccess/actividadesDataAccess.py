@@ -14,6 +14,9 @@ class ActividadesDataAccess:
         #return Actividad.objects.filter(usuario_id=usuarioId)
         return Actividad.objects.all()
     
+    def crearActividad(self,actividadRequest):
+        return Actividad.objects.create(**actividadRequest)
+    
     def obtenerActividadesPorKant(self):
         """
         Obtiene las actividades asociadas al diagrama de Kant.

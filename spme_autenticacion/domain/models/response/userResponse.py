@@ -6,8 +6,13 @@ class UsuarioResponse(serializers.Serializer):
     nombre = serializers.CharField(required=False, allow_blank=True, max_length=150)
     paterno = serializers.CharField(required=False, allow_blank=True, max_length=150)
     materno = serializers.CharField(required=False, allow_blank=True, max_length=150)
-    permisos = serializers.CharField(required=False, allow_blank=True, max_length=150)
-    activo = serializers.BooleanField(required=False)
+    ci = serializers.CharField(required=False,allow_blank=True, max_length=12)
+    cargo = serializers.CharField(required=False,allow_blank=True, max_length=50)
+    banco = serializers.CharField(required=False,allow_blank=True, max_length=50)
+    numeroCuenta = serializers.CharField(required=False,allow_blank=True, max_length=50)
+    tipoCuenta = serializers.CharField(required=False,allow_blank=True, max_length=50)
+    # permisos = serializers.CharField(required=False, allow_blank=True, max_length=150)
+    # activo = serializers.BooleanField(required=False)
 
 class CreateUserResponse(serializers.Serializer):
     id = serializers.IntegerField(required=False)

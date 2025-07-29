@@ -6,14 +6,26 @@ class UserMapper:
     @staticmethod
     def toUsuarioResponse(user):
         return {
-            "id": user.id,
-            "usuario": user.username,
-            "nombre": user.nombre,
-            "paterno": user.paterno,
-            "materno": user.materno,
-            "permisos": user.permisos,
-            "activo": user.is_active
+            "id": 1,
+            "usuario": "ACarvajal",
+            "nombre": "Alejandro",
+            "paterno": "Carvajal",
+            "materno": "Carvajal",
+            "ci": "4859687",
+            "cargo": "Gerente",
+            "banco": "Banco Nacional Bolivia BNB",
+            "numeroCuenta": "5874-55212-1211-15-4",
+            "tipoCuenta": "AHORRO"
         }
+        # return {
+        #     "id": user.id,
+        #     "usuario": user.username,
+        #     "nombre": user.nombre,
+        #     "paterno": user.paterno,
+        #     "materno": user.materno,
+        #     "permisos": user.permisos,
+        #     "activo": user.is_active
+        # }
     
     # @staticmethod
     # def toUserEntity(userRequest):

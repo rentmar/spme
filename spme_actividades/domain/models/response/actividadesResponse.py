@@ -26,3 +26,7 @@ class ActividadesUsuarioResponse(serializers.Serializer):
 class ActividadesKantResponse(serializers.Serializer):
     actividades = ActividadeKantResponse(many=True)
 
+class CrearActividadResponse(serializers.Serializer):
+    id = serializers.IntegerField(required=False)
+    mensaje = serializers.CharField(required=False, allow_blank=True, max_length=150)
+

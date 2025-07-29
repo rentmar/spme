@@ -13,8 +13,8 @@ class UsuarioPresenter:
         """
         Obtiene el usuario a partir de la solicitud.
         """
-        usuario = self.userUseCase.execute(userRequest)
-        
+        #usuario = self.userUseCase.execute(userRequest)
+        usuario = {}
         if usuario is not None:
             return UserMapper.toUsuarioResponse(usuario)
         else:
