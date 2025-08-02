@@ -54,3 +54,28 @@ class ObtenerEstructuraPEI(APIView):
                 return Response({"mensaje": MessageType.NOT_FOUND.value},status = status.HTTP_404_NOT_FOUND)
             
         return Response({"mensaje": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class DemoAPIView(APIView):
+    def get(self, request):
+        return Response({
+            "mensaje": "GET recibido correctamente"
+        }, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        return Response({
+            "mensaje": "POST recibido correctamente",
+            "datos_recibidos": request.data
+        }, status=status.HTTP_201_CREATED)
+
+    def put(self, request):
+        return Response({
+            "mensaje": "PUT recibido correctamente",
+            "datos_recibidos": request.data
+        }, status=status.HTTP_200_OK)
+
+    def delete(self, request):
+        return Response({
+            "mensaje": "DELETE recibido correctamente"
+        }, status=status.HTTP_204_NO_CONTENT)
+

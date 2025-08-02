@@ -26,3 +26,5 @@ class EstructuracionPeiDataAccess:
     
     def obtenerEstructuraPei(self):
         return EstructuraPei.objects.all().first()
+    
+    
