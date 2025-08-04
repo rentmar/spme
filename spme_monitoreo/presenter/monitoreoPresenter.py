@@ -3,6 +3,7 @@ from spme_monitoreo.mappers.monitoreoMapper import ReponseMapper
 
 class SolicitudFondosPresenter:
     def __init__(self):
+        #Capa Inferior, inyeccion de datos
         self.useCaseContainer = CrearSolicitudFondosUseCaseContainer()
         self.crearSolicitudFondosUseCase = self.useCaseContainer.crearSolicitudFondosUseCase()
 
