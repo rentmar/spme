@@ -16,17 +16,20 @@ class SolicitudFondos(APIView):
     API para solicitud de fondos
     """
     def __init__(self):
+        #Inyeccion, Presenter de la solicitud de fondos
         self.contenedor = SolicitudFondosPresenterContainer()
         self.solicitudFondosPresenter = self.contenedor.solicitudFondosPresenter()
 
     def post(self, request, *args, **kwargs):
         
+        #Converion de json a objeto django
         createSolicitudFondosRequest = CrearSolicitudFondosRequest(data=request.data)
-
+        #Validador, para los campos del objeto django
         if createSolicitudFondosRequest.is_valid():
-            
+            #Presenter, mandar el request al presenter
             solicitudFondosResponse = self.solicitudFondosPresenter.crearSolicitudFondos(createSolicitudFondosRequest.validated_data)
 
+            #Serializacion 
             response = CreateSolicitudFondosResponse(data=solicitudFondosResponse)
 
             if response.is_valid():

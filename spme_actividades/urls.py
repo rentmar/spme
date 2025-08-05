@@ -11,3 +11,4 @@ urlpatterns = [
     path(r'crearActividad/',views.CrearActividad.as_view(), name='crearActividad'),
 ]
 urlpatterns += router.urls
+

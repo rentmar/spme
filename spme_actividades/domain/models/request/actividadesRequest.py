@@ -28,6 +28,10 @@ class CrearActividadRequest(serializers.Serializer):
     descripcion_evaluacion = serializers.CharField(max_length=500)
     justificacion_modificacion = serializers.CharField(max_length=500)
     datos_actividad = serializers.JSONField()
+    proceso = serializers.IntegerField()
+    resultado_og = serializers.IntegerField()
+    resultado_oe = serializers.IntegerField()
+    producto_oe = serializers.IntegerField()
 
     def to_internal_value(self, data):
         """
@@ -49,5 +53,9 @@ class CrearActividadRequest(serializers.Serializer):
             'descripcion_evaluacion': internal_value['descripcion_evaluacion'],
             'justificacion_modificacion': internal_value['justificacion_modificacion'],
             'datos_actividad': internal_value['datos_actividad'],
+            'proceso': internal_value['proceso'],
+            'resultado_og': internal_value['resultado_og'],
+            'resultado_oe': internal_value['resultado_oe'],
+            'producto_oe': internal_value['producto_oe'],
         }
     

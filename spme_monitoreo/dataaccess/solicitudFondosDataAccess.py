@@ -1,6 +1,7 @@
 from ..models import SolicitudFondos
 
 class SolicitudFondosDataAccess:
+    #Aqui se maneja el ORM
     
     def crearSolicitudFondos(self, solicitudData):
         """
