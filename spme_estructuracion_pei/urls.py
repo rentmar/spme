@@ -11,3 +11,4 @@ urlpatterns = [
     path(r'obtenerPeiVigente/', views.DemoAPIView.as_view(), name='pei-vigente' )
 ]
 urlpatterns += router.urls
+
