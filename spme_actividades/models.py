@@ -53,6 +53,11 @@ class Actividad(models.Model):
     #Datos de la actividad segun su tipo
     datos_actividad = models.JSONField(null=True, blank=True)
 
+    proceso = models.IntegerField()
+    resultado_og = models.IntegerField()
+    resultado_oe = models.IntegerField()
+    producto_oe = models.IntegerField()
+    
     class Meta:
         verbose_name = 'Actividad'
         verbose_name_plural = 'Actividades'
