@@ -52,9 +52,9 @@ class CrearUsuario(APIView):
             if response.is_valid():
                 return Response(response.data, status=status.HTTP_201_CREATED)
             else:
-                return Response({"mensaje": MessageType.ERROR.value}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"estado": MessageType.ERROR.value}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
         
-        return Response({"mensaje": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"estado": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
     
 class AutenticacionUsuario(APIView):
     """
@@ -77,9 +77,9 @@ class AutenticacionUsuario(APIView):
             if response.is_valid():
                 return Response(response.data, status=status.HTTP_200_OK)
             else:
-                return Response({"mensaje": MessageType.NOT_FOUND.value}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"estado": MessageType.UNAUTHORIZED.value}, status=status.HTTP_401_UNAUTHORIZED)
         
-        return Response({"mensaje": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"estado": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
     
 class ListaUsuarios(APIView):
     """

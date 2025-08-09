@@ -36,7 +36,7 @@ class UserMapper:
     #     return request
     
     @staticmethod
-    def toSuccessResponse(user):
+    def toCreateSuccessResponse(user):
         return {
             "id": user.id,
             "mensaje": MessageType.SUCCESS.value,
@@ -45,6 +45,7 @@ class UserMapper:
     @staticmethod
     def toErrorResponse(error_message):
         return {
+            "id":0,
             "mensaje": error_message,
         }
     
@@ -52,8 +53,9 @@ class UserMapper:
     def toAutenticacionSuccessResponse(user):
         return {
             "validacion": True,
-            "mensaje": MessageType.SUCCESS.value,
-            "usuario": UserMapper.toUsuarioResponse(user)
+            "mensaje": MessageType.AUTHORIZED.value,
+            "usuario": user.username,
+            "permisos":user.permisos
         }
 
     @staticmethod

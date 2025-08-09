@@ -27,9 +27,9 @@ class UsuarioPresenter:
         usuario = self.createUserUseCase.execute(userRequest)
 
         if usuario is not None:
-            return UserMapper.toSuccessResponse(usuario)
+            return UserMapper.toCreateSuccessResponse(usuario)
         else:
-            return UserMapper.toErrorResponse("Error al crear el usuario")
+            return UserMapper.toErrorResponse("Usuario ya existe")
         
     def obtenerListaUsuarios(self):
         """
@@ -48,4 +48,4 @@ class UsuarioPresenter:
         if usuario is not None:
             return UserMapper.toAutenticacionSuccessResponse(usuario)
         else:
-            return UserMapper.toAutenticacionErrorResponse("Credenciales inválidas")
+            return UserMapper.toAutenticacionErrorResponse("Usuario y/o contraseña inválidas")

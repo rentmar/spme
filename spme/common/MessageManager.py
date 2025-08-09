@@ -8,3 +8,4 @@ class MessageType(Enum):
     BAD_REQUEST = "peticion incorrecta"
     NOT_FOUND = "no encontrado"
     UNAUTHORIZED = "no autorizado"
+    AUTHORIZED = "autorizado"

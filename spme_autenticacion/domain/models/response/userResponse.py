@@ -11,7 +11,7 @@ class UsuarioResponse(serializers.Serializer):
     banco = serializers.CharField(required=False,allow_blank=True, max_length=50)
     numeroCuenta = serializers.CharField(required=False,allow_blank=True, max_length=50)
     tipoCuenta = serializers.CharField(required=False,allow_blank=True, max_length=50)
-    # permisos = serializers.CharField(required=False, allow_blank=True, max_length=150)
+    permisos = serializers.CharField(required=False, allow_blank=True, max_length=20)
     # activo = serializers.BooleanField(required=False)
 
 class CreateUserResponse(serializers.Serializer):
@@ -21,5 +21,6 @@ class CreateUserResponse(serializers.Serializer):
 class AutenticacionUsuarioResponse(serializers.Serializer):
     validacion = serializers.BooleanField(required=False)
     mensaje = serializers.CharField(required=False, allow_blank=True, max_length=150)
-    usuario = UsuarioResponse(required=False)
+    usuario = serializers.CharField(required=False, allow_blank=False, max_length=150)
+    permisos = serializers.CharField(required=False, allow_blank=True, max_length=20)
     

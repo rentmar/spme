@@ -73,10 +73,10 @@ class Actividad(models.Model):
     #Usuario
     responsable = models.CharField(max_length=255, blank=True, null=True) #Usuario Asignado
 
-    proceso = models.IntegerField()
-    resultado_og = models.IntegerField()
-    resultado_oe = models.IntegerField()
-    producto_oe = models.IntegerField()
+    # proceso = models.IntegerField()
+    # resultado_og = models.IntegerField()
+    # resultado_oe = models.IntegerField()
+    # producto_oe = models.IntegerField()
     
     class Meta:
         verbose_name = 'Actividad'

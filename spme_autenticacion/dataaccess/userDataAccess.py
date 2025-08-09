@@ -32,23 +32,32 @@ class UserDataAccess:
             return usuario
         return None
         
-    def createUser(self, user):
+    def createUser(self, userData):
         """
         Crea un nuevo usuario.
         :param user: Objeto Usuario a crear.
         :return: Usuario creado.
         """
+        if Usuario.objects.filter(username=userData["username"]).exists():
+            return None
 
-        return Usuario.objects.create(
-            username=user["username"],
-            nombre=user["nombre"],
-            paterno=user["paterno"],
-            materno=user["materno"],
-            is_active=user["is_active"],
-            password=user["password"],
-            permisos=user["permisos"],
-            is_staff=user["is_staff"]
+        return Usuario.objects.create_user(
+            username=userData["username"],
+            password=userData["password"],  
+            nombre=userData["nombre"],
+            paterno=userData["paterno"],
+            materno=userData["materno"],
+            ci=userData["materno"],
+            cargo=userData["ci"],
+            banco=userData["banco"],
+            numero_cuenta=userData["numero_cuenta"],
+            tipo_cuenta=userData["tipo_cuenta"],
+            is_active=userData["is_active"],
+            permisos=userData["permisos"],
+            is_staff=userData.get("is_staff", True),
+            is_superuser=userData.get("is_superuser", False)
         )
+
     def obtenerListaUsuarios(self):
         """
         Obtiene la lista de usuarios.
