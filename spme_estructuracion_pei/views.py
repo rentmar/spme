@@ -57,6 +57,7 @@ class ObtenerEstructuraPEI(APIView):
         return Response({"mensaje": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
     
 
+
 class DemoAPIView(APIView):
     def get(self, request):
         return Response({

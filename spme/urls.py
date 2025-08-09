@@ -28,3 +28,4 @@ urlpatterns = [
     path('actividades_api/', include('spme_actividades.urls')),
     path('monitoreo_api/', include('spme_monitoreo.urls')),
 ]
+

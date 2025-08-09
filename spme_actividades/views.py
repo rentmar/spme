@@ -82,4 +82,18 @@ class ObtenerActividadesKant(APIView):
             return Response({"mensaje": MessageType.NOT_FOUND.value},status = status.HTTP_404_NOT_FOUND)
 
         
-       
+
+class Tareas(APIView):
+    """
+    API para obtener tareas
+    """
+    def __init__(self, **kwargs):
+        pass
+    #Motodo get
+    def get(self, request):
+        print(f"Llamar al Presentes")
+        
+        #Conversion de json a objeto django
+        return Response({
+            "mensaje": "Get Recibido correctamente"
+        }, status=status.HTTP_200_OK)
