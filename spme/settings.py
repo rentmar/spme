@@ -41,10 +41,12 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
+    'polymorphic',
     'spme_web',
     'spme_api',
     'spme_autenticacion',
     'spme_estructuracion_pei',
+    'spme_estructuracion_proyecto',
     'spme_actividades',
     'spme_monitoreo',
 ]
