@@ -2,6 +2,8 @@ from dependency_injector import containers, providers
 from ..domain.usecases.solicitudFondosUseCase import CrearSolicitudFondosUseCase
 from ..domain.usecases.rendicionCuentasUseCase import CrearRendicionCuentasUseCase
 from ..domain.usecases.solicitudReembolsoUseCase import CrearSolicitudReembolsoUseCase
+from ..domain.usecases.solicitudViajeUseCase import CrearSolicitudViajeUseCase
+from ..domain.usecases.solicitudPagoDirectoUseCase import CrearSolicitudPagoDirectoUseCase
 
 class CrearSolicitudFondosUseCaseContainer(containers.DeclarativeContainer):
     # Config del contenedor
@@ -21,3 +23,17 @@ class CrearSolicitudReembolsoUseCaseContainer(containers.DeclarativeContainer):
 
     # Proveedor de dependencias
     crearSolicitudReembolsoUseCase = providers.Singleton(CrearSolicitudReembolsoUseCase)
+
+class CrearSolicitudViajeUseCaseContainer(containers.DeclarativeContainer):
+    # Config del contenedor
+    config = providers.Configuration()
+
+    # Proveedor de dependencias
+    crearSolicitudViajeUseCase = providers.Singleton(CrearSolicitudViajeUseCase)
+
+class CrearSolicitudPagoDirectoUseCaseContainer(containers.DeclarativeContainer):
+    # Config del contenedor
+    config = providers.Configuration()
+
+    # Proveedor de dependencias
+    crearSolicitudPagoDirectoUseCase = providers.Singleton(CrearSolicitudPagoDirectoUseCase)

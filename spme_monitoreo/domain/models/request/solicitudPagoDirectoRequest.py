@@ -1,9 +1,16 @@
 from rest_framework import serializers
 
-class CrearSolicitudFondosRequest(serializers.Serializer):
+class CrearSolicitudPagoDirectoRequest(serializers.Serializer):
     """
-    Request para crear un Solicitud de Fondos.
+    Request para crear un Solicitud de Pago Directo.
     """
+    nombre = serializers.CharField(max_length=50, required=True, allow_null=False)
+    paterno = serializers.CharField(max_length=50, required=True, allow_null=False)
+    materno = serializers.CharField(max_length=50, required=True, allow_null=False)
+    ci = serializers.CharField(max_length=20, required=True, allow_null=False)
+    banco = serializers.CharField(max_length=50, required=True, allow_null=False)
+    numero_cuenta = serializers.CharField(max_length=50, required=True, allow_null=False)
+    cargo = serializers.CharField(max_length=30, required=True, allow_null=False)
     detalle_destino_fondos = serializers.JSONField(allow_null=False, required=True)
     forma_pago = serializers.IntegerField(required=True, allow_null=False)
     lugar_solicitud = serializers.CharField(max_length=50)
@@ -22,6 +29,13 @@ class CrearSolicitudFondosRequest(serializers.Serializer):
         """
         internal_value = super().to_internal_value(data)
         return {
+            'nombre': internal_value['nombre'],
+            'paterno': internal_value['paterno'],
+            'materno': internal_value['materno'],
+            'ci': internal_value['ci'],
+            'banco': internal_value['banco'],
+            'numeroCuenta': internal_value['numero_cuenta'],
+            'cargo': internal_value['cargo'],
             'detalleDestinoFondos': internal_value['detalle_destino_fondos'],
             'formaPago': int(internal_value['forma_pago']),
             'lugarSolicitud': internal_value['lugar_solicitud'],

@@ -26,6 +26,6 @@ class ReponseMapper:
     @staticmethod
     def toErrorResponse(errorMessage):
         return {
-            "mensaje": MessageType.ERROR.value,
-            "error": errorMessage
+            "id":0,
+            "mensaje": errorMessage,
         }

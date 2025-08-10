@@ -2,6 +2,8 @@ from dependency_injector import containers, providers
 from ..dataaccess.solicitudFondosDataAccess import SolicitudFondosDataAccess
 from ..dataaccess.rendicionCuentasDataAccess import RendicionCuentasDataAccess
 from ..dataaccess.solicitudReembolsoDataAccess import SolicitudReembolsoDataAccess
+from ..dataaccess.solicitudViajeDataAccess import SolicitudViajeDataAccess
+from ..dataaccess.solicitudPagoDirectoDataAccess import SolicitudPagoDirectoDataAccess
 
 class SolicitudFondosDataAccessContainer(containers.DeclarativeContainer):
     """
@@ -34,3 +36,25 @@ class SolicitudReembolsoDataAccessContainer(containers.DeclarativeContainer):
 
 
     solicitudReembolsoDataAccess = providers.Singleton(SolicitudReembolsoDataAccess)
+
+class SolicitudViajeDataAccessContainer(containers.DeclarativeContainer):
+    """
+    Contenedor de acceso a datos de la Solicitud de Viaje.
+    Proporciona una instancia de SolicitudViajeDataAccess.
+    """
+    # Configuración del contenedor
+    config = providers.Configuration()
+
+    # Proveedor de acceso a datos de la Solicitud de Viaje
+    solicitudViajeDataAccess = providers.Singleton(SolicitudViajeDataAccess)
+
+class SolicitudPagoDirectoDataAccessContainer(containers.DeclarativeContainer):
+    """
+    Contenedor de acceso a datos de la Solicitud de Pago Directo.
+    Proporciona una instancia de SolicitudPagoDirectoDataAccess.
+    """
+    # Configuración del contenedor
+    config = providers.Configuration()
+
+    # Proveedor de acceso a datos de la Solicitud de Pago Directo
+    solicitudPagoDirectoDataAccess = providers.Singleton(SolicitudPagoDirectoDataAccess)
