@@ -1,5 +1,6 @@
 from django.db import models
 from spme_estructuracion_proyecto.models import * 
+from spme_estructuracion_pei.models import *
 
 #Tipos de actividad
 class TipoActividad(models.Model):
@@ -122,8 +123,25 @@ class Actividad(models.Model):
     )
 
     #pei_objetivo
-    objetivo_pei = models.IntegerField(null=True, blank=True)
-    indicador_pei = models.IntegerField(null=True, blank=True)
+    objetivo_pei = models.ForeignKey(
+        ObjetivoPei,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='actividades_objpei',
+        verbose_name='Actividades que contribuyen al Producto OE',
+        help_text='Actividades realizadas para completar el Obejtivo PEI'
+    )
+    #Indicador PEI
+    indicador_pei = models.ForeignKey(
+        IndicadorPeiBase,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='actividades_indpei',
+        verbose_name="Actividades relacionadas al Indicador PEI (cualitativo cuantitativo)",
+        help_text="Actividades relacionadas al indicador cualitativo/cuantitativo PEI",
+    )
 
     class Meta:
         verbose_name = 'Actividad'
