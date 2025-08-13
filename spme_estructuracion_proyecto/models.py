@@ -439,3 +439,94 @@ class Proceso(models.Model):
 
     def __str__(self):
         return f'Proceso: {self.titulo}'    
+
+
+#PRoducto vinculado a todos los nodos
+class ProductoGeneral(ProductoProyecto):
+    #relaciones
+    objetivo_general = models.ForeignKey(
+        ObjetivoGeneralProyecto, 
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='productos_generales_og',
+        verbose_name='Producto general asociado a Objetivo General',
+        help_text='Producto que puede asociarse a todos los nodos',
+    )
+    objetivo_especifico = models.ForeignKey(
+        ObjetivoEspecificoProyecto,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True, 
+        related_name='productos_generales_oe',
+        verbose_name='Producto general asociado a objetivo especifico',
+        help_text='Producto que puede asociarse a todos los nodos',
+    )
+
+    indicador_og = models.ForeignKey(
+        IndicadorObjetivoGeneral,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='productos_gral_indicador_og',
+        verbose_name='Producto gral asociado al indicador OG',
+        help_text='Producto que puede asociarse a todos los nodos',
+    )
+
+    indicador_oe = models.ForeignKey(
+        IndicadorObjetivoEspecifico,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='productos_gral_indicador_oe',
+        verbose_name='Producto gral asociado al indicador OE',
+        help_text='Producto que puede asociarse a todos los nodos',
+    )
+
+    resultado_og = models.ForeignKey(
+        ResultadoOG,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='productos_gral_resultado_og',
+        verbose_name='Producto gral asociado al Resultado OG',
+        help_text='Producto que puede asociarse a todos los nodos',
+    )
+
+    resultado_oe = models.ForeignKey(
+        ResultadoOE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='productos_gral_resultado_oe',
+        verbose_name='Producto gral asociado al Resultado OE',
+        help_text='Producto que puede asociarse a todos los nodos',
+    )
+
+    indicador_resultado_og =models.ForeignKey(
+        IndicadorResultadoObjGral,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='productos_gral_indicador_resultado_og',
+        verbose_name='Producto gral asociado al Indicador Resultado OG',
+        help_text='Producto que puede asociarse a todos los nodos',
+    )
+
+    indicador_resultado_oe =models.ForeignKey(
+        IndicadorResultadoObjEspecifico,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='productos_gral_indicador_resultado_oe',
+        verbose_name='Producto gral asociado al Indicador Resultado OE',
+        help_text='Producto que puede asociarse a todos los nodos',
+    )
+
+
+
+    #relaciones
+    class Meta:
+        verbose_name = 'Producto general (a toda la estructura)'
+        verbose_name_plural = 'Productos generales (a toda la estructura)'
+
