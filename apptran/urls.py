@@ -3,6 +3,7 @@ from .views import *
 from .viewsuser import RegisterView, LoginView, LogoutView, UserDetailView, ChangePasswordView, UsuarioListView, UsuarioDetailAdminView, UsuarioPorIdView, RegistrarUsuarioView
 from rest_framework.routers import DefaultRouter
 from .viewtarea import TareaActividadView
+from .viewmonitoreo import *
 
 #PEI
 router = DefaultRouter()
@@ -37,7 +38,16 @@ router.register(r'procesos', ProcesoViewset, basename='procesos')
 router.register(r'actividades', ActividadViewset, basename='actividades')
 router.register(r'procedencia-fondos', ProcedenciaFondosViewmodel, basename='procedencia_fondos')
 #Tareas de Actividades
-router.register(r'tareas-actividad', TareaActividadView, basename='tarea-act')
+router.register(r'tareas-actividad', TareaActividadView, basename='tareas-actividades')
+#Monitoreo
+router.register(r'forma-de-pago', FormaPagoView, basename='forma_de_pago')
+router.register(r'solicitud-fondos', SolicitudFondosView, basename='solicitud_fondos')
+router.register(r'rendicion-cuentas', RendicionCuentasView, basename='rendicion_cuentas')
+router.register(r'solicitud-reembolso', SolicitudReembolsoView, basename='solicitud_reembolso')
+router.register(r'solicitud-viaje', SolicitudViajeView, basename='solicitud_viaje')
+router.register(r'solicitud-pago-directo', SolicitudPagoDirectoView, basename='sol_pago_directo')
+
+
 
 
 urlpatterns =[
