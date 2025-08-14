@@ -327,3 +327,20 @@ class ProyectoEstructuraSerializer(serializers.ModelSerializer):
             ]
 
 ############################################## FIN ESTRUCTURA COMPLETA DEL PROYECTO   #####################################################
+
+
+
+###################################  Lista de procesos de un proyecto  ######################33
+class ProcesoProyectoSerializer(serializers.ModelSerializer):
+    display_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Proceso
+        fields = ['id', 'codigo', 'titulo', 'display_name']
+
+    def get_display_name(sel, obj):
+        return f"{obj.id} - {obj.codigo} - {obj.titulo}"   
+
+
+
+################################### Fin Lista de procesos de un proyecto  ######################

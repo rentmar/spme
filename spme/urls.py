@@ -27,6 +27,8 @@ urlpatterns = [
     path('estructuracionPei_api/', include('spme_estructuracion_pei.urls')),
     path('actividades_api/', include('spme_actividades.urls')),
     path('monitoreo_api/', include('spme_monitoreo.urls')),
+    #Api de planificacion
+    path('api-plan/', include('spme_planificacion.urls')),
     #Api de transicion
     path('api/', include('apptran.urls')),
     #Api de configuracion
