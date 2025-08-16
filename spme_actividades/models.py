@@ -1,6 +1,9 @@
 from django.db import models
 from spme_estructuracion_proyecto.models import * 
 from spme_estructuracion_pei.models import *
+from spme_estructuracion_proyecto.models import Proyecto
+from spme_autenticacion.models import Usuario
+
 
 #Tipos de actividad
 class TipoActividad(models.Model):
@@ -17,6 +20,7 @@ class TipoActividad(models.Model):
 #Actividad
 class Actividad(models.Model):
     ESTADOS_ACTIVIDAD = [
+        ('CRD', 'Creada'),
         ('PLAN', 'Planificada'),
         ('RETR', 'Retraso'),
         ('REPROG', 'Reprogramacion'),
@@ -70,10 +74,10 @@ class Actividad(models.Model):
     # ] 
     procedencia_fondos = models.JSONField(null=True, blank=True)    
     #Estado de la actividad
-    estado = models.CharField(max_length=15, choices=ESTADOS_ACTIVIDAD, default='SPLAN')
+    estado = models.CharField(max_length=15, choices=ESTADOS_ACTIVIDAD, default='CRD')
     
     #Usuario
-    responsable = models.CharField(max_length=255, blank=True, null=True) #Usuario Asignado
+    #responsable = models.CharField(max_length=255, blank=True, null=True) #Usuario Asignado
 
     # proceso = models.IntegerField()
     # resultado_og = models.IntegerField()
@@ -142,7 +146,27 @@ class Actividad(models.Model):
         verbose_name="Actividades relacionadas al Indicador PEI (cualitativo cuantitativo)",
         help_text="Actividades relacionadas al indicador cualitativo/cuantitativo PEI",
     )
+    #Proyecto
+    proyecto = models.ForeignKey(
+        Proyecto,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='actividad_proyecto',
+        verbose_name='Proyecto al que pertenece la actividad'
+    )
 
+    #Responsable
+    responsable = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='actividad_responsable',
+        verbose_name='Responsable de la actividad'
+    )
+
+    
     class Meta:
         verbose_name = 'Actividad'
         verbose_name_plural = 'Actividades'
