@@ -40,6 +40,8 @@ class Actividad(models.Model):
 
     #Datos de la actividad
     codigo = models.CharField(max_length=60, blank=True, null=True)
+
+    nombreCorto = models.CharField(max_length=500, null=True, blank=True)
     descripcion = models.TextField(null=True, blank=True)
 
     supuestos = models.TextField(null=True, blank=True)
