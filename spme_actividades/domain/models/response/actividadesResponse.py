@@ -57,5 +57,5 @@ class ObtenerDatosFormActividadResponse(serializers.Serializer):
     id = serializers.IntegerField(required=False)
     descripcion = serializers.CharField(max_length=100, required=False)
     fecha_inicio = serializers.DateField(required=False)
-    fecha_fin = serializers.DateField(required=False)
+    fecha_cierre = serializers.DateField(required=False)
     objetivo_de_actividad = serializers.CharField(max_length=100, required=False)

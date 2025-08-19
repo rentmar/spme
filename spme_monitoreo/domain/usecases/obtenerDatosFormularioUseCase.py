@@ -10,18 +10,17 @@ class ObtenerDatosFormularioUseCase:
 
     def execute(self, requestData):
         userData = self.userRepository.obtenerUsuarioPorUsername(requestData["username"])
-       
+        
+        if not userData:
+            return None
         validadores = list(self.userRepository.obtenerListaValidadores())
-        #actividadData = self.actividadesRepository.obtenerDatosFormActividadPorId(requestData["id"])
+        if not validadores:
+            return None
+        actividadData = self.actividadesRepository.obtenerDatosFormActividadPorId(requestData["id"])
+        if not actividadData:
+            return None
         formaPago =[
             "Transferencia","Deposito","Cheque","QR"
         ]
-        actividadData = {
-            "id":1,
-            "descripcion": "Actividad de prueba",
-            "fecha_inicio": "2025-08-01",
-            "fecha_fin": "2025-08-10",
-            "objetivo_de_actividad": "Objetivo de la actividad de prueba"
-        }
 
         return {"usuario": userData,"actividad": actividadData,"validadores": validadores, "formaPago": formaPago}
