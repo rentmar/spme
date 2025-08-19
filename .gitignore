@@ -150,3 +150,15 @@ spme_web/__pycache__/urls.cpython-313.pyc
 spme_web/__pycache__/views.cpython-313.pyc
 spme_web/migrations/__pycache__/__init__.cpython-313.pyc
 spme_web/migrations/__pycache__/0001_initial.cpython-313.pyc
+
+# Ignorar directorios de cache de Python
+__pycache__/
+
+# Ignorar archivos compilados de Python
+*.pyc
+
+# Ignorar todos los archivos de migracion
+*/migrations/[0-9]*.py
+
+# Exceptuar el archivo __init__.py en los directorios de migraciones
+!*/migrations/__init__.py

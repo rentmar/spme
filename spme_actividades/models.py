@@ -1,5 +1,9 @@
 from django.db import models
 from spme_estructuracion_proyecto.models import * 
+from spme_estructuracion_pei.models import *
+from spme_estructuracion_proyecto.models import Proyecto
+from spme_autenticacion.models import Usuario
+
 
 #Tipos de actividad
 class TipoActividad(models.Model):
@@ -16,6 +20,7 @@ class TipoActividad(models.Model):
 #Actividad
 class Actividad(models.Model):
     ESTADOS_ACTIVIDAD = [
+        ('CRD', 'Creada'),
         ('PLAN', 'Planificada'),
         ('RETR', 'Retraso'),
         ('REPROG', 'Reprogramacion'),
@@ -35,6 +40,8 @@ class Actividad(models.Model):
 
     #Datos de la actividad
     codigo = models.CharField(max_length=60, blank=True, null=True)
+
+    nombreCorto = models.CharField(max_length=500, null=True, blank=True)
     descripcion = models.TextField(null=True, blank=True)
 
     supuestos = models.TextField(null=True, blank=True)
@@ -69,10 +76,10 @@ class Actividad(models.Model):
     # ] 
     procedencia_fondos = models.JSONField(null=True, blank=True)    
     #Estado de la actividad
-    estado = models.CharField(max_length=15, choices=ESTADOS_ACTIVIDAD, default='SPLAN')
+    estado = models.CharField(max_length=15, choices=ESTADOS_ACTIVIDAD, default='CRD')
     
     #Usuario
-    responsable = models.CharField(max_length=255, blank=True, null=True) #Usuario Asignado
+    #responsable = models.CharField(max_length=255, blank=True, null=True) #Usuario Asignado
 
     # proceso = models.IntegerField()
     # resultado_og = models.IntegerField()
@@ -122,9 +129,46 @@ class Actividad(models.Model):
     )
 
     #pei_objetivo
-    objetivo_pei = models.IntegerField(null=True, blank=True)
-    indicador_pei = models.IntegerField(null=True, blank=True)
+    objetivo_pei = models.ForeignKey(
+        ObjetivoPei,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='actividades_objpei',
+        verbose_name='Actividades que contribuyen al Producto OE',
+        help_text='Actividades realizadas para completar el Obejtivo PEI'
+    )
+    #Indicador PEI
+    indicador_pei = models.ForeignKey(
+        IndicadorPeiBase,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='actividades_indpei',
+        verbose_name="Actividades relacionadas al Indicador PEI (cualitativo cuantitativo)",
+        help_text="Actividades relacionadas al indicador cualitativo/cuantitativo PEI",
+    )
+    #Proyecto
+    proyecto = models.ForeignKey(
+        Proyecto,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='actividad_proyecto',
+        verbose_name='Proyecto al que pertenece la actividad'
+    )
 
+    #Responsable
+    responsable = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='actividad_responsable',
+        verbose_name='Responsable de la actividad'
+    )
+
+    
     class Meta:
         verbose_name = 'Actividad'
         verbose_name_plural = 'Actividades'
