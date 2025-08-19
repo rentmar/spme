@@ -530,3 +530,32 @@ class ProductoGeneral(ProductoProyecto):
         verbose_name = 'Producto general (a toda la estructura)'
         verbose_name_plural = 'Productos generales (a toda la estructura)'
 
+
+#Deficinion de Efecto del Proyecto
+class EfectoProyecto(models.Model):
+    nombre = models.CharField(max_length=30, blank=True, null=True)
+    contenido = models.TextField(blank=True, null=True)
+
+    proyecto = models.ForeignKey(
+        Proyecto,
+        on_delete=models.SET_NULL,
+        related_name='efectos',
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = 'Efecto sobre Proyecto'
+        verbose_name_plural = 'Efectos sobre los Proyectos'
+
+    def __str__(self):
+        return f"{self.nombre}"    
+    
+    def save(self, *args, **kwargs):
+        #Guarda el registro
+        super().save(*args, **kwargs)
+        if not self.nombre or not self.nombre.startswith('EFEC'):
+            self.nombre = f"EFEC{self.id}"
+            # Guardamos nuevamente solo el campo nombre
+            super().save(update_fields=['nombre'])
+

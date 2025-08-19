@@ -1,6 +1,7 @@
 from django.db import models
 from spme_autenticacion.models import Usuario
-from spme_actividades.models import Actividad
+from spme_actividades.models import Actividad, TareaActividad
+from polymorphic.models import PolymorphicModel
 
 class FormaPago(models.Model):
     codigo = models.CharField(max_length=10, blank=True, null=True)
@@ -12,7 +13,7 @@ class FormaPago(models.Model):
     def __str__(self):
         return self.codigo    
 
-
+#Formulario de solicitud de fondos
 class SolicitudFondos(models.Model):
     numeroFormulario = models.CharField(max_length=150, blank=True, null=True)
     detalleDestinoFondos = models.JSONField(verbose_name='Detalle destino de fondos', blank=True, null=True)
@@ -59,6 +60,14 @@ class SolicitudFondos(models.Model):
         blank=True,
     )
 
+    tarea = models.ForeignKey(
+        TareaActividad,
+        on_delete=models.SET_NULL,
+        related_name='tarea_solicitud',
+        null=True,
+        blank=True,
+    )
+
     def __str__(self):
         return f"{self.numeroFormulario}"
 
@@ -66,74 +75,8 @@ class SolicitudFondos(models.Model):
         verbose_name = 'Solicitud de Fondos'
         verbose_name_plural = 'Solicitudes de Fondos'
 
-class RendicionCuentas(models.Model):
-    #Datos del formulario
-    numeroFormulario = models.CharField(max_length=150, blank=True, null=True)
-    cpteDiario = models.CharField(max_length=100, blank=True, null=True)
-    fechaDesembolso = models.DateField(verbose_name='Fecha de desembolso', blank=True, null=True)
-    montoAsignado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Monto asignado', blank=True, null=True)
-    montoDescargado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Monto Descargado', blank=False, null=True)
-    saldo = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Saldo', blank=True, null=True)
-    detalleDestinoFondos = models.JSONField(verbose_name='Detalle destino de fondos', blank=True, null=True)
-    #Validaciones
-    validacionResponsable = models.BooleanField(default=False)
-    responsable = models.ForeignKey(
-        Usuario,
-        on_delete=models.SET_NULL,
-        related_name='usuario_responsable_rendicion',
-        null=True,
-        blank=True,
-    )
-    validacionCoordinador = models.BooleanField(default=False)
-    coordinador = models.ForeignKey(
-        Usuario,
-        on_delete=models.SET_NULL,
-        related_name='usuario_coordinador_rendicion',
-        null=True,
-        blank=True,
-    )
 
-    validacionContador = models.BooleanField(default=False)
-    contador = models.ForeignKey(
-        Usuario,
-        on_delete=models.SET_NULL,
-        related_name='usuario_contador_rendicion',
-        null=True,
-        blank=True,
-    )
-
-    validacionAdministrador = models.BooleanField(default=False)
-    administrador = models.ForeignKey(
-        Usuario,
-        on_delete=models.SET_NULL,
-        related_name='usario_administrador_rendicion',
-        null=True,
-        blank=True,
-    )
-
-    usuario = models.ForeignKey(
-        Usuario,
-        on_delete=models.SET_NULL,
-        related_name='usuario_rendicion',
-        null=True,
-        blank=True,
-    )
-
-    actividad = models.ForeignKey(
-        Actividad, 
-        on_delete=models.SET_NULL,
-        related_name='usuario_actividad_rendicion',
-        null=True,
-        blank=True,
-    )
-
-    def __str__(self):
-        return f"{self.numeroFormulario}"
-
-    class Meta:
-        verbose_name = 'Rendicion de cuentas'
-        verbose_name_plural = 'Rendiciones de cuentas'
-
+#Solicitud de reembolso
 class SolicitudReembolso(models.Model):
     #Datos del formulario
     numeroFormulario = models.CharField(max_length=150, blank=True, null=True)
@@ -184,6 +127,14 @@ class SolicitudReembolso(models.Model):
         blank=True,
     )
 
+    tarea = models.ForeignKey(
+        TareaActividad,
+        on_delete=models.SET_NULL,
+        related_name='tarea_reembolso',
+        null=True,
+        blank=True,
+    )
+
     def __str__(self):
         return f"{self.numeroFormulario}"
 
@@ -191,7 +142,7 @@ class SolicitudReembolso(models.Model):
         verbose_name = 'Solicitud de Reembolso'
         verbose_name_plural = 'Solicitudes de Reembolso'
 
-
+#Solicitud de viaje
 class SolicitudViaje (models.Model):
     #Datos del formulario
     numeroFormulario = models.CharField(max_length=150, blank=True, null=True)
@@ -250,7 +201,15 @@ class SolicitudViaje (models.Model):
         related_name='usuario_actividad_sol_viaje',
         null=True,
         blank=True,
-    )        
+    )
+
+    tarea = models.ForeignKey(
+        TareaActividad,
+        on_delete=models.SET_NULL,
+        related_name='tarea_solicitud_sol_viaje',
+        null=True,
+        blank=True,
+    )      
     
     def __str__(self):
         return f"{self.numeroFormulario}"
@@ -317,6 +276,14 @@ class SolicitudPagoDirecto(models.Model):
         null=True,
         blank=True,
     ) 
+
+    tarea = models.ForeignKey(
+        TareaActividad,
+        on_delete=models.SET_NULL,
+        related_name='tarea_solicitud_sol_pago_directo',
+        null=True,
+        blank=True,
+    )  
     
     def __str__(self):
         return f"{self.numeroFormulario}"
@@ -326,3 +293,92 @@ class SolicitudPagoDirecto(models.Model):
         verbose_name_plural = 'Solicitudes de Pago Directo'
 
 
+#Rendicion de cuentas
+class RendicionCuentas(models.Model):
+    #Datos del formulario
+    numeroFormulario = models.CharField(max_length=150, blank=True, null=True)
+    cpteDiario = models.CharField(max_length=100, blank=True, null=True)
+    fechaDesembolso = models.DateField(verbose_name='Fecha de desembolso', blank=True, null=True)
+    montoAsignado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Monto asignado', blank=True, null=True)
+    montoDescargado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Monto Descargado', blank=False, null=True)
+    saldo = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Saldo', blank=True, null=True)
+    detalleDestinoFondos = models.JSONField(verbose_name='Detalle destino de fondos', blank=True, null=True)
+    #Validaciones
+    validacionResponsable = models.BooleanField(default=False)
+    responsable = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_responsable_rendicion',
+        null=True,
+        blank=True,
+    )
+    validacionCoordinador = models.BooleanField(default=False)    
+    coordinador = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_coordinador_rendicion',
+        null=True,
+        blank=True,
+    )
+
+    validacionContador = models.BooleanField(default=False)
+    contador = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_contador_rendicion',
+        null=True,
+        blank=True,
+    )
+
+    validacionAdministrador = models.BooleanField(default=False)
+    administrador = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usario_administrador_rendicion',
+        null=True,
+        blank=True,
+    )
+
+    usuario = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_rendicion',
+        null=True,
+        blank=True,
+    )
+    #Solicitud
+    solicitudFondos = models.ForeignKey(
+        SolicitudFondos,
+        on_delete=models.SET_NULL,
+        related_name='rendicion_sol_fondos',
+        null=True,
+        blank=True,
+    )
+    SolicitudReembolso = models.ForeignKey(
+        SolicitudReembolso,
+        on_delete=models.SET_NULL,
+        related_name='rendicion_sol_reembolso',
+        null=True,
+        blank=True,
+    )
+    solicitudViaje = models.ForeignKey(
+        SolicitudViaje,
+        on_delete=models.SET_NULL,
+        related_name='rendicion_sol_viaje',
+        null=True,
+        blank=True,
+    )
+    solicitudPagoDirecto = models.ForeignKey(
+        SolicitudPagoDirecto,
+        on_delete=models.SET_NULL,
+        related_name='rendicion_sol_pago_directo',
+        null=True,
+        blank=True,
+    )
+
+    def __str__(self):
+        return f"{self.numeroFormulario}"
+
+    class Meta:
+        verbose_name = 'Rendicion de cuentas'
+        verbose_name_plural = 'Rendiciones de cuentas'

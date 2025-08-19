@@ -4,6 +4,7 @@ from .viewsuser import RegisterView, LoginView, LogoutView, UserDetailView, Chan
 from rest_framework.routers import DefaultRouter
 from .viewtarea import TareaActividadView
 from .viewmonitoreo import *
+from .viewefecto import EfectoProyectoView
 
 #PEI
 router = DefaultRouter()
@@ -37,6 +38,7 @@ router.register(r'producto-general', ProductoGeneralViewset, basename='producto_
 router.register(r'procesos', ProcesoViewset, basename='procesos')
 router.register(r'actividades', ActividadViewset, basename='actividades')
 router.register(r'procedencia-fondos', ProcedenciaFondosViewmodel, basename='procedencia_fondos')
+router.register(r'efectos-proyecto', EfectoProyectoView, basename='efectos_proyecto')
 #Tareas de Actividades
 router.register(r'tareas-actividad', TareaActividadView, basename='tareas-actividades')
 #Monitoreo
