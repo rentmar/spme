@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from spme.common.MessageManager import MessageType
-from .container.presenterContainer import SolicitudFondosPresenterContainer,RendicionCuentasPresenterContainer,SolicitudReembolsoPresenterContainer,SolicitudViajePresenterContainer,SolicitudPagoDirectoPresenterContainer
+from .container.presenterContainer import SolicitudFondosPresenterContainer,RendicionCuentasPresenterContainer,SolicitudReembolsoPresenterContainer,SolicitudViajePresenterContainer,SolicitudPagoDirectoPresenterContainer,DatosFormularioPresenterContainer
 from .domain.models.request.solicitudFondosRequest import CrearSolicitudFondosRequest
 from .domain.models.response.solicitudFondosResponse import CreateSolicitudFondosResponse
 from .domain.models.request.rendicionCuentasRequest import CrearRendicionCuentasRequest
@@ -14,6 +14,8 @@ from .domain.models.request.solicitudViajeRequest import CrearSolicitudViajeRequ
 from .domain.models.response.solicitudViajeResponse import CreateSolicitudViajeResponse
 from .domain.models.request.solicitudPagoDirectoRequest import CrearSolicitudPagoDirectoRequest
 from .domain.models.response.solicitudPagoDirectoResponse import CreateSolicitudPagoDirectoResponse
+from .domain.models.request.datosFormRequest import ObtenerDatosFormularioRequest
+from .domain.models.response.obtenerDatosFormResponse import ObtenerDatosFormularioResponse
 
 class SolicitudFondos(APIView):
     """
@@ -132,6 +134,31 @@ class SolicitudPagoDirecto(APIView):
 
             response = CreateSolicitudPagoDirectoResponse(data=solicitudPagoDirectoResponse)
 
+            if response.is_valid():
+                return Response(response.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response({"estado": MessageType.ERROR.value}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({"estado": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
+
+class ObtenerDatosFormulario(APIView):
+    """
+    API para datos del formulario
+    """
+    def __init__(self):
+        self.contenedor = DatosFormularioPresenterContainer()
+        self.datosFormularioPresenter = self.contenedor.datosFormularioPresenter()
+
+    def post(self, request, *args, **kwargs):
+
+        obtenerDatosFormularioRequest = ObtenerDatosFormularioRequest(data=request.data)
+
+        if obtenerDatosFormularioRequest.is_valid():
+
+            datosFormularioResponse = self.datosFormularioPresenter.obtenerDatosFormulario(obtenerDatosFormularioRequest.validated_data)
+           
+            response = ObtenerDatosFormularioResponse(data=datosFormularioResponse)
+            
             if response.is_valid():
                 return Response(response.data, status=status.HTTP_201_CREATED)
             else:

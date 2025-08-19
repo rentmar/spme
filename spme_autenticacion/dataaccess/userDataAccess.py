@@ -25,10 +25,9 @@ class UserDataAccess:
         :param user_name: Nombre de usuario a buscar.
         :return: Usuario encontrado o None si no existe.
         """
-        print(f"Buscando usuario por nombre: {userName}")
-        usuario = Usuario.objects.get(username=userName)
-        print(f"Usuario encontrado: {usuario}")
-        if usuario is not None:
+        usuario = Usuario.objects.filter(is_active=True,username=userName).values('id','nombre','paterno','materno','cargo','permisos','ci','banco','numero_cuenta').first()
+
+        if usuario:
             return usuario
         return None
         
@@ -47,8 +46,8 @@ class UserDataAccess:
             nombre=userData["nombre"],
             paterno=userData["paterno"],
             materno=userData["materno"],
-            ci=userData["materno"],
-            cargo=userData["ci"],
+            ci=userData["ci"],
+            cargo=userData["cargo"],
             banco=userData["banco"],
             numero_cuenta=userData["numero_cuenta"],
             tipo_cuenta=userData["tipo_cuenta"],
@@ -64,3 +63,10 @@ class UserDataAccess:
         :return: Lista de usuarios.
         """
         return Usuario.objects.filter(is_superuser=False, is_active=True)
+
+    def obtenerListaValidadores(self):
+        """
+        Obtiene la lista de validadores.
+        :return: Lista de validadores.
+        """
+        return Usuario.objects.filter(is_active=True,is_superuser=False).values('id','nombre','paterno','materno','cargo')

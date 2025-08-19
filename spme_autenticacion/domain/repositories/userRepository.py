@@ -37,3 +37,10 @@ class UserRepository:
         :return: Lista de usuarios.
         """
         return self.userDataAccess.obtenerListaUsuarios()
+    
+    def obtenerListaValidadores(self):
+        """
+        Obtiene la lista de validadores.
+        :return: Lista de validadores.
+        """
+        return self.userDataAccess.obtenerListaValidadores()

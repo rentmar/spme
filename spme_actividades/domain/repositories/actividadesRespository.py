@@ -13,4 +13,9 @@ class ActividadesRepository:
     
     def crearActividad(self,actividadRequest):
         return self.actividadesDataAccess.crearActividad(actividadRequest)
-        
+    
+    def obtenerActividadPorId(self, actividadId):
+        return self.actividadesDataAccess.obtenerActividadPorId(actividadId)
+    
+    def obtenerDatosFormActividadPorId(self, actividadId):
+        return self.actividadesDataAccess.obtenerDatosFormActividadPorId(actividadId)

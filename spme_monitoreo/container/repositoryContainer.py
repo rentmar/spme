@@ -34,3 +34,4 @@ class SolicitudPagoDirectoRepositoryContainer(containers.DeclarativeContainer):
     config = providers.Configuration()
 
     solicitudPagoDirectoRepository = providers.Singleton(SolicitudPagoDirectoRepository)
+

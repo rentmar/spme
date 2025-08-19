@@ -4,6 +4,7 @@ from rest_framework import status
 from spme_autenticacion.common.MessageManager import MessageType
 from .domain.models.request.userRequest import ObtenerUsuarioRequest, CrearUsuarioRequest, AutenticacionUsuarioRequest
 from .domain.models.response.userResponse import UsuarioResponse, CreateUserResponse, AutenticacionUsuarioResponse
+from .domain.models.response.userResponse import ListaValidadoresResponse
 from .container.presenterContainer import UsuarioPresenterContainer
 
 class ObtenerUsuario(APIView):
@@ -114,3 +115,23 @@ class ListaUsuarios(APIView):
             ]
         }
         return Response(listaUsuarios, status=status.HTTP_200_OK)
+    
+class ListaValidadores(APIView):
+    """
+    API view lista validadores.
+    """
+    def __init__(self):
+        self.contenedor = UsuarioPresenterContainer()
+        self.usurioPresenter = self.contenedor.usuarioPresenter()
+
+    def get(self, request, *args, **kwargs):
+        """
+        Obtiene la lista de validadores.
+        """
+        listResponse = self.usurioPresenter.obtenerListaValidadores()
+
+        response = ListaValidadoresResponse(data=listResponse)
+        if response.is_valid():
+            return Response(response.data, status=status.HTTP_200_OK)
+        else:
+            return Response({"estado": MessageType.ERROR.value}, status=status.HTTP_503_SERVICE_UNAVAILABLE)

@@ -59,3 +59,26 @@ class CrearActividadRequest(serializers.Serializer):
             'producto_oe': internal_value['producto_oe'],
         }
     
+class ObtenerActividadIdRequest(serializers.Serializer):
+    actividad_id = serializers.IntegerField()
+
+    def to_internal_value(self, data):
+        """
+        Convierte los campos a un formato interno.
+        """
+        internal_value = super().to_internal_value(data)
+        return {
+            'id': int(internal_value['actividad_id']),
+        }
+
+class ObtenerDatosFormActividadPorIdRequest(serializers.Serializer):
+    actividad_id = serializers.IntegerField()
+
+    def to_internal_value(self, data):
+        """
+        Convierte los campos a un formato interno.
+        """
+        internal_value = super().to_internal_value(data)
+        return {
+            'id': int(internal_value['actividad_id']),
+        }

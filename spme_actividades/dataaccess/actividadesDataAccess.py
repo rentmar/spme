@@ -32,3 +32,27 @@ class ActividadesDataAccess:
         'fecha_cierre',
         'estado'
     )
+
+    def obtenerActividadPorId(self, actividadId):
+        """
+        Obtiene la actividad asociada a un ID específico.
+
+        :param actividadId: ID de la actividad que se desea obtener.
+        :return: Actividad correspondiente al ID proporcionado.
+        """
+        return Actividad.objects.filter(id=actividadId).first()
+    
+    def obtenerDatosFormActividadPorId(self, actividadId):
+        """
+        Obtiene los datos del formulario de actividad asociados a un ID específico.
+
+        :param actividadId: ID de la actividad cuyos datos del formulario se desean obtener.
+        :return: Datos del formulario correspondientes al ID proporcionado.
+        """
+        return Actividad.objects.filter(id=actividadId).values(
+            'id',
+            'descripcion',
+            'fecha_inicio',
+            'fecha_cierre',
+            'objetivo_de_actividad',
+        ).first()

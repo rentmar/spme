@@ -7,6 +7,13 @@ class ActividadesMapper:
             "id": actividadesResponse.id,
             "mensaje": MessageType.SUCCESS.value,
         }
+    
+    @staticmethod
+    def toErrorResponse(errorMessage):
+        return {
+            "id": 0,
+            "mensaje": errorMessage
+        }
 
     @staticmethod
     def toActividadesUsuarioResponse(actividades):
@@ -52,4 +59,18 @@ class ActividadesMapper:
             lista.append(act)
         return {
             "actividades": lista
+        }
+
+    @staticmethod
+    def toObtenerActividadIdResponse(actividad):
+        return {
+            "id": actividad.id,
+            "codigo": actividad.codigo,
+            "descripcion": actividad.descripcion,
+            "tipo": actividad.tipo,
+            "fecha_programada": actividad.fecha_programada,
+            "duracion": actividad.duracion,
+            "fecha_inicio": actividad.fecha_inicio,
+            "fecha_cierre": actividad.fecha_cierre,
+            "estado": actividad.estado,
         }
