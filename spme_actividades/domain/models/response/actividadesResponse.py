@@ -59,3 +59,13 @@ class ObtenerDatosFormActividadResponse(serializers.Serializer):
     fecha_inicio = serializers.DateField(required=False)
     fecha_cierre = serializers.DateField(required=False)
     objetivo_de_actividad = serializers.CharField(max_length=100, required=False)
+
+class ObtenerEncabezadoActividadResponse(serializers.Serializer):
+    codigo = serializers.CharField(max_length=60, required=False)
+    descripcion = serializers.CharField(max_length=500, required=False)
+    estado = serializers.CharField(max_length=15, required=False)
+    tipo = serializers.CharField(max_length=100, required=False)
+    fecha_programada = serializers.DateField(required=False)
+    fecha_cierre = serializers.DateField(required=False)
+    presupuesto = serializers.DecimalField(max_digits=6, decimal_places=2, required=False)
+    responsable = serializers.JSONField(required=False)

@@ -30,7 +30,18 @@ class UserDataAccess:
         if usuario:
             return usuario
         return None
-        
+
+    def nombreUsuarioPorId(self, userId):
+        """
+        Obtiene el nombre de un usuario por su ID.
+        :param userId: ID del usuario a buscar.
+        :return: Nombre del usuario encontrado o None si no existe.
+        """
+        usuario = Usuario.objects.filter(id=userId).values('nombre','paterno','materno').first()
+        if usuario:
+            return usuario
+        return None
+
     def createUser(self, userData):
         """
         Crea un nuevo usuario.

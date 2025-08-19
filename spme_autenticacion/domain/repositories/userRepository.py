@@ -13,7 +13,15 @@ class UserRepository:
         :return: Usuario encontrado o None si no existe.
         """
         return self.userDataAccess.usuarioPorUsername(userName)
-        
+    
+    def obtenerNombreUsuarioPorId(self, userId):
+        """
+        Obtiene el nombre de un usuario por su ID.
+        :param userId: ID del usuario a buscar.
+        :return: Nombre del usuario encontrado o None si no existe.
+        """
+        return self.userDataAccess.nombreUsuarioPorId(userId)
+
     def createUser(self, userRequest):
         """
         Crea un nuevo usuario.

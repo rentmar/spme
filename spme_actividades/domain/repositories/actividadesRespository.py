@@ -19,3 +19,6 @@ class ActividadesRepository:
     
     def obtenerDatosFormActividadPorId(self, actividadId):
         return self.actividadesDataAccess.obtenerDatosFormActividadPorId(actividadId)
+
+    def obtenerEncabezadoActividadPorId(self, encabezadoId):
+        return self.actividadesDataAccess.obtenerEncabezadoActividadPorId(encabezadoId)

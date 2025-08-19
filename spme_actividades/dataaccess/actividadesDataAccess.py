@@ -56,3 +56,20 @@ class ActividadesDataAccess:
             'fecha_cierre',
             'objetivo_de_actividad',
         ).first()
+
+    def obtenerEncabezadoActividadPorId(self, encabezadoId):
+        """
+        Obtiene el encabezado de actividad asociado a un ID específico.
+
+        :param encabezadoId: ID del encabezado de actividad que se desea obtener.
+        :return: Encabezado de actividad correspondiente al ID proporcionado.
+        """
+        return Actividad.objects.filter(id=encabezadoId).values(
+            "codigo",
+            "descripcion",
+            "estado",
+            "fecha_programada",
+            "fecha_cierre",
+            "responsable_id",
+            "presupuesto",
+        ).first()

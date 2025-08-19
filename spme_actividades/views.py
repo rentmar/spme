@@ -2,8 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .common.MessageManager import MessageType
-from .domain.models.request.actividadesRequest import ObtenerActividadIdRequest,CrearActividadRequest,ObtenerActividadesUsuarioRequest,ObtenerDatosFormActividadPorIdRequest
-from .domain.models.response.actividadesResponse import ActividadesUsuarioResponse,ActividadesKantResponse,CrearActividadResponse,ObtenerActividadIdResponse,ObtenerDatosFormActividadResponse
+from .domain.models.request.actividadesRequest import ObtenerActividadIdRequest,CrearActividadRequest,ObtenerActividadesUsuarioRequest,ObtenerEncabezadoPorIdRequest
+from .domain.models.response.actividadesResponse import ActividadesUsuarioResponse,ActividadesKantResponse,CrearActividadResponse,ObtenerActividadIdResponse,ObtenerEncabezadoActividadResponse
 from .container.presenterContainer import ActividadesPresenterContainer
 
 class ObtenerActividadesUsuario(APIView):
@@ -104,3 +104,28 @@ class ObtenerActividadId(APIView):
         else:
             return Response({"estado": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
 
+class ObtenerEncabezadoActividad(APIView):
+    """
+    API para obtener el encabezado de una actividad
+    """
+    def __init__(self):
+        self.contenedor = ActividadesPresenterContainer()
+        self.actividadesPresenter = self.contenedor.actividadesPresenter()
+
+    def post(self, request, *args, **kwargs):
+
+        obtenerEncabezadoActividadRequest = ObtenerEncabezadoPorIdRequest(data=request.data)
+
+        if obtenerEncabezadoActividadRequest.is_valid():
+
+            encabezado = self.actividadesPresenter.obtenerEncabezadoActividadPorId(obtenerEncabezadoActividadRequest.validated_data)
+
+            response = ObtenerEncabezadoActividadResponse(data=encabezado)
+
+            if response.is_valid():
+                return Response(response.data, status=status.HTTP_200_OK)
+            else:
+                return Response({"estado": MessageType.NOT_FOUND.value}, status=status.HTTP_404_NOT_FOUND)
+
+        else:
+            return Response({"estado": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)

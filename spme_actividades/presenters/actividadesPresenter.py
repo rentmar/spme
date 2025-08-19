@@ -8,6 +8,7 @@ class ActividadesPresenter:
         self.obtenerActividadesKantUseCase = self.useCaseContainer.obtenerActividadesKantUseCase()
         self.crearActividadUseCase = self.useCaseContainer.crearActividadUseCase()
         self.obtenerActividadPorIdUseCase = self.useCaseContainer.obtenerActividadPorIdUseCase()
+        self.obtenerEncabezadoActividadPorIdUseCase = self.useCaseContainer.obtenerEncabezadoActividadPorIdUseCase()
 
     def obtenerActividadesUsuario(self, userIdRequest):
         actividadesList = self.obtenerActividadesUsuarioUseCase.execute(userIdRequest)
@@ -38,3 +39,9 @@ class ActividadesPresenter:
         else:
             return ActividadesMapper.toErrorResponse("Actividad no encontrada")
         
+    def obtenerEncabezadoActividadPorId(self, encabezadoIdRequest):
+        encabezado = self.obtenerEncabezadoActividadPorIdUseCase.execute(encabezadoIdRequest)
+        if encabezado is not None:
+            return ActividadesMapper.toObtenerEncabezadoActividadResponse(encabezado)
+        else:
+            return ActividadesMapper.toErrorResponse("Encabezado de actividad no encontrado")

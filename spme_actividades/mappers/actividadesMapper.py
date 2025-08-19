@@ -74,3 +74,16 @@ class ActividadesMapper:
             "fecha_cierre": actividad.fecha_cierre,
             "estado": actividad.estado,
         }
+
+    @staticmethod
+    def toObtenerEncabezadoActividadResponse(encabezado):
+        return {
+            "codigo": encabezado.get('codigo'),
+            "descripcion": encabezado.get('descripcion'),
+            "estado": encabezado.get('estado'),
+            "tipo": "[{ 'nombre': 'Actividad de Capacitación' }, { 'nombre': 'Actividad de Articulación' }]",
+            "fecha_programada": encabezado.get('fecha_programada'),
+            "fecha_cierre": encabezado.get('fecha_cierre'),
+            "presupuesto": encabezado.get('presupuesto'),
+            "responsable": {"nombre": encabezado.get('nombre_responsable')} if 'nombre_responsable' in encabezado else None,
+        }
