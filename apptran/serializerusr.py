@@ -8,6 +8,11 @@ class UsuarioSerializer(serializers.ModelSerializer):
         model = Usuario
         fields = '__all__'
 
+class UsuatiosNicksSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Usuario
+        fields = ['username']        
+
 
 class RegistrarSerializer(serializers.ModelSerializer):
     password = serializers.CharField(

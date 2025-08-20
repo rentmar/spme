@@ -1,10 +1,11 @@
 from django.urls import path
 from .views import *
-from .viewsuser import RegisterView, LoginView, LogoutView, UserDetailView, ChangePasswordView, UsuarioListView, UsuarioDetailAdminView, UsuarioPorIdView, RegistrarUsuarioView
+from .viewsuser import RegisterView, LoginView, LogoutView, UserDetailView, ChangePasswordView, UsuarioListView, UsuarioDetailAdminView, UsuarioPorIdView, RegistrarUsuarioView, UserListNicksViews
 from rest_framework.routers import DefaultRouter
 from .viewtarea import TareaActividadView
 from .viewmonitoreo import *
 from .viewefecto import EfectoProyectoView
+from .viewactividad import ActividadViewset, PlanActividadesView
 
 #PEI
 router = DefaultRouter()
@@ -93,7 +94,12 @@ urlpatterns =[
     path(r'proyectos/<int:proyecto_id>/indicadores-og/count/', count_indicadores_og, name='count-indicadores-og'),    
     path(r'proyectos/<int:proyecto_id>/resultados-og/count/', count_resultados_og, name='count-resultados-og'),
     path(r'proyectos/<int:proyecto_id>/column-stats/', ColumnVisibilityStatsView.as_view(), name='column-stats'),
-    path(r'test/', test_endpoint, name='test-endpoint'),    
+    path(r'test/', test_endpoint, name='test-endpoint'),   
+    #
+    path(r'actividades/proyecto/<int:proyecto_id>/', ActividadViewset.as_view({'get': 'list_by_proyecto'}), name='actividades-by-proyecto'
+    ), 
+    path(r'usuariosnick/', UserListNicksViews.as_view(), name='lista_nicks' ),
+    path(r'actividades-planificacion/<int:id_proyecto>/', PlanActividadesView.as_view(), name='actividades_bulk_insert_update'),
 ]
 
 urlpatterns += router.urls

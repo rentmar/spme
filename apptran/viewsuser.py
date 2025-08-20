@@ -10,6 +10,7 @@ from .serializerusr import (
     RegistrarSerializer,
     LoginSerializer,
     ChangePasswordSerializer,
+    UsuatiosNicksSerializer
 )
 from spme_autenticacion.models import Usuario
 
@@ -150,4 +151,6 @@ class RegistrarUsuarioView(generics.CreateAPIView):
         }, status=status.HTTP_201_CREATED)
 
         
-        
+class UserListNicksViews(generics.ListAPIView):
+    queryset = Usuario.objects.all()
+    serializer_class = UsuatiosNicksSerializer    
