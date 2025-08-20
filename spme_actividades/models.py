@@ -36,6 +36,7 @@ class Actividad(models.Model):
         ('PDES', 'Proyecto de Desarrollo'),
         ('AINC', 'Actividad de Incidencia'),
         ('AART', 'Actividad de Articulacion'),
+        ('OTRO', 'Otro'),
     ]
 
     #Datos de la actividad
@@ -48,15 +49,17 @@ class Actividad(models.Model):
     riesgos = models.TextField(null=True, blank=True)
     objetivo_de_actividad = models.TextField(null=True, blank=True) #Nuevo datos
     descripcion_evaluacion = models.TextField(null=True, blank=True) #Toda la informacion de la planificacion de la actividad
+    descripcion_tipo_actividad = models.TextField(null=True, blank=True)
 
     
     #Modificar
-    #tipo = models.CharField(max_length=30, choices=TIPO_ACTIVIDAD, default='NODEF')
-    tipo = models.ManyToManyField(
+    tipo = models.ForeignKey(
         TipoActividad,
+        on_delete=models.SET_NULL,
         blank=True,
+        null=True,
         related_name='actividades',
-        verbose_name='Tipos de la actividad'
+        verbose_name= 'Tipos de la actividad',
     )
     
     #Fechas de la Actividad
@@ -67,6 +70,11 @@ class Actividad(models.Model):
     #Presupuesto
     presupuesto = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     presupuestoGlobal = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    totalReportado = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    totalEjecutado = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    saldo = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+
+    gradoEjecucion = models.CharField(max_length=50, blank=True, null=True)
 
     #Procedencia de fondos (Viene de la planificacion):
     # "desglosePresupuesto": [
@@ -74,11 +82,12 @@ class Actividad(models.Model):
     #     {"nombre": "Otro", "monto": 45, "manual": true},  #Dato Registrar
     #     {"id": 2, "nombre": "Financiador Uno", "monto": 45}
     # ] 
-    procedencia_fondos = models.JSONField(null=True, blank=True)    
+    procedencia_fondos = models.JSONField(null=True, blank=True)   
+
     #Estado de la actividad
     estado = models.CharField(max_length=15, choices=ESTADOS_ACTIVIDAD, default='CRD')
-    
-    #Usuario
+
+       #Usuario
     #responsable = models.CharField(max_length=255, blank=True, null=True) #Usuario Asignado
 
     # proceso = models.IntegerField()
@@ -193,9 +202,11 @@ class TareaActividad(models.Model):
         ('COMPL','Completada'),
     ]
     estado = models.CharField(max_length=15, choices=ESTADOS_TAREA, default='PEN')
+    titulo = models.CharField(max_length=255, blank=True, null=True)
     descripcion = models.TextField(blank=True, null=True )
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_limite = models.DateField(null=True, blank=True)
+    presupuesto = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
     #Relaciones
     actividad = models.ForeignKey(

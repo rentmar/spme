@@ -272,12 +272,23 @@ class IndicadorProyecto(PolymorphicModel):
         ('%', 'Porcentual')
     ]
 
+    FREQ = [
+        ('MEN', 'Mensual'),
+        ('BIMEN', 'Bimensual'),
+        ('TMEN', 'TriMestral'),
+        ('CMES', 'CuatriMestral'),
+        ('SEM', 'Semestral'),
+        ('ANUAL', 'Anual'),
+    ]
+
     # Campos comunes a todos los indicadores
     codigo = models.CharField(max_length=50, null=True, blank=True)
     redaccion = models.CharField(max_length=5, choices=TIPO_INDICADOR, blank=True, null=True)
     fuente_verificacion = models.TextField(blank=True, null=True)
     target_poblacion = models.CharField(max_length=255, blank=True, null=True)
     tipo = models.CharField(max_length=5, choices=TIPO, default='A-Z')
+    frecuencia = models.CharField(max_length=15, choices=FREQ, default='MEN')
+    responsable = models.CharField(blank=True, null=True)
 
     #Campos
     baseline = models.CharField(
