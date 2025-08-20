@@ -55,19 +55,12 @@ class Actividad(models.Model):
     #Modificar
     tipo = models.ForeignKey(
         TipoActividad,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
         related_name='actividades',
         verbose_name= 'Tipos de la actividad',
     )
-    # tipo = models.ManyToManyField(
-    #     TipoActividad,
-    #     blank=True,
-    #     related_name='actividades',
-    #     verbose_name='Tipos de la actividad'
-    # )
-
-    
     
     #Fechas de la Actividad
     fecha_programada = models.DateField(null=True, blank=True)

@@ -275,7 +275,7 @@ class IndicadorProyecto(PolymorphicModel):
     FREQ = [
         ('MEN', 'Mensual'),
         ('BIMEN', 'Bimensual'),
-        ('TMEN', 'TriMestral')
+        ('TMEN', 'TriMestral'),
         ('CMES', 'CuatriMestral'),
         ('SEM', 'Semestral'),
         ('ANUAL', 'Anual'),
