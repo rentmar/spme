@@ -1,7 +1,5 @@
 from django.db import models
 from spme_estructuracion_proyecto.models import Proyecto
-
-# Create your models here.
 from django.db import models
 
 
