@@ -5,7 +5,10 @@ from rest_framework.routers import DefaultRouter
 from .viewtarea import TareaActividadView
 from .viewmonitoreo import *
 from .viewefecto import EfectoProyectoView
-from .viewactividad import ActividadViewset, PlanActividadesView
+from .viewactividad import actividades_por_proyecto
+from .viewtipoactividad import TipoActividadView
+from .viewslistasencillanicks import lista_nicks_usuarios
+from .viewactividadbulk import procesar_actividades_bulk
 
 #PEI
 router = DefaultRouter()
@@ -40,6 +43,8 @@ router.register(r'procesos', ProcesoViewset, basename='procesos')
 router.register(r'actividades', ActividadViewset, basename='actividades')
 router.register(r'procedencia-fondos', ProcedenciaFondosViewmodel, basename='procedencia_fondos')
 router.register(r'efectos-proyecto', EfectoProyectoView, basename='efectos_proyecto')
+#Tipos de Actividad
+router.register(r'tipo-actividad', TipoActividadView, basename='tipo_actividad')
 #Tareas de Actividades
 router.register(r'tareas-actividad', TareaActividadView, basename='tareas-actividades')
 #Monitoreo
@@ -49,8 +54,6 @@ router.register(r'rendicion-cuentas', RendicionCuentasView, basename='rendicion_
 router.register(r'solicitud-reembolso', SolicitudReembolsoView, basename='solicitud_reembolso')
 router.register(r'solicitud-viaje', SolicitudViajeView, basename='solicitud_viaje')
 router.register(r'solicitud-pago-directo', SolicitudPagoDirectoView, basename='sol_pago_directo')
-
-
 
 
 urlpatterns =[
@@ -96,10 +99,10 @@ urlpatterns =[
     path(r'proyectos/<int:proyecto_id>/column-stats/', ColumnVisibilityStatsView.as_view(), name='column-stats'),
     path(r'test/', test_endpoint, name='test-endpoint'),   
     #
-    path(r'actividades/proyecto/<int:proyecto_id>/', ActividadViewset.as_view({'get': 'list_by_proyecto'}), name='actividades-by-proyecto'
-    ), 
+    path(r'actividades/proyecto/<int:proyecto_id>/', actividades_por_proyecto, name='actividades_por_proyecto'), 
     path(r'usuariosnick/', UserListNicksViews.as_view(), name='lista_nicks' ),
-    path(r'actividades-planificacion/<int:id_proyecto>/', PlanActividadesView.as_view(), name='actividades_bulk_insert_update'),
+    path(r'usuarios/lista-nicks/', lista_nicks_usuarios, name='lista-nicks-usuarios'),
+    path(r'actividades/procesar-bulk/', procesar_actividades_bulk, name='procesar_actividades_bulk'),
 ]
 
 urlpatterns += router.urls

@@ -323,6 +323,7 @@ class ProcesosSerializador(serializers.ModelSerializer):
         fields = '__all__'      
 
 
+
 #Serializador Actividad
 class ActividadSerializer(serializers.ModelSerializer):
     class Meta:

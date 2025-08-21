@@ -259,7 +259,8 @@ class ProcesoViewset(viewsets.ModelViewSet):
 #Vista - Actividad
 class ActividadViewset(viewsets.ModelViewSet):
     queryset = Actividad.objects.all()
-    serializer_class = ActividadSerializer    
+    serializer_class = ActividadSerializer
+        
 
 #Vista - Proyecto Estructura Completa
 class ProyectoDetalladoView(RetrieveAPIView):
