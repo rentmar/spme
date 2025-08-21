@@ -3,21 +3,46 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from django.db import transaction
-# from .models import Actividad
-# from .serializers import ActividadBulkSerializer
+from django.shortcuts import get_object_or_404
 from spme_actividades.models import Actividad
 from .serializeractividadbulk import ActividadBulkSerializer
-
+from spme_planificacion.models import PlanificacionProyecto, CambioPlanificacion 
+import json
+from datetime import datetime
 
 @api_view(['POST'])
 @transaction.atomic
-def procesar_actividades_bulk(request):
+def procesar_actividades_bulk(request, idproyecto=None):
     """
-    Procesa un array de actividades (crear o actualizar)
-    POST /actividades/procesar-bulk/
+    Procesa un array de actividades (crear o actualizar) y registra la planificación
+    POST /actividades/procesar-bulk/<idproyecto>/
     """
     try:
-        actividades_data = request.data
+        # Validar que se proporcione el ID del proyecto
+        if not idproyecto:
+            return Response(
+                {'error': 'Se requiere el ID del proyecto en la URL'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Obtener el proyecto
+        from spme_estructuracion_proyecto.models import Proyecto
+        proyecto = get_object_or_404(Proyecto, id=idproyecto)
+        
+        # Obtener datos de la solicitud
+        request_data = request.data
+        
+        # Verificar si es un array simple o un objeto con metadata
+        if isinstance(request_data, list):
+            # Formato antiguo: solo array de actividades
+            actividades_data = request_data
+            table_config = None
+            rows_data = None
+        else:
+            # Formato nuevo: objeto con metadata y actividades
+            actividades_data = request_data.get('rows_data', [])
+            table_config = request_data.get('table_config', None)
+            rows_data = request_data.get('rows_data', None)
         
         if not isinstance(actividades_data, list):
             return Response(
@@ -29,11 +54,22 @@ def procesar_actividades_bulk(request):
             'creadas': 0,
             'actualizadas': 0,
             'errores': [],
-            'detalles': []
+            'detalles': [],
+            'planificacion_id': None,
+            'version': None
         }
         
+        # Obtener información del usuario si está autenticado
+        usuario = None
+        if hasattr(request, 'user') and request.user.is_authenticated:
+            usuario = request.user.username
+        
+        # Procesar cada actividad
         for index, actividad_data in enumerate(actividades_data):
             try:
+                # Asegurar que la actividad pertenece al proyecto correcto
+                actividad_data['proyecto_id'] = idproyecto
+                
                 # Determinar si es creación o actualización
                 actividad_id = actividad_data.get('id', 0)
                 
@@ -59,10 +95,23 @@ def procesar_actividades_bulk(request):
                 else:
                     # Actualizar actividad existente
                     try:
-                        actividad = Actividad.objects.get(id=actividad_id)
+                        actividad = Actividad.objects.get(id=actividad_id, proyecto=proyecto)
+                        
+                        # Guardar datos anteriores para el registro de cambios
+                        datos_anteriores = {
+                            'codigo': actividad.codigo,
+                            'nombreCorto': actividad.nombreCorto,
+                            'tipo': str(actividad.tipo),
+                            'responsable': actividad.responsable.username if actividad.responsable else None,
+                            'fecha_inicio': actividad.fecha_inicio,
+                            'fecha_cierre': actividad.fecha_cierre,
+                            'presupuesto': actividad.presupuesto,
+                            'estado': actividad.estado
+                        }
+                        
                         serializer = ActividadBulkSerializer(actividad, data=actividad_data, partial=True)
                         if serializer.is_valid():
-                            serializer.save()
+                            actividad_actualizada = serializer.save()
                             resultados['actualizadas'] += 1
                             resultados['detalles'].append({
                                 'index': index,
@@ -70,6 +119,21 @@ def procesar_actividades_bulk(request):
                                 'accion': 'actualizada',
                                 'estado': 'éxito'
                             })
+                            
+                            # Registrar cambio individual
+                            datos_nuevos = {
+                                'codigo': actividad_actualizada.codigo,
+                                'nombreCorto': actividad_actualizada.nombreCorto,
+                                'tipo': str(actividad_actualizada.tipo),
+                                'responsable': actividad_actualizada.responsable.username if actividad_actualizada.responsable else None,
+                                'fecha_inicio': actividad_actualizada.fecha_inicio,
+                                'fecha_cierre': actividad_actualizada.fecha_cierre,
+                                'presupuesto': actividad_actualizada.presupuesto,
+                                'estado': actividad_actualizada.estado
+                            }
+                            
+                            # Aquí podrías crear registros de cambios individuales si lo deseas
+                            
                         else:
                             resultados['errores'].append({
                                 'index': index,
@@ -81,7 +145,7 @@ def procesar_actividades_bulk(request):
                         resultados['errores'].append({
                             'index': index,
                             'id': actividad_id,
-                            'error': 'Actividad no encontrada',
+                            'error': 'Actividad no encontrada en este proyecto',
                             'accion': 'actualizar'
                         })
             
@@ -92,6 +156,48 @@ def procesar_actividades_bulk(request):
                     'error': str(e),
                     'accion': 'procesar'
                 })
+        
+        # Almacenar la planificación completa
+        try:
+            # Obtener la última versión
+            ultima_version = PlanificacionProyecto.objects.filter(
+                proyecto=proyecto
+            ).order_by('-version').first()
+            
+            nueva_version = 1
+            if ultima_version:
+                nueva_version = ultima_version.version + 1
+            
+            # Crear nueva planificación
+            planificacion = PlanificacionProyecto.objects.create(
+                proyecto=proyecto,
+                table_config=table_config,
+                rows_data=rows_data if rows_data else actividades_data,
+                version=nueva_version,
+                creado_por=usuario
+            )
+            
+            resultados['planificacion_id'] = planificacion.id
+            resultados['version'] = planificacion.version
+            
+            # Registrar cambio general
+            CambioPlanificacion.objects.create(
+                planificacion=planificacion,
+                tipo_cambio='actualizacion' if ultima_version else 'creacion',
+                datos_nuevos={
+                    'actividades_procesadas': len(actividades_data),
+                    'creadas': resultados['creadas'],
+                    'actualizadas': resultados['actualizadas'],
+                    'errores': len(resultados['errores'])
+                },
+                descripcion=f"Planificación {'creada' if not ultima_version else 'actualizada'} v{nueva_version}",
+                realizado_por=usuario
+            )
+            
+        except Exception as e:
+            resultados['errores_planificacion'] = {
+                'error': f'Error al guardar la planificación: {str(e)}'
+            }
         
         # Response final
         return Response(resultados, status=status.HTTP_200_OK)

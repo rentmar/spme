@@ -9,6 +9,8 @@ from .viewactividad import actividades_por_proyecto
 from .viewtipoactividad import TipoActividadView
 from .viewslistasencillanicks import lista_nicks_usuarios
 from .viewactividadbulk import procesar_actividades_bulk
+from .viewsplanificacion import obtener_historial_planificacion, obtener_planificacion_version, contar_planificaciones
+from .viewsactividadestareas import ActividadConTareasListView, ActividadConTareasDetailView
 
 #PEI
 router = DefaultRouter()
@@ -102,7 +104,15 @@ urlpatterns =[
     path(r'actividades/proyecto/<int:proyecto_id>/', actividades_por_proyecto, name='actividades_por_proyecto'), 
     path(r'usuariosnick/', UserListNicksViews.as_view(), name='lista_nicks' ),
     path(r'usuarios/lista-nicks/', lista_nicks_usuarios, name='lista-nicks-usuarios'),
-    path(r'actividades/procesar-bulk/', procesar_actividades_bulk, name='procesar_actividades_bulk'),
+    path(r'actividades/procesar-bulk/<int:idproyecto>/', procesar_actividades_bulk, name='procesar_actividades_bulk'),
+    path(r'actividades/historial-planificacion/<int:idproyecto>/', obtener_historial_planificacion, name='historial_planificacion'),
+    path(r'actividades/planificacion/<int:idproyecto>/<int:version>/', obtener_planificacion_version, name='planificacion_version'),
+    path(r'planificaciones/contar/', contar_planificaciones, name='contar_planificaciones'),
+    #Actividades-Tareas
+    path(r'actividades-con-tareas/', ActividadConTareasListView.as_view(), 
+         name='actividades-con-tareas'),
+    path(r'actividades-con-tareas/<int:pk>/', ActividadConTareasDetailView.as_view(), 
+         name='actividad-detalle-con-tareas'),
 ]
 
 urlpatterns += router.urls
