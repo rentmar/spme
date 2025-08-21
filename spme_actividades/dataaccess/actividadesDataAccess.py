@@ -25,7 +25,7 @@ class ActividadesDataAccess:
         return Actividad.objects.all().values(
         'codigo',
         'descripcion',
-        'tipo',
+        'tipo_id',
         'fecha_programada',
         'duracion',
         'fecha_inicio',
@@ -72,4 +72,5 @@ class ActividadesDataAccess:
             "fecha_cierre",
             "responsable_id",
             "presupuesto",
+            "tipo_id"
         ).first()
