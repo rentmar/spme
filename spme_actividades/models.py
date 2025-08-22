@@ -26,6 +26,7 @@ class Actividad(models.Model):
         ('REPROG', 'Reprogramacion'),
         ('EJEC', 'En Ejecucion'),
         ('REP', 'En Reporte'),
+        ('FIN', 'Finalizado'),
     ]
     TIPO_ACTIVIDAD = [
         ('NODEF', 'No definido'),
