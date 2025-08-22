@@ -8,15 +8,16 @@ class UsuarioPresenter:
         self.createUserUseCase = self.contenedor.createUserUseCase()
         self.autenticarUsuarioUseCase = self.contenedor.autenticarUsuarioUseCase()
         self.obtenerUsuariosUseCase = self.contenedor.obtenerUsuariosUseCase()
+        self.obtenerValidadoresUseCase = self.contenedor.obtenerListaValidadoresUseCase()
 
     def obtenerUsuario(self,userRequest):
         """
         Obtiene el usuario a partir de la solicitud.
         """
-        #usuario = self.userUseCase.execute(userRequest)
-        usuario = {}
+        usuario = self.userUseCase.execute(userRequest['username'])
+        
         if usuario is not None:
-            return UserMapper.toUsuarioResponse(usuario)
+            return usuario
         else:
             return UserMapper.toErrorResponse("Usuario no encontrado")
         
@@ -49,3 +50,14 @@ class UsuarioPresenter:
             return UserMapper.toAutenticacionSuccessResponse(usuario)
         else:
             return UserMapper.toAutenticacionErrorResponse("Usuario y/o contraseña inválidas")
+
+    def obtenerListaValidadores(self):
+        """
+        Obtiene la lista de validadores.
+        """
+        lista = self.obtenerValidadoresUseCase.execute()
+       
+        if lista is None:
+            return UserMapper.toErrorResponse("No se encontraron validadores")
+        else:
+            return UserMapper.toListValidadoresResponse(lista)

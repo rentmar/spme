@@ -4,10 +4,10 @@ class GetUserUseCase:
         self.contenedor = UserRepositoryContainer() 
         self.userRepository = self.contenedor.userRepository()
 
-    def execute(self, userRequest):
+    def execute(self, username):
         """Obtiene un usuario por su nombre de usuario del request user_name."""
-        return self.userRepository.obtenerUsuarioPorUsername(userRequest['username'])
-    
+        return self.userRepository.obtenerUsuarioPorUsername(username)
+
 class CreateUserUseCase:
     def __init__(self):
         self.contenedor = UserRepositoryContainer() 

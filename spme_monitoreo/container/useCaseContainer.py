@@ -4,6 +4,7 @@ from ..domain.usecases.rendicionCuentasUseCase import CrearRendicionCuentasUseCa
 from ..domain.usecases.solicitudReembolsoUseCase import CrearSolicitudReembolsoUseCase
 from ..domain.usecases.solicitudViajeUseCase import CrearSolicitudViajeUseCase
 from ..domain.usecases.solicitudPagoDirectoUseCase import CrearSolicitudPagoDirectoUseCase
+from ..domain.usecases.obtenerDatosFormularioUseCase import ObtenerDatosFormularioUseCase
 
 class CrearSolicitudFondosUseCaseContainer(containers.DeclarativeContainer):
     # Config del contenedor
@@ -37,3 +38,10 @@ class CrearSolicitudPagoDirectoUseCaseContainer(containers.DeclarativeContainer)
 
     # Proveedor de dependencias
     crearSolicitudPagoDirectoUseCase = providers.Singleton(CrearSolicitudPagoDirectoUseCase)
+
+class ObtenerDatosFormularioUseCaseContainer(containers.DeclarativeContainer):
+    # Config del contenedor
+    config = providers.Configuration()
+
+    # Proveedor de dependencias
+    obtenerDatosFormularioUseCase = providers.Singleton(ObtenerDatosFormularioUseCase)

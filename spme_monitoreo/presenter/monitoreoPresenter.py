@@ -1,4 +1,4 @@
-from spme_monitoreo.container.useCaseContainer import CrearSolicitudFondosUseCaseContainer,CrearRendicionCuentasUseCaseContainer,CrearSolicitudReembolsoUseCaseContainer,CrearSolicitudViajeUseCaseContainer,CrearSolicitudPagoDirectoUseCaseContainer
+from spme_monitoreo.container.useCaseContainer import CrearSolicitudFondosUseCaseContainer,CrearRendicionCuentasUseCaseContainer,CrearSolicitudReembolsoUseCaseContainer,CrearSolicitudViajeUseCaseContainer,CrearSolicitudPagoDirectoUseCaseContainer,ObtenerDatosFormularioUseCaseContainer
 from spme_monitoreo.mappers.monitoreoMapper import ReponseMapper
 
 class SolicitudFondosPresenter:
@@ -60,3 +60,17 @@ class SolicitudPagoDirectoPresenter:
             return ReponseMapper.toSuccessResponse(crearSolicitud)
         else:
             return ReponseMapper.toErrorResponse("Error al crear la solicitud de Pago Directo")
+
+class DatosFormularioPresenter:
+    def __init__(self):
+        self.useCaseContainer = ObtenerDatosFormularioUseCaseContainer()
+        self.obtenerDatosFormularioUseCase = self.useCaseContainer.obtenerDatosFormularioUseCase()
+
+    def obtenerDatosFormulario(self, requestData):
+
+        obtenerDatos = self.obtenerDatosFormularioUseCase.execute(requestData)
+        
+        if obtenerDatos is not None:
+            return obtenerDatos
+        else:
+            return ReponseMapper.toErrorResponse("Error al obtener los datos del formulario")

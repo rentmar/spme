@@ -1,5 +1,5 @@
 from dependency_injector import containers, providers
-from ..presenter.monitoreoPresenter import SolicitudFondosPresenter, RendicionCuentasPresenter,SolicitudReembolsoPresenter, SolicitudViajePresenter,SolicitudPagoDirectoPresenter
+from ..presenter.monitoreoPresenter import SolicitudFondosPresenter, RendicionCuentasPresenter,SolicitudReembolsoPresenter,SolicitudViajePresenter,SolicitudPagoDirectoPresenter,DatosFormularioPresenter
 
 class SolicitudFondosPresenterContainer(containers.DeclarativeContainer):
     # Config del contenedor
@@ -36,3 +36,10 @@ class SolicitudPagoDirectoPresenterContainer(containers.DeclarativeContainer):
 
     # Proveedor de dependencias
     solicitudPagoDirectoPresenter = providers.Factory(SolicitudPagoDirectoPresenter)
+
+class DatosFormularioPresenterContainer(containers.DeclarativeContainer):
+    # Config del contenedor
+    config = providers.Configuration()
+
+    # Proveedor de dependencias
+    datosFormularioPresenter = providers.Factory(DatosFormularioPresenter)

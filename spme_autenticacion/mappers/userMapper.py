@@ -17,24 +17,16 @@ class UserMapper:
             "numeroCuenta": "5874-55212-1211-15-4",
             "tipoCuenta": "AHORRO"
         }
-        # return {
-        #     "id": user.id,
-        #     "usuario": user.username,
-        #     "nombre": user.nombre,
-        #     "paterno": user.paterno,
-        #     "materno": user.materno,
-        #     "permisos": user.permisos,
-        #     "activo": user.is_active
-        # }
     
-    # @staticmethod
-    # def toUserEntity(userRequest):
-    #     request = CreateUserRequest()
-    #     request.usuario = userRequest['username']
-    #     request.password = userRequest['password']      
-    #     request.permisos = userRequest['permisos']
-    #     return request
-    
+    @staticmethod
+    def toListResponse(lista):
+        """
+        Convierte una lista de usuarios a un formato de respuesta.
+        """
+        return {
+            "usuarios": [UserMapper.toUsuarioResponse(user) for user in lista]
+        }
+
     @staticmethod
     def toCreateSuccessResponse(user):
         return {
@@ -67,10 +59,19 @@ class UserMapper:
     
 
     @staticmethod
-    def toListResponse(lista):
-        """
-        Convierte una lista de usuarios a un formato de respuesta.
-        """
+    def toValidadorResponse(user): 
         return {
-            "usuarios": [UserMapper.toUsuarioResponse(user) for user in lista]
+            "id": user.get("id"),
+            "nombre": user.get("nombre"),
+            "paterno": user.get("paterno"),
+            "materno": user.get("materno"),
+            "cargo": user.get("cargo"),
         }
+
+    @staticmethod
+    def toListValidadoresResponse(lista):
+        return {
+            "validadores": [UserMapper.toValidadorResponse(user) for user in lista]
+        }
+
+   
