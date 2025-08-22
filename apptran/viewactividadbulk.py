@@ -181,14 +181,32 @@ def procesar_actividades_bulk(request, idproyecto=None):
             resultados['version'] = planificacion.version
             
             # Registrar cambio general
+            # CambioPlanificacion.objects.create(
+            #     planificacion=planificacion,
+            #     tipo_cambio='actualizacion' if ultima_version else 'creacion',
+            #     datos_nuevos={
+            #         'actividades_procesadas': len(actividades_data),
+            #         'creadas': resultados['creadas'],
+            #         'actualizadas': resultados['actualizadas'],
+            #         'errores': len(resultados['errores'])
+            #     },
+            #     descripcion=f"Planificación {'creada' if not ultima_version else 'actualizada'} v{nueva_version}",
+            #     realizado_por=usuario
+            # )
+            # En la parte de registrar cambio general (views.py)
             CambioPlanificacion.objects.create(
                 planificacion=planificacion,
                 tipo_cambio='actualizacion' if ultima_version else 'creacion',
+                datos_anteriores={
+                    'version_anterior': ultima_version.version if ultima_version else None,
+                    'total_actividades_anteriores': len(ultima_version.rows_data) if ultima_version else 0
+                },
                 datos_nuevos={
                     'actividades_procesadas': len(actividades_data),
                     'creadas': resultados['creadas'],
                     'actualizadas': resultados['actualizadas'],
-                    'errores': len(resultados['errores'])
+                    'errores': len(resultados['errores']),
+                    'version_nueva': nueva_version
                 },
                 descripcion=f"Planificación {'creada' if not ultima_version else 'actualizada'} v{nueva_version}",
                 realizado_por=usuario

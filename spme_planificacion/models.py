@@ -41,7 +41,7 @@ class CambioPlanificacion(models.Model):
     )
     tipo_cambio = models.CharField(max_length=20, choices=TIPO_CAMBIO)
     datos_anteriores = models.JSONField(null=True, blank=True)
-    datos_nuevos = models.JSONField()
+    datos_nuevos = models.JSONField(null=True, blank=True)
     descripcion = models.TextField(null=True, blank=True)
     realizado_por = models.CharField(max_length=255, null=True, blank=True)
     realizado_el = models.DateTimeField(auto_now_add=True)
