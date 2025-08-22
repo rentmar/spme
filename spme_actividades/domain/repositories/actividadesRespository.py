@@ -22,3 +22,4 @@ class ActividadesRepository:
 
     def obtenerEncabezadoActividadPorId(self, encabezadoId):
         return self.actividadesDataAccess.obtenerEncabezadoActividadPorId(encabezadoId)
+    
