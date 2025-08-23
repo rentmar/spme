@@ -27,6 +27,11 @@ class CrearActividadRequest(serializers.Serializer):
     presupuesto_global = serializers.DecimalField(max_digits=6, decimal_places=2)
     procedencia_fondos = serializers.JSONField()
     estado = serializers.CharField(max_length=15)
+    descripcion_tipo_actividad = serializers.CharField(max_length=500) 
+    grado_ejecucion = serializers.CharField(max_length=50) 
+    saldo = serializers.DecimalField(max_digits=6, decimal_places=2)
+    total_ejecutado = serializers.DecimalField(max_digits=6, decimal_places=2)
+    total_reportado = serializers.DecimalField(max_digits=6, decimal_places=2)
     indicador_pei_id = serializers.IntegerField(allow_null=True)
     objetivo_pei_id = serializers.IntegerField(allow_null=True)
     proceso_id = serializers.IntegerField(allow_null=True)
@@ -35,6 +40,7 @@ class CrearActividadRequest(serializers.Serializer):
     responsable_id = serializers.IntegerField(allow_null=True)
     resultado_oe_id = serializers.IntegerField(allow_null=True)
     resultado_og_id = serializers.IntegerField(allow_null=True)
+    tipo_id = serializers.IntegerField(required=False, allow_null=True)
     
     def to_internal_value(self, data):
         """
@@ -43,7 +49,6 @@ class CrearActividadRequest(serializers.Serializer):
         internal_value = super().to_internal_value(data)
         return {
             'codigo': internal_value['codigo'],
-            'nombreCorto': internal_value['nombre_corto'],
             'descripcion': internal_value['descripcion'],
             'supuestos': internal_value['supuestos'],
             'riesgos': internal_value['riesgos'],
@@ -64,6 +69,13 @@ class CrearActividadRequest(serializers.Serializer):
             'responsable_id': internal_value['responsable_id'],
             'resultado_oe_id': internal_value['resultado_oe_id'],
             'resultado_og_id': internal_value['resultado_og_id'],
+            'nombreCorto': internal_value['nombre_corto'],
+            'descripcion_tipo_actividad':internal_value['descripcion_tipo_actividad'],
+            'gradoEjecucion':internal_value['grado_ejecucion'],
+            'saldo':internal_value['saldo'],
+            'totalEjecutado':internal_value['total_ejecutado'],
+            'totalReportado':internal_value['total_reportado'],
+            'tipo_id':internal_value['tipo_id'],
         }
     
 class ObtenerActividadIdRequest(serializers.Serializer):
