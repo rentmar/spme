@@ -53,13 +53,6 @@ class ObtenerActividadIdResponse(serializers.Serializer):
     resultado_oe_id = serializers.IntegerField(required=False)
     resultado_og_id = serializers.IntegerField(required=False)
 
-class ObtenerDatosFormActividadResponse(serializers.Serializer):
-    id = serializers.IntegerField(required=False)
-    descripcion = serializers.CharField(max_length=100, required=False)
-    fecha_inicio = serializers.DateField(required=False)
-    fecha_cierre = serializers.DateField(required=False)
-    objetivo_de_actividad = serializers.CharField(max_length=100, required=False)
-
 class ObtenerEncabezadoActividadResponse(serializers.Serializer):
     codigo = serializers.CharField(max_length=60, required=False)
     descripcion = serializers.CharField(max_length=500, required=False)

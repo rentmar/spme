@@ -50,11 +50,7 @@ class ActividadesDataAccess:
         :return: Datos del formulario correspondientes al ID proporcionado.
         """
         return Actividad.objects.filter(id=actividadId).values(
-            'id',
-            'descripcion',
-            'fecha_inicio',
-            'fecha_cierre',
-            'objetivo_de_actividad',
+            'procedencia_fondos',
         ).first()
 
     def obtenerEncabezadoActividadPorId(self, encabezadoId):
