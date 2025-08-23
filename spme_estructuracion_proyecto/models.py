@@ -379,7 +379,6 @@ class IndicadorResultadoObjEspecifico(IndicadorProyecto):
         verbose_name_plural = 'Indicadores Resultado Objetivo Especifico'
 
 
-
 #Almacenamiento de Diagrama de estructura
 class DiagramaEstructura(models.Model):
     codigoProyecto = models.CharField(max_length=50)
