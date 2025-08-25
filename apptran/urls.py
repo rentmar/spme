@@ -11,6 +11,10 @@ from .viewslistasencillanicks import lista_nicks_usuarios
 from .viewactividadbulk import procesar_actividades_bulk
 from .viewsplanificacion import obtener_historial_planificacion, obtener_planificacion_version, contar_planificaciones
 from .viewsactividadestareas import ActividadConTareasListView, ActividadConTareasDetailView
+#from planificacion.vistas.viewsrutas import PruebaPlanificacionView
+from .actividades.views.viewsactividadrutas import rutas_actividad, ruta_actividad_proyecto
+from .pei.views.viewsobjetivoindicadorpei import ObjetivoPeiPorPeiListView, IndicadorPeiPorPeiListView
+
 
 #PEI
 router = DefaultRouter()
@@ -111,8 +115,16 @@ urlpatterns =[
     #Actividades-Tareas
     path(r'actividades-con-tareas/', ActividadConTareasListView.as_view(), 
          name='actividades-con-tareas'),
-    path(r'actividades-con-tareas/<int:pk>/', ActividadConTareasDetailView.as_view(), 
-         name='actividad-detalle-con-tareas'),
+    path(r'actividades-con-tareas/<int:pk>/', ActividadConTareasDetailView.as_view(), name='actividad-detalle-con-tareas'),
+    #Ruta de actividad
+    path(r'actividades/<int:actividad_id>/ruta-proyecto/', ruta_actividad_proyecto, name="ruta_actividad_proyecto"),
+    #Rutas de actividad
+    path(r'actividades/<int:actividad_id>/rutas/', rutas_actividad, name="rutas_actividad"),
+    #Objetivos e indicadores para PEI
+    path(r'pei/<int:pei_id>/objetivos-pei/',ObjetivoPeiPorPeiListView.as_view(), name='objetivospei_por_pei'),
+    path(r'pei/<int:pei_id>/indicadores-pei/', IndicadorPeiPorPeiListView.as_view(), name='indicadorespeo_por_pei'),
+
+
 ]
 
 urlpatterns += router.urls
