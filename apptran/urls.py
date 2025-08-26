@@ -13,8 +13,12 @@ from .viewsplanificacion import obtener_historial_planificacion, obtener_planifi
 from .viewsactividadestareas import ActividadConTareasListView, ActividadConTareasDetailView
 #from planificacion.vistas.viewsrutas import PruebaPlanificacionView
 from .actividades.views.viewsactividadrutas import rutas_actividad, ruta_actividad_proyecto
+from .actividades.views.viewsactividadrutaindicador import obtener_ruta_actividad_con_indicadores
+from .actividades.views.viewsactividadindicadorrutasposibles import rutas_actividad_indicadores
 from .pei.views.viewsobjetivoindicadorpei import ObjetivoPeiPorPeiListView, IndicadorPeiPorPeiListView
-
+#Monitoreo
+from .monitoreo.views.viewssolicitudfondos import SolicitudFondosViewSet
+from .monitoreo.views.viewscrearsolicitudfondos import crear_solicitud_fondos
 
 #PEI
 router = DefaultRouter()
@@ -55,7 +59,7 @@ router.register(r'tipo-actividad', TipoActividadView, basename='tipo_actividad')
 router.register(r'tareas-actividad', TareaActividadView, basename='tareas-actividades')
 #Monitoreo
 router.register(r'forma-de-pago', FormaPagoView, basename='forma_de_pago')
-router.register(r'solicitud-fondos', SolicitudFondosView, basename='solicitud_fondos')
+router.register(r'solicitud-fondos', SolicitudFondosViewSet , basename='solicitud_fondos')
 router.register(r'rendicion-cuentas', RendicionCuentasView, basename='rendicion_cuentas')
 router.register(r'solicitud-reembolso', SolicitudReembolsoView, basename='solicitud_reembolso')
 router.register(r'solicitud-viaje', SolicitudViajeView, basename='solicitud_viaje')
@@ -120,9 +124,14 @@ urlpatterns =[
     path(r'actividades/<int:actividad_id>/ruta-proyecto/', ruta_actividad_proyecto, name="ruta_actividad_proyecto"),
     #Rutas de actividad
     path(r'actividades/<int:actividad_id>/rutas/', rutas_actividad, name="rutas_actividad"),
+    path(r'actividad/<int:actividad_id>/ruta-con-indicadores/', obtener_ruta_actividad_con_indicadores, name='obtener_ruta_actividad_indicadores'),
+    path(r'actividad/<int:actividad_id>/all-rutas-con-indicadores/', rutas_actividad_indicadores, name='obtener_rutas_actividad_indicadores'),
     #Objetivos e indicadores para PEI
     path(r'pei/<int:pei_id>/objetivos-pei/',ObjetivoPeiPorPeiListView.as_view(), name='objetivospei_por_pei'),
     path(r'pei/<int:pei_id>/indicadores-pei/', IndicadorPeiPorPeiListView.as_view(), name='indicadorespeo_por_pei'),
+    #Monitoreo
+    path(r'monitoreo/crear-solicitud-fondos/', crear_solicitud_fondos, name='crear_solicitud_fondos'),
+
 
 
 ]
