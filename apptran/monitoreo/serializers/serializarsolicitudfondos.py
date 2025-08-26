@@ -23,12 +23,12 @@ class UsuarioBasicSerializer(serializers.ModelSerializer):
 class ActividadBasicSerializer(serializers.ModelSerializer):
     class Meta:
         model = Actividad
-        fields = ['id', 'codigo', 'nombreCorto']
+        fields = '__all__'
 
 class TareaActividadBasicSerializer(serializers.ModelSerializer):
     class Meta:
         model = TareaActividad
-        fields = ['id', 'titulo', 'descripcion']
+        fields = '__all__'
 
 class SolicitudFondosSerializer(serializers.ModelSerializer):
     forma_pago_info = FormaPagoSerializer(source='formaPago', read_only=True)
