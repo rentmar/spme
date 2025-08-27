@@ -33,7 +33,7 @@ class ActividadProyectoSerializer(serializers.ModelSerializer):
             'presupuesto', 'presupuestoGlobal', 'totalReportado', 
             'totalEjecutado', 'saldo', 'gradoEjecucion', 'procedencia_fondos',
             'estado', 'tipo', 'proceso', 'resultado_og', 'resultado_oe', 
-            'producto_oe', 'objetivo_pei', 'indicador_pei', 'proyecto', 'responsable'
+            'producto_oe', 'objetivo_pei', 'indicador_pei', 'proyecto', 'responsable', 'rutaTrazadoIndicadores', 'factoresCriticos',
         ]
     
     def get_tipo(self, obj):

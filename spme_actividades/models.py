@@ -180,6 +180,8 @@ class Actividad(models.Model):
 
     #Ruta e indicadores
     rutaTrazadoIndicadores = models.JSONField(blank=True, null=True)
+    # Factores criticos
+    factoresCriticos = models.JSONField(blank=True, null=True)
 
     
     class Meta:

@@ -23,6 +23,9 @@ from .monitoreo.views.viewssolicitudfondos import SolicitudFondosViewSet
 from .monitoreo.views.viewscrearsolicitudfondos import crear_solicitud_fondos
 from .monitoreo.views.viewobtenersolicitudviaje import solicitud_viaje_list, solicitud_viaje_detail
 from .monitoreo.views.viewscrearsolicitudviaje import crear_solicitud_viaje
+#PEI
+from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
+
 
 #PEI
 router = DefaultRouter()
@@ -76,6 +79,7 @@ urlpatterns =[
     path(r'pei/estructura/<int:id>/', PeiEstructuraCompletaView.as_view(), name='pei-estructura'),
     path(r'pei-vigente/', obtener_pei_vigente, name='pei-vigente'),
     path(r'pei-vigente/<int:pei_id>/', establecer_pei_vigente, name='establecer-pei-vigente'),
+    path(r'pei/<int:pei_id>/factores-criticos/', factores_criticos_por_pei,name='pei-lista-fac-criticos'),
     ######################## USUARIOS #################################
     # Autenticación
     path('usr/registrar/', RegistrarUsuarioView.as_view(), name='registrar-usuario'),
@@ -140,6 +144,7 @@ urlpatterns =[
     path(r'monitoreo/solicitud-viaje/<int:pk>/', solicitud_viaje_detail, name='sol-viaje-detalle'),
     path(r'monitoreo/lista-solicitud-viaje/', solicitud_viaje_list, name='lista-sol-viaje'),
     path(r'monitoreo/crear-solicitud-viaje/', crear_solicitud_viaje, name='lista-sol-viaje'),
+    
 
 
 ]

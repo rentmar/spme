@@ -29,7 +29,7 @@ class ActividadBulkSerializer(serializers.ModelSerializer):
             'presupuesto', 'presupuestoGlobal', 'totalReportado', 
             'totalEjecutado', 'saldo', 'gradoEjecucion', 'procedencia_fondos',
             'estado', 'tipo_str', 'proceso', 'resultado_og', 'resultado_oe', 
-            'producto_oe', 'objetivo_pei', 'indicador_pei', 'proyecto_id', 'responsable_str'
+            'producto_oe', 'objetivo_pei', 'indicador_pei', 'proyecto_id', 'responsable_str', 'rutaTrazadoIndicadores', 'factoresCriticos',
         ]
         extra_kwargs = {
             'id': {'required': False}
