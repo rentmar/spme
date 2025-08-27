@@ -5,12 +5,14 @@ from rest_framework.routers import DefaultRouter
 from .viewtarea import TareaActividadView
 from .viewmonitoreo import *
 from .viewefecto import EfectoProyectoView
+#Actividad y planificacion
 from .viewactividad import actividades_por_proyecto
 from .viewtipoactividad import TipoActividadView
 from .viewslistasencillanicks import lista_nicks_usuarios
 from .viewactividadbulk import procesar_actividades_bulk
 from .viewsplanificacion import obtener_historial_planificacion, obtener_planificacion_version, contar_planificaciones
 from .viewsactividadestareas import ActividadConTareasListView, ActividadConTareasDetailView
+from .planificacion.views.viewsactividadplansegbulk import procesar_actividades_planificacion_bulk
 #from planificacion.vistas.viewsrutas import PruebaPlanificacionView
 from .actividades.views.viewsactividadrutas import rutas_actividad, ruta_actividad_proyecto
 from .actividades.views.viewsactividadrutaindicador import obtener_ruta_actividad_con_indicadores
@@ -110,14 +112,16 @@ urlpatterns =[
     path(r'proyectos/<int:proyecto_id>/resultados-og/count/', count_resultados_og, name='count-resultados-og'),
     path(r'proyectos/<int:proyecto_id>/column-stats/', ColumnVisibilityStatsView.as_view(), name='column-stats'),
     path(r'test/', test_endpoint, name='test-endpoint'),   
-    #
+    #Actividades y planificacion
     path(r'actividades/proyecto/<int:proyecto_id>/', actividades_por_proyecto, name='actividades_por_proyecto'), 
     path(r'usuariosnick/', UserListNicksViews.as_view(), name='lista_nicks' ),
     path(r'usuarios/lista-nicks/', lista_nicks_usuarios, name='lista-nicks-usuarios'),
+    #Actividades
     path(r'actividades/procesar-bulk/<int:idproyecto>/', procesar_actividades_bulk, name='procesar_actividades_bulk'),
     path(r'actividades/historial-planificacion/<int:idproyecto>/', obtener_historial_planificacion, name='historial_planificacion'),
     path(r'actividades/planificacion/<int:idproyecto>/<int:version>/', obtener_planificacion_version, name='planificacion_version'),
     path(r'planificaciones/contar/', contar_planificaciones, name='contar_planificaciones'),
+    path(r'planificacion/actividades-plan/<int:idproyecto>/', procesar_actividades_planificacion_bulk, name='bulk-actividades-planificacion'),
     #Actividades-Tareas
     path(r'actividades-con-tareas/', ActividadConTareasListView.as_view(), 
          name='actividades-con-tareas'),
@@ -136,6 +140,7 @@ urlpatterns =[
     path(r'monitoreo/solicitud-viaje/<int:pk>/', solicitud_viaje_detail, name='sol-viaje-detalle'),
     path(r'monitoreo/lista-solicitud-viaje/', solicitud_viaje_list, name='lista-sol-viaje'),
     path(r'monitoreo/crear-solicitud-viaje/', crear_solicitud_viaje, name='lista-sol-viaje'),
+
 
 ]
 
