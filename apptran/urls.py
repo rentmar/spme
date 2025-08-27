@@ -19,6 +19,8 @@ from .pei.views.viewsobjetivoindicadorpei import ObjetivoPeiPorPeiListView, Indi
 #Monitoreo
 from .monitoreo.views.viewssolicitudfondos import SolicitudFondosViewSet
 from .monitoreo.views.viewscrearsolicitudfondos import crear_solicitud_fondos
+from .monitoreo.views.viewobtenersolicitudviaje import solicitud_viaje_list, solicitud_viaje_detail
+from .monitoreo.views.viewscrearsolicitudviaje import crear_solicitud_viaje
 
 #PEI
 router = DefaultRouter()
@@ -131,8 +133,9 @@ urlpatterns =[
     path(r'pei/<int:pei_id>/indicadores-pei/', IndicadorPeiPorPeiListView.as_view(), name='indicadorespeo_por_pei'),
     #Monitoreo
     path(r'monitoreo/crear-solicitud-fondos/', crear_solicitud_fondos, name='crear_solicitud_fondos'),
-
-
+    path(r'monitoreo/solicitud-viaje/<int:pk>/', solicitud_viaje_detail, name='sol-viaje-detalle'),
+    path(r'monitoreo/lista-solicitud-viaje/', solicitud_viaje_list, name='lista-sol-viaje'),
+    path(r'monitoreo/crear-solicitud-viaje/', crear_solicitud_viaje, name='lista-sol-viaje'),
 
 ]
 
