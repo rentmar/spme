@@ -23,6 +23,7 @@ from .monitoreo.views.viewssolicitudfondos import SolicitudFondosViewSet
 from .monitoreo.views.viewscrearsolicitudfondos import crear_solicitud_fondos
 from .monitoreo.views.viewobtenersolicitudviaje import solicitud_viaje_list, solicitud_viaje_detail
 from .monitoreo.views.viewscrearsolicitudviaje import crear_solicitud_viaje
+from .monitoreo.views.viewobtenerdatosform import obtener_datos_solicitud_fondos
 #PEI
 from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
 
@@ -71,6 +72,7 @@ router.register(r'rendicion-cuentas', RendicionCuentasView, basename='rendicion_
 router.register(r'solicitud-reembolso', SolicitudReembolsoView, basename='solicitud_reembolso')
 router.register(r'solicitud-viaje', SolicitudViajeView, basename='solicitud_viaje')
 router.register(r'solicitud-pago-directo', SolicitudPagoDirectoView, basename='sol_pago_directo')
+
 
 
 urlpatterns =[
@@ -143,7 +145,8 @@ urlpatterns =[
     path(r'monitoreo/crear-solicitud-fondos/', crear_solicitud_fondos, name='crear_solicitud_fondos'),
     path(r'monitoreo/solicitud-viaje/<int:pk>/', solicitud_viaje_detail, name='sol-viaje-detalle'),
     path(r'monitoreo/lista-solicitud-viaje/', solicitud_viaje_list, name='lista-sol-viaje'),
-    path(r'monitoreo/crear-solicitud-viaje/', crear_solicitud_viaje, name='lista-sol-viaje'),
+    path(r'monitoreo/crear-solicitud-viaje/', crear_solicitud_viaje, name='crear-sol-viaje'),
+    path(r'monitoreo/obtener-datos-formulario/', obtener_datos_solicitud_fondos, name='obt_datos_form_sol_fondos'),
     
 
 
