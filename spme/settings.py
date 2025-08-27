@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +27,18 @@ SECRET_KEY = 'django-insecure-n)-&nf$^)&(xaejlaxke)nsbwb6*98gduoevh$rc1dta^$y$*p
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# En settings.py, asegúrate de incluir
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1', 
+    '0.0.0.0',
+    'backend',
+    'nginx',
+    '*'
+]
+
+# Para desarrollo, puedes deshabilitar algunas verificaciones
+DEBUG = True
 
 
 # Application definition
@@ -88,10 +100,30 @@ WSGI_APPLICATION = 'spme.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+# spme/spme/settings.py
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'spmbe',                    # Nombre de la base de datos
+        'USER': 'django_user',              # Usuario de MySQL
+        'PASSWORD': 'django_pass',          # Contraseña del usuario
+        'HOST': 'db',                       # Nombre del servicio en docker-compose
+        'PORT': '3306',                     # Puerto de MySQL
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            'charset': 'utf8mb4',
+        },
+        'TEST': {
+            'NAME': 'test_spmbe',           # Base de datos para tests
+        },
     }
 }
 
@@ -154,7 +186,7 @@ SIMPLE_JWT = {
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-es'
 
 TIME_ZONE = 'UTC'
 
@@ -166,7 +198,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+
+# Configuración para static files
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -175,6 +211,40 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'spme_autenticacion.Usuario'
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173", 
+
+# Configuración de CSRF - ORÍGENES CONFIABLES
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'http://0.0.0.0:8000',
 ]
+
+# Configuración de CORS
+CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'http://0.0.0.0:8000',
+]
+
+# Para desarrollo, también puedes permitir todos los orígenes (NO en producción)
+CORS_ALLOW_ALL_ORIGINS = True
+
+# Permitir credenciales
+CORS_ALLOW_CREDENTIALS = True
+
+# Hosts permitidos
+ALLOWED_HOSTS = ['*']  # Para desarrollo, en producción especifica los dominios
+
+# Configuración de cookies CSRF
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = False
+CSRF_USE_SESSIONS = False
+
+# Configuración de sesiones
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_HTTPONLY = True
+
+# Configuración para media files (si los usas)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
