@@ -283,6 +283,7 @@ class IndicadorProyecto(PolymorphicModel):
 
     # Campos comunes a todos los indicadores
     codigo = models.CharField(max_length=50, null=True, blank=True)
+    descripcion = models.TextField(blank=True, null=True)
     redaccion = models.CharField(max_length=5, choices=TIPO_INDICADOR, blank=True, null=True)
     fuente_verificacion = models.TextField(blank=True, null=True)
     target_poblacion = models.CharField(max_length=255, blank=True, null=True)
