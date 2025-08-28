@@ -289,7 +289,7 @@ class IndicadorProyecto(PolymorphicModel):
     target_poblacion = models.CharField(max_length=255, blank=True, null=True)
     tipo = models.CharField(max_length=5, choices=TIPO, default='A-Z')
     frecuencia = models.CharField(max_length=15, choices=FREQ, default='MEN')
-    responsable = models.CharField(blank=True, null=True)
+    responsable = models.CharField(blank=True, null=True, max_length=30)
 
     #Campos
     baseline = models.CharField(

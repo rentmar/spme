@@ -71,7 +71,7 @@ class PlanRevision(models.Model):
     cambios = models.JSONField(null=True, blank=True)
     razon = models.TextField(null=True, blank=True)
     #modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    modificado_por = models.CharField(null=True, blank=True)
+    modificado_por = models.CharField(max_length=30, null=True, blank=True)
     modificado_el = models.DateTimeField(auto_now_add=True)
     version = models.IntegerField()
     #Relacion

@@ -115,7 +115,7 @@ DATABASES = {
         'NAME': 'spmbe',                    # Nombre de la base de datos
         'USER': 'django_user',              # Usuario de MySQL
         'PASSWORD': 'django_pass',          # Contraseña del usuario
-        'HOST': 'db',                       # Nombre del servicio en docker-compose
+        'HOST': '127.0.0.1',                       # Nombre del servicio en docker-compose
         'PORT': '3306',                     # Puerto de MySQL
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
