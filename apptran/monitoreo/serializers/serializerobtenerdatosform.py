@@ -25,4 +25,4 @@ class ActividadSerializer(serializers.ModelSerializer):
 class FormaPagoSerializer(serializers.ModelSerializer):
     class Meta:
         model = FormaPago
-        fields = ['formaPago']
+        fields = '__all__'

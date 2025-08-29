@@ -74,7 +74,13 @@ def obtener_datos_solicitud_fondos(request):
         
         # Obtener formas de pago
         formas_pago = FormaPago.objects.all()
-        formas_pago_list = [fp.formaPago for fp in formas_pago if fp.formaPago]
+        formas_pago_list = [
+             {
+                'id': fp.id,
+                'formaPago': fp.formaPago
+            } 
+            for fp in formas_pago if fp.formaPago
+        ]
         #print(f"Formas de pago: {formas_pago_list}")
         
         # Serializar datos
