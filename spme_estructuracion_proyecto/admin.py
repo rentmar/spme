@@ -4,3 +4,5 @@ from .models import *
 admin.site.register(InstanciaGestora)
 admin.site.register(ProcedenciaFondos)
 admin.site.register(DiagramaEstructura)
+admin.site.register(ResultadoOG)
+admin.site.register(Proceso)

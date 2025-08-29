@@ -410,7 +410,7 @@ class DiagramaEstructura(models.Model):
 #Procesos - Linea de Accion
 class Proceso(models.Model):
     codigo = models.CharField(max_length=20, null=True, blank=True)
-    titulo = models.CharField(max_length=255, null=True, blank=True)
+    titulo = models.TextField(null=True, blank=True)
     descripcion = models.TextField(blank=True, null=True)
     #Relaciones
     resultado_og = models.ForeignKey(
@@ -449,7 +449,7 @@ class Proceso(models.Model):
         verbose_name_plural = 'Procesos'
 
     def __str__(self):
-        return f'Proceso: {self.titulo}'    
+        return f'CODIGO: {self.codigo} - Proceso: {self.titulo}'    
 
 
 #PRoducto vinculado a todos los nodos
