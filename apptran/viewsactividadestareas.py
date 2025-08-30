@@ -19,6 +19,7 @@ class ActividadConTareasListView(generics.ListAPIView):
         for actividad_data in serializer.data:
             actividad_formateada = {
                 'id': actividad_data['id'],
+                'codigo': actividad_data['codigo'],
                 'nombreCorto': actividad_data['nombreCorto'],
                 'descripcion': actividad_data['descripcion'],
                 'estado': actividad_data['estado'],
@@ -52,6 +53,7 @@ class ActividadConTareasDetailView(generics.RetrieveAPIView):
         # Formatear la respuesta
         data = {
             'id': serializer.data['id'],
+            'codigo': serializer.data['codigo'],
             'nombreCorto': serializer.data['nombreCorto'],
             'estado': serializer.data['estado'],
             'fecha_programada': serializer.data['fecha_programada'],
