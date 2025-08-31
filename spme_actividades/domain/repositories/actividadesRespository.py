@@ -8,8 +8,8 @@ class ActividadesRepository:
     def obtenerActividadesPorUsuario(self, usuarioIdRequest):
         return self.actividadesDataAccess.obtenerActividadesPorUsuario(usuarioIdRequest['user_id'])
 
-    def obtenerActividadesPorKant(self):
-        return self.actividadesDataAccess.obtenerActividadesPorKant()
+    def obtenerActividadesGantId(self,idUser):
+        return self.actividadesDataAccess.obtenerActividadesGantId(idUser)
     
     def crearActividad(self,actividadRequest):
         return self.actividadesDataAccess.crearActividad(actividadRequest)

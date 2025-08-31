@@ -59,9 +59,9 @@ class CrearActividad(APIView):
         else: 
              return Response({"mensaje": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
 
-class ObtenerActividadesKant(APIView):
+class ObtenerActividadesGant(APIView):
     """
-    API para obtener las actividades del diagrama de Kant
+    API para obtener las actividades del diagrama de Gantt
     """
     def __init__(self):
         self.contenedor = ActividadesPresenterContainer()
@@ -69,9 +69,9 @@ class ObtenerActividadesKant(APIView):
 
     def get(self, request, *args, **kwargs):
 
-        actividadesKant = self.actividadesPresenter.obtenerActividadesKant()
+        actividadesGant = self.actividadesPresenter.obtenerActividadesGant()
         print(f"Obteniendo actividades por Kfsdfsfsdfant {actividadesKant}")
-        response = ActividadesKantResponse(data = actividadesKant)
+        response = ActividadesGantResponse(data = actividadesGant)
         print (f"Response is valid: {response.is_valid()}")
         if response.is_valid():
             return Response(response.data,status=status.HTTP_200_OK)

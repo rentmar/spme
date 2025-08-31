@@ -9,10 +9,3 @@ class ObtenerActividadesUsuarioUseCase:
         # Aquí se llamaría al método del presenter para obtener las actividades del usuario
         return self.actividadesRepository.obtenerActividadesPorUsuario(usuarioIdRequest)
     
-class ObtenerActividadesKantUseCase:
-    def __init__(self):
-        self.contenedor = ActividadesRepositoryContainer()
-        self.actividadesRepository = self.contenedor.actividadesRepository()
-
-    def execute(self):
-        return self.actividadesRepository.obtenerActividadesPorKant()

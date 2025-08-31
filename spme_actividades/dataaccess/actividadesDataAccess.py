@@ -17,7 +17,7 @@ class ActividadesDataAccess:
     def crearActividad(self,actividadRequest):
         return Actividad.objects.create(**actividadRequest)
     
-    def obtenerActividadesPorKant(self):
+    def obtenerActividadesGantId(self,idUser):
         """
         Obtiene las actividades asociadas al diagrama de Kant.
         :return: Lista de actividades del diagrama de Kant.
