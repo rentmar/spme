@@ -178,6 +178,11 @@ class Actividad(models.Model):
         verbose_name='Responsable de la actividad'
     )
 
+    #Ruta e indicadores
+    rutaTrazadoIndicadores = models.JSONField(blank=True, null=True)
+    # Factores criticos
+    factoresCriticos = models.JSONField(blank=True, null=True)
+
     
     class Meta:
         verbose_name = 'Actividad'

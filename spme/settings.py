@@ -49,6 +49,9 @@ INSTALLED_APPS = [
     'spme_estructuracion_proyecto',
     'spme_actividades',
     'spme_monitoreo',
+    'spme_planificacion',
+    'apptran', #Aplicacion de transicion
+    'system_config', #Configuracion del sistema
 ]
 
 MIDDLEWARE = [
