@@ -1,4 +1,4 @@
-from spme_actividades.container.repositoryContainer import ActividadesRepositoryContainer
+from spme_actividades.container.repositoryContainer import ActividadesRepositoryContainergi
 
 class ObtenerActividadesGantUseCase:
     def __init__(self):
