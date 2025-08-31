@@ -33,6 +33,7 @@ class ActividadConTareasListView(generics.ListAPIView):
                 'totalEjecutado':actividad_data['totalEjecutado'], 
                 'saldo':actividad_data['saldo'], 
                 'gradoEjecucion':actividad_data['gradoEjecucion'],
+                'proyecto_id': actividad_data['proyecto_id'],
                 'tareas': actividad_data['tareas']
             }
             data.append(actividad_formateada)
@@ -66,6 +67,7 @@ class ActividadConTareasDetailView(generics.RetrieveAPIView):
             'totalEjecutado':serializer.data['totalEjecutado'], 
             'saldo':serializer.data['saldo'], 
             'gradoEjecucion':serializer.data['gradoEjecucion'],
+            'proyecto_id': serializer.data['proyecto_id'],
             'tareas': serializer.data['tareas']
         }
         
