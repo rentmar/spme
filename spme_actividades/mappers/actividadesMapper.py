@@ -43,21 +43,54 @@ class ActividadesMapper:
         }
     
     @staticmethod
-    def toActividadesKantResponse(actividades):
+    def toActividadesGanttResponse(actividades):
         lista = []
         for actividad in actividades:
             act = {
                 "codigo": actividad['codigo'],
+                "nombre_corto": actividad['nombreCorto'],
                 "descripcion": actividad['descripcion'],
-                "tipo": actividad['tipo'],
+                "tipo": actividad['tipo_id'],
                 "fecha_programada": actividad['fecha_programada'],
-                "duracion": actividad['duracion'],
                 "fecha_inicio": actividad['fecha_inicio'],
                 "fecha_cierre": actividad['fecha_cierre'],
+                "grado_ejecucion": actividad['gradoEjecucion'],
                 "estado": actividad['estado'],
             }
             lista.append(act)
         return {
+            "estados":[
+                {
+                    "id": "PLAN",
+                    "nombre": "Planificacion",
+                    "color": "#64b5f6",
+                },
+                {
+                    "id": "RETR",
+                    "nombre": "Retraso",
+                    "color": "#ff0000"
+                },
+                {
+                    "id": "REPROG",
+                    "nombre": "Reprogramacion",
+                    "color": "#ffd54f"
+                },
+                {
+                    "id": "EJEC",
+                    "nombre": "En_Ejecucion",
+                    "color": "#ffa726"
+                },
+                {
+                    "id": "REP",
+                    "nombre": "En_Reporte",
+                    "color": "#81c784"
+                },
+                {
+                    "id": "FIN",
+                    "nombre": "Finalizado",
+                    "color": "#003CFF"
+                }
+            ],
             "actividades": lista
         }
 

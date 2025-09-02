@@ -5,7 +5,7 @@ class ActividadesPresenter:
     def __init__(self):
         self.useCaseContainer = ActividadesUseCaseContainer()
         self.obtenerActividadesUsuarioUseCase = self.useCaseContainer.obtenerActividadesUsuarioUseCase()
-        self.obtenerActividadesGantUseCase = self.useCaseContainer.obtenerActividadesGantUseCase()
+        self.obtenerActividadesGanttUseCase = self.useCaseContainer.obtenerActividadesGanttUseCase()
         self.crearActividadUseCase = self.useCaseContainer.crearActividadUseCase()
         self.obtenerActividadPorIdUseCase = self.useCaseContainer.obtenerActividadPorIdUseCase()
         self.obtenerEncabezadoActividadPorIdUseCase = self.useCaseContainer.obtenerEncabezadoActividadPorIdUseCase()
@@ -17,11 +17,12 @@ class ActividadesPresenter:
         else:
             return []
 
-    def obtenerActividadesGant(self,request):
-        actividadesList = self.obtenerActividadesGantUseCase.execute(request)
-       
+    def obtenerActividadesGantt(self,request):
+        
+        actividadesList = self.obtenerActividadesGanttUseCase.execute(request)
+        
         if actividadesList is not None:
-            return ActividadesMapper.toActividadesGantResponse(actividadesList)
+            return ActividadesMapper.toActividadesGanttResponse(actividadesList)
         else:
             return []
         

@@ -1,9 +1,0 @@
-from spme_actividades.container.repositoryContainer import ActividadesRepositoryContainergi
-
-class ObtenerActividadesGantUseCase:
-    def __init__(self):
-        self.contenedor = ActividadesRepositoryContainer()
-        self.actividadesRepository = self.contenedor.actividadesRepository()
-
-    def execute(self,request):
-        return self.actividadesRepository.obtenerActividadesGantId(request['idUser'])
