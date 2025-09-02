@@ -11,9 +11,9 @@ router = DefaultRouter()
 urlpatterns = [
 
     path(r'proyectos/test-conexion/', test_connection, name='proyecto-test'),
-    path(r'proyectos/<int:id>/detalles/', ProyectoDetailView.as_view(), name='proyecto_detalles_por_id' )
+    path(r'proyectos/<int:id>/detalles/', ProyectoDetailView.as_view(), name='proyecto_detalles_por_id' ),
     #path(r'actualizar-estructura/', actualizar_estructura_completa, name='actualizar_estructura'),
-    path(r'actualizar-estructura-transaccional/', actualizar_estructura_transaccional, name='actualizar_estructura_transaccional' )
+    path(r'actualizar-estructura-transaccional/', actualizar_estructura_transaccional, name='actualizar_estructura_transaccional' ),
 
 ]
 
