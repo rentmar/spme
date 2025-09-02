@@ -28,6 +28,8 @@ class SolicitudFondos(models.Model):
     lugarSolicitud = models.TextField(blank=True, null=True)
     fechaSolicitud = models.DateField(verbose_name='Fecha de la solicitud', blank=True, null=True)
     montoSolicitado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Monto Solicitado', blank=True, null=True)
+    #Actividad
+    fechaRealizacionActividad = models.DateField(verbose_name="Fecha de realizacion del actividad", blank=True, null=True)
     #Validacion
     validacionResponsable = models.BooleanField(default=False)
     responsable = models.ForeignKey(
@@ -382,3 +384,6 @@ class RendicionCuentas(models.Model):
     class Meta:
         verbose_name = 'Rendicion de cuentas'
         verbose_name_plural = 'Rendiciones de cuentas'
+
+
+
