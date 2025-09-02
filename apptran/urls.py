@@ -27,6 +27,8 @@ from .monitoreo.views.viewobtenerdatosform import obtener_datos_solicitud_fondos
 from .monitoreo.views.crear_rendicion_cuentas_views import crear_rendicion_cuentas
 #PEI
 from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
+#Proyecto
+from .viewdiagramaporidproyecto import DiagramaPorProyectoView
 
 
 #PEI
@@ -118,6 +120,7 @@ urlpatterns =[
     path(r'proyectos/<int:proyecto_id>/indicadores-og/count/', count_indicadores_og, name='count-indicadores-og'),    
     path(r'proyectos/<int:proyecto_id>/resultados-og/count/', count_resultados_og, name='count-resultados-og'),
     path(r'proyectos/<int:proyecto_id>/column-stats/', ColumnVisibilityStatsView.as_view(), name='column-stats'),
+    path(r'proyectos/diagrama/<int:proyecto_id>/', DiagramaPorProyectoView.as_view(), name='diagrama-de-un.proyecto'),
     path(r'test/', test_endpoint, name='test-endpoint'),   
     #Actividades y planificacion
     path(r'actividades/proyecto/<int:proyecto_id>/', actividades_por_proyecto, name='actividades_por_proyecto'), 
