@@ -25,6 +25,7 @@ from .monitoreo.views.viewobtenersolicitudviaje import solicitud_viaje_list, sol
 from .monitoreo.views.viewscrearsolicitudviaje import crear_solicitud_viaje
 from .monitoreo.views.viewobtenerdatosform import obtener_datos_solicitud_fondos
 from .monitoreo.views.crear_rendicion_cuentas_views import crear_rendicion_cuentas
+from .monitoreo.views.info_rendicion_cuentas_views import RendicionCuentasDatosView
 #PEI
 from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
 #Proyecto
@@ -152,6 +153,7 @@ urlpatterns =[
     path(r'monitoreo/crear-solicitud-viaje/', crear_solicitud_viaje, name='crear-sol-viaje'),
     path(r'monitoreo/obtener-datos-formulario/', obtener_datos_solicitud_fondos, name='obt_datos_form_sol_fondos'),
     path(r'monitoreo/crear-rendicion-cuentas/', crear_rendicion_cuentas, name='form_rendicion_cuentas'),
+    path(r'monitoreo/rendicion-cuentas-datos/', RendicionCuentasDatosView.as_view(), name='rendicion-cuentas-datos-form'),
 
 
 ]
