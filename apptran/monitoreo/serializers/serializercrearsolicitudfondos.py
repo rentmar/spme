@@ -41,7 +41,14 @@ class SolicitudFondosCreateSerializer(serializers.ModelSerializer):
         allow_null=True
     )
     
-    # Campo para el número de formulario personalizado
+    # Campo para bloquear iconos
+    bloquear_icono_sf = serializers.BooleanField(
+        source='bloquearIconosSolFondos',
+        required=False,
+        default=True
+    )
+    
+    # Campo para número de formulario personalizado
     numero_formulario = serializers.CharField(
         source='numeroFormulario',
         required=False,
@@ -49,13 +56,8 @@ class SolicitudFondosCreateSerializer(serializers.ModelSerializer):
         allow_blank=True
     )
     
-    # Campo para ID de actividad (en lugar del JSON completo)
-    id_actividad = serializers.PrimaryKeyRelatedField(
-        queryset=Actividad.objects.all(),
-        source='actividad',
-        required=False,
-        allow_null=True
-    )
+    # Campo para actividad (JSON con datos de actualización)
+    actividad = serializers.JSONField(write_only=True, required=False)
     
     id_tarea = serializers.PrimaryKeyRelatedField(
         queryset=TareaActividad.objects.all(),
@@ -67,14 +69,48 @@ class SolicitudFondosCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = SolicitudFondos
         fields = [
-            'numero_formulario', 'detalle_destino_fondos', 'forma_pago', 
+            'numero_formulario', 'detalle_destino_fondos', 'bloquear_icono_sf', 'forma_pago', 
             'lugar_solicitud', 'fecha_solicitud', 'monto_solicitado', 
             'validacion_responsable', 'id_responsable', 'validacion_coordinador', 
-            'id_coordinador', 'id_usuario', 'id_actividad', 'id_tarea'
+            'id_coordinador', 'id_usuario', 'actividad', 'id_tarea'
         ]
 
     @transaction.atomic
     def create(self, validated_data):
+        # Extraer y procesar los datos de actividad si vienen
+        actividad_data = validated_data.pop('actividad', None)
+        actividad_obj = None
+        
+        # Si viene actividad en el formato, actualizar la actividad existente
+        if actividad_data and 'id_actividad' in actividad_data:
+            try:
+                actividad_id = actividad_data['id_actividad']
+                actividad_obj = Actividad.objects.select_for_update().get(id=actividad_id)
+                
+                # Actualizar los campos de la actividad si vienen en el JSON
+                campos_actualizados = False
+                if 'descripcion_actividad' in actividad_data:
+                    actividad_obj.descripcion = actividad_data['descripcion_actividad']
+                    campos_actualizados = True
+                if 'objetivo_actividad' in actividad_data:
+                    actividad_obj.objetivo_de_actividad = actividad_data['objetivo_actividad']
+                    campos_actualizados = True
+                
+                if campos_actualizados:
+                    actividad_obj.save()
+                
+                # Asignar la actividad actualizada a la solicitud de fondos
+                validated_data['actividad'] = actividad_obj
+                
+            except Actividad.DoesNotExist:
+                raise serializers.ValidationError(
+                    {"actividad": f"La actividad con ID {actividad_id} no existe."}
+                )
+            except Exception as e:
+                raise serializers.ValidationError(
+                    {"actividad": f"Error al actualizar la actividad: {str(e)}"}
+                )
+        
         # Generar número de formulario automáticamente solo si no se proporcionó uno
         if ('numeroFormulario' not in validated_data or 
             not validated_data.get('numeroFormulario')):
@@ -88,11 +124,11 @@ class SolicitudFondosCreateSerializer(serializers.ModelSerializer):
             return solicitud
             
         except Exception as e:
+            # Si hay algún error al crear la solicitud, la transacción se revertirá
+            # automáticamente incluyendo cualquier cambio en la actividad
             raise serializers.ValidationError(
                 {"solicitud": f"Error al crear la solicitud de fondos: {str(e)}"}
             )
-
-
 
 # class SolicitudFondosCreateSerializer(serializers.ModelSerializer):
 #     # Campos que vendrán en el JSON con nombres diferentes a los del modelo
