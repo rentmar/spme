@@ -30,6 +30,8 @@ class SolicitudFondos(models.Model):
     montoSolicitado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Monto Solicitado', blank=True, null=True)
     #Actividad
     fechaRealizacionActividad = models.DateField(verbose_name="Fecha de realizacion del actividad", blank=True, null=True)
+    #Discriminador
+    bloquearIconosSolFondos = models.BooleanField(default=False)
     #Validacion
     validacionResponsable = models.BooleanField(default=False)
     responsable = models.ForeignKey(
@@ -93,7 +95,6 @@ class SolicitudReembolso(models.Model):
     lugarSolicitud = models.CharField(max_length=50, verbose_name='Lugar solicitud', blank=True, null=True)
     fechaSolicitud = models.DateField(verbose_name='Fecha solicitud', blank=True, null=True)
     montoSolicitado = models.DecimalField(max_digits=6,decimal_places=2,verbose_name ='Monto solicitado',blank=True, null=True)
-    
     #Validaciones
     validacionResponsable = models.BooleanField(default=False)
     responsable = models.ForeignKey(
