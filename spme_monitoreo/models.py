@@ -31,7 +31,7 @@ class SolicitudFondos(models.Model):
     #Actividad
     fechaRealizacionActividad = models.DateField(verbose_name="Fecha de realizacion del actividad", blank=True, null=True)
     #Discriminador
-    bloquearIconosSolFondos = models.BooleanField(default=False)
+    bloquearIconosSolFondos = models.BooleanField(default=True)
     #Validacion
     validacionResponsable = models.BooleanField(default=False)
     responsable = models.ForeignKey(
