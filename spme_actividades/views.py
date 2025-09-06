@@ -1,6 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import IsAuthenticated
 from .common.MessageManager import MessageType
 from .domain.models.request.actividadesRequest import ObtenerActividadIdRequest,CrearActividadRequest,ObtenerActividadesUsuarioRequest,ObtenerEncabezadoPorIdRequest
 from .domain.models.response.actividadesResponse import ActividadesUsuarioResponse,ActividadesGanttResponse,CrearActividadResponse,ObtenerActividadIdResponse,ObtenerEncabezadoActividadResponse
@@ -63,6 +65,9 @@ class ObtenerActividadesGantt(APIView):
     """
     API para obtener las actividades del diagrama de Gantt
     """
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+
     def __init__(self):
         self.contenedor = ActividadesPresenterContainer()
         self.actividadesPresenter = self.contenedor.actividadesPresenter()
