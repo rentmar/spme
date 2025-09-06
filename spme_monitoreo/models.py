@@ -96,8 +96,13 @@ class SolicitudReembolso(models.Model):
     fechaSolicitud = models.DateField(verbose_name='Fecha solicitud', blank=True, null=True)
     montoSolicitado = models.DecimalField(max_digits=6,decimal_places=2,verbose_name ='Monto solicitado',blank=True, null=True)
 
+
     #Campos Extra
     descripcionReposicion = models.TextField(blank=True,null=True)
+
+
+    #discriminador
+    bloquearIconos = models.BooleanField(default=True)
 
     #Validaciones
     validacionResponsable = models.BooleanField(default=False)
@@ -163,6 +168,9 @@ class SolicitudViaje (models.Model):
     justificacionAsistencia = models.TextField(verbose_name='justificacion_asistencia', blank=True, null=True)
     fondosUnitas = models.TextField( verbose_name='fondos_unitas', blank=True, null=True)
     tareasPrevias = models.TextField( verbose_name='tareas_previas', blank=True, null=True)
+
+    #Bloquear iconos
+    bloquearIconos = models.BooleanField(default=True)
 
     formaPago = models.ForeignKey(
         FormaPago,
@@ -237,6 +245,9 @@ class SolicitudPagoDirecto(models.Model):
     cargo = models.CharField(max_length=30, verbose_name='cargo', blank=True, null=True)
     detalleDestinoFondos = models.JSONField(verbose_name='detalle_destino_fondos', blank=True, null=True)
 
+    #Discriminador
+    bloquearIconos = models.BooleanField(default=True)
+
     formaPago = models.ForeignKey(
         FormaPago,
         on_delete=models.SET_NULL,
@@ -310,6 +321,8 @@ class RendicionCuentas(models.Model):
     montoDescargado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Monto Descargado', blank=False, null=True)
     saldo = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Saldo', blank=True, null=True)
     detalleDestinoFondos = models.JSONField(verbose_name='Detalle destino de fondos', blank=True, null=True)
+    #Discriminador
+    bloquearIconos = models.BooleanField(default=True)
     #Validaciones
     validacionResponsable = models.BooleanField(default=False)
     responsable = models.ForeignKey(
