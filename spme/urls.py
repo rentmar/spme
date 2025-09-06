@@ -36,6 +36,6 @@ urlpatterns = [
     #Api Programas/Areas
     path('api-ap/', include('spme_programas.urls')),
     #Api de proyectos
-    path('api-proy/', include('spme_estructuracion_proyecto.urls'),)
+    path('api-proy/', include('spme_estructuracion_proyecto.urls'),),
 ]
 
