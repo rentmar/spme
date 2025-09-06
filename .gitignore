@@ -162,3 +162,5 @@ __pycache__/
 
 # Exceptuar el archivo __init__.py en los directorios de migraciones
 !*/migrations/__init__.py
+
+*.log
