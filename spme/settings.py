@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'spme_actividades',
     'spme_monitoreo',
     'spme_planificacion',
+    'spme_programas',
     'apptran', #Aplicacion de transicion
     'system_config', #Configuracion del sistema
 ]
@@ -178,3 +179,50 @@ AUTH_USER_MODEL = 'spme_autenticacion.Usuario'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173", 
 ]
+
+
+# settings.py
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+            'stream': 'ext://sys.stdout',  # Esto asegura que salga a la consola
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': 'DEBUG',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'spme_estructuracion_proyecto': {  # Reemplaza 'tu_app' con el nombre de tu aplicación
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}

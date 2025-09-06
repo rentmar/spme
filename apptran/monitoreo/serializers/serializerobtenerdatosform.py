@@ -16,7 +16,7 @@ class ValidadorSerializer(serializers.ModelSerializer):
 
 class ActividadSerializer(serializers.ModelSerializer):
     fecha_inicio = serializers.DateField()
-    fecha_fin = serializers.DateField(source='fecha_cierre')  # Solo aquí usamos source para mapear
+    fecha_fin = serializers.DateField(source='fecha_cierre') 
     
     class Meta:
         model = Actividad
