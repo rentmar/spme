@@ -17,21 +17,24 @@ class ActividadesDataAccess:
     def crearActividad(self,actividadRequest):
         return Actividad.objects.create(**actividadRequest)
     
-    def obtenerActividadesPorKant(self):
+    def obtenerActividadesGanttId(self,idResponsable):
         """
-        Obtiene las actividades asociadas al diagrama de Kant.
-        :return: Lista de actividades del diagrama de Kant.
+        Obtiene las actividades asociadas al diagrama de Gantt.
+        :return: Lista de actividades del diagrama de Gantt.
         """
-        return Actividad.objects.all().values(
-        'codigo',
-        'descripcion',
-        'tipo_id',
-        'fecha_programada',
-        'duracion',
-        'fecha_inicio',
-        'fecha_cierre',
-        'estado'
-    )
+        return Actividad.objects.filter(
+            responsable_id=idResponsable
+        ).values(
+            'codigo',
+            'nombreCorto',
+            'descripcion',
+            'tipo_id',
+            'fecha_programada',
+            'fecha_inicio',
+            'fecha_cierre',
+            'gradoEjecucion',
+            'estado'
+        )
 
     def obtenerActividadPorId(self, actividadId):
         """
@@ -50,11 +53,7 @@ class ActividadesDataAccess:
         :return: Datos del formulario correspondientes al ID proporcionado.
         """
         return Actividad.objects.filter(id=actividadId).values(
-            'id',
-            'descripcion',
-            'fecha_inicio',
-            'fecha_cierre',
-            'objetivo_de_actividad',
+            'procedencia_fondos',
         ).first()
 
     def obtenerEncabezadoActividadPorId(self, encabezadoId):

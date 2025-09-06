@@ -1,5 +1,6 @@
 from dependency_injector import containers, providers
-from ..domain.usecases.obtenerActividadesUsuarioUseCase import ObtenerActividadesUsuarioUseCase,ObtenerActividadesKantUseCase
+from ..domain.usecases.obtenerActividadesUsuarioUseCase import ObtenerActividadesUsuarioUseCase
+from ..domain.usecases.obtenerActividadesGanttUseCase import ObtenerActividadesGanttUseCase
 from ..domain.usecases.obtenerEncabezadoActividadPorIdUseCase import ObtenerEncabezadoActividadPorIdUseCase
 from ..domain.usecases.crearActividadUseCase import CrearActividadUseCase
 from ..domain.usecases.obtenerActividadPorIdUseCase import ObtenerActividadPorIdUseCase
@@ -13,7 +14,7 @@ class ActividadesUseCaseContainer(containers.DeclarativeContainer):
 
     crearActividadUseCase = providers.Singleton(CrearActividadUseCase)
 
-    obtenerActividadesKantUseCase = providers.Singleton(ObtenerActividadesKantUseCase)
+    obtenerActividadesGanttUseCase = providers.Singleton(ObtenerActividadesGanttUseCase)
 
     obtenerActividadPorIdUseCase = providers.Singleton(ObtenerActividadPorIdUseCase)
 
