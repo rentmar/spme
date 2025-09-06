@@ -184,6 +184,8 @@ class Actividad(models.Model):
     factoresCriticos = models.JSONField(blank=True, null=True)
     # estructura procedencia
     estructuraProcedencia = models.JSONField(blank=True, null=True)
+    #Anular Actividad
+    estaInactiva = models.BooleanField(default=False)
 
     
     class Meta:
