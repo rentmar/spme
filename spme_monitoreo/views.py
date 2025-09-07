@@ -188,7 +188,7 @@ class ObtenerDatosFormulario(APIView):
             response = ObtenerDatosFormularioResponse(data=datosFormularioResponse)
             
             if response.is_valid():
-                return Response(response.data, status=status.HTTP_201_CREATED)
+                return Response(response.data, status=status.HTTP_302_FOUND)
             else:
                 return Response({"estado": MessageType.ERROR.value}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

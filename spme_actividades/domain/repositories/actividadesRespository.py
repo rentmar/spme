@@ -6,11 +6,11 @@ class ActividadesRepository:
         self.actividadesDataAccess = self.contenedor.actividadesDataAccess()
 
     def obtenerActividadesPorUsuario(self, usuarioIdRequest):
-        return self.actividadesDataAccess.obtenerActividadesPorUsuario(usuarioIdRequest['user_id'])
+        return self.actividadesDataAccess.obtenerActividadesPorUsuario(usuarioIdRequest['responsable_id'])
 
-    def obtenerActividadesPorKant(self):
-        return self.actividadesDataAccess.obtenerActividadesPorKant()
-    
+    def obtenerActividadesGanttId(self,idResponsable):
+        return self.actividadesDataAccess.obtenerActividadesGanttId(idResponsable)
+
     def crearActividad(self,actividadRequest):
         return self.actividadesDataAccess.crearActividad(actividadRequest)
     
