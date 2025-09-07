@@ -9,7 +9,7 @@ class ObtenerActividadesUsuarioRequest(serializers.Serializer):
         """
         internal_value = super().to_internal_value(data)
         return {
-            'user_id': int(internal_value['user_id']),
+            'responsable_id': int(internal_value['user_id']),
         }
     
 class CrearActividadRequest(serializers.Serializer):
@@ -20,13 +20,20 @@ class CrearActividadRequest(serializers.Serializer):
     riesgos = serializers.CharField(max_length = 500)
     objetivo_de_actividad = serializers.CharField(max_length=500)
     descripcion_evaluacion = serializers.CharField(max_length=500)
+    descripcion_tipo_actividad = serializers.CharField(max_length=500)
     fecha_programada = serializers.DateField()
     fecha_inicio = serializers.DateField()
     fecha_cierre = serializers.DateField()
     presupuesto = serializers.DecimalField(max_digits=6, decimal_places=2)
     presupuesto_global = serializers.DecimalField(max_digits=6, decimal_places=2)
+    total_reportado = serializers.DecimalField(max_digits=6, decimal_places=2)
+    total_ejecutado = serializers.DecimalField(max_digits=6, decimal_places=2)
+    saldo = serializers.DecimalField(max_digits=6, decimal_places=2)
+    grado_ejecucion = serializers.CharField(max_length=50)
     procedencia_fondos = serializers.JSONField()
     estado = serializers.CharField(max_length=15)
+    ruta_trazado_indicadores = serializers.JSONField()
+    factores_criticos = serializers.JSONField()
     indicador_pei_id = serializers.IntegerField(allow_null=True)
     objetivo_pei_id = serializers.IntegerField(allow_null=True)
     proceso_id = serializers.IntegerField(allow_null=True)
@@ -35,6 +42,7 @@ class CrearActividadRequest(serializers.Serializer):
     responsable_id = serializers.IntegerField(allow_null=True)
     resultado_oe_id = serializers.IntegerField(allow_null=True)
     resultado_og_id = serializers.IntegerField(allow_null=True)
+    tipo_id = serializers.IntegerField(required=False, allow_null=True)
     
     def to_internal_value(self, data):
         """
@@ -56,6 +64,8 @@ class CrearActividadRequest(serializers.Serializer):
             'presupuestoGlobal': internal_value['presupuesto_global'],
             'procedencia_fondos': internal_value['procedencia_fondos'],
             'estado' : internal_value['estado'],
+            'rutaTrazadoIndicadores': internal_value['ruta_trazado_indicadores'],
+            'factoresCriticos': internal_value['factores_criticos'],
             'indicador_pei_id' :internal_value['indicador_pei_id'],
             'objetivo_pei_id': internal_value['objetivo_pei_id'],
             'proceso_id': internal_value['proceso_id'],
@@ -64,6 +74,13 @@ class CrearActividadRequest(serializers.Serializer):
             'responsable_id': internal_value['responsable_id'],
             'resultado_oe_id': internal_value['resultado_oe_id'],
             'resultado_og_id': internal_value['resultado_og_id'],
+            'nombreCorto': internal_value['nombre_corto'],
+            'descripcion_tipo_actividad':internal_value['descripcion_tipo_actividad'],
+            'gradoEjecucion':internal_value['grado_ejecucion'],
+            'saldo':internal_value['saldo'],
+            'totalEjecutado':internal_value['total_ejecutado'],
+            'totalReportado':internal_value['total_reportado'],
+            'tipo_id':internal_value['tipo_id'],
         }
     
 class ObtenerActividadIdRequest(serializers.Serializer):

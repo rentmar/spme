@@ -1,9 +1,11 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import IsAuthenticated
 from .common.MessageManager import MessageType
 from .domain.models.request.actividadesRequest import ObtenerActividadIdRequest,CrearActividadRequest,ObtenerActividadesUsuarioRequest,ObtenerEncabezadoPorIdRequest
-from .domain.models.response.actividadesResponse import ActividadesUsuarioResponse,ActividadesKantResponse,CrearActividadResponse,ObtenerActividadIdResponse,ObtenerEncabezadoActividadResponse
+from .domain.models.response.actividadesResponse import ActividadesUsuarioResponse,ActividadesGanttResponse,CrearActividadResponse,ObtenerActividadIdResponse,ObtenerEncabezadoActividadResponse
 from .container.presenterContainer import ActividadesPresenterContainer
 
 class ObtenerActividadesUsuario(APIView):
@@ -54,30 +56,40 @@ class CrearActividad(APIView):
             if response.is_valid():
                 return Response(response.data,status=status.HTTP_200_OK)
             else:
-                return Response({"mensaje": MessageType.NOT_FOUND.value},status = status.HTTP_404_NOT_FOUND)
+                return Response({"estado": MessageType.NOT_FOUND.value},status = status.HTTP_404_NOT_FOUND)
             
         else: 
-             return Response({"mensaje": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
+             return Response({"estado": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
 
-class ObtenerActividadesKant(APIView):
+class ObtenerActividadesGantt(APIView):
     """
-    API para obtener las actividades del diagrama de Kant
+    API para obtener las actividades del diagrama de Gantt
     """
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+
     def __init__(self):
         self.contenedor = ActividadesPresenterContainer()
         self.actividadesPresenter = self.contenedor.actividadesPresenter()
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
 
-        actividadesKant = self.actividadesPresenter.obtenerActividadesKant()
-        print(f"Obteniendo actividades por Kfsdfsfsdfant {actividadesKant}")
-        response = ActividadesKantResponse(data = actividadesKant)
-        print (f"Response is valid: {response.is_valid()}")
-        if response.is_valid():
-            return Response(response.data,status=status.HTTP_200_OK)
+        requestActividadesGantt = ObtenerActividadesUsuarioRequest(data=request.data)
+
+        if requestActividadesGantt.is_valid():
+
+            actividadesGantt = self.actividadesPresenter.obtenerActividadesGantt(requestActividadesGantt.validated_data)
+
+            response = ActividadesGanttResponse(data=actividadesGantt)
+           
+            if response.is_valid():
+                return Response(response.data, status=status.HTTP_200_OK)
+            else:
+                return Response({"estado": MessageType.NOT_FOUND.value}, status=status.HTTP_404_NOT_FOUND)
+
         else:
-            return Response({"mensaje": MessageType.NOT_FOUND.value},status = status.HTTP_404_NOT_FOUND)
-        
+            return Response({"estado": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
+
 class ObtenerActividadId(APIView):
     """
     API para obtener una actividad por su ID

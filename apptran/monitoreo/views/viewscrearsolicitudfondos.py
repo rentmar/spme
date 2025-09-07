@@ -8,7 +8,7 @@ from django.db import transaction
 from spme_monitoreo.models import SolicitudFondos
 from ..serializers.serializercrearsolicitudfondos import SolicitudFondosCreateSerializer
 
-@api_view(['POST'])
+@api_view(['POST']) 
 @permission_classes([AllowAny])
 def crear_solicitud_fondos(request):
     """
@@ -28,7 +28,9 @@ def crear_solicitud_fondos(request):
                     'message': 'Solicitud de fondos creada exitosamente',
                     'id': solicitud.id,
                     'numero_formulario': solicitud.numeroFormulario,
-                    'actividad_actualizada': hasattr(solicitud, 'actividad') and solicitud.actividad is not None
+                    'actividad_actualizada': hasattr(solicitud, 'actividad') and solicitud.actividad is not None,
+                    'actividad_id': solicitud.actividad.id if solicitud.actividad else None,
+                    'tarea_id': solicitud.tarea.id if solicitud.tarea else None,
                 },
                 status=status.HTTP_201_CREATED
             )

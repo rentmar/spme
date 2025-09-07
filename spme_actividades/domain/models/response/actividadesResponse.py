@@ -1,16 +1,22 @@
 from rest_framework import serializers
 
-class ActividadeKantResponse(serializers.Serializer):
+class ActividadGanttResponse(serializers.Serializer):
     codigo = serializers.CharField(max_length=60)
+    nombre_corto = serializers.CharField(max_length=100)
     descripcion = serializers.CharField(max_length=500)
     tipo = serializers.CharField(max_length=30)
     fecha_programada = serializers.DateField()
-    duracion = serializers.IntegerField()
     fecha_inicio = serializers.DateField()
     fecha_cierre = serializers.DateField()
+    grado_ejecucion = serializers.CharField(max_length=25)
     estado = serializers.CharField(max_length=15)
 
-class ActividadResponse(ActividadeKantResponse):
+class EstadoActividadResponse(serializers.Serializer):
+    id = serializers.CharField(max_length=9)
+    nombre = serializers.CharField(max_length=100)
+    color = serializers.CharField(max_length=7)
+
+class ActividadResponse(ActividadGanttResponse):
     id = serializers.IntegerField()
     presupuesto = serializers.DecimalField(max_digits=10, decimal_places=2)
     presupuesto_pei = serializers.DecimalField(max_digits=10, decimal_places=2)
@@ -23,8 +29,9 @@ class ActividadResponse(ActividadeKantResponse):
 class ActividadesUsuarioResponse(serializers.Serializer):
     actividades = ActividadResponse(many=True)
 
-class ActividadesKantResponse(serializers.Serializer):
-    actividades = ActividadeKantResponse(many=True)
+class ActividadesGanttResponse(serializers.Serializer):
+    estados = EstadoActividadResponse(many=True)
+    actividades = ActividadGanttResponse(many=True)
 
 class CrearActividadResponse(serializers.Serializer):
     id = serializers.IntegerField(required=False)
@@ -52,13 +59,6 @@ class ObtenerActividadIdResponse(serializers.Serializer):
     producto_oe_id = serializers.IntegerField(required=False)
     resultado_oe_id = serializers.IntegerField(required=False)
     resultado_og_id = serializers.IntegerField(required=False)
-
-class ObtenerDatosFormActividadResponse(serializers.Serializer):
-    id = serializers.IntegerField(required=False)
-    descripcion = serializers.CharField(max_length=100, required=False)
-    fecha_inicio = serializers.DateField(required=False)
-    fecha_cierre = serializers.DateField(required=False)
-    objetivo_de_actividad = serializers.CharField(max_length=100, required=False)
 
 class ObtenerEncabezadoActividadResponse(serializers.Serializer):
     codigo = serializers.CharField(max_length=60, required=False)

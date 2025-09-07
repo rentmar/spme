@@ -1,490 +1,308 @@
 # views.py
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status
-from django.core.exceptions import ObjectDoesNotExist
-from django.db import transaction, DatabaseError
-import logging
+from django.db import transaction
+from django.shortcuts import get_object_or_404
 from spme_estructuracion_proyecto.models import (
-    Proyecto, ObjetivoGeneralProyecto, ObjetivoEspecificoProyecto,
-    ResultadoOG, ResultadoOE, ProductoOE, ProductoResultadoOE,
-    IndicadorObjetivoGeneral, IndicadorObjetivoEspecifico,
-    IndicadorResultadoObjGral, IndicadorResultadoObjEspecifico,
-    Proceso, ProductoGeneral, DiagramaEstructura
+    DiagramaEstructura, Proyecto, ObjetivoGeneralProyecto, ObjetivoEspecificoProyecto,
+    ResultadoOG, ResultadoOE, Proceso, ProductoOE, ProductoResultadoOE
 )
-from spme_actividades.models import Actividad
+from ..serializers.actualizar_estructura_serializer import *
+import logging
 
-# Configurar logging
 logger = logging.getLogger(__name__)
 
-@api_view(['POST'])
+# views.py
+@api_view(['PUT'])
 @transaction.atomic
-def actualizar_estructura_transaccional(request):
+def actualizar_estructura_diagrama(request, diagrama_id):
     """
-    Endpoint transaccional completo para actualizar estructura desde DiagramaEstructura
-    Modo TODO-O-NADA: Si falla cualquier nodo, se hace rollback completo
+    Endpoint para actualizar la estructura completa y diagrama usando el ID del diagrama
     """
     try:
-        data = request.data
+        print("=== INICIANDO ACTUALIZACIÓN ===")
         
-        # Validar formato básico
-        if 'codigoProyecto' not in data or 'nodos' not in data:
-            return Response(
-                {'error': 'Formato inválido. Se requieren codigoProyecto y nodos'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        # Obtener el diagrama por ID
+        diagrama = get_object_or_404(DiagramaEstructura, id=diagrama_id)
+        proyecto = diagrama.proyecto
+        print(f"Proyecto: {proyecto.codigo}")
         
-        codigo_proyecto = data['codigoProyecto']
-        nodos = data['nodos']
-        conexiones = data.get('conexiones', [])
-        diagrama_id = data.get('id')
+        datos_diagrama = request.data
         
-        # Obtener proyecto con LOCK para evitar condiciones de carrera
-        try:
-            proyecto = Proyecto.objects.select_for_update().get(codigo=codigo_proyecto)
-        except Proyecto.DoesNotExist:
-            return Response(
-                {'error': f'Proyecto con código {codigo_proyecto} no encontrado'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+        # 1. Actualizar el diagrama de estructura
+        diagrama.codigoProyecto = datos_diagrama.get('codigoProyecto', diagrama.codigoProyecto)
+        diagrama.nodos = datos_diagrama.get('nodos', diagrama.nodos)
+        diagrama.conexiones = datos_diagrama.get('conexiones', diagrama.conexiones)
+        diagrama.sincronizado = True
+        diagrama.save()
+        print("Diagrama guardado")
         
-        resultados = {
-            'actualizados': 0,
-            'detalles': {},
-            'proyecto_id': proyecto.id,
-            'proyecto_codigo': proyecto.codigo
-        }
+        # 2. Actualizar los modelos asociados a cada nodo
+        nodos = datos_diagrama.get('nodos', [])
+        nodos_actualizados = 0
+        errores = []
         
-        # Procesar cada nodo - si alguno falla, la transacción hará rollback automático
         for i, nodo in enumerate(nodos):
-            nodo_id = nodo.get('id', f'nodo-{i}')
-            tipo = nodo.get('type')
-            datos_nodo = nodo.get('data', {}).get('datosNodo', {})
+            tipo_nodo = nodo.get('type', '')
+            datos_nodo = nodo.get('data', {})
             
-            if not datos_nodo:
+            print(f"\n--- Procesando nodo {i} ---")
+            print(f"Tipo: {tipo_nodo}")
+            print(f"Keys en data: {list(datos_nodo.keys())}")
+            
+            # CORRECCIÓN: Diferente estructura para proyecto vs otros nodos
+            if tipo_nodo == 'proyecto':
+                # Para nodos proyecto: datos en 'datosNodo'
+                nodo_proyecto_data = datos_nodo.get('datosNodo', {})
+                print(f"Buscando en 'datosNodo': {list(nodo_proyecto_data.keys()) if nodo_proyecto_data else 'VACIO'}")
+            else:
+                # Para otros nodos: datos en 'nodoProyecto'
+                nodo_proyecto_data = datos_nodo.get('nodoProyecto', {})
+                print(f"Buscando en 'nodoProyecto': {list(nodo_proyecto_data.keys()) if nodo_proyecto_data else 'VACIO'}")
+            
+            if not nodo_proyecto_data:
+                print(f"Nodo {i} sin datos, saltando")
                 continue
             
-            # Procesar nodo según su tipo
-            resultado = procesar_nodo_transaccional(tipo, datos_nodo, proyecto)
+            print(f"Datos a procesar: {list(nodo_proyecto_data.keys())}")
             
-            if resultado['success']:
-                resultados['actualizados'] += 1
-                resultados['detalles'][nodo_id] = {
-                    'tipo': tipo,
-                    'modelo': resultado['modelo'],
-                    'id': resultado['id'],
-                    'accion': resultado.get('accion', 'updated')
-                }
-            else:
-                # Cualquier error hace que la transacción falle completamente
-                raise DatabaseError(f"Error en nodo {nodo_id}: {resultado['error']}")
-        
-        # Actualizar el diagrama de estructura
-        if diagrama_id:
-            # Actualizar diagrama existente
-            diagrama = DiagramaEstructura.objects.select_for_update().get(id=diagrama_id)
-            diagrama.nodos = nodos
-            diagrama.conexiones = conexiones
-            diagrama.sincronizado = True
-            diagrama.save()
-        else:
-            # Crear o actualizar diagrama
-            diagrama, created = DiagramaEstructura.objects.update_or_create(
-                proyecto=proyecto,
-                defaults={
-                    'codigoProyecto': codigo_proyecto,
-                    'nodos': nodos,
-                    'conexiones': conexiones,
-                    'sincronizado': True
-                }
-            )
-        
-        resultados['diagrama_actualizado'] = True
-        resultados['diagrama_id'] = diagrama.id
-        
-        return Response({
-            'message': f'Transacción completada exitosamente. {resultados["actualizados"]} nodos actualizados.',
-            'resultados': resultados
-        }, status=status.HTTP_200_OK)
-        
-    except Proyecto.DoesNotExist:
-        return Response(
-            {'error': 'Proyecto no encontrado'},
-            status=status.HTTP_404_NOT_FOUND
-        )
-    except DiagramaEstructura.DoesNotExist:
-        return Response(
-            {'error': 'Diagrama no encontrado'},
-            status=status.HTTP_404_NOT_FOUND
-        )
-    except DatabaseError as e:
-        # Rollback automático por la transacción
-        return Response({
-            'error': 'Transacción fallida - Rollback realizado',
-            'detalle_error': str(e),
-            'tipo_error': 'database_error'
-        }, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        # Rollback automático por la transacción
-        logger.exception("Error inesperado en transacción")
-        return Response({
-            'error': 'Error interno - Rollback realizado',
-            'detalle_error': str(e),
-            'tipo_error': 'internal_error'
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-def procesar_nodo_transaccional(tipo, datos_nodo, proyecto):
-    """
-    Procesa un nodo individual dentro de la transacción
-    """
-    try:
-        if tipo == 'proyecto':
-            return actualizar_proyecto_transaccional(datos_nodo, proyecto)
-        elif tipo == 'objetivo_general':
-            return actualizar_objetivo_general_transaccional(datos_nodo, proyecto)
-        elif tipo == 'objetivo_especifico':
-            return actualizar_objetivo_especifico_transaccional(datos_nodo, proyecto)
-        elif tipo == 'resultado_og':
-            return actualizar_resultado_og_transaccional(datos_nodo, proyecto)
-        elif tipo == 'resultado_oe':
-            return actualizar_resultado_oe_transaccional(datos_nodo, proyecto)
-        elif tipo == 'producto_oe':
-            return actualizar_producto_oe_transaccional(datos_nodo, proyecto)
-        elif tipo == 'actividad':
-            return actualizar_actividad_transaccional(datos_nodo, proyecto)
-        else:
-            return {
-                'success': False,
-                'error': f'Tipo de nodo no soportado: {tipo}'
-            }
-    except Exception as e:
-        return {
-            'success': False,
-            'error': f'Error procesando nodo: {str(e)}'
-        }
-
-# Funciones transaccionales específicas para cada tipo de modelo
-def actualizar_proyecto_transaccional(datos, proyecto):
-    """Actualizar proyecto principal con locking"""
-    proyecto_id = datos.get('id')
-    
-    # Verificar que el ID coincide
-    if proyecto_id != proyecto.id:
-        return {
-            'success': False,
-            'error': f'ID de proyecto inconsistente: esperado {proyecto.id}, recibido {proyecto_id}'
-        }
-    
-    # Campos actualizables
-    campos_actualizables = [
-        'codigo', 'titulo', 'descripcion', 'estado', 'presupuesto',
-        'fecha_inicio', 'fecha_finalizacion'
-    ]
-    
-    for field in campos_actualizables:
-        if field in datos:
-            setattr(proyecto, field, datos[field])
-    
-    proyecto.save()
-    
-    # Actualizar relaciones ManyToMany
-    if 'instancia_gestora' in datos:
-        proyecto.instancia_gestora.set(datos['instancia_gestora'])
-    if 'procedencia_fondos' in datos:
-        proyecto.procedencia_fondos.set(datos['procedencia_fondos'])
-    
-    return {
-        'success': True,
-        'modelo': 'Proyecto',
-        'id': proyecto.id,
-        'accion': 'updated'
-    }
-
-def actualizar_objetivo_general_transaccional(datos, proyecto):
-    """Actualizar o crear objetivo general con locking"""
-    objetivo_id = datos.get('id')
-    accion = 'updated'
-    
-    if objetivo_id:
-        objetivo = ObjetivoGeneralProyecto.objects.select_for_update().get(
-            id=objetivo_id,
-            proyecto=proyecto
-        )
-    else:
-        objetivo = ObjetivoGeneralProyecto(proyecto=proyecto)
-        accion = 'created'
-    
-    # Actualizar campos
-    campos = ['codigo', 'descripcion', 'supuestos', 'riesgos']
-    for field in campos:
-        if field in datos:
-            setattr(objetivo, field, datos[field])
-    
-    objetivo.save()
-    
-    return {
-        'success': True,
-        'modelo': 'ObjetivoGeneral',
-        'id': objetivo.id,
-        'accion': accion
-    }
-
-def actualizar_objetivo_especifico_transaccional(datos, proyecto):
-    """Actualizar o crear objetivo específico con locking"""
-    objetivo_id = datos.get('id')
-    accion = 'updated'
-    
-    if objetivo_id:
-        objetivo = ObjetivoEspecificoProyecto.objects.select_for_update().get(
-            id=objetivo_id,
-            proyecto=proyecto
-        )
-    else:
-        objetivo = ObjetivoEspecificoProyecto(proyecto=proyecto)
-        accion = 'created'
-    
-    # Actualizar campos
-    campos = ['codigo', 'descripcion', 'supuestos', 'riesgos']
-    for field in campos:
-        if field in datos:
-            setattr(objetivo, field, datos[field])
-    
-    # Relación con objetivo general
-    if 'objetivo_general' in datos and datos['objetivo_general']:
-        try:
-            objetivo.objetivo_general = ObjetivoGeneralProyecto.objects.get(
-                id=datos['objetivo_general'],
-                proyecto=proyecto
-            )
-        except ObjetivoGeneralProyecto.DoesNotExist:
-            pass
-    
-    objetivo.save()
-    
-    return {
-        'success': True,
-        'modelo': 'ObjetivoEspecifico',
-        'id': objetivo.id,
-        'accion': accion
-    }
-
-def actualizar_resultado_og_transaccional(datos, proyecto):
-    """Actualizar o crear resultado de objetivo general"""
-    resultado_id = datos.get('id')
-    accion = 'updated'
-    
-    if resultado_id:
-        resultado = ResultadoOG.objects.select_for_update().get(id=resultado_id)
-    else:
-        resultado = ResultadoOG()
-        accion = 'created'
-    
-    # Actualizar campos
-    campos = ['codigo', 'descripcion', 'supuestos', 'riesgos']
-    for field in campos:
-        if field in datos:
-            setattr(resultado, field, datos[field])
-    
-    # Relación con objetivo general
-    if 'objetivo_general' in datos and datos['objetivo_general']:
-        try:
-            resultado.objetivo_general = ObjetivoGeneralProyecto.objects.get(
-                id=datos['objetivo_general'],
-                proyecto=proyecto
-            )
-        except ObjetivoGeneralProyecto.DoesNotExist:
-            pass
-    
-    resultado.save()
-    
-    return {
-        'success': True,
-        'modelo': 'ResultadoOG',
-        'id': resultado.id,
-        'accion': accion
-    }
-
-def actualizar_resultado_oe_transaccional(datos, proyecto):
-    """Actualizar o crear resultado de objetivo específico"""
-    resultado_id = datos.get('id')
-    accion = 'updated'
-    
-    if resultado_id:
-        resultado = ResultadoOE.objects.select_for_update().get(id=resultado_id)
-    else:
-        resultado = ResultadoOE()
-        accion = 'created'
-    
-    # Actualizar campos
-    campos = ['codigo', 'descripcion', 'supuestos', 'riesgos']
-    for field in campos:
-        if field in datos:
-            setattr(resultado, field, datos[field])
-    
-    # Relación con objetivo específico
-    if 'objetivo_especifico' in datos and datos['objetivo_especifico']:
-        try:
-            resultado.objetivo_especifico = ObjetivoEspecificoProyecto.objects.get(
-                id=datos['objetivo_especifico'],
-                proyecto=proyecto
-            )
-        except ObjetivoEspecificoProyecto.DoesNotExist:
-            pass
-    
-    resultado.save()
-    
-    return {
-        'success': True,
-        'modelo': 'ResultadoOE',
-        'id': resultado.id,
-        'accion': accion
-    }
-
-def actualizar_producto_oe_transaccional(datos, proyecto):
-    """Actualizar o crear producto de objetivo específico"""
-    producto_id = datos.get('id')
-    accion = 'updated'
-    
-    if producto_id:
-        producto = ProductoOE.objects.select_for_update().get(id=producto_id)
-    else:
-        producto = ProductoOE()
-        accion = 'created'
-    
-    # Actualizar campos
-    campos = ['codigo', 'descripcion', 'supuestos', 'riesgos', 'entregado']
-    for field in campos:
-        if field in datos:
-            setattr(producto, field, datos[field])
-    
-    # Relación con objetivo específico
-    if 'objetivo_especifico' in datos and datos['objetivo_especifico']:
-        try:
-            producto.objetivo_especifico = ObjetivoEspecificoProyecto.objects.get(
-                id=datos['objetivo_especifico'],
-                proyecto=proyecto
-            )
-        except ObjetivoEspecificoProyecto.DoesNotExist:
-            pass
-    
-    producto.save()
-    
-    return {
-        'success': True,
-        'modelo': 'ProductoOE',
-        'id': producto.id,
-        'accion': accion
-    }
-
-def actualizar_actividad_transaccional(datos, proyecto):
-    """Actualizar o crear actividad con locking"""
-    actividad_id = datos.get('id')
-    accion = 'updated'
-    
-    if actividad_id:
-        actividad = Actividad.objects.select_for_update().get(
-            id=actividad_id,
-            proyecto=proyecto
-        )
-    else:
-        actividad = Actividad(proyecto=proyecto)
-        accion = 'created'
-    
-    # Campos básicos
-    campos_basicos = [
-        'codigo', 'nombreCorto', 'descripcion', 'supuestos', 'riesgos',
-        'objetivo_de_actividad', 'descripcion_evaluacion', 'descripcion_tipo_actividad',
-        'presupuesto', 'presupuestoGlobal', 'totalReportado', 'totalEjecutado', 'saldo',
-        'gradoEjecucion', 'estado', 'procedencia_fondos', 'rutaTrazadoIndicadores',
-        'factoresCriticos', 'estructuraProcedencia'
-    ]
-    
-    for field in campos_basicos:
-        if field in datos:
-            setattr(actividad, field, datos[field])
-    
-    # Campos de fecha
-    for field_fecha in ['fecha_programada', 'fecha_inicio', 'fecha_cierre']:
-        if field_fecha in datos:
-            setattr(actividad, field_fecha, datos[field_fecha])
-    
-    actividad.save()
-    
-    return {
-        'success': True,
-        'modelo': 'Actividad',
-        'id': actividad.id,
-        'accion': accion
-    }
-
-# Función alternativa para modo tolerante a errores (no transaccional)
-@api_view(['POST'])
-def actualizar_estructura_tolerante(request):
-    """
-    Endpoint alternativo que continúa procesando aunque algunos nodos fallen
-    """
-    try:
-        data = request.data
-        
-        if 'codigoProyecto' not in data or 'nodos' not in data:
-            return Response(
-                {'error': 'Formato inválido. Se requieren codigoProyecto y nodos'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        codigo_proyecto = data['codigoProyecto']
-        nodos = data['nodos']
-        
-        try:
-            proyecto = Proyecto.objects.get(codigo=codigo_proyecto)
-        except Proyecto.DoesNotExist:
-            return Response(
-                {'error': f'Proyecto con código {codigo_proyecto} no encontrado'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        
-        resultados = {
-            'actualizados': 0,
-            'errores': [],
-            'detalles': {}
-        }
-        
-        # Procesar cada nodo individualmente (sin transacción global)
-        for i, nodo in enumerate(nodos):
             try:
-                with transaction.atomic():
-                    nodo_id = nodo.get('id', f'nodo-{i}')
-                    tipo = nodo.get('type')
-                    datos_nodo = nodo.get('data', {}).get('datosNodo', {})
-                    
-                    if not datos_nodo:
-                        continue
-                    
-                    resultado = procesar_nodo_transaccional(tipo, datos_nodo, proyecto)
-                    
-                    if resultado['success']:
-                        resultados['actualizados'] += 1
-                        resultados['detalles'][nodo_id] = resultado
+                # Preprocesar fechas
+                processed_data = preprocesar_fechas(nodo_proyecto_data)
+                
+                if tipo_nodo == 'proyecto':
+                    print("Actualizando PROYECTO...")
+                    proyecto_serializer = ProyectoSerializer(proyecto, data=processed_data, partial=True)
+                    if proyecto_serializer.is_valid():
+                        proyecto_actualizado = proyecto_serializer.save()
+                        nodos_actualizados += 1
+                        print(f"✅ Proyecto actualizado: {proyecto_actualizado.codigo}")
                     else:
-                        resultados['errores'].append({
-                            'nodo_id': nodo_id,
-                            'error': resultado['error'],
-                            'tipo': tipo
-                        })
+                        error_msg = f"Error validando proyecto: {proyecto_serializer.errors}"
+                        print(f"❌ {error_msg}")
+                        raise serializers.ValidationError(error_msg)
+                
+                elif tipo_nodo == 'objetivogeneral':
+                    print("Actualizando OBJETIVO GENERAL...")
+                    objetivo_id = processed_data.get('id')
+                    if objetivo_id:
+                        objetivo = ObjetivoGeneralProyecto.objects.get(id=objetivo_id, proyecto=proyecto)
+                        objetivo_serializer = ObjetivoGeneralSerializer(objetivo, data=processed_data, partial=True)
+                        if objetivo_serializer.is_valid():
+                            objetivo_serializer.save()
+                            nodos_actualizados += 1
+                            print(f"✅ Objetivo general {objetivo_id} actualizado")
+                        else:
+                            error_msg = f"Error validando objetivo general: {objetivo_serializer.errors}"
+                            raise serializers.ValidationError(error_msg)
+                    else:
+                        error_msg = "Objetivo general sin ID"
+                        raise serializers.ValidationError(error_msg)
+                
+                elif tipo_nodo == 'objetivoespecificoog':
+                    print("Actualizando OBJETIVO ESPECÍFICO OG...")
+                    objetivo_id = processed_data.get('id')
+                    print(objetivo_id)
+                    if objetivo_id:
+                        objetivo = ObjetivoEspecificoProyecto.objects.get(id=objetivo_id)
+                        print(objetivo)
+                        objetivo_serializer = ObjetivoEspecificoSerializer(objetivo, data=processed_data, partial=True)
+                        if objetivo_serializer.is_valid():
+                            objetivo_serializer.save()
+                            nodos_actualizados += 1
+                            print(f"✅ Objetivo específico {objetivo_id} actualizado")
+                        else:
+                            error_msg = f"Error validando objetivo específico: {objetivo_serializer.errors}"
+                            raise serializers.ValidationError(error_msg)
+                    else:
+                        error_msg = "Objetivo específico sin ID"
+                        raise serializers.ValidationError(error_msg)
+                
+                elif tipo_nodo == 'resultadoog':
+                    print("Actualizando RESULTADO OG...")
+                    resultado_id = processed_data.get('id')
+                    if resultado_id:
+                        resultado = ResultadoOG.objects.get(id=resultado_id)
+                        resultado_serializer = ResultadoOGSerializer(resultado, data=processed_data, partial=True)
+                        if resultado_serializer.is_valid():
+                            resultado_serializer.save()
+                            nodos_actualizados += 1
+                            print(f"✅ Resultado OG {resultado_id} actualizado")
+                        else:
+                            error_msg = f"Error validando resultado OG: {resultado_serializer.errors}"
+                            raise serializers.ValidationError(error_msg)
+                    else:
+                        error_msg = "Resultado OG sin ID"
+                        raise serializers.ValidationError(error_msg)
+                
+                elif tipo_nodo == 'resultadooe':
+                    print("Actualizando RESULTADO OE...")
+                    resultado_id = processed_data.get('id')
+                    if resultado_id:
+                        resultado = ResultadoOE.objects.get(id=resultado_id)
+                        resultado_serializer = ResultadoOESerializer(resultado, data=processed_data, partial=True)
+                        if resultado_serializer.is_valid():
+                            resultado_serializer.save()
+                            nodos_actualizados += 1
+                            print(f"✅ Resultado OE {resultado_id} actualizado")
+                        else:
+                            error_msg = f"Error validando resultado OE: {resultado_serializer.errors}"
+                            raise serializers.ValidationError(error_msg)
+                    else:
+                        error_msg = "Resultado OE sin ID"
+                        raise serializers.ValidationError(error_msg)
+                
+                elif tipo_nodo == 'procesorog':
+                    print("Actualizando PROCESO...")
+                    proceso_id = processed_data.get('id')
+                    if proceso_id:
+                        proceso = Proceso.objects.get(id=proceso_id)
+                        proceso_serializer = ProcesoSerializer(proceso, data=processed_data, partial=True)
+                        if proceso_serializer.is_valid():
+                            proceso_serializer.save()
+                            nodos_actualizados += 1
+                            print(f"✅ Proceso {proceso_id} actualizado")
+                        else:
+                            error_msg = f"Error validando proceso: {proceso_serializer.errors}"
+                            raise serializers.ValidationError(error_msg)
+                    else:
+                        error_msg = "Proceso sin ID"
+                        raise serializers.ValidationError(error_msg)
+                
+                elif tipo_nodo == 'productooe':
+                    print("Actualizando PRODUCTO OE...")
+                    producto_id = processed_data.get('id')
+                    if producto_id:
+                        producto = ProductoOE.objects.get(id=producto_id)
+                        producto_serializer = ProductoOESerializer(producto, data=processed_data, partial=True)
+                        if producto_serializer.is_valid():
+                            producto_serializer.save()
+                            nodos_actualizados += 1
+                            print(f"✅ Producto OE {producto_id} actualizado")
+                        else:
+                            error_msg = f"Error validando producto OE: {producto_serializer.errors}"
+                            raise serializers.ValidationError(error_msg)
+                    else:
+                        error_msg = "Producto OE sin ID"
+                        raise serializers.ValidationError(error_msg)
+                
+                elif tipo_nodo == 'productoresultadooe':
+                    print("Actualizando PRODUCTO RESULTADO OE...")
+                    producto_id = processed_data.get('id')
+                    if producto_id:
+                        producto = ProductoResultadoOE.objects.get(id=producto_id)
+                        producto_serializer = ProductoResultadoOESerializer(producto, data=processed_data, partial=True)
+                        if producto_serializer.is_valid():
+                            producto_serializer.save()
+                            nodos_actualizados += 1
+                            print(f"✅ Producto resultado OE {producto_id} actualizado")
+                        else:
+                            error_msg = f"Error validando producto resultado OE: {producto_serializer.errors}"
+                            raise serializers.ValidationError(error_msg)
+                    else:
+                        error_msg = "Producto resultado OE sin ID"
+                        raise serializers.ValidationError(error_msg)
+                
+                else:
+                    print(f"⚠️  Tipo de nodo no reconocido: {tipo_nodo}")
+                        
+            except serializers.ValidationError as ve:
+                print(f"❌ Error de validación: {ve.detail}")
+                raise ve
+            except Exception as e:
+                error_msg = f"Error procesando nodo {i}: {str(e)}"
+                print(f"❌ {error_msg}")
+                raise serializers.ValidationError(error_msg)
+        
+        response_data = {
+            'message': 'Estructura y diagrama actualizados exitosamente',
+            'diagrama_id': diagrama.id,
+            'proyecto_id': proyecto.id,
+            'proyecto_codigo': proyecto.codigo,
+            'nodos_procesados': len(nodos),
+            'nodos_actualizados': nodos_actualizados,
+            'errores': errores,
+            'sincronizado': True
+        }
+        
+        print(f"✅ Operación completada: {nodos_actualizados} nodos actualizados")
+        return Response(response_data, status=status.HTTP_200_OK)
+    
+    except serializers.ValidationError as ve:
+        print(f"❌ Error de validación (ROLLBACK): {ve.detail}")
+        return Response(
+            {'error': 'Error de validación en los datos', 'detalles': ve.detail},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    except Exception as e:
+        print(f"❌ Error crítico (ROLLBACK): {str(e)}")
+        return Response(
+            {'error': f'Error interno del servidor: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    
+def preprocesar_fechas(data):
+    """
+    Función para preprocesar y normalizar formatos de fecha
+    """
+    from django.utils.dateparse import parse_date
+    from datetime import datetime
+    import re
+    
+    processed = data.copy()
+    
+    # Mapeo de campos de fecha comunes
+    date_fields = [
+        'fecha_inicio', 'fecha_finalizacion', 'fecha_creacion',
+        'fecha_programada', 'fecha_inicio', 'fecha_cierre',
+        'fecha_baseline', 'fecha_target_q1', 'fecha_target_q2',
+        'fecha_target_q3', 'fecha_target_q4', 'fecha_solicitud',
+        'fecha_realizacion_actividad'
+    ]
+    
+    for field in date_fields:
+        if field in processed and processed[field]:
+            try:
+                value = processed[field]
+                print(f"Procesando fecha {field}: {value} (tipo: {type(value)})")
+                
+                # Si ya es objeto date, no hacer nada
+                if hasattr(value, 'strftime'):
+                    continue
+                    
+                # Si es string, intentar parsear
+                if isinstance(value, str):
+                    # Intentar diferentes formatos
+                    parsed_date = None
+                    
+                    # Formato ISO (YYYY-MM-DD)
+                    if re.match(r'^\d{4}-\d{2}-\d{2}', value):
+                        parsed_date = parse_date(value)
+                    
+                    # Formato DD/MM/YYYY
+                    elif re.match(r'^\d{2}/\d{2}/\d{4}', value):
+                        try:
+                            parsed_date = datetime.strptime(value, '%d/%m/%Y').date()
+                        except:
+                            pass
+                    
+                    # Formato MM/DD/YYYY
+                    elif re.match(r'^\d{2}/\d{2}/\d{4}', value):
+                        try:
+                            parsed_date = datetime.strptime(value, '%m/%d/%Y').date()
+                        except:
+                            pass
+                    
+                    if parsed_date:
+                        processed[field] = parsed_date
+                        print(f"✅ Fecha {field} convertida: {parsed_date}")
+                    else:
+                        print(f"⚠️  No se pudo convertir fecha {field}: {value}")
+                        # Mantener el valor original pero como string
                         
             except Exception as e:
-                resultados['errores'].append({
-                    'nodo_id': nodo.get('id', f'nodo-{i}'),
-                    'error': f'Error en transacción de nodo: {str(e)}',
-                    'tipo': tipo
-                })
-        
-        return Response({
-            'message': f'Procesamiento completado. {resultados["actualizados"]} nodos actualizados, {len(resultados["errores"])} errores.',
-            'resultados': resultados
-        }, status=status.HTTP_207_MULTI_STATUS)
-        
-    except Exception as e:
-        return Response({
-            'error': f'Error interno: {str(e)}'
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                print(f"❌ Error procesando fecha {field}: {e}")
+                # En caso de error, mantener el valor original
+    
+    return processed    

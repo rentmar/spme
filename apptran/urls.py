@@ -23,8 +23,13 @@ from .monitoreo.views.viewssolicitudfondos import SolicitudFondosViewSet
 from .monitoreo.views.viewscrearsolicitudfondos import crear_solicitud_fondos
 from .monitoreo.views.viewobtenersolicitudviaje import solicitud_viaje_list, solicitud_viaje_detail
 from .monitoreo.views.viewscrearsolicitudviaje import crear_solicitud_viaje
+from .monitoreo.views.viewobtenerdatosform import obtener_datos_solicitud_fondos
+from .monitoreo.views.crear_rendicion_cuentas_views import crear_rendicion_cuentas
+from .monitoreo.views.info_rendicion_cuentas_views import RendicionCuentasDatosView
 #PEI
 from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
+#Proyecto
+from .viewdiagramaporidproyecto import DiagramaPorProyectoView
 
 
 #PEI
@@ -73,6 +78,7 @@ router.register(r'solicitud-viaje', SolicitudViajeView, basename='solicitud_viaj
 router.register(r'solicitud-pago-directo', SolicitudPagoDirectoView, basename='sol_pago_directo')
 
 
+
 urlpatterns =[
     #PEI
     path(r'pei/<int:pk>/objetivos/', PeiObjetivosIndicadoresView.as_view(), name='pei-objetivos'),
@@ -115,6 +121,7 @@ urlpatterns =[
     path(r'proyectos/<int:proyecto_id>/indicadores-og/count/', count_indicadores_og, name='count-indicadores-og'),    
     path(r'proyectos/<int:proyecto_id>/resultados-og/count/', count_resultados_og, name='count-resultados-og'),
     path(r'proyectos/<int:proyecto_id>/column-stats/', ColumnVisibilityStatsView.as_view(), name='column-stats'),
+    path(r'proyectos/diagrama/<int:proyecto_id>/', DiagramaPorProyectoView.as_view(), name='diagrama-de-un.proyecto'),
     path(r'test/', test_endpoint, name='test-endpoint'),   
     #Actividades y planificacion
     path(r'actividades/proyecto/<int:proyecto_id>/', actividades_por_proyecto, name='actividades_por_proyecto'), 
@@ -143,8 +150,10 @@ urlpatterns =[
     path(r'monitoreo/crear-solicitud-fondos/', crear_solicitud_fondos, name='crear_solicitud_fondos'),
     path(r'monitoreo/solicitud-viaje/<int:pk>/', solicitud_viaje_detail, name='sol-viaje-detalle'),
     path(r'monitoreo/lista-solicitud-viaje/', solicitud_viaje_list, name='lista-sol-viaje'),
-    path(r'monitoreo/crear-solicitud-viaje/', crear_solicitud_viaje, name='lista-sol-viaje'),
-    
+    path(r'monitoreo/crear-solicitud-viaje/', crear_solicitud_viaje, name='crear-sol-viaje'),
+    path(r'monitoreo/obtener-datos-formulario/', obtener_datos_solicitud_fondos, name='obt_datos_form_sol_fondos'),
+    path(r'monitoreo/crear-rendicion-cuentas/', crear_rendicion_cuentas, name='form_rendicion_cuentas'),
+    path(r'monitoreo/rendicion-cuentas-datos/', RendicionCuentasDatosView.as_view(), name='rendicion-cuentas-datos-form'),
 
 
 ]

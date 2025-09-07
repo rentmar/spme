@@ -28,6 +28,10 @@ class SolicitudFondos(models.Model):
     lugarSolicitud = models.TextField(blank=True, null=True)
     fechaSolicitud = models.DateField(verbose_name='Fecha de la solicitud', blank=True, null=True)
     montoSolicitado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Monto Solicitado', blank=True, null=True)
+    #Actividad
+    fechaRealizacionActividad = models.DateField(verbose_name="Fecha de realizacion del actividad", blank=True, null=True)
+    #Discriminador
+    bloquearIconosSolFondos = models.BooleanField(default=True)
     #Validacion
     validacionResponsable = models.BooleanField(default=False)
     responsable = models.ForeignKey(
@@ -91,7 +95,8 @@ class SolicitudReembolso(models.Model):
     lugarSolicitud = models.CharField(max_length=50, verbose_name='Lugar solicitud', blank=True, null=True)
     fechaSolicitud = models.DateField(verbose_name='Fecha solicitud', blank=True, null=True)
     montoSolicitado = models.DecimalField(max_digits=6,decimal_places=2,verbose_name ='Monto solicitado',blank=True, null=True)
-    
+    #discriminador
+    bloquearIconos = models.BooleanField(default=True)
     #Validaciones
     validacionResponsable = models.BooleanField(default=False)
     responsable = models.ForeignKey(
@@ -156,6 +161,9 @@ class SolicitudViaje (models.Model):
     justificacionAsistencia = models.TextField(verbose_name='justificacion_asistencia', blank=True, null=True)
     fondosUnitas = models.TextField( verbose_name='fondos_unitas', blank=True, null=True)
     tareasPrevias = models.TextField( verbose_name='tareas_previas', blank=True, null=True)
+
+    #Bloquear iconos
+    bloquearIconos = models.BooleanField(default=True)
 
     formaPago = models.ForeignKey(
         FormaPago,
@@ -230,6 +238,9 @@ class SolicitudPagoDirecto(models.Model):
     cargo = models.CharField(max_length=30, verbose_name='cargo', blank=True, null=True)
     detalleDestinoFondos = models.JSONField(verbose_name='detalle_destino_fondos', blank=True, null=True)
 
+    #Discriminador
+    bloquearIconos = models.BooleanField(default=True)
+
     formaPago = models.ForeignKey(
         FormaPago,
         on_delete=models.SET_NULL,
@@ -303,6 +314,8 @@ class RendicionCuentas(models.Model):
     montoDescargado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Monto Descargado', blank=False, null=True)
     saldo = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Saldo', blank=True, null=True)
     detalleDestinoFondos = models.JSONField(verbose_name='Detalle destino de fondos', blank=True, null=True)
+    #Discriminador
+    bloquearIconos = models.BooleanField(default=True)
     #Validaciones
     validacionResponsable = models.BooleanField(default=False)
     responsable = models.ForeignKey(
@@ -382,3 +395,6 @@ class RendicionCuentas(models.Model):
     class Meta:
         verbose_name = 'Rendicion de cuentas'
         verbose_name_plural = 'Rendiciones de cuentas'
+
+
+

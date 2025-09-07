@@ -19,8 +19,21 @@ class ActividadConTareasListView(generics.ListAPIView):
         for actividad_data in serializer.data:
             actividad_formateada = {
                 'id': actividad_data['id'],
+                'codigo': actividad_data['codigo'],
                 'nombreCorto': actividad_data['nombreCorto'],
+                'descripcion': actividad_data['descripcion'],
                 'estado': actividad_data['estado'],
+                'fecha_programada': actividad_data['fecha_programada'],
+                'fecha_inicio': actividad_data['fecha_inicio'],
+                'fecha_cierre':actividad_data['fecha_cierre'],
+                'presupuesto':actividad_data['presupuesto'], 
+                'presupuestoGlobal':actividad_data['presupuestoGlobal'], 
+                'procedencia_fondos':actividad_data['procedencia_fondos'],
+                'totalReportado':actividad_data['totalReportado'],
+                'totalEjecutado':actividad_data['totalEjecutado'], 
+                'saldo':actividad_data['saldo'], 
+                'gradoEjecucion':actividad_data['gradoEjecucion'],
+                'proyecto_id': actividad_data['proyecto_id'],
                 'tareas': actividad_data['tareas']
             }
             data.append(actividad_formateada)
@@ -41,8 +54,20 @@ class ActividadConTareasDetailView(generics.RetrieveAPIView):
         # Formatear la respuesta
         data = {
             'id': serializer.data['id'],
+            'codigo': serializer.data['codigo'],
             'nombreCorto': serializer.data['nombreCorto'],
             'estado': serializer.data['estado'],
+            'fecha_programada': serializer.data['fecha_programada'],
+            'fecha_inicio': serializer.data['fecha_inicio'],
+            'fecha_cierre':serializer.data['fecha_cierre'],
+            'presupuesto':serializer.data['presupuesto'], 
+            'presupuestoGlobal':serializer.data['presupuestoGlobal'], 
+            'procedencia_fondos':serializer.data['procedencia_fondos'],
+            'totalReportado':serializer.data['totalReportado'],
+            'totalEjecutado':serializer.data['totalEjecutado'], 
+            'saldo':serializer.data['saldo'], 
+            'gradoEjecucion':serializer.data['gradoEjecucion'],
+            'proyecto_id': serializer.data['proyecto_id'],
             'tareas': serializer.data['tareas']
         }
         
