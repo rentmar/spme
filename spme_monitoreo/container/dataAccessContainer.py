@@ -4,6 +4,8 @@ from ..dataaccess.rendicionCuentasDataAccess import RendicionCuentasDataAccess
 from ..dataaccess.solicitudReembolsoDataAccess import SolicitudReembolsoDataAccess
 from ..dataaccess.solicitudViajeDataAccess import SolicitudViajeDataAccess
 from ..dataaccess.solicitudPagoDirectoDataAccess import SolicitudPagoDirectoDataAccess
+from ..dataaccess.solicitudPagoDirectoDataAccess import SolicitudPagoDirectoDataAccess
+from ..dataaccess.formaPagoDataAccess import FormaPagoDataAccess
 
 class SolicitudFondosDataAccessContainer(containers.DeclarativeContainer):
     """
@@ -58,3 +60,14 @@ class SolicitudPagoDirectoDataAccessContainer(containers.DeclarativeContainer):
 
     # Proveedor de acceso a datos de la Solicitud de Pago Directo
     solicitudPagoDirectoDataAccess = providers.Singleton(SolicitudPagoDirectoDataAccess)
+
+class FormaPagoDataAccessContainer(containers.DeclarativeContainer):
+    """
+    Contenedor de acceso a datos de la Forma de pago.
+    Proporciona una instancia de FormaPagoDataAccess.
+    """
+    # Configuración del contenedor
+    config = providers.Configuration()
+
+    # Proveedor de acceso a datos de la Solicitud de Pago Directo
+    formaPagoDataAccess = providers.Singleton(FormaPagoDataAccess)

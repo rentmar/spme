@@ -1,6 +1,7 @@
 from django.db import models
 from spme_estructuracion_pei.models import Pei
 from polymorphic.models import PolymorphicModel
+from spme_programas.models import Programa
 
 
 
@@ -76,6 +77,17 @@ class Proyecto(models.Model):
         help_text='Financiador(es) del proyecto'
     )
 
+    #Programas
+    programa = models.ForeignKey(
+        Programa,
+        on_delete=models.SET_NULL,
+        related_name='proyectos_programa',
+        blank=True,
+        null=True,
+        verbose_name= 'Programa',
+        help_text="Programa asocia proyectos"
+    )
+    
     class Meta:
         ordering = ['-fecha_creacion']
         verbose_name = 'Proyecto'
@@ -283,6 +295,7 @@ class IndicadorProyecto(PolymorphicModel):
 
     # Campos comunes a todos los indicadores
     codigo = models.CharField(max_length=50, null=True, blank=True)
+    descripcion = models.TextField(blank=True, null=True)
     redaccion = models.CharField(max_length=5, choices=TIPO_INDICADOR, blank=True, null=True)
     fuente_verificacion = models.TextField(blank=True, null=True)
     target_poblacion = models.CharField(max_length=255, blank=True, null=True)

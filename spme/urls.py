@@ -33,5 +33,9 @@ urlpatterns = [
     path('api/', include('apptran.urls')),
     #Api de configuracion
     path('api/system/', include('system_config.urls') ),
+    #Api Programas/Areas
+    path('api-ap/', include('spme_programas.urls')),
+    #Api de proyectos
+    path('api-proy/', include('spme_estructuracion_proyecto.urls'),),
 ]
 
