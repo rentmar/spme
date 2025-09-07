@@ -84,7 +84,7 @@ class AutenticacionUsuario(APIView):
     
 class ListaUsuarios(APIView):
     """
-    API view lista usuarios.
+    API view lista usuarios. 
     """
     def __init__(self):
         self.contenedor = UsuarioPresenterContainer()
