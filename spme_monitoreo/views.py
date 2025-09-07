@@ -17,6 +17,30 @@ from .domain.models.response.solicitudPagoDirectoResponse import CreateSolicitud
 from .domain.models.request.datosFormRequest import ObtenerDatosFormularioRequest
 from .domain.models.response.obtenerDatosFormResponse import ObtenerDatosFormularioResponse
 
+# class SolicitudFondos(APIView):
+#     """
+#     API para solicitud de fondos
+#     """
+#     def __init__(self):
+#         self.contenedor = SolicitudFondosPresenterContainer()
+#         self.solicitudFondosPresenter = self.contenedor.solicitudFondosPresenter()
+
+#     def post(self, request, *args, **kwargs):
+        
+#         createSolicitudFondosRequest = CrearSolicitudFondosRequest(data=request.data)
+        
+#         if createSolicitudFondosRequest.is_valid():
+            
+#             solicitudFondosResponse = self.solicitudFondosPresenter.crearSolicitudFondos(createSolicitudFondosRequest.validated_data)
+#             response = CreateSolicitudFondosResponse(data=solicitudFondosResponse)
+
+#             if response.is_valid():
+#                 return Response(response.data, status=status.HTTP_201_CREATED)
+#             else:
+#                 return Response({"estado": MessageType.ERROR.value}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#         return Response({"estado": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
+
 class SolicitudFondos(APIView):
     """
     API para solicitud de fondos
@@ -26,20 +50,23 @@ class SolicitudFondos(APIView):
         self.solicitudFondosPresenter = self.contenedor.solicitudFondosPresenter()
 
     def post(self, request, *args, **kwargs):
-        
-        createSolicitudFondosRequest = CrearSolicitudFondosRequest(data=request.data)
-        
-        if createSolicitudFondosRequest.is_valid():
+        try:
+            createSolicitudFondosRequest = CrearSolicitudFondosRequest(data=request.data)
             
-            solicitudFondosResponse = self.solicitudFondosPresenter.crearSolicitudFondos(createSolicitudFondosRequest.validated_data)
-            response = CreateSolicitudFondosResponse(data=solicitudFondosResponse)
+            if createSolicitudFondosRequest.is_valid():
+                
+                solicitudFondosResponse = self.solicitudFondosPresenter.crearSolicitudFondos(createSolicitudFondosRequest.validated_data)
+                response = CreateSolicitudFondosResponse(data=solicitudFondosResponse)
 
-            if response.is_valid():
-                return Response(response.data, status=status.HTTP_201_CREATED)
-            else:
-                return Response({"estado": MessageType.ERROR.value}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                if response.is_valid():
+                    return Response(response.data, status=status.HTTP_201_CREATED)
+                else:
+                    return Response({"estado": MessageType.ERROR.value, "errores": response.errors}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        return Response({"estado": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"estado": MessageType.BAD_REQUEST.value, "errores": createSolicitudFondosRequest.errors}, status=status.HTTP_400_BAD_REQUEST)
+        
+        except Exception as e:
+            return Response({"estado": MessageType.ERROR.value, "mensaje": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class RendicionCuentas(APIView):
     """
@@ -47,7 +74,8 @@ class RendicionCuentas(APIView):
     """
     def __init__(self):
         self.contenedor = RendicionCuentasPresenterContainer()
-        self.rendicionCuentasPresenter = self.contenedor.rendicionCuentasPresenterPresenter()
+        # self.rendicionCuentasPresenter = self.contenedor.rendicionCuentasPresenterPresenter()
+        self.rendicionCuentasPresenter = self.contenedor.rendicionCuentasPresenter()
 
     def post(self, request, *args, **kwargs):
         

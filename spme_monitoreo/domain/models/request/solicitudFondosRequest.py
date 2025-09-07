@@ -23,16 +23,16 @@ class CrearSolicitudFondosRequest(serializers.Serializer):
         internal_value = super().to_internal_value(data)
         return {
             'detalleDestinoFondos': internal_value['detalle_destino_fondos'],
-            'formaPago': int(internal_value['forma_pago']),
+            'formaPago_id': int(internal_value['forma_pago']),
             'lugarSolicitud': internal_value['lugar_solicitud'],
             'fechaSolicitud': internal_value['fecha_solicitud'],
             'montoSolicitado': internal_value['monto_solicitado'],
             'validacionResponsable': internal_value['validacion_responsable'],
-            'idResponsable': int(internal_value['id_responsable']),
+            'responsable_id': int(internal_value['id_responsable']),
             'validacionCoordinador': internal_value['validacion_coordinador'],
-            'idCoordinador': int(internal_value['id_coordinador']),
-            'idUsuario': int(internal_value['id_usuario']),
-            'idActividad': int(internal_value['id_actividad']),
+            'coordinador_id': int(internal_value['id_coordinador']),
+            'usuario_id': int(internal_value['id_usuario']),
+            'actividad_id': int(internal_value['id_actividad']),
         }
           
     

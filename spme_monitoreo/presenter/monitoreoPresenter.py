@@ -30,7 +30,8 @@ class SolicitudReembolsoPresenter:
         self.useCaseContainer = CrearSolicitudReembolsoUseCaseContainer()
         self.crearSolicitudReembolsoUseCase = self.useCaseContainer.crearSolicitudReembolsoUseCase()
 
-    def crearSolicitudFondos(self, requestData):
+    # def crearSolicitudFondos(self, requestData):
+    def crearSolicitudReembolso(self, requestData):
         crearSolicitud = self.crearSolicitudReembolsoUseCase.execute(requestData)
         if crearSolicitud is not None:
             return ReponseMapper.toSuccessResponse(crearSolicitud)

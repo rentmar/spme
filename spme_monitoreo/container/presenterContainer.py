@@ -13,8 +13,7 @@ class RendicionCuentasPresenterContainer(containers.DeclarativeContainer):
     config = providers.Configuration()
 
     # Proveedor de dependencias
-    rendicionCuentasPresenterPresenter = providers.Factory(RendicionCuentasPresenter)
-
+    rendicionCuentasPresenter = providers.Factory(RendicionCuentasPresenter)
 
 class SolicitudReembolsoPresenterContainer(containers.DeclarativeContainer):
     # Config del contenedor
