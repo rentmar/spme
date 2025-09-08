@@ -176,6 +176,19 @@ class SolicitudViaje (models.Model):
     lugarSolicitud = models.CharField(max_length=50, verbose_name='lugar_solicitud', blank=True, null=True)
     fechaSolicitud = models.DateField(verbose_name='fecha_solicitud', blank=True, null=True)
 
+    #Campos extra
+    fechaEvento = models.DateField(blank=True, null=True)
+    fuenteGasto = models.TextField(blank=True, null=True)
+    partidaGasto = models.TextField(blank=True, null=True)
+
+    solicitante = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_solicitante_solviaje',
+        null=True,
+        blank=True,
+    )
+
     #Validaciones
     validacionResponsable = models.BooleanField(default=False)
     responsable = models.ForeignKey(
