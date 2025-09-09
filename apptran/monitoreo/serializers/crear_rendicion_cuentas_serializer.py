@@ -4,17 +4,24 @@ from spme_autenticacion.models import Usuario
 from spme_actividades.models import Actividad, TareaActividad
 from spme_monitoreo.models import (RendicionCuentas, SolicitudReembolso, 
                                    SolicitudViaje, SolicitudPagoDirecto, SolicitudFondos)
+from decimal import Decimal, InvalidOperation
 
 class DetalleDestinoFondosSerializer(serializers.Serializer):
     factura_recibo = serializers.CharField(required=False, allow_blank=True, default="")
     descripcion = serializers.CharField(required=False, allow_blank=True, default="")
-    monto = serializers.DecimalField(
-        max_digits=10, 
-        decimal_places=2, 
+    monto = serializers.CharField(
         required=False, 
         allow_null=True,
         default=0
     )
+    def validate_monto(self, value):
+        """Convierte el string a decimal si es necesario"""
+        if value and isinstance(value, str):
+            try:
+                return str(Decimal(value))  # Convierte a string del decimal
+            except (ValueError, InvalidOperation):
+                raise serializers.ValidationError("Monto debe ser un número válido")
+        return value
 
 class RendicionCuentasCreateSerializer(serializers.ModelSerializer):
     detalleDestinoFondos = serializers.ListField(
