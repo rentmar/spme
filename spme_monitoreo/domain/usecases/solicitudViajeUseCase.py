@@ -21,23 +21,5 @@ class CrearSolicitudViajeUseCase:
         :param solicitud_data: Datos de la solicitud de viaje.
         :return: Resultado de la creación de la solicitud.
         """
-        actividad = self.actividadesRepository.obtenerActividadPorId(requestData["actividad_id"])
-        formaPago = self.formaPagoRepository.obtenerFormaPagoPoId(requestData["formaPago_id"])
-        responsable = self.userRepository.obtenerNombreUsuarioPorId(requestData["responsable_id"])
-        coordinador = self.userRepository.obtenerNombreUsuarioPorId(requestData["coordinador_id"])
-        usuario = self.userRepository.obtenerNombreUsuarioPorId(requestData["usuario_id"])
-        tarea = None
-        print(actividad, formaPago, responsable, coordinador, usuario)
-        if actividad and formaPago and responsable and coordinador and usuario:
-            solicitudData = {
-                **requestData,
-                "actividad_id": actividad,
-                "formaPago_id": formaPago,
-                "responsable_id": responsable,
-                "coordinador_id": coordinador,
-                "usuario_id": usuario,
-                "tarea_id": tarea
-            }
-            return self.solicitudViajeRepository.crearSolicitudViaje(solicitudData)
-        else:
-            return None
+        return self.solicitudViajeRepository.crearSolicitudViaje(requestData)
+        

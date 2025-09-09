@@ -27,6 +27,10 @@ class CrearSolicitudViajeRequest(serializers.Serializer):
     tarea_id = serializers.IntegerField()
     usuario_id = serializers.IntegerField(required=True, allow_null=False)
     bloquear_iconos = serializers.BooleanField(default=False)
+    fecha_evento = serializers.DateField()
+    fuente_gasto = serializers.CharField(max_length=100, required=False, allow_null=True)
+    partida_gasto = serializers.CharField(max_length=100, required=False, allow_null=True)
+    solicitante_id = serializers.IntegerField(required=False, allow_null=True)
 
     def to_internal_value(self, data):
         """
@@ -57,4 +61,8 @@ class CrearSolicitudViajeRequest(serializers.Serializer):
             "tarea_id": internal_value.get("tarea_id"),
             "usuario_id": internal_value.get("usuario_id"),
             "bloquearIconos": internal_value.get("bloquear_iconos"),
+            "fechaEvento": internal_value.get("fecha_evento"),
+            "fuenteGasto": internal_value.get("fuente_gasto"),
+            "partidaGasto": internal_value.get("partida_gasto"),
+            "solicitante_id": internal_value.get("solicitante_id")
         }
