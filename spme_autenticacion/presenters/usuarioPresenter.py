@@ -9,6 +9,8 @@ class UsuarioPresenter:
         self.autenticarUsuarioUseCase = self.contenedor.autenticarUsuarioUseCase()
         self.obtenerUsuariosUseCase = self.contenedor.obtenerUsuariosUseCase()
         self.obtenerValidadoresUseCase = self.contenedor.obtenerListaValidadoresUseCase()
+        self.actualizarUsuarioUseCase = self.contenedor.actualizarUsuarioUseCase()
+        self.actualizarEstadoUseCase = self.contenedor.actualizarEstadoUseCase()
 
     def obtenerUsuario(self,userRequest):
         """
@@ -31,14 +33,42 @@ class UsuarioPresenter:
             return UserMapper.toCreateSuccessResponse(usuario)
         else:
             return UserMapper.toErrorResponse("Usuario ya existe")
-        
+
+    def actualizarUsuario(self, userRequest):
+        """
+        Actualiza un usuario a partir de la solicitud.
+        """
+        actualizarUsuarioResponse = self.actualizarUsuarioUseCase.execute(userRequest)
+
+        if isinstance(actualizarUsuarioResponse, dict) and 'error' in actualizarUsuarioResponse:        
+            return UserMapper.toErrorResponse(actualizarUsuarioResponse['error'])
+
+        if actualizarUsuarioResponse is not None:
+            return UserMapper.toUpdateSuccessResponse(actualizarUsuarioResponse)
+        else:
+            return UserMapper.toErrorResponse("Usuario no actualizado")
+    
+    def cambiarEstadoUsuario(self, estadoRequest):
+        """
+        Cambia el estado de un usuario a partir de la solicitud.
+        """
+        estadoResponse = self.actualizarEstadoUseCase.execute(estadoRequest)
+
+        if estadoResponse is not None:
+            return UserMapper.toUpdateSuccessResponse(estadoResponse)
+        else:
+            return UserMapper.toErrorResponse("Usuario no actualizado")
+
     def obtenerListaUsuarios(self):
         """
         Obtiene la lista de usuarios.
         """
         lista = self.obtenerUsuariosUseCase.execute()
-        print("Lista de usuarios obtenida:", lista)
-        return None#UserMapper.toListResponse(lista)
+        
+        if lista is None:
+            return UserMapper.toErrorResponse("No se encontraron usuarios")
+        else:
+            return UserMapper.toListUserResponse(lista)
 
     def autenticarUsuario(self, userRequest):
         """

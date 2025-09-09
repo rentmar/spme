@@ -52,6 +52,42 @@ class CrearUsuarioRequest(serializers.Serializer):
             'is_superuser': False
         }
     
+class ActualizarUsuarioRequest(CrearUsuarioRequest):
+    """
+    Usuario request para actualizar un usuario.
+    """
+    id_usuario = serializers.IntegerField(required=True)
+
+    def to_internal_value(self, data):
+        """
+        Convierte los campos a un formato DB.
+        """
+        parent_internal_value = super().to_internal_value(data)
+        
+        internal_value = super(CrearUsuarioRequest, self).to_internal_value(data)
+        
+        return {
+            **parent_internal_value,
+            'id': internal_value['id_usuario'],
+        }
+    
+class CambioEstadoUsuarioRequest(serializers.Serializer):
+    """
+    Usuario request para desactivar un usuario.
+    """
+    id_usuario = serializers.IntegerField(required=True)
+    activo = serializers.BooleanField(default=False)
+
+    def to_internal_value(self, data):
+        """
+        Convierte los campos a un formato DB.
+        """
+        internal_value = super().to_internal_value(data)
+        return {
+            'id': internal_value['id_usuario'],
+            'is_active': internal_value['activo']
+        }
+    
 class AutenticacionUsuarioRequest(serializers.Serializer):
     """
     Request para autenticar un usuario.

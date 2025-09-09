@@ -2,8 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from spme_autenticacion.common.MessageManager import MessageType
-from .domain.models.request.userRequest import ObtenerUsuarioRequest, CrearUsuarioRequest, AutenticacionUsuarioRequest
-from .domain.models.response.userResponse import UsuarioResponse, CreateUserResponse, AutenticacionUsuarioResponse
+from .domain.models.request.userRequest import ObtenerUsuarioRequest, CrearUsuarioRequest, AutenticacionUsuarioRequest,ActualizarUsuarioRequest,CambioEstadoUsuarioRequest
+from .domain.models.response.userResponse import UsuarioResponse, CreateUserResponse, AutenticacionUsuarioResponse,ActualizarUsuarioResponse,ListaUsuariosResponse
 from .domain.models.response.userResponse import ListaValidadoresResponse
 from .container.presenterContainer import UsuarioPresenterContainer
 
@@ -57,6 +57,56 @@ class CrearUsuario(APIView):
         
         return Response({"estado": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
     
+class ActualizarUsuario(APIView):
+    """
+    API view actualizar usuario.
+    """
+    def __init__(self):
+        self.contenedor = UsuarioPresenterContainer()
+        self.usurioPresenter = self.contenedor.usuarioPresenter()
+
+    def put(self, request, *args, **kwargs):
+
+        userRequest = ActualizarUsuarioRequest(data=request.data)
+
+        if userRequest.is_valid():
+
+            updateResponse = self.usurioPresenter.actualizarUsuario(userRequest.validated_data)
+
+            response = ActualizarUsuarioResponse(data=updateResponse)
+
+            if response.is_valid():
+                return Response(response.data, status=status.HTTP_200_OK)
+            else:
+                return Response({"estado": MessageType.ERROR.value}, status=status.HTTP_304_NOT_MODIFIED)
+
+        return Response({"estado": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
+    
+class CambioEstadoUsuario(APIView):
+    """
+    API view activar/desactivar usuario.
+    """
+    def __init__(self):
+        self.contenedor = UsuarioPresenterContainer()
+        self.usurioPresenter = self.contenedor.usuarioPresenter()
+
+    def put(self, request, *args, **kwargs):
+
+        estadoRequest = CambioEstadoUsuarioRequest(data=request.data)
+
+        if estadoRequest.is_valid():
+
+            estadoResponse = self.usurioPresenter.cambiarEstadoUsuario(estadoRequest.validated_data)
+
+            response = ActualizarUsuarioResponse(data=estadoResponse)
+
+            if response.is_valid():
+                return Response(response.data, status=status.HTTP_200_OK)
+            else:
+                return Response({"estado": MessageType.ERROR.value}, status=status.HTTP_304_NOT_MODIFIED)
+
+        return Response({"estado": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
+
 class AutenticacionUsuario(APIView):
     """
     API view autenticación usuario.
@@ -90,32 +140,18 @@ class ListaUsuarios(APIView):
         self.contenedor = UsuarioPresenterContainer()
         self.usurioPresenter = self.contenedor.usuarioPresenter()
 
-    def get(self, request, *args, **kwargs):
+    def get(self,*args, **kwargs):
         """
         Obtiene la lista de usuarios.
         """
         listResponse = self.usurioPresenter.obtenerListaUsuarios()
+        response = ListaUsuariosResponse(data=listResponse)
+       
+        if response.is_valid():
+            return Response(response.data, status=status.HTTP_200_OK)
+        else:
+            return Response({"estado": MessageType.ERROR.value}, status=status.HTTP_404_NOT_FOUND)
 
-        print("ListResponse:", listResponse)
-
-        listaUsuarios = {
-            "usuarios": [
-                {
-                    "id": 1,
-                    "usuario": "Will Smith"
-                },
-                {
-                    "id": 2,
-                    "usuario": "Gorg Selva"
-                },
-                {
-                    "id": 3,
-                    "usuario": "Jaime Dunn"
-                }
-            ]
-        }
-        return Response(listaUsuarios, status=status.HTTP_200_OK)
-    
 class ListaValidadores(APIView):
     """
     API view lista validadores.
@@ -134,4 +170,4 @@ class ListaValidadores(APIView):
         if response.is_valid():
             return Response(response.data, status=status.HTTP_200_OK)
         else:
-            return Response({"estado": MessageType.ERROR.value}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            return Response({"estado": MessageType.ERROR.value}, status=status.HTTP_404_NOT_FOUND)

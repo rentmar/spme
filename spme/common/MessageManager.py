@@ -5,6 +5,8 @@ class MessageType(Enum):
     WARNING = "advertencia"
     ERROR = "error"
     SUCCESS = "exito"
+    UPDATE = "actualizado"
+    CREATE = "creado"
     BAD_REQUEST = "peticion incorrecta"
     NOT_FOUND = "no encontrado"
     UNAUTHORIZED = "no autorizado"

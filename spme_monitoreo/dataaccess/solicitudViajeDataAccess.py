@@ -9,7 +9,7 @@ class SolicitudViajeDataAccess:
         :param solicitud_data: Datos de la solicitud de viaje.
         :return: Resultado de la creación de la solicitud.
         """
-        return SolicitudViaje.objects.create(**solicitudData)
+        return None#SolicitudViaje.objects.create(**solicitudData)
 
     def obtenerSolicitudesViaje(self):
         """

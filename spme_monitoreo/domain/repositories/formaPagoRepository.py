@@ -2,7 +2,7 @@ from spme_monitoreo.container.dataAccessContainer import FormaPagoDataAccessCont
 
 class FormaPagoRepository:
 
-     def __init__(self):
+    def __init__(self):
         self.contenedor = FormaPagoDataAccessContainer()
         self.formaPagoDataAccess = self.contenedor.formaPagoDataAccess()
 

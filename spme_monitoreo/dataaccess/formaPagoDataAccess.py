@@ -1,4 +1,5 @@
 from ..models import FormaPago
+from django.core.exceptions import ObjectDoesNotExist
 
 class FormaPagoDataAccess:
     
@@ -8,4 +9,7 @@ class FormaPagoDataAccess:
 
         :return: Lista de solicitudes de viaje.
         """
-        return FormaPago.objects.get(id=idPago)
+        try:
+            return FormaPago.objects.get(id=idPago)
+        except ObjectDoesNotExist:
+            return None
