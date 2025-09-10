@@ -176,6 +176,19 @@ class SolicitudViaje (models.Model):
     lugarSolicitud = models.CharField(max_length=50, verbose_name='lugar_solicitud', blank=True, null=True)
     fechaSolicitud = models.DateField(verbose_name='fecha_solicitud', blank=True, null=True)
 
+    #Campos extra
+    fechaEvento = models.DateField(blank=True, null=True)
+    fuenteGasto = models.TextField(blank=True, null=True)
+    partidaGasto = models.TextField(blank=True, null=True)
+
+    solicitante = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_solicitante_solviaje',
+        null=True,
+        blank=True,
+    )
+
     #Validaciones
     validacionResponsable = models.BooleanField(default=False)
     responsable = models.ForeignKey(
@@ -314,6 +327,24 @@ class RendicionCuentas(models.Model):
     montoDescargado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Monto Descargado', blank=False, null=True)
     saldo = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Saldo', blank=True, null=True)
     detalleDestinoFondos = models.JSONField(verbose_name='Detalle destino de fondos', blank=True, null=True)
+    #Informacion sobre Actividades y Tareas
+    actividad = models.ForeignKey(
+        Actividad,
+        on_delete=models.SET_NULL,
+        related_name='rendicion_cuentas_actividad',
+        null=True,
+        blank=True,
+    )
+    fechaActividad = models.DateField(verbose_name='Fecha de la actividad', blank=True, null=True)
+    descripcionActividad = models.TextField(blank=True, null=True)
+    lugarActividad = models.TextField(blank=True, null=True)
+    tarea = models.ForeignKey(
+        TareaActividad,
+        on_delete=models.SET_NULL,
+        related_name='rendicion_cuentas_tarea_actividad',
+        null=True,
+        blank=True,
+    )
     #Discriminador
     bloquearIconos = models.BooleanField(default=True)
     #Validaciones
@@ -367,7 +398,7 @@ class RendicionCuentas(models.Model):
         null=True,
         blank=True,
     )
-    SolicitudReembolso = models.ForeignKey(
+    solicitudReembolso = models.ForeignKey(
         SolicitudReembolso,
         on_delete=models.SET_NULL,
         related_name='rendicion_sol_reembolso',
