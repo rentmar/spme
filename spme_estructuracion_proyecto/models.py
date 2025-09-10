@@ -296,39 +296,62 @@ class IndicadorProyecto(PolymorphicModel):
     # Campos comunes a todos los indicadores
     codigo = models.CharField(max_length=50, null=True, blank=True)
     descripcion = models.TextField(blank=True, null=True)
-    redaccion = models.CharField(max_length=5, choices=TIPO_INDICADOR, blank=True, null=True)
+    redaccion = models.TextField(max_length=5, choices=TIPO_INDICADOR, blank=True, null=True)
     fuente_verificacion = models.TextField(blank=True, null=True)
+    
+    #Meta
     target_poblacion = models.CharField(max_length=255, blank=True, null=True)
+    fechaTargetPoblacion = models.DateField(blank=True, null=True)
+    #Corresponde a la unidad de medida del FE
     tipo = models.CharField(max_length=5, choices=TIPO, default='A-Z')
+    #Frecuencia de medicion
     frecuencia = models.CharField(max_length=15, choices=FREQ, default='MEN')
+    
+    #Este campo no se usa - por el momento
     responsable = models.CharField(blank=True, null=True)
 
-    #Campos
+    #Linea base
     baseline = models.CharField(
         max_length=10, 
         blank=True, 
         null=True,
     )
+    #Fecha de la linea base
+    fechaLineaBase = models.DateField(blank=True, null=True)
+
+    #Meta 1
     target_q1 = models.CharField(
         max_length=10,
         blank=True, 
         null=True,
     )
+    fechaTargetQ1 = models.DateField(blank=True, null=True)
+
+    #Meta 2
     target_q2 = models.CharField(
         max_length=10,
         blank=True, 
         null=True,
     )
+    fechaTargetQ2 = models.DateField(blank=True, null=True)
+
+
+    #Meta 3
     target_q3 = models.CharField(
         max_length=10,
         blank=True, 
         null=True,
     )
+    fechaTargetQ3 = models.DateField(blank=True, null=True)
+
+
+    #Meta 4
     target_q4 = models.CharField(
         max_length=10,
         blank=True, 
         null=True,
     )
+    fechaTargetQ4 = models.DateField(blank=True, null=True)
 
     class Meta:
         verbose_name = 'Indicador de Proyecto'
