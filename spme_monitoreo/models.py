@@ -447,6 +447,12 @@ class InformeActividad(models.Model):
     )
 
     def __str__(self):
-        return f"{self.numeroInforme}"
+        return f"{self.numeroInforme}
+    
+    class Meta:
+        verbose_name = 'Informe Actividad'
+        verbose_name_plural = 'Informes de Actividad'
+
+
 
 
