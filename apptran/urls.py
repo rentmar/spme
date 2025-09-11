@@ -31,6 +31,8 @@ from .monitoreo.views.info_rendicion_cuentas_views import RendicionCuentasDatosV
 from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
 #Proyecto
 from .viewdiagramaporidproyecto import DiagramaPorProyectoView
+#Informe de actividad
+from .monitoreo.views.crear_informe_actividad_views import InformeActividadView
 
 
 
@@ -80,6 +82,7 @@ router.register(r'rendicion-cuentas', RendicionCuentasView, basename='rendicion_
 router.register(r'solicitud-reembolso', SolicitudReembolsoView, basename='solicitud_reembolso')
 router.register(r'solicitud-viaje', SolicitudViajeView, basename='solicitud_viaje')
 router.register(r'solicitud-pago-directo', SolicitudPagoDirectoView, basename='sol_pago_directo')
+router.register(r'informe-actividad', InformeActividadView, basename='informe-actividades')
 
 
 
