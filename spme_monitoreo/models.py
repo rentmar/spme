@@ -443,11 +443,13 @@ class InformeActividad(models.Model):
     actividad = models.ForeignKey(
         Actividad,
         on_delete=models.SET_NULL,
-        related_name='actividad_informe_actividad'
+        related_name='actividad_informe_actividad',
+        null=True,
+        blank=True
     )
 
     def __str__(self):
-        return f"{self.numeroInforme}
+        return self.numeroInforme
     
     class Meta:
         verbose_name = 'Informe Actividad'
