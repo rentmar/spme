@@ -429,3 +429,24 @@ class RendicionCuentas(models.Model):
 
 
 
+#Informe de Actividad
+class InformeActividad(models.Model):
+    numeroInforme = models.CharField(max_length=50, blank=True, null=True)
+    contribucionesProyecto = models.JSONField(blank=True, null=True)
+    contribucionesActividad = models.JSONField(blank=True, null=True)
+    informaObjetivoActividad = models.TextField(blank=True, null=True)
+    reporteTipo = models.CharField(max_length=100, blank=True, null=True)
+    indicador = models.JSONField(blank=True, null=True)
+    herramientaEvaluacion = models.TextField(blank=True, null=True)
+    descripcionMediosVerificacion = models.TextField(blank=True, null=True)
+    comentariosRecomendacion = models.TextField(blank=True, null=True)
+    actividad = models.ForeignKey(
+        Actividad,
+        on_delete=models.SET_NULL,
+        related_name='actividad_informe_actividad'
+    )
+
+    def __str__(self):
+        return f"{self.numeroInforme}"
+
+
