@@ -13,6 +13,7 @@ from .viewactividadbulk import procesar_actividades_bulk
 from .viewsplanificacion import obtener_historial_planificacion, obtener_planificacion_version, contar_planificaciones
 from .viewsactividadestareas import ActividadConTareasListView, ActividadConTareasDetailView
 from .planificacion.views.viewsactividadplansegbulk import procesar_actividades_planificacion_bulk
+from .actividades.views.actividad_indicador_views import ActividadIndicadorViewSet
 #from planificacion.vistas.viewsrutas import PruebaPlanificacionView
 from .actividades.views.viewsactividadrutas import rutas_actividad, ruta_actividad_proyecto
 from .actividades.views.viewsactividadrutaindicador import obtener_ruta_actividad_con_indicadores
@@ -69,6 +70,8 @@ router.register(r'efectos-proyecto', EfectoProyectoView, basename='efectos_proye
 router.register(r'tipo-actividad', TipoActividadView, basename='tipo_actividad')
 #Tareas de Actividades
 router.register(r'tareas-actividad', TareaActividadView, basename='tareas-actividades')
+#Actividad indicadores - bitacora
+router.register(r'actividad-indicadores-proyecto', ActividadIndicadorViewSet, basename='actividad_indicadores_proyecto' )
 #Monitoreo
 router.register(r'forma-de-pago', FormaPagoView, basename='forma_de_pago')
 router.register(r'solicitud-fondos', SolicitudFondosViewSet , basename='solicitud_fondos')

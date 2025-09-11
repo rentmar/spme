@@ -285,11 +285,11 @@ class IndicadorProyecto(PolymorphicModel):
     ]
 
     FREQ = [
-        ('MEN', 'Mensual'),
-        ('BIMEN', 'Bimensual'),
-        ('TMEN', 'TriMestral'),
-        ('CMES', 'CuatriMestral'),
-        ('SEM', 'Semestral'),
+        ('MENSUAL', 'Mensual'),
+        ('BIMENSUAL', 'Bimensual'),
+        ('TRIMESTRAL', 'TriMestral'),
+        ('CUATRIMESTRAL', 'CuatriMestral'),
+        ('SEMESTRAL', 'Semestral'),
         ('ANUAL', 'Anual'),
     ]
 
@@ -305,7 +305,7 @@ class IndicadorProyecto(PolymorphicModel):
     #Corresponde a la unidad de medida del FE
     tipo = models.CharField(max_length=5, choices=TIPO, default='A-Z')
     #Frecuencia de medicion
-    frecuencia = models.CharField(max_length=15, choices=FREQ, default='MEN')
+    frecuencia = models.CharField(max_length=15, choices=FREQ, default='Mensual')
     
     #Este campo no se usa - por el momento
     responsable = models.CharField(blank=True, null=True)
