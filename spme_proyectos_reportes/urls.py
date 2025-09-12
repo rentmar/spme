@@ -2,9 +2,12 @@ from django.urls import path, include
 from .views import *
 from rest_framework.routers import DefaultRouter
 from .views.estructura_jerarquica_proy_views import prueba_conexion_reportes, estructura_jerarquica_completa
+from .views.crear_entrada_bitacora_indicador_view import BitacoraIndicadorViewSet
+
 
 router = DefaultRouter()
 
+router.register(r'bitacora-indicadores', BitacoraIndicadorViewSet, basename='bitacora_indicador')
 #router.register(r'planes', ProyectoPlanViewSet, basename='proyecto-plan')
 
 urlpatterns = [
