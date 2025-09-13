@@ -85,8 +85,8 @@ class UserDataAccess:
                 if campo in userData:
                     setattr(usuario, campo, userData[campo])
 
-            if userData.get("password"):
-                usuario.set_password(userData["password"])
+            # if userData.get("password"):
+            #     usuario.set_password(userData["password"])
 
             usuario.save()
             return usuario
@@ -124,6 +124,21 @@ class UserDataAccess:
         try:
             usuario = Usuario.objects.get(id=userId)
             usuario.is_active = estado
+            usuario.save()
+            return usuario
+        except Usuario.DoesNotExist:
+            return None
+
+    def actualizarPasswordUsuario(self, userId, pwd):
+        """
+        Cambia el pwd de un usuario.
+        :param userId: ID del usuario a actualizar.
+        :param pwd: Nuevo pwd del usuario.
+        :return: Usuario actualizado o None si no existe.
+        """
+        try:
+            usuario = Usuario.objects.get(id=userId)
+            usuario.set_password(pwd)
             usuario.save()
             return usuario
         except Usuario.DoesNotExist:

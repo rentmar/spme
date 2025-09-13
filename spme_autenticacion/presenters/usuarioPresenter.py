@@ -11,6 +11,7 @@ class UsuarioPresenter:
         self.obtenerValidadoresUseCase = self.contenedor.obtenerListaValidadoresUseCase()
         self.actualizarUsuarioUseCase = self.contenedor.actualizarUsuarioUseCase()
         self.actualizarEstadoUseCase = self.contenedor.actualizarEstadoUseCase()
+        self.actualizarPasswordUseCase = self.contenedor.actualizarPasswordUseCase()
 
     def obtenerUsuario(self,userRequest):
         """
@@ -56,6 +57,17 @@ class UsuarioPresenter:
 
         if estadoResponse is not None:
             return UserMapper.toUpdateSuccessResponse(estadoResponse)
+        else:
+            return UserMapper.toErrorResponse("Usuario no actualizado")
+
+    def cambiarPasswordUsuario(self, resetRequest):
+        """
+        Cambia el estado de un usuario a partir de la solicitud.
+        """
+        resetResponse = self.actualizarPasswordUseCase.execute(resetRequest)
+
+        if resetResponse is not None:
+            return UserMapper.toUpdateSuccessResponse(resetResponse)
         else:
             return UserMapper.toErrorResponse("Usuario no actualizado")
 

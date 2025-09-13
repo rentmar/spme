@@ -69,3 +69,12 @@ class UserRepository:
         :return: Usuario actualizado o None si no existe.
         """
         return self.userDataAccess.actualizarEstadoUsuario(userId, estado)
+
+    def actualizarPasswordUsuario(self, userId, pwd):
+        """
+        Cambia el password de un usuario.
+        :param userId: ID del usuario a actualizar.
+        :param pwd: Nuevo password del usuario.
+        :return: Usuario actualizado o None si no existe.
+        """
+        return self.userDataAccess.actualizarPasswordUsuario(userId, pwd)

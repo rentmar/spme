@@ -15,6 +15,7 @@ urlpatterns = [
     path(r'crearUsuario/',views.CrearUsuario.as_view(), name='crearUsuario'),
     path(r'actualizarUsuario/',views.ActualizarUsuario.as_view(), name='actualizarUsuario'),
     path(r'cambiarEstadoUsuario/',views.CambioEstadoUsuario.as_view(), name='cambiarEstadoUsuario'),
+    path(r'cambiarPwdUsuario/',views.CambioPasswrdUsuario.as_view(), name='cambiarPwdUsuario'),
     path(r'autenticarUsuario/',views.AutenticacionUsuario.as_view(), name='autenticarUsuario'),
     path(r'listaUsuarios/',views.ListaUsuarios.as_view(), name='listaUsuarios'),
     path(r'listaValidadores/',views.ListaValidadores.as_view(), name='listaValidadores'),

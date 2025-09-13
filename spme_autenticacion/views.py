@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from spme_autenticacion.common.MessageManager import MessageType
-from .domain.models.request.userRequest import ObtenerUsuarioRequest, CrearUsuarioRequest, AutenticacionUsuarioRequest,ActualizarUsuarioRequest,CambioEstadoUsuarioRequest
+from .domain.models.request.userRequest import ObtenerUsuarioRequest, CrearUsuarioRequest, AutenticacionUsuarioRequest,ActualizarUsuarioRequest,CambioEstadoUsuarioRequest,CambioPasswordUsuarioRequest
 from .domain.models.response.userResponse import UsuarioResponse, CreateUserResponse, AutenticacionUsuarioResponse,ActualizarUsuarioResponse,ListaUsuariosResponse
 from .domain.models.response.userResponse import ListaValidadoresResponse
 from .container.presenterContainer import UsuarioPresenterContainer
@@ -99,6 +99,31 @@ class CambioEstadoUsuario(APIView):
             estadoResponse = self.usurioPresenter.cambiarEstadoUsuario(estadoRequest.validated_data)
 
             response = ActualizarUsuarioResponse(data=estadoResponse)
+
+            if response.is_valid():
+                return Response(response.data, status=status.HTTP_200_OK)
+            else:
+                return Response({"estado": MessageType.ERROR.value}, status=status.HTTP_304_NOT_MODIFIED)
+
+        return Response({"estado": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
+
+class CambioPasswrdUsuario(APIView):
+    """
+    API view reset password usuario.
+    """
+    def __init__(self):
+        self.contenedor = UsuarioPresenterContainer()
+        self.usurioPresenter = self.contenedor.usuarioPresenter()
+
+    def put(self, request, *args, **kwargs):
+
+        resetRequest = CambioPasswordUsuarioRequest(data=request.data)
+
+        if resetRequest.is_valid():
+
+            resetResponse = self.usurioPresenter.cambiarPasswordUsuario(resetRequest.validated_data)
+
+            response = ActualizarUsuarioResponse(data=resetResponse)
 
             if response.is_valid():
                 return Response(response.data, status=status.HTTP_200_OK)

@@ -4,6 +4,7 @@ from ..domain.usecases.obtenerListaUsuariosUseCase import ObtenerListaUsuariosUs
 from ..domain.usecases.actualizarUsuarioUseCase import ActualizarUsuarioUseCase
 from ..domain.usecases.obtenerListaValidadoresUseCase import ObtenerListaValidadoresUseCase 
 from ..domain.usecases.actualizarEstadoUsuarioUseCase import ActualizarEstadoUsuarioUseCase
+from ..domain.usecases.actualizarPasswordUsuarioUseCase import ActualizarPasswordUsuarioUseCase
 
 class UserUseCaseContainer(containers.DeclarativeContainer):
     # Config del contenedor
@@ -23,4 +24,6 @@ class UserUseCaseContainer(containers.DeclarativeContainer):
     actualizarUsuarioUseCase = providers.Singleton(ActualizarUsuarioUseCase)
 
     actualizarEstadoUseCase = providers.Singleton(ActualizarEstadoUsuarioUseCase)
+
+    actualizarPasswordUseCase = providers.Singleton(ActualizarPasswordUsuarioUseCase)
 
