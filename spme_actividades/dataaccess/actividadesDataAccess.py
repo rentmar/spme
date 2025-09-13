@@ -43,7 +43,7 @@ class ActividadesDataAccess:
         :param actividadId: ID de la actividad que se desea obtener.
         :return: Actividad correspondiente al ID proporcionado.
         """
-        return Actividad.objects.filter(id=actividadId).first()
+        return Actividad.objects.filter(id=actividadId)
     
     def obtenerDatosFormActividadPorId(self, actividadId):
         """

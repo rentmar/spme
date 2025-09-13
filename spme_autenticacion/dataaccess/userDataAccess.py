@@ -1,4 +1,5 @@
 from ..models import Usuario
+from django.db.utils import IntegrityError
 
 class UserDataAccess:
     """
@@ -67,13 +68,44 @@ class UserDataAccess:
             is_staff=userData.get("is_staff", True),
             is_superuser=userData.get("is_superuser", False)
         )
+    
+    def actualizarUsuario(self, userData):
+        """
+        Actualiza un usuario a partir del request.
+        :param userData: Datos del usuario a actualizar.
+        :return: Usuario actualizado o un mensaje de error.
+        """
+        try:
+            usuario = Usuario.objects.get(id=userData["id"])
+
+            campos_normales = ['username', 'nombre', 'paterno', 'materno', 'ci', 'cargo', 'banco',
+                            'numero_cuenta', 'tipo_cuenta', 'is_active', 'permisos']
+
+            for campo in campos_normales:
+                if campo in userData:
+                    setattr(usuario, campo, userData[campo])
+
+            # if userData.get("password"):
+            #     usuario.set_password(userData["password"])
+
+            usuario.save()
+            return usuario
+        except Usuario.DoesNotExist:
+            return {"error": "El usuario no existe."}
+        except IntegrityError as e:
+            if "UNIQUE constraint failed: spme_autenticacion_usuario.username" in str(e):
+                return {"error": "El nombre de usuario ya existe. Por favor, elija otro."}
+            else:
+                return {"error": "Error de integridad de datos."}
+        except Exception as e:
+            return {"error": f"Ocurrió un error en el servicio."}
 
     def obtenerListaUsuarios(self):
         """
         Obtiene la lista de usuarios.
         :return: Lista de usuarios.
         """
-        return Usuario.objects.filter(is_superuser=False, is_active=True)
+        return Usuario.objects.filter(is_superuser=False).values('id','username','nombre','paterno','materno','ci','cargo','permisos','banco','numero_cuenta','tipo_cuenta','is_active')
 
     def obtenerListaValidadores(self):
         """
@@ -81,3 +113,33 @@ class UserDataAccess:
         :return: Lista de validadores.
         """
         return Usuario.objects.filter(is_active=True,is_superuser=False).values('id','nombre','paterno','materno','cargo')
+    
+    def actualizarEstadoUsuario(self, userId, estado):
+        """
+        Cambia el estado de un usuario (activo/inactivo).
+        :param userId: ID del usuario a actualizar.
+        :param estado: Nuevo estado del usuario (True/False).
+        :return: Usuario actualizado o None si no existe.
+        """
+        try:
+            usuario = Usuario.objects.get(id=userId)
+            usuario.is_active = estado
+            usuario.save()
+            return usuario
+        except Usuario.DoesNotExist:
+            return None
+
+    def actualizarPasswordUsuario(self, userId, pwd):
+        """
+        Cambia el pwd de un usuario.
+        :param userId: ID del usuario a actualizar.
+        :param pwd: Nuevo pwd del usuario.
+        :return: Usuario actualizado o None si no existe.
+        """
+        try:
+            usuario = Usuario.objects.get(id=userId)
+            usuario.set_password(pwd)
+            usuario.save()
+            return usuario
+        except Usuario.DoesNotExist:
+            return None

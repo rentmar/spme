@@ -29,6 +29,14 @@ class UserRepository:
         :return: Usuario creado.
         """
         return self.userDataAccess.createUser(userRequest)
+    
+    def actualizarUsuario(self, userRequest):
+        """
+        Actualiza un usuario a partir del request.
+        :param userRequest: Datos del usuario a actualizar.
+        :return: Usuario actualizado.
+        """
+        return self.userDataAccess.actualizarUsuario(userRequest)
 
     def autenticarUsuario(self,userRequest):
         """
@@ -52,3 +60,21 @@ class UserRepository:
         :return: Lista de validadores.
         """
         return self.userDataAccess.obtenerListaValidadores()
+    
+    def actualizarEstadoUsuario(self, userId, estado):
+        """
+        Cambia el estado de un usuario (activo/inactivo).
+        :param userId: ID del usuario a actualizar.
+        :param estado: Nuevo estado del usuario (True/False).
+        :return: Usuario actualizado o None si no existe.
+        """
+        return self.userDataAccess.actualizarEstadoUsuario(userId, estado)
+
+    def actualizarPasswordUsuario(self, userId, pwd):
+        """
+        Cambia el password de un usuario.
+        :param userId: ID del usuario a actualizar.
+        :param pwd: Nuevo password del usuario.
+        :return: Usuario actualizado o None si no existe.
+        """
+        return self.userDataAccess.actualizarPasswordUsuario(userId, pwd)

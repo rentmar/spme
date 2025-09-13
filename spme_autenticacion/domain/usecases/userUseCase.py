@@ -25,13 +25,3 @@ class AutenticarUsuarioUseCase:
     def execute(self, userRequest):
         """Autentica un usuario a partir del request."""
         return self.userRepository.autenticarUsuario(userRequest)
-    
-class ObtenerUsuariosUseCase:
-    def __init__(self):
-        self.contenedor = UserRepositoryContainer() 
-        self.userRepository = self.contenedor.userRepository()
-
-    def execute(self):
-        """Obtiene la lista de usuarios."""
-        usuarios = self.userRepository.obtenerListaUsuarios()
-        return list(usuarios.values())

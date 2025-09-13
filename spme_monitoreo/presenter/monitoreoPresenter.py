@@ -44,9 +44,9 @@ class SolicitudViajePresenter:
         self.crearSolicitudViajeUseCase = self.useCaseContainer.crearSolicitudViajeUseCase()
 
     def crearSolicitudViaje(self, requestData):
-        crearSolicitud = self.crearSolicitudViajeUseCase.execute(requestData)
-        if crearSolicitud is not None:
-            return ReponseMapper.toSuccessResponse(crearSolicitud)
+        crearSolicitudResponse = self.crearSolicitudViajeUseCase.execute(requestData)
+        if crearSolicitudResponse is not None:
+            return ReponseMapper.toSuccessResponse(crearSolicitudResponse)
         else:
             return ReponseMapper.toErrorResponse("Error al crear la solicitud de Viaje")
 
