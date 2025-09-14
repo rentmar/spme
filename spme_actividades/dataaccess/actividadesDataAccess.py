@@ -63,13 +63,19 @@ class ActividadesDataAccess:
         :param encabezadoId: ID del encabezado de actividad que se desea obtener.
         :return: Encabezado de actividad correspondiente al ID proporcionado.
         """
-        return Actividad.objects.filter(id=encabezadoId).values(
-            "codigo",
-            "descripcion",
-            "estado",
-            "fecha_programada",
-            "fecha_cierre",
-            "responsable_id",
-            "presupuesto",
-            "tipo_id"
-        ).first()
+        actividad = Actividad.objects.get(id=encabezadoId)
+
+        data = {
+                "codigo": actividad.codigo,
+                "descripcion": actividad.descripcion,
+                "estado": actividad.get_estado_display(), 
+                "fecha_programada": actividad.fecha_programada,
+                "fecha_cierre": actividad.fecha_cierre,
+                "responsable_id": actividad.responsable_id,
+                "presupuesto": actividad.presupuesto,
+                "tipo_id": actividad.tipo_id
+            }
+        return data
+            
+        if Actividad.DoesNotExist:
+            return None

@@ -118,5 +118,5 @@ class ActividadesMapper:
             "fecha_programada": encabezado.get('fecha_programada'),
             "fecha_cierre": encabezado.get('fecha_cierre'),
             "presupuesto": encabezado.get('presupuesto'),
-            "responsable": {"nombre": encabezado.get('nombre_responsable')} if 'nombre_responsable' in encabezado else None,
+            "responsable": encabezado.get('nombre_responsable'),
         }
