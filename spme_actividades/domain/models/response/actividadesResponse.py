@@ -68,4 +68,4 @@ class ObtenerEncabezadoActividadResponse(serializers.Serializer):
     fecha_programada = serializers.DateField(required=False)
     fecha_cierre = serializers.DateField(required=False)
     presupuesto = serializers.DecimalField(max_digits=6, decimal_places=2, required=False)
-    responsable = serializers.JSONField(required=False)
+    responsable = serializers.CharField(max_length=150, required=False)
