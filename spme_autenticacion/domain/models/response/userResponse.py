@@ -29,6 +29,7 @@ class AutenticacionUsuarioResponse(serializers.Serializer):
     mensaje = serializers.CharField(required=False, allow_blank=True, max_length=150)
     usuario = serializers.CharField(required=False, allow_blank=False, max_length=150)
     rol = serializers.CharField(required=False, allow_blank=True, max_length=20)
+    permisos = serializers.CharField(required=False, allow_blank=True, max_length=20)
     # token = serializers.CharField(required=False, allow_blank=True, max_length=200)
     # refresh_token = serializers.CharField(required=False, allow_blank=True, max_length=200)
 

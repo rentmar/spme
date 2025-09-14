@@ -30,7 +30,8 @@ class UserMapper:
             "validacion": True,
             "mensaje": MessageType.AUTHORIZED.value,
             "usuario": user.username,
-            "rol":user.permisos
+            "rol":user.cargo,
+            "permisos": user.permisos,
         }
 
     @staticmethod
