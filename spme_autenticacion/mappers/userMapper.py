@@ -4,30 +4,6 @@ from spme.common.MessageManager import MessageType
 class UserMapper:
     
     @staticmethod
-    def toUsuarioResponse(user):
-        return {
-            "id": 1,
-            "usuario": "ACarvajal",
-            "nombre": "Alejandro",
-            "paterno": "Carvajal",
-            "materno": "Carvajal",
-            "ci": "4859687",
-            "cargo": "Gerente",
-            "banco": "Banco Nacional Bolivia BNB",
-            "numeroCuenta": "5874-55212-1211-15-4",
-            "tipoCuenta": "AHORRO"
-        }
-    
-    @staticmethod
-    def toListResponse(lista):
-        """
-        Convierte una lista de usuarios a un formato de respuesta.
-        """
-        return {
-            "usuarios": [UserMapper.toUsuarioResponse(user) for user in lista]
-        }
-
-    @staticmethod
     def toCreateSuccessResponse(user):
         return {
             "id": user.id,
@@ -35,9 +11,16 @@ class UserMapper:
         }
     
     @staticmethod
+    def toUpdateSuccessResponse(user):
+        return {
+            "usuario": user.username,
+            "mensaje": MessageType.UPDATE.value,
+        }
+    
+    @staticmethod
     def toErrorResponse(error_message):
         return {
-            "id":0,
+            "usuario": "",
             "mensaje": error_message,
         }
     
@@ -74,4 +57,28 @@ class UserMapper:
             "validadores": [UserMapper.toValidadorResponse(user) for user in lista]
         }
 
-   
+    @staticmethod
+    def toUsuarioResponse(user):
+        return {
+            "id": user.get("id"),
+            "usuario": user.get("username"),
+            "nombre": user.get("nombre"),
+            "paterno": user.get("paterno"),
+            "materno": user.get("materno"),
+            "ci": user.get("ci"),
+            "cargo": user.get("cargo"),
+            "permisos": user.get("permisos"),
+            "banco": user.get("banco"),
+            "numero_cuenta": user.get("numero_cuenta"),
+            "tipo_cuenta": user.get("tipo_cuenta"),
+            "es_activo": user.get("is_active"),
+        }
+    
+    @staticmethod
+    def toListUserResponse(lista):
+        """
+        Convierte una lista de usuarios a un formato de respuesta.
+        """
+        return {
+            "usuarios": [UserMapper.toUsuarioResponse(user) for user in lista]
+        }

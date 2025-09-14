@@ -4,6 +4,7 @@ from ..domain.repositories.rendicionCuentasRepository import RendicionCuentasRep
 from ..domain.repositories.solicitudReembolsoRepository import SolicitudReembolsoRepository
 from ..domain.repositories.solicitudViajeRepository import SolicitudViajeRepository
 from ..domain.repositories.solicitudPagoDirectoRepository import SolicitudPagoDirectoRepository
+from ..domain.repositories.formaPagoRepository import FormaPagoRepository
 
 class SolicitudFondosRepositoryContainer(containers.DeclarativeContainer):
 
@@ -34,4 +35,11 @@ class SolicitudPagoDirectoRepositoryContainer(containers.DeclarativeContainer):
     config = providers.Configuration()
 
     solicitudPagoDirectoRepository = providers.Singleton(SolicitudPagoDirectoRepository)
+
+class FormaPagoRepositoryContainer(containers.DeclarativeContainer):
+    
+    config = providers.Configuration()
+
+    formaPagoRepository = providers.Singleton(FormaPagoRepository)
+
 

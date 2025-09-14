@@ -8,13 +8,20 @@ class UsuarioValidadorResponse(serializers.Serializer):
     cargo = serializers.CharField(required=False,allow_blank=True, max_length=50)
   
 class UsuarioResponse(UsuarioValidadorResponse):
+    usuario = serializers.CharField(required=False, allow_blank=True, max_length=150)
     ci = serializers.CharField(required=False,allow_blank=True, max_length=12)
     banco = serializers.CharField(required=False,allow_blank=True, max_length=50)
-    numeroCuenta = serializers.CharField(required=False,allow_blank=True, max_length=50)
+    numero_cuenta = serializers.CharField(required=False,allow_blank=True, max_length=50)
+    tipo_cuenta = serializers.CharField(required=False,allow_blank=True, max_length=20)
     permisos = serializers.CharField(required=False, allow_blank=True, max_length=20)
-
+    es_activo = serializers.BooleanField(required=False)
+    
 class CreateUserResponse(serializers.Serializer):
     id = serializers.IntegerField(required=False)
+    mensaje = serializers.CharField(required=False, allow_blank=True, max_length=150)
+
+class ActualizarUsuarioResponse(serializers.Serializer):
+    usuario = serializers.CharField(required=False, allow_blank=True, max_length=150)
     mensaje = serializers.CharField(required=False, allow_blank=True, max_length=150)
 
 class AutenticacionUsuarioResponse(serializers.Serializer):
