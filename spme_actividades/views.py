@@ -131,12 +131,13 @@ class ObtenerEncabezadoActividad(APIView):
         if obtenerEncabezadoActividadRequest.is_valid():
 
             encabezado = self.actividadesPresenter.obtenerEncabezadoActividadPorId(obtenerEncabezadoActividadRequest.validated_data)
-
+            
             response = ObtenerEncabezadoActividadResponse(data=encabezado)
 
             if response.is_valid():
                 return Response(response.data, status=status.HTTP_200_OK)
             else:
+                print("Serializer Errors:", response.errors)
                 return Response({"estado": MessageType.NOT_FOUND.value}, status=status.HTTP_404_NOT_FOUND)
 
         else:
