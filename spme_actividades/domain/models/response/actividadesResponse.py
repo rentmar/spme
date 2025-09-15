@@ -5,10 +5,10 @@ class ActividadGanttResponse(serializers.Serializer):
     nombre_corto = serializers.CharField(max_length=100)
     descripcion = serializers.CharField(max_length=500)
     tipo = serializers.CharField(max_length=30)
-    fecha_programada = serializers.DateField()
+    fecha_programada = serializers.DateField(allow_null=True)
     fecha_inicio = serializers.DateField()
     fecha_cierre = serializers.DateField()
-    grado_ejecucion = serializers.CharField(max_length=25)
+    grado_ejecucion = serializers.CharField(max_length=25,allow_null=True)
     estado = serializers.CharField(max_length=15)
 
 class EstadoActividadResponse(serializers.Serializer):
@@ -61,11 +61,11 @@ class ObtenerActividadIdResponse(serializers.Serializer):
     resultado_og_id = serializers.IntegerField(required=False)
 
 class ObtenerEncabezadoActividadResponse(serializers.Serializer):
-    codigo = serializers.CharField(max_length=60, required=False)
+    codigo = serializers.CharField(max_length=60, required=False,allow_null=True)
     descripcion = serializers.CharField(max_length=500, required=False, allow_null=True)
-    estado = serializers.CharField(max_length=15, required=False)
-    tipo = serializers.CharField(max_length=100, required=False)
+    estado = serializers.CharField(max_length=15, required=False,allow_null=True)
+    tipo = serializers.CharField(max_length=100, required=False,allow_null=True)
     fecha_programada = serializers.DateField(required=False, allow_null=True)
-    fecha_cierre = serializers.DateField(required=False)
+    fecha_cierre = serializers.DateField(required=False,allow_null=True)
     presupuesto = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
-    responsable = serializers.CharField(max_length=150, required=False)
+    responsable = serializers.CharField(max_length=150, required=False,allow_null=True)

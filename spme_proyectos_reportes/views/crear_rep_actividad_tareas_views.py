@@ -105,7 +105,7 @@ def generar_reporte_actividad_word(request, actividad_id):
             document.add_paragraph('No hay solicitudes de fondos registradas para esta actividad.', style='Intense Quote')
 
         # Solicitudes de Reembolso - SIEMPRE MOSTRAR TÍTULO
-        document.add_heading('4. SOLICITUDES DE REEMBOLSO', level=1)
+        """document.add_heading('4. SOLICITUDES DE REEMBOLSO', level=1)
         if actividad.usuario_actividad_reembolso.exists():
             for i, solicitud in enumerate(actividad.usuario_actividad_reembolso.all(), 1):
                 document.add_heading(f'4.{i} Reembolso: {solicitud.numeroFormulario}', level=2)
@@ -117,7 +117,7 @@ def generar_reporte_actividad_word(request, actividad_id):
                 document.add_paragraph('')  # Espacio en blanco
         else:
             document.add_paragraph('No hay solicitudes de reembolso registradas para esta actividad.', style='Intense Quote')
-
+        """
         # Solicitudes de Pago Directo - SIEMPRE MOSTRAR TÍTULO
         document.add_heading('5. SOLICITUDES DE PAGO DIRECTO', level=1)
         if actividad.usuario_actividad_sol_pago_directo.exists():
