@@ -2,7 +2,8 @@ from django.urls import path, include
 from .views import *
 from rest_framework.routers import DefaultRouter
 from .views.estructura_jerarquica_proy_views import prueba_conexion_reportes, estructura_jerarquica_completa
-from .views.crear_entrada_bitacora_indicador_view import BitacoraIndicadorViewSet
+from .views.crear_entrada_bitacora_indicador_view import crear_bitacora_indicador
+from .views.obtener_bitacora_indicador_views import obtener_bitacoras_indicador, obtener_bitacoras_indicador_detallado
 from .views.test_docx_view import test_docx_status, test_docx_endpoint
 from .views.reporte_actividad_view import generar_reporte_actividad, info_reporte_actividad
 from .views.estructura_proyecto_reportes_views import ProyectoEstructuraCompletaView
@@ -10,7 +11,6 @@ from .views.proyecto_reporte_view import ProyectoReporteCompletoView, descargar_
 
 router = DefaultRouter()
 
-router.register(r'bitacora-indicadores', BitacoraIndicadorViewSet, basename='bitacora_indicador')
 #router.register(r'planes', ProyectoPlanViewSet, basename='proyecto-plan')
 
 urlpatterns = [
@@ -20,6 +20,10 @@ urlpatterns = [
     path(r'test/docx/generate/', test_docx_endpoint, name='test-docx-generate'),
     path(r'test/docx/status/', test_docx_status, name='test-docx-status'),
     path(r'proyectos/<int:id>/estructura-reportes/', ProyectoEstructuraCompletaView.as_view(), name='proyecto_estrucuctura_completa_reportes' ),
+    #Registro de bitacoras
+    path(r'bitacora-indicador/crear/', crear_bitacora_indicador, name='crear-bitacora-indicador' ),
+    path(r'bitacora-indicador/obtener/', obtener_bitacoras_indicador, name='obtener_bitacoras_indicador'),
+    path(r'bitacora-indicador/obtener-detallado/', obtener_bitacoras_indicador_detallado, name='obtener_bitacoras_indicador_detallado'),
     #Reporte de proyecto
     path(r'proyectos/<int:id>/reporte-completo/', ProyectoReporteCompletoView.as_view(), name='proyecto-reporte-completo'),
     path(r'proyectos/<int:id>/descargar-reporte/', descargar_reporte_proyecto, name='descargar-reporte-proyecto'),
