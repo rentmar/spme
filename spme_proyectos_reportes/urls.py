@@ -8,6 +8,7 @@ from .views.test_docx_view import test_docx_status, test_docx_endpoint
 from .views.reporte_actividad_view import generar_reporte_actividad, info_reporte_actividad
 from .views.estructura_proyecto_reportes_views import ProyectoEstructuraCompletaView
 from .views.proyecto_reporte_view import ProyectoReporteCompletoView, descargar_reporte_proyecto
+from .views.crear_rep_actividad_tareas_views import generar_reporte_actividad_word
 
 router = DefaultRouter()
 
@@ -30,7 +31,7 @@ urlpatterns = [
     #Reporte de Acividades
     path(r'actividades/<int:actividad_id>/reporte/generar/', generar_reporte_actividad, name='generar-reporte-actividad'),
     path(r'actividades/<int:actividad_id>/reporte/info/', info_reporte_actividad, name='info-reporte-actividad'),
-
+    path(r'actividad/<int:actividad_id>/reporte-word/', generar_reporte_actividad_word, name='actividad_tarea_reporte')
     #path(r'proyectos/test-conexion/', test_connection, name='proyecto-test'),
     #path(r'proyectos/<int:id>/detalles/', ProyectoDetailView.as_view(), name='proyecto_detalles_por_id' ),
     #path(r'actualizar-estructura/', actualizar_estructura_completa, name='actualizar_estructura'),
