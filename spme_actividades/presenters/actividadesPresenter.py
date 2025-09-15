@@ -42,6 +42,7 @@ class ActividadesPresenter:
         
     def obtenerEncabezadoActividadPorId(self, encabezadoIdRequest):
         encabezado = self.obtenerEncabezadoActividadPorIdUseCase.execute(encabezadoIdRequest)
+       
         if encabezado is not None:
             return ActividadesMapper.toObtenerEncabezadoActividadResponse(encabezado)
         else:

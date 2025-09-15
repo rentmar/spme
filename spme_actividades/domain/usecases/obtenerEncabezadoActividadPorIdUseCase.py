@@ -11,12 +11,12 @@ class ObtenerEncabezadoActividadPorIdUseCase:
 
     def execute(self, encabezadoRequest):
         datosEncabezado = self.actividadesRepository.obtenerEncabezadoActividadPorId(encabezadoRequest['id'])
-        
+      
         if datosEncabezado is None:
             return None
 
         datosUsuario = self.userRepository.obtenerNombreUsuarioPorId(datosEncabezado['responsable_id'])
-        
+
         if datosUsuario is not None:
             datosEncabezado['nombre_responsable'] = datosUsuario['nombre'] + " " + datosUsuario['paterno'] + " " + datosUsuario['materno']
 

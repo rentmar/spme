@@ -112,11 +112,11 @@ class ActividadesMapper:
     def toObtenerEncabezadoActividadResponse(encabezado):
         return {
             "codigo": encabezado.get('codigo'),
-            "descripcion": encabezado.get('descripcion'),
+            "descripcion": encabezado.get('descripcion') if encabezado.get('descripcion') is not None else "No Definido",
             "estado": encabezado.get('estado'),
             "tipo": encabezado.get('tipo_actividad'),
             "fecha_programada": encabezado.get('fecha_programada'),
             "fecha_cierre": encabezado.get('fecha_cierre'),
-            "presupuesto": encabezado.get('presupuesto'),
-            "responsable": encabezado.get('nombre_responsable'),
+            "presupuesto": encabezado.get('presupuesto') if encabezado.get('presupuesto') is not None else 0,
+            "responsable": encabezado.get('nombre_responsable') if encabezado.get('nombre_responsable') is not None else "No Definido",
         }
