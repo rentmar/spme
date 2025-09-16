@@ -9,10 +9,13 @@ from .views.reporte_actividad_view import generar_reporte_actividad, info_report
 from .views.estructura_proyecto_reportes_views import ProyectoEstructuraCompletaView
 from .views.proyecto_reporte_view import ProyectoReporteCompletoView, descargar_reporte_proyecto
 from .views.crear_rep_actividad_tareas_views import generar_reporte_actividad_word
+from .views.bitacora_indicador_views import BitacoraIndicadorViews
 
 router = DefaultRouter()
 
 #router.register(r'planes', ProyectoPlanViewSet, basename='proyecto-plan')
+router.register(r'bitacora-indicador', BitacoraIndicadorViews, basename='bitacora_indicadores_views')
+
 
 urlpatterns = [
     path(r'test-cnx/', prueba_conexion_reportes, name='reportes-test'),
