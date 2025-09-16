@@ -10,6 +10,7 @@ from .views.estructura_proyecto_reportes_views import ProyectoEstructuraCompleta
 from .views.proyecto_reporte_view import ProyectoReporteCompletoView, descargar_reporte_proyecto
 from .views.crear_rep_actividad_tareas_views import generar_reporte_actividad_word
 from .views.bitacora_indicador_views import BitacoraIndicadorViews
+from .views.get_bitacora_id_tipo_views import bitacoras_por_indicador
 
 router = DefaultRouter()
 
@@ -28,6 +29,7 @@ urlpatterns = [
     path(r'bitacora-indicador/crear/', crear_bitacora_indicador, name='crear-bitacora-indicador' ),
     path(r'bitacora-indicador/obtener/', obtener_bitacoras_indicador, name='obtener_bitacoras_indicador'),
     path(r'bitacora-indicador/obtener-detallado/', obtener_bitacoras_indicador_detallado, name='obtener_bitacoras_indicador_detallado'),
+    path(r'bitacoras-lista-tipo-id/', bitacoras_por_indicador, name='bitacoras-por-indicador' ),
     #Reporte de proyecto
     path(r'proyectos/<int:id>/reporte-completo/', ProyectoReporteCompletoView.as_view(), name='proyecto-reporte-completo'),
     path(r'proyectos/<int:id>/descargar-reporte/', descargar_reporte_proyecto, name='descargar-reporte-proyecto'),
