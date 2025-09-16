@@ -15,6 +15,21 @@ from django.utils import timezone
 #from .models import Actividad
 #from .serializers import ActividadReporteSerializer
 
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from docx import Document
+from docx.shared import Inches, Pt
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.table import WD_TABLE_ALIGNMENT
+import io
+from spme_actividades.models import Actividad
+from ..serializers.crear_rep_actividad_tareas_serializers import ActividadReporteSerializer 
+from django.utils import timezone
+
+
 @api_view(['GET'])
 def generar_reporte_actividad_word(request, actividad_id):
     try:
@@ -22,7 +37,7 @@ def generar_reporte_actividad_word(request, actividad_id):
         actividad = get_object_or_404(Actividad.objects.prefetch_related(
             'tareas',
             'usuario_actividad_solicitud',
-            'usuario_actividad_reembolso',
+            # La relación 'usuario_actividad_reembolso' ha sido eliminada.
             'usuario_actividad_sol_pago_directo',
             'usuario_actividad_sol_viaje',
             'rendicion_cuentas_actividad',
@@ -86,7 +101,7 @@ def generar_reporte_actividad_word(request, actividad_id):
                 document.add_paragraph(f'Estado: {tarea.get_estado_display()}')
                 document.add_paragraph(f'Fecha Límite: {tarea.fecha_limite}')
                 document.add_paragraph(f'Presupuesto: ${tarea.presupuesto}' if tarea.presupuesto else 'Presupuesto: N/A')
-                document.add_paragraph('')  # Espacio en blanco
+                document.add_paragraph('') # Espacio en blanco
         else:
             document.add_paragraph('No hay tareas registradas para esta actividad.', style='Intense Quote')
 
@@ -100,29 +115,17 @@ def generar_reporte_actividad_word(request, actividad_id):
                 document.add_paragraph(f'Validación Responsable: {"✅ Aprobado" if solicitud.validacionResponsable else "❌ Pendiente"}')
                 document.add_paragraph(f'Validación Coordinador: {"✅ Aprobado" if solicitud.validacionCoordinador else "❌ Pendiente"}')
                 document.add_paragraph(f'Lugar: {solicitud.lugarSolicitud}')
-                document.add_paragraph('')  # Espacio en blanco
+                document.add_paragraph('') # Espacio en blanco
         else:
             document.add_paragraph('No hay solicitudes de fondos registradas para esta actividad.', style='Intense Quote')
 
-        # Solicitudes de Reembolso - SIEMPRE MOSTRAR TÍTULO
-        """document.add_heading('4. SOLICITUDES DE REEMBOLSO', level=1)
-        if actividad.usuario_actividad_reembolso.exists():
-            for i, solicitud in enumerate(actividad.usuario_actividad_reembolso.all(), 1):
-                document.add_heading(f'4.{i} Reembolso: {solicitud.numeroFormulario}', level=2)
-                document.add_paragraph(f'Monto Solicitado: ${solicitud.montoSolicitado}' if solicitud.montoSolicitado else 'Monto Solicitado: N/A')
-                document.add_paragraph(f'Fecha Solicitud: {solicitud.fechaSolicitud}')
-                document.add_paragraph(f'Lugar: {solicitud.lugarSolicitud}')
-                document.add_paragraph(f'Validación Responsable: {"✅ Aprobado" if solicitud.validacionResponsable else "❌ Pendiente"}')
-                document.add_paragraph(f'Validación Coordinador: {"✅ Aprobado" if solicitud.validacionCoordinador else "❌ Pendiente"}')
-                document.add_paragraph('')  # Espacio en blanco
-        else:
-            document.add_paragraph('No hay solicitudes de reembolso registradas para esta actividad.', style='Intense Quote')
-        """
+        # La sección de "Solicitudes de Reembolso" ha sido eliminada por completo.
+
         # Solicitudes de Pago Directo - SIEMPRE MOSTRAR TÍTULO
-        document.add_heading('5. SOLICITUDES DE PAGO DIRECTO', level=1)
+        document.add_heading('4. SOLICITUDES DE PAGO DIRECTO', level=1)
         if actividad.usuario_actividad_sol_pago_directo.exists():
             for i, solicitud in enumerate(actividad.usuario_actividad_sol_pago_directo.all(), 1):
-                document.add_heading(f'5.{i} Pago Directo: {solicitud.numeroFormulario}', level=2)
+                document.add_heading(f'4.{i} Pago Directo: {solicitud.numeroFormulario}', level=2)
                 document.add_paragraph(f'Nombre: {solicitud.nombre} {solicitud.paterno} {solicitud.materno}')
                 document.add_paragraph(f'CI: {solicitud.ci}')
                 document.add_paragraph(f'Banco: {solicitud.banco}')
@@ -131,15 +134,15 @@ def generar_reporte_actividad_word(request, actividad_id):
                 document.add_paragraph(f'Cargo: {solicitud.cargo}')
                 document.add_paragraph(f'Validación Responsable: {"✅ Aprobado" if solicitud.validacionResponsable else "❌ Pendiente"}')
                 document.add_paragraph(f'Validación Coordinador: {"✅ Aprobado" if solicitud.validacionCoordinador else "❌ Pendiente"}')
-                document.add_paragraph('')  # Espacio en blanco
+                document.add_paragraph('') # Espacio en blanco
         else:
             document.add_paragraph('No hay solicitudes de pago directo registradas para esta actividad.', style='Intense Quote')
 
         # Solicitudes de Viaje - SIEMPRE MOSTRAR TÍTULO
-        document.add_heading('6. SOLICITUDES DE VIAJE', level=1)
+        document.add_heading('5. SOLICITUDES DE VIAJE', level=1)
         if actividad.usuario_actividad_sol_viaje.exists():
             for i, solicitud in enumerate(actividad.usuario_actividad_sol_viaje.all(), 1):
-                document.add_heading(f'6.{i} Viaje: {solicitud.numeroFormulario}', level=2)
+                document.add_heading(f'5.{i} Viaje: {solicitud.numeroFormulario}', level=2)
                 document.add_paragraph(f'Evento: {solicitud.evento}')
                 document.add_paragraph(f'Fecha Inicio: {solicitud.fechaInicio}')
                 document.add_paragraph(f'Fecha Fin: {solicitud.fechaFin}')
@@ -148,15 +151,15 @@ def generar_reporte_actividad_word(request, actividad_id):
                 document.add_paragraph(f'Monto Solicitado: ${solicitud.montoSolicitado}' if solicitud.montoSolicitado else 'Monto Solicitado: N/A')
                 document.add_paragraph(f'Validación Responsable: {"✅ Aprobado" if solicitud.validacionResponsable else "❌ Pendiente"}')
                 document.add_paragraph(f'Validación Coordinador: {"✅ Aprobado" if solicitud.validacionCoordinador else "❌ Pendiente"}')
-                document.add_paragraph('')  # Espacio en blanco
+                document.add_paragraph('') # Espacio en blanco
         else:
             document.add_paragraph('No hay solicitudes de viaje registradas para esta actividad.', style='Intense Quote')
 
         # Rendiciones de Cuentas - SIEMPRE MOSTRAR TÍTULO
-        document.add_heading('7. RENDICIONES DE CUENTAS', level=1)
+        document.add_heading('6. RENDICIONES DE CUENTAS', level=1)
         if actividad.rendicion_cuentas_actividad.exists():
             for i, rendicion in enumerate(actividad.rendicion_cuentas_actividad.all(), 1):
-                document.add_heading(f'7.{i} Rendición: {rendicion.numeroFormulario}', level=2)
+                document.add_heading(f'6.{i} Rendición: {rendicion.numeroFormulario}', level=2)
                 document.add_paragraph(f'Monto Asignado: ${rendicion.montoAsignado}' if rendicion.montoAsignado else 'Monto Asignado: N/A')
                 document.add_paragraph(f'Monto Descargado: ${rendicion.montoDescargado}' if rendicion.montoDescargado else 'Monto Descargado: N/A')
                 document.add_paragraph(f'Saldo: ${rendicion.saldo}' if rendicion.saldo else 'Saldo: N/A')
@@ -166,15 +169,15 @@ def generar_reporte_actividad_word(request, actividad_id):
                 document.add_paragraph(f'Validación Coordinador: {"✅ Aprobado" if rendicion.validacionCoordinador else "❌ Pendiente"}')
                 document.add_paragraph(f'Validación Contador: {"✅ Aprobado" if rendicion.validacionContador else "❌ Pendiente"}')
                 document.add_paragraph(f'Validación Administrador: {"✅ Aprobado" if rendicion.validacionAdministrador else "❌ Pendiente"}')
-                document.add_paragraph('')  # Espacio en blanco
+                document.add_paragraph('') # Espacio en blanco
         else:
             document.add_paragraph('No hay rendiciones de cuentas registradas para esta actividad.', style='Intense Quote')
 
         # Informes de Actividad - SIEMPRE MOSTRAR TÍTULO
-        document.add_heading('8. INFORMES DE ACTIVIDAD', level=1)
+        document.add_heading('7. INFORMES DE ACTIVIDAD', level=1)
         if actividad.actividad_informe_actividad.exists():
             for i, informe in enumerate(actividad.actividad_informe_actividad.all(), 1):
-                document.add_heading(f'8.{i} Informe: {informe.numeroInforme}', level=2)
+                document.add_heading(f'7.{i} Informe: {informe.numeroInforme}', level=2)
                 document.add_paragraph(f'Tipo de Reporte: {informe.reporteTipo}')
                 document.add_paragraph(f'Objetivo de la Actividad: {informe.informaObjetivoActividad}')
                 document.add_paragraph(f'Herramienta de Evaluación: {informe.herramientaEvaluacion}')
@@ -191,7 +194,7 @@ def generar_reporte_actividad_word(request, actividad_id):
                     for contribucion in informe.contribucionesActividad:
                         document.add_paragraph(f'  • {contribucion}', style='List Bullet')
                 
-                document.add_paragraph('')  # Espacio en blanco
+                document.add_paragraph('') # Espacio en blanco
         else:
             document.add_paragraph('No hay informes de actividad registrados para esta actividad.', style='Intense Quote')
 
