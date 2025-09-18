@@ -72,24 +72,17 @@ class ObtenerActividadesGantt(APIView):
         self.contenedor = ActividadesPresenterContainer()
         self.actividadesPresenter = self.contenedor.actividadesPresenter()
 
-    def post(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
 
-        requestActividadesGantt = ObtenerActividadesUsuarioRequest(data=request.data)
-
-        if requestActividadesGantt.is_valid():
-
-            actividadesGantt = self.actividadesPresenter.obtenerActividadesGantt(requestActividadesGantt.validated_data)
-
-            response = ActividadesGanttResponse(data=actividadesGantt)
-           
-            if response.is_valid():
-                return Response(response.data, status=status.HTTP_200_OK)
-            else:
-                print("Serializer Errors:", response.errors)
-                return Response({"estado": MessageType.NOT_FOUND.value}, status=status.HTTP_404_NOT_FOUND)
-
+        actividadesGantt = self.actividadesPresenter.obtenerActividadesGantt()
+       
+        response = ActividadesGanttResponse(data=actividadesGantt)
+        
+        if response.is_valid():
+            return Response(response.data, status=status.HTTP_200_OK)
         else:
-            return Response({"estado": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
+            print("Serializer Errors:", response.errors)
+            return Response({"estado": MessageType.NOT_FOUND.value}, status=status.HTTP_404_NOT_FOUND)
 
 class ObtenerActividadId(APIView):
     """
