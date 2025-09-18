@@ -47,15 +47,16 @@ class ActividadesMapper:
         lista = []
         for actividad in actividades:
             act = {
-                "codigo": actividad['codigo'],
-                "nombre_corto": actividad['nombreCorto'],
-                "descripcion": actividad['descripcion'],
-                "tipo": actividad['tipo_id'],
-                "fecha_programada": actividad['fecha_programada'],
-                "fecha_inicio": actividad['fecha_inicio'],
-                "fecha_cierre": actividad['fecha_cierre'],
-                "grado_ejecucion": actividad['gradoEjecucion'],
-                "estado": actividad['estado'],
+                "nombre_responsable": actividad['nombre_responsable'] if actividad['nombre_responsable'] is not None else "No Definido",
+                "codigo": actividad['codigo'] if actividad['codigo'] is not None else "No Definido",
+                "nombre_corto": actividad['nombreCorto'] if actividad['nombreCorto'] is not None else "No Definido",
+                "descripcion": actividad['descripcion'] if actividad['descripcion'] is not None else "No Definido",
+                "tipo": actividad['tipo_id'] if actividad['tipo_id'] is not None else "No Definido",
+                "fecha_programada": actividad['fecha_programada'] if actividad['fecha_programada'] is not None else "2000-01-01",
+                "fecha_inicio": actividad['fecha_inicio'] if actividad['fecha_inicio'] is not None else "2000-01-01",
+                "fecha_cierre": actividad['fecha_cierre'] if actividad['fecha_cierre'] is not None else "2000-01-01",
+                "grado_ejecucion": actividad['gradoEjecucion'] if actividad['gradoEjecucion'] is not None else "No Definido",
+                "estado": actividad['estado'] if actividad['estado'] is not None else "No Definido",
             }
             lista.append(act)
         return {

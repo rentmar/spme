@@ -8,8 +8,8 @@ class ActividadesRepository:
     def obtenerActividadesPorUsuario(self, usuarioIdRequest):
         return self.actividadesDataAccess.obtenerActividadesPorUsuario(usuarioIdRequest['responsable_id'])
 
-    def obtenerActividadesGanttId(self,idResponsable):
-        return self.actividadesDataAccess.obtenerActividadesGanttId(idResponsable)
+    def obtenerActividadesGanttId(self):
+        return self.actividadesDataAccess.obtenerActividadesGanttId()
 
     def crearActividad(self,actividadRequest):
         return self.actividadesDataAccess.crearActividad(actividadRequest)
@@ -22,4 +22,18 @@ class ActividadesRepository:
 
     def obtenerEncabezadoActividadPorId(self, encabezadoId):
         return self.actividadesDataAccess.obtenerEncabezadoActividadPorId(encabezadoId)
+
+    def totalActividadesPlanificadas(self):
+        return self.actividadesDataAccess.totalActividadesPlanificadas()
     
+    def totalActividadesEnEjecucion(self):
+        return self.actividadesDataAccess.totalActividadesEnEjecucion()
+
+    def totalActividadesFinalizadas(self):
+        return self.actividadesDataAccess.totalActividadesFinalizadas()
+
+    def sumaPresupuestosGlobales(self):
+        return self.actividadesDataAccess.sumaPresupuestosGlobales()
+    
+    def sumaPresupuestos(self):
+        return self.actividadesDataAccess.sumaPresupuestos()

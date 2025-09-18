@@ -1,4 +1,5 @@
 from ..models import Actividad
+from django.db.models import Sum
 
 class ActividadesDataAccess:
     def __init__(self):
@@ -17,14 +18,12 @@ class ActividadesDataAccess:
     def crearActividad(self,actividadRequest):
         return Actividad.objects.create(**actividadRequest)
     
-    def obtenerActividadesGanttId(self,idResponsable):
+    def obtenerActividadesGanttId(self):
         """
         Obtiene las actividades asociadas al diagrama de Gantt.
         :return: Lista de actividades del diagrama de Gantt.
         """
-        return Actividad.objects.filter(
-            responsable_id=idResponsable
-        ).values(
+        return Actividad.objects.values(
             'codigo',
             'nombreCorto',
             'descripcion',
@@ -33,7 +32,8 @@ class ActividadesDataAccess:
             'fecha_inicio',
             'fecha_cierre',
             'gradoEjecucion',
-            'estado'
+            'estado',
+            'responsable_id',
         )
 
     def obtenerActividadPorId(self, actividadId):
@@ -77,5 +77,44 @@ class ActividadesDataAccess:
             }
         return data
             
-        if Actividad.DoesNotExist:
-            return None
+    def totalActividadesPlanificadas(self):
+        """
+        Obtiene el total de actividades planificadas.
+
+        :return: Total de actividades planificadas.
+        """
+        return Actividad.objects.filter(estado='PLAN').count()
+    
+    def totalActividadesEnEjecucion(self):
+        """
+        Obtiene el total de actividades en ejecución.
+
+        :return: Total de actividades en ejecución.
+        """
+        return Actividad.objects.filter(estado='EJEC').count()
+    
+    def totalActividadesFinalizadas(self):
+        """
+        Obtiene el total de actividades finalizadas.
+
+        :return: Total de actividades finalizadas.
+        """
+        return Actividad.objects.filter(estado='FIN').count()
+    
+    def sumaPresupuestosGlobales(self):
+        """
+        Obtiene la suma de los presupuestos globales de todas las actividades.
+
+        :return: Suma de los presupuestos globales.
+        """
+        resultado = Actividad.objects.filter(estado='PLAN').aggregate(total_presupuestos_globales=Sum('presupuestoGlobal'))
+        return resultado['total_presupuestos_globales'] if resultado['total_presupuestos_globales'] is not None else 0
+    
+    def sumaPresupuestos(self):
+        """
+        Obtiene la suma de los presupuestos de todas las actividades.
+
+        :return: Suma de los presupuestos.
+        """
+        resultado = Actividad.objects.filter(estado='PLAN').aggregate(total_presupuestos=Sum('presupuesto'))
+        return resultado['total_presupuestos'] if resultado['total_presupuestos'] is not None else 0
