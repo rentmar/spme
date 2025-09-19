@@ -11,6 +11,7 @@ import io
 from spme_actividades.models import Actividad
 from ..serializers.crear_rep_actividad_tareas_serializers import ActividadReporteSerializer 
 from django.utils import timezone
+import json
 
 #from .models import Actividad
 #from .serializers import ActividadReporteSerializer
@@ -29,7 +30,6 @@ from spme_actividades.models import Actividad
 from ..serializers.crear_rep_actividad_tareas_serializers import ActividadReporteSerializer 
 from django.utils import timezone
 
-
 @api_view(['GET'])
 def generar_reporte_actividad_word(request, actividad_id):
     try:
@@ -37,7 +37,6 @@ def generar_reporte_actividad_word(request, actividad_id):
         actividad = get_object_or_404(Actividad.objects.prefetch_related(
             'tareas',
             'usuario_actividad_solicitud',
-            # La relación 'usuario_actividad_reembolso' ha sido eliminada.
             'usuario_actividad_sol_pago_directo',
             'usuario_actividad_sol_viaje',
             'rendicion_cuentas_actividad',
@@ -119,8 +118,6 @@ def generar_reporte_actividad_word(request, actividad_id):
         else:
             document.add_paragraph('No hay solicitudes de fondos registradas para esta actividad.', style='Intense Quote')
 
-        # La sección de "Solicitudes de Reembolso" ha sido eliminada por completo.
-
         # Solicitudes de Pago Directo - SIEMPRE MOSTRAR TÍTULO
         document.add_heading('4. SOLICITUDES DE PAGO DIRECTO', level=1)
         if actividad.usuario_actividad_sol_pago_directo.exists():
@@ -184,15 +181,17 @@ def generar_reporte_actividad_word(request, actividad_id):
                 document.add_paragraph(f'Descripción Medios de Verificación: {informe.descripcionMediosVerificacion}')
                 document.add_paragraph(f'Comentarios y Recomendaciones: {informe.comentariosRecomendacion}')
                 
+                # CORRECCIÓN: Mostrar contribucionesProyecto como JSON sin procesar
                 if informe.contribucionesProyecto:
                     document.add_paragraph('Contribuciones al Proyecto:')
-                    for contribucion in informe.contribucionesProyecto:
-                        document.add_paragraph(f'  • {contribucion}', style='List Bullet')
+                    contribuciones_proyecto_paragraph = document.add_paragraph()
+                    contribuciones_proyecto_paragraph.add_run(str(informe.contribucionesProyecto))
                 
+                # CORRECCIÓN: Mostrar contribucionesActividad como JSON sin procesar
                 if informe.contribucionesActividad:
                     document.add_paragraph('Contribuciones a la Actividad:')
-                    for contribucion in informe.contribucionesActividad:
-                        document.add_paragraph(f'  • {contribucion}', style='List Bullet')
+                    contribuciones_actividad_paragraph = document.add_paragraph()
+                    contribuciones_actividad_paragraph.add_run(str(informe.contribucionesActividad))
                 
                 document.add_paragraph('') # Espacio en blanco
         else:

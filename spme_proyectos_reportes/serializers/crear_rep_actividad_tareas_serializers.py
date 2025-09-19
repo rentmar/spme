@@ -5,7 +5,7 @@ from spme_monitoreo.models import *
 from rest_framework import serializers
 from spme_actividades.models import Actividad, TareaActividad
 from spme_monitoreo.models import *
-
+ 
 class TareaActividadSerializer(serializers.ModelSerializer):
     class Meta:
         model = TareaActividad
