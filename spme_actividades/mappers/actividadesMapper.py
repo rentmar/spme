@@ -46,8 +46,9 @@ class ActividadesMapper:
     def toActividadesGanttResponse(actividades):
         lista = []
         for actividad in actividades:
+            nombre_responsable = actividad.get('nombre_responsable')
             act = {
-                "nombre_responsable": actividad['nombre_responsable'] if actividad['nombre_responsable'] is not None else "No Definido",
+                "nombre_responsable": nombre_responsable if nombre_responsable is not None else "No Definido",
                 "codigo": actividad['codigo'] if actividad['codigo'] is not None else "No Definido",
                 "nombre_corto": actividad['nombreCorto'] if actividad['nombreCorto'] is not None else "No Definido",
                 "descripcion": actividad['descripcion'] if actividad['descripcion'] is not None else "No Definido",
