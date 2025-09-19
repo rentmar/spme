@@ -33,6 +33,8 @@ from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
 from .viewdiagramaporidproyecto import DiagramaPorProyectoView
 #Informe de actividad
 from .monitoreo.views.crear_informe_actividad_views import InformeActividadView
+#Gannt
+from .actividades.views.datos_gantt_views import actividades_con_estados
 
 
 
@@ -161,6 +163,8 @@ urlpatterns =[
     path(r'monitoreo/obtener-datos-formulario/', obtener_datos_solicitud_fondos, name='obt_datos_form_sol_fondos'),
     path(r'monitoreo/crear-rendicion-cuentas/', crear_rendicion_cuentas, name='form_rendicion_cuentas'),
     path(r'monitoreo/rendicion-cuentas-datos/', RendicionCuentasDatosView.as_view(), name='rendicion-cuentas-datos-form'),
+    #Diagrama de Gannt
+    path(r'actividades-gannt/', actividades_con_estados, name='actividades-diagrama-gannt' ),
 
 
 ]

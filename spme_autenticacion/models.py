@@ -23,7 +23,7 @@ class UsuarioManager(BaseUserManager):
             raise ValueError('Superuser debe tener is_superuser=True.')
 
         return self.create_user(username, password, **extra_fields)
-
+ 
 class Usuario(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True)
     username = models.CharField(max_length=150, unique=True)
