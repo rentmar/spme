@@ -1,8 +1,6 @@
-# views.py
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from spme_actividades.models import Actividad
-#from .serializers import ActividadSerializer
 from ..serializador.datos_gantt_serializer import ActividadGanntSerializer
 
 @api_view(['GET'])
