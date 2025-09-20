@@ -19,10 +19,15 @@ class ObtenerEncabezadoActividadPorIdUseCase:
 
         if datosUsuario is not None:
             datosEncabezado['nombre_responsable'] = datosUsuario['nombre'] + " " + datosUsuario['paterno'] + " " + datosUsuario['materno']
+        
+        idTipo = datosEncabezado.get('tipo_id')
 
-        tipoActividad = self.actividadTipoRepository.obtenerTipoActividadPorId(datosEncabezado['tipo_id'])
+        if idTipo is not None: 
+            tipoActividad = self.actividadTipoRepository.obtenerTipoActividadPorId(idTipo)
 
-        if tipoActividad is not None:
-            datosEncabezado['tipo_actividad'] = tipoActividad.tipo_actividad
+            if tipoActividad is not None:
+                datosEncabezado['tipo_actividad'] = tipoActividad.tipo_actividad
+        else:
+            datosEncabezado['tipo_actividad'] = "No definido"
 
         return datosEncabezado
