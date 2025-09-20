@@ -6,8 +6,6 @@ class CrearSolicitudViajeRequest(serializers.Serializer):
     """
     numero_formulario = serializers.CharField(max_length=50)
     evento = serializers.CharField(max_length=150)
-    fecha_inicio = serializers.DateField()
-    fecha_fin = serializers.DateField()
     lugar_evento = serializers.CharField(max_length=150)
     instituciones_participantes = serializers.CharField(max_length=255)
     organizador = serializers.CharField(max_length=100)
@@ -24,13 +22,11 @@ class CrearSolicitudViajeRequest(serializers.Serializer):
     coordinador_id = serializers.IntegerField()
     forma_pago_id = serializers.IntegerField()
     responsable_id = serializers.IntegerField()
-    tarea_id = serializers.IntegerField()
+    tarea_id = serializers.IntegerField(allow_null=True)
     usuario_id = serializers.IntegerField(required=True, allow_null=False)
     bloquear_iconos = serializers.BooleanField(default=False)
     fecha_evento = serializers.DateField()
-    fuente_gasto = serializers.CharField(max_length=100, required=False, allow_null=True)
-    partida_gasto = serializers.CharField(max_length=100, required=False, allow_null=True)
-    solicitante_id = serializers.IntegerField(required=False, allow_null=True)
+    detalle_gasto = serializers.CharField(max_length=100, required=False, allow_null=True)
 
     def to_internal_value(self, data):
         """
@@ -40,8 +36,6 @@ class CrearSolicitudViajeRequest(serializers.Serializer):
         return {
             "numeroFormulario": internal_value.get("numero_formulario"),
             "evento": internal_value.get("evento"),
-            "fechaInicio": internal_value.get("fecha_inicio"),
-            "fechaFin": internal_value.get("fecha_fin"),
             "lugarEvento": internal_value.get("lugar_evento"),
             "institucionesParticipantes": internal_value.get("instituciones_participantes"),
             "organizador": internal_value.get("organizador"),
@@ -62,7 +56,5 @@ class CrearSolicitudViajeRequest(serializers.Serializer):
             "usuario_id": internal_value.get("usuario_id"),
             "bloquearIconos": internal_value.get("bloquear_iconos"),
             "fechaEvento": internal_value.get("fecha_evento"),
-            "fuenteGasto": internal_value.get("fuente_gasto"),
-            "partidaGasto": internal_value.get("partida_gasto"),
-            "solicitante_id": internal_value.get("solicitante_id")
+            "detalleGasto": internal_value.get("detalle_gasto")
         }
