@@ -39,7 +39,7 @@ class Actividad(models.Model):
         ('AART', 'Actividad de Articulacion'),
         ('OTRO', 'Otro'),
     ]
-
+ 
     #Datos de la actividad
     codigo = models.CharField(max_length=60, blank=True, null=True)
 
@@ -88,7 +88,7 @@ class Actividad(models.Model):
     #Estado de la actividad
     estado = models.CharField(max_length=15, choices=ESTADOS_ACTIVIDAD, default='CRD')
 
-       #Usuario
+    #Usuario
     #responsable = models.CharField(max_length=255, blank=True, null=True) #Usuario Asignado
 
     # proceso = models.IntegerField()

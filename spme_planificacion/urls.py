@@ -10,7 +10,6 @@ router.register(r'revisiones', PlanRevisionViewSet, basename='plan-revision')
 urlpatterns = [
     path(r'planes/<int:plan_id>/crear-revision/', ProyectoPlanViewSet.as_view({'post': 'create_revision'}), name='plan-crear-revision'), 
     path(r'proyectos/<int:proyectoId>/planificacion/', LatestProjectPlanAPIView.as_view(), name='proyecto-planificacion-ultimo'),
-
 ]
 
 urlpatterns += router.urls

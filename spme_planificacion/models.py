@@ -3,7 +3,7 @@ from spme_estructuracion_proyecto.models import Proyecto
 from django.db import models
 
 
-#Almacena la planificacion completa de un proyecto
+#Almacena la planificacion completa de un proyecto para seguimiento
 class PlanificacionProyecto(models.Model):
     proyecto = models.ForeignKey(
         Proyecto,
@@ -22,6 +22,12 @@ class PlanificacionProyecto(models.Model):
     class Meta:
         ordering = ['-version']
         unique_together = ['proyecto', 'version']
+        verbose_name = 'Planificacion Proyecto'
+        verbose_name_plural = 'Planificaciones Proyecto'
+
+    def __str__(self):
+        return f'Plan de {self.proyecto} - version {self.version}'    
+
 
 
 #Registra cambios especificos en la planificacion
@@ -48,6 +54,12 @@ class CambioPlanificacion(models.Model):
     
     class Meta:
         ordering = ['-realizado_el']
+        verbose_name = 'Cambio planificacion'
+        verbose_name_plural = 'Cambios planificacion'
+
+    def __str__(self):
+        return f'Cambio para: { self.planificacion }'    
+
 
 
 
