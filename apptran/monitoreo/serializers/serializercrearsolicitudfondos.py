@@ -14,6 +14,11 @@ class SolicitudFondosCreateSerializer(serializers.ModelSerializer):
     )
     lugar_solicitud = serializers.CharField(source='lugarSolicitud')
     fecha_solicitud = serializers.DateField(source='fechaSolicitud')
+    fecha_realizacion_actividad = serializers.DateField(  # NUEVO CAMPO
+        source='fechaRealizacionActividad',
+        required=False,
+        allow_null=True
+    )    
     monto_solicitado = serializers.DecimalField(
         max_digits=6, 
         decimal_places=2, 
@@ -70,7 +75,7 @@ class SolicitudFondosCreateSerializer(serializers.ModelSerializer):
         model = SolicitudFondos
         fields = [
             'numero_formulario', 'detalle_destino_fondos', 'bloquear_icono_sf', 'forma_pago', 
-            'lugar_solicitud', 'fecha_solicitud', 'monto_solicitado', 
+            'lugar_solicitud', 'fecha_solicitud', 'fecha_realizacion_actividad', 'monto_solicitado', 
             'validacion_responsable', 'id_responsable', 'validacion_coordinador', 
             'id_coordinador', 'id_usuario', 'actividad', 'id_tarea'
         ]

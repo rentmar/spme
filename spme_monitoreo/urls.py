@@ -7,6 +7,8 @@ router = DefaultRouter()
 urlpatterns = [
     path('', include(router.urls)),
     path(r'crearSolicitudFondos/',views.SolicitudFondos.as_view(), name='crearSolicitudFondos'),
+    path(r'obtenerSolicitudFondos/',views.ObtenerSolicitudFondos.as_view(), name='obtenerSolicitudFondos'),
+    path(r'obtener-solicitudFondosPor-idAidUidT/', views.ObtenerSolicitudFondosPorFiltros.as_view(), name='obtener-solicitudFondosPor-idAidUidT'),
     path(r'crearRendicionCuentas/',views.RendicionCuentas.as_view(), name='crearRendicionCuentas'),
     path(r'crearSolicitudReembolso/',views.SolicitudReembolso.as_view(), name='crearSolicitudReembolso'),
     path(r'crearSolicitudViaje/',views.SolicitudViaje.as_view(), name='crearSolicitudViaje'),

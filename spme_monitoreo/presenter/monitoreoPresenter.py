@@ -12,6 +12,25 @@ class SolicitudFondosPresenter:
             return ReponseMapper.toSuccessResponse(crearSolicitud)
         else:
             return ReponseMapper.toErrorResponse("Error al crear la solicitud de fondos")
+    
+        # Nuevo método para obtener todas las solicitudes
+    def obtenerSolicitudesFondos(self):
+        solicitudes = self.crearSolicitudFondosUseCase.obtenerTodasLasSolicitudes()
+        if solicitudes is not None:
+            return ReponseMapper.toSolicitudesFondosResponse(solicitudes)
+        else:
+            return ReponseMapper.toErrorResponse("Error al obtener las solicitudes de fondos")
+        
+    def obtenerSolicitudesFondosPorFiltros(self, actividad_id, usuario_id, tarea_id=None):
+        solicitudes = self.crearSolicitudFondosUseCase.obtenerSolicitudesPorFiltros(
+            actividad_id=actividad_id,
+            usuario_id=usuario_id,
+            tarea_id=tarea_id
+        )
+        if solicitudes is not None:
+            return ReponseMapper.toSolicitudesFondosResponse(solicitudes)
+        else:
+            return ReponseMapper.toErrorResponse("Error al obtener las solicitudes de fondos por filtros")
         
 class RendicionCuentasPresenter:
     def __init__(self):

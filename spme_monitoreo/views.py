@@ -17,30 +17,6 @@ from .domain.models.response.solicitudPagoDirectoResponse import CreateSolicitud
 from .domain.models.request.datosFormRequest import ObtenerDatosFormularioRequest
 from .domain.models.response.obtenerDatosFormResponse import ObtenerDatosFormularioResponse
 
-# class SolicitudFondos(APIView):
-#     """
-#     API para solicitud de fondos
-#     """
-#     def __init__(self):
-#         self.contenedor = SolicitudFondosPresenterContainer()
-#         self.solicitudFondosPresenter = self.contenedor.solicitudFondosPresenter()
-
-#     def post(self, request, *args, **kwargs):
-        
-#         createSolicitudFondosRequest = CrearSolicitudFondosRequest(data=request.data)
-        
-#         if createSolicitudFondosRequest.is_valid():
-            
-#             solicitudFondosResponse = self.solicitudFondosPresenter.crearSolicitudFondos(createSolicitudFondosRequest.validated_data)
-#             response = CreateSolicitudFondosResponse(data=solicitudFondosResponse)
-
-#             if response.is_valid():
-#                 return Response(response.data, status=status.HTTP_201_CREATED)
-#             else:
-#                 return Response({"estado": MessageType.ERROR.value}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-#         return Response({"estado": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
-
 class SolicitudFondos(APIView):
     """
     API para solicitud de fondos
@@ -67,6 +43,74 @@ class SolicitudFondos(APIView):
         
         except Exception as e:
             return Response({"estado": MessageType.ERROR.value, "mensaje": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# Nueva clase para obtener solicitudes - CORREGIDA
+class ObtenerSolicitudFondos(APIView):
+    """
+    API para obtener todas las solicitudes de fondos
+    """
+    
+    def __init__(self):
+        # Usamos el mismo contenedor que SolicitudFondos
+        self.contenedor = SolicitudFondosPresenterContainer()
+        self.solicitudFondosPresenter = self.contenedor.solicitudFondosPresenter()
+    
+    def get(self, request, *args, **kwargs):
+        try:
+            # Obtener todas las solicitudes de fondos
+            solicitudes = self.solicitudFondosPresenter.obtenerSolicitudesFondos()
+            return Response({
+                "estado": MessageType.SUCCESS.value,
+                "solicitudes": solicitudes
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({
+                "estado": MessageType.ERROR.value, 
+                "mensaje": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class ObtenerSolicitudFondosPorFiltros(APIView):
+    """
+    API para obtener solicitudes de fondos filtrando por actividad_id, usuario_id y tarea_id
+    """
+    
+    def __init__(self):
+        self.contenedor = SolicitudFondosPresenterContainer()
+        self.solicitudFondosPresenter = self.contenedor.solicitudFondosPresenter()
+    
+    def post(self, request, *args, **kwargs):  # Cambiado de GET a POST
+        try:
+            # Obtener parámetros del body JSON
+            data = request.data
+            actividad_id = data.get('actividad_id')
+            usuario_id = data.get('usuario_id')
+            tarea_id = data.get('tarea_id')
+            
+            # Validar parámetros requeridos
+            if not actividad_id or not usuario_id:
+                return Response({
+                    "estado": MessageType.BAD_REQUEST.value,
+                    "mensaje": "Los parámetros actividad_id y usuario_id son requeridos"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Llamar al presenter con los filtros
+            solicitudes = self.solicitudFondosPresenter.obtenerSolicitudesFondosPorFiltros(
+                actividad_id=actividad_id,
+                usuario_id=usuario_id,
+                tarea_id=tarea_id
+            )
+            
+            return Response({
+                "estado": MessageType.SUCCESS.value,
+                "solicitudes": solicitudes
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({
+                "estado": MessageType.ERROR.value, 
+                "mensaje": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class RendicionCuentas(APIView):
     """

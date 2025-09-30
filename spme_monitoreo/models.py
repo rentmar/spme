@@ -72,6 +72,10 @@ class SolicitudFondos(models.Model):
         blank=True,
     )
 
+    # Campos automáticos de Django (si usas auto_now_add y auto_now)
+    # created_at = models.DateTimeField(auto_now_add=True)  # Si existe
+    # updated_at = models.DateTimeField(auto_now=True)      # Si existe
+
     def __str__(self):
         return f"{self.numeroFormulario}"
 

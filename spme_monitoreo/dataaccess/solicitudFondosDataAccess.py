@@ -1,4 +1,5 @@
 from ..models import SolicitudFondos
+from django.db.models import Q
 
 class SolicitudFondosDataAccess:
     
@@ -18,3 +19,25 @@ class SolicitudFondosDataAccess:
         :return: Lista de solicitudes de fondos.
         """
         return SolicitudFondos.objects.all()
+    
+    def obtenerSolicitudesPorFiltros(self, actividad_id, usuario_id, tarea_id=None):
+        """
+        Obtiene solicitudes de fondos filtrando por actividad_id, usuario_id y tarea_id.
+        Si tarea_id es null, solo filtra por actividad_id y usuario_id.
+        
+        :param actividad_id: ID de la actividad
+        :param usuario_id: ID del usuario
+        :param tarea_id: ID de la tarea (opcional)
+        :return: Lista de solicitudes de fondos que coinciden con los filtros
+        """
+        # Construir el filtro base
+        filtro = Q(actividad_id=actividad_id) & Q(usuario_id=usuario_id)
+        
+        # Si tarea_id está especificado, agregarlo al filtro
+        if tarea_id:
+            filtro &= Q(tarea_id=tarea_id)
+        else:
+            # Si tarea_id es null, buscar donde tarea_id es null
+            filtro &= Q(tarea_id__isnull=True)
+        
+        return SolicitudFondos.objects.filter(filtro)
