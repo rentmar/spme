@@ -65,7 +65,8 @@ def obtener_datos_solicitud_fondos(request):
             )
         
         # Obtener validadores - todos los usuarios activos excepto el actual
-        validadores = Usuario.objects.filter(is_active=True).exclude(id=usuario.id)
+        #validadores = Usuario.objects.filter(is_active=True).exclude(id=usuario.id)
+        validadores = Usuario.objects.filter(is_active=True)
         
         #print(f"Validadores encontrados: {validadores.count()}")
         # for validador in validadores:

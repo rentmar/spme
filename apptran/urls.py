@@ -14,6 +14,8 @@ from .viewsplanificacion import obtener_historial_planificacion, obtener_planifi
 from .viewsactividadestareas import ActividadConTareasListView, ActividadConTareasDetailView
 from .planificacion.views.viewsactividadplansegbulk import procesar_actividades_planificacion_bulk
 from .actividades.views.actividad_indicador_views import ActividadIndicadorViewSet
+from .actividades.views.lista_actividad_tarea_views import ActividadSubActividadViewSet
+
 #from planificacion.vistas.viewsrutas import PruebaPlanificacionView
 from .actividades.views.viewsactividadrutas import rutas_actividad, ruta_actividad_proyecto
 from .actividades.views.viewsactividadrutaindicador import obtener_ruta_actividad_con_indicadores
@@ -73,6 +75,8 @@ router.register(r'procedencia-fondos', ProcedenciaFondosViewmodel, basename='pro
 router.register(r'efectos-proyecto', EfectoProyectoView, basename='efectos_proyecto')
 #Tipos de Actividad
 router.register(r'tipo-actividad', TipoActividadView, basename='tipo_actividad')
+#Lista de actividades
+router.register(r'actividades-tareas-lista', ActividadSubActividadViewSet, basename='lista_actividades_tareas')
 #Tareas de Actividades
 router.register(r'tareas-actividad', TareaActividadView, basename='tareas-actividades')
 #Actividad indicadores - bitacora
@@ -152,6 +156,7 @@ urlpatterns =[
     path(r'actividades/<int:actividad_id>/rutas/', rutas_actividad, name="rutas_actividad"),
     path(r'actividad/<int:actividad_id>/ruta-con-indicadores/', obtener_ruta_actividad_con_indicadores, name='obtener_ruta_actividad_indicadores'),
     path(r'actividad/<int:actividad_id>/all-rutas-con-indicadores/', rutas_actividad_indicadores, name='obtener_rutas_actividad_indicadores'),
+    #Lista de actividades por responsable
     #Objetivos e indicadores para PEI
     path(r'pei/<int:pei_id>/objetivos-pei/',ObjetivoPeiPorPeiListView.as_view(), name='objetivospei_por_pei'),
     path(r'pei/<int:pei_id>/indicadores-pei/', IndicadorPeiPorPeiListView.as_view(), name='indicadorespeo_por_pei'),

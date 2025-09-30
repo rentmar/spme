@@ -2,7 +2,7 @@ from django.db import models
 from spme_estructuracion_proyecto.models import Proyecto
 from django.db import models
 
-
+ 
 #Almacena la planificacion completa de un proyecto para seguimiento
 class PlanificacionProyecto(models.Model):
     proyecto = models.ForeignKey(
@@ -13,11 +13,12 @@ class PlanificacionProyecto(models.Model):
         null=True,
     )
     table_config = models.JSONField(null=True, blank=True)
-    rows_data = models.JSONField()
+    rows_data = models.JSONField(null=True, blank=True)
     version = models.IntegerField(default=1)
     creado = models.DateTimeField(auto_now_add=True)
     actualizado = models.DateTimeField(auto_now=True)
     creado_por = models.CharField(max_length=255, null=True, blank=True)
+    vigente = models.BooleanField(default=False)
     
     class Meta:
         ordering = ['-version']
