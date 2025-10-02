@@ -5,6 +5,7 @@ from spme_estructuracion_proyecto.models import(
     IndicadorResultadoObjGral,
     IndicadorResultadoObjEspecifico
     )
+from spme_actividades.models import Actividad
 
 # Modelo para la bitacora
 class BitacoraIndicador(models.Model):
@@ -22,13 +23,22 @@ class BitacoraIndicador(models.Model):
     #     verbose_name='Indicador asociado'
     # )
 
+    #Relacion con la Actividad
+    actividad = models.ForeignKey(
+        Actividad,
+        on_delete=models.SET_NULL,
+        related_name='actividad_bitacora',
+        null=True,
+        blank=True,
+    )
+
     #Relacion a Indicador OG
     indicadorog = models.ForeignKey(
         IndicadorObjetivoGeneral,
         on_delete=models.SET_NULL,  
         related_name='bitacoras_indicadorog',
         null=True,
-        blank=True
+        blank=True,
     )
 
     #Relacion al Indicador OE
