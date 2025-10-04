@@ -51,7 +51,7 @@ class ActividadesPresenter:
     def obtenerDatosDashboard(self):
 
         datosResponse = self.obtenerDashboardAvtividadUseCase.execute()
-
+        
         if datosResponse is not None:
             return ActividadesMapper.toDashboardResponse(datosResponse)
         else:

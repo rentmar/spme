@@ -36,5 +36,19 @@ class ObtenerDashboardActividadUseCase:
             datosResponse["numero_actividades_finalizadas"] = 0
         else:
             datosResponse["numero_actividades_finalizadas"] = actividadesFin
+
+        sumaPresupuestos = self.actividadesRepository.sumaPresupuestos()
+
+        if sumaPresupuestos is None:
+            datosResponse["suma_presupuestos"]=0
+        else:
+            datosResponse["suma_presupuestos"]=sumaPresupuestos
+
+        sumaPresupuestosGlobales = self.actividadesRepository.sumaPresupuestosGlobales()
+
+        if sumaPresupuestos is None:
+            datosResponse["suma_presupuestos_globales"]=0
+        else:
+            datosResponse["suma_presupuestos_globales"]=sumaPresupuestosGlobales
       
         return datosResponse       
