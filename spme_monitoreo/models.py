@@ -159,8 +159,6 @@ class SolicitudViaje (models.Model):
     #Datos del formulario
     numeroFormulario = models.CharField(max_length=150, blank=True, null=True)
     evento = models.TextField(verbose_name='evento', blank=True, null=True)
-    fechaInicio = models.DateField(verbose_name='fecha_inicio', blank=True, null=True)
-    fechaFin = models.DateField(verbose_name='fecha_fin', blank=True, null=True)
     lugarEvento = models.CharField(max_length=50, verbose_name='Lugar del evento', blank=True, null=True)
     institucionesParticipantes = models.TextField(verbose_name='Instituciones participantes',blank=True, null=True)
     organizador = models.TextField(verbose_name='Organizador', blank=True, null=True)
@@ -179,22 +177,13 @@ class SolicitudViaje (models.Model):
         null=True,
         blank=True,
     )
-    montoSolicitado = models.DecimalField(max_digits=6,decimal_places=2,verbose_name ='monto_solicitado', blank=True, null=True)
+    montoSolicitado = models.DecimalField(max_digits=12,decimal_places=2,verbose_name ='monto_solicitado', blank=True, null=True)
     lugarSolicitud = models.CharField(max_length=50, verbose_name='lugar_solicitud', blank=True, null=True)
     fechaSolicitud = models.DateField(verbose_name='fecha_solicitud', blank=True, null=True)
 
     #Campos extra
     fechaEvento = models.DateField(blank=True, null=True)
-    fuenteGasto = models.TextField(blank=True, null=True)
-    partidaGasto = models.TextField(blank=True, null=True)
-
-    solicitante = models.ForeignKey(
-        Usuario,
-        on_delete=models.SET_NULL,
-        related_name='usuario_solicitante_solviaje',
-        null=True,
-        blank=True,
-    )
+    detalleGasto = models.JSONField(blank=True, null=True)
 
     #Validaciones
     validacionResponsable = models.BooleanField(default=False)

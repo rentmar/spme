@@ -16,6 +16,15 @@ class ActividadesMapper:
         }
 
     @staticmethod
+    def toDashboardResponse(response):
+        return {
+            "total_actividades": response["numero_total_actividades"],
+            "actividades_planificadas": response["numero_actividades_planificadas"],
+            "actividades_ejecucion": response["numero_actividades_ejecucion"],
+            "actividades_finalizadas": response["numero_actividades_finalizadas"]
+        }
+
+    @staticmethod
     def toActividadesUsuarioResponse(actividades):
         lista = []
         for actividad in actividades:
