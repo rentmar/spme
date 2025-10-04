@@ -20,7 +20,7 @@ class ActividadesPresenter:
     def obtenerActividadesGantt(self):
         
         actividadesList = self.obtenerActividadesGanttUseCase.execute()
-
+  
         if actividadesList is not None:
             return ActividadesMapper.toActividadesGanttResponse(actividadesList)
         else:
