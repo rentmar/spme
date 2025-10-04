@@ -436,6 +436,8 @@ class InformeActividad(models.Model):
     herramientaEvaluacion = models.TextField(blank=True, null=True)
     descripcionMediosVerificacion = models.TextField(blank=True, null=True)
     comentariosRecomendacion = models.TextField(blank=True, null=True)
+    presupuestoEjecutado = models.JSONField(blank=True, null=True)
+
     actividad = models.ForeignKey(
         Actividad,
         on_delete=models.SET_NULL,
@@ -450,6 +452,15 @@ class InformeActividad(models.Model):
     class Meta:
         verbose_name = 'Informe Actividad'
         verbose_name_plural = 'Informes de Actividad'
+
+
+class InformeBase(PolymorphicModel):
+    numeroInforme = models.CharField(max_length=50, blank=True, null=True)
+    class Meta:
+        verbose_name = 'Informe Base actividada y subactividad'
+        verbose_name_plural = 'Informes Base actividad y subactividad'
+
+
 
 
 

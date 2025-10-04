@@ -15,6 +15,7 @@ from .viewsactividadestareas import ActividadConTareasListView, ActividadConTare
 from .planificacion.views.viewsactividadplansegbulk import procesar_actividades_planificacion_bulk
 from .actividades.views.actividad_indicador_views import ActividadIndicadorViewSet
 from .actividades.views.lista_actividad_tarea_views import ActividadSubActividadViewSet
+from .actividades.views.tarea_detalles_porid_views import obtener_tarea_detalle
 
 #from planificacion.vistas.viewsrutas import PruebaPlanificacionView
 from .actividades.views.viewsactividadrutas import rutas_actividad, ruta_actividad_proyecto
@@ -149,6 +150,7 @@ urlpatterns =[
     #Actividades-Tareas
     path(r'actividades-con-tareas/', ActividadConTareasListView.as_view(), 
          name='actividades-con-tareas'),
+    path(r'tarea-detalles/<int:tarea_id>/', obtener_tarea_detalle, name='obtener_tarea_detalle'),     
     path(r'actividades-con-tareas/<int:pk>/', ActividadConTareasDetailView.as_view(), name='actividad-detalle-con-tareas'),
     #Ruta de actividad
     path(r'actividades/<int:actividad_id>/ruta-proyecto/', ruta_actividad_proyecto, name="ruta_actividad_proyecto"),

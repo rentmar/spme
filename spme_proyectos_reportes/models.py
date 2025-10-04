@@ -5,8 +5,8 @@ from spme_estructuracion_proyecto.models import(
     IndicadorResultadoObjGral,
     IndicadorResultadoObjEspecifico
     )
-from spme_actividades.models import Actividad
-
+from spme_actividades.models import Actividad, TareaActividad
+ 
 # Modelo para la bitacora
 class BitacoraIndicador(models.Model):
     fechaBitacora = models.DateField(blank=True, null=True)
@@ -30,6 +30,15 @@ class BitacoraIndicador(models.Model):
         related_name='actividad_bitacora',
         null=True,
         blank=True,
+    )
+
+    #Relacion con la Tarea(Subactividad)
+    tarea = models.ForeignKey(
+        TareaActividad,
+        on_delete=models.SET_NULL,
+        related_name='tarea_bitacora',
+        null=True,
+        blank=True
     )
 
     #Relacion a Indicador OG

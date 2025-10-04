@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import SolicitudFondos, RendicionCuentas, SolicitudReembolso, SolicitudViaje, SolicitudPagoDirecto, FormaPago
+from .models import SolicitudFondos, RendicionCuentas, SolicitudReembolso, SolicitudViaje, SolicitudPagoDirecto, FormaPago, InformeActividad
 
 # Register your models here.
 admin.site.register(FormaPago)
@@ -8,3 +8,4 @@ admin.site.register(RendicionCuentas)
 admin.site.register(SolicitudReembolso)
 admin.site.register(SolicitudViaje)
 admin.site.register(SolicitudPagoDirecto)
+admin.site.register(InformeActividad)
