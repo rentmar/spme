@@ -36,6 +36,11 @@ from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
 from .viewdiagramaporidproyecto import DiagramaPorProyectoView
 #Informe de actividad
 from .monitoreo.views.crear_informe_actividad_views import InformeActividadView
+from .monitoreo.views.informe_tarea_views import crear_informe_tarea
+from .monitoreo.views.informe_tarea_views import listar_informes_tarea
+from .monitoreo.views.informe_tarea_views import obtener_informe_tarea
+from .monitoreo.views.informe_tarea_views import actualizar_informe_tarea
+from .monitoreo.views.informe_tarea_views import eliminar_informe_tarea
 #Gannt
 from .actividades.views.datos_gantt_views import actividades_con_estados
 
@@ -172,8 +177,16 @@ urlpatterns =[
     path(r'monitoreo/rendicion-cuentas-datos/', RendicionCuentasDatosView.as_view(), name='rendicion-cuentas-datos-form'),
     #Diagrama de Gannt
     path(r'actividades-gannt/', actividades_con_estados, name='actividades-diagrama-gannt' ),
-
-
+    #INFORMDE DE TAREA - SUBACTIVIDAD
+    #Guardar
+    path(r'informes-tarea/crear/', crear_informe_tarea, name='crear-informe-tarea'),
+    #Extraer/Obtener
+    path(r'informes-tarea/listar/', listar_informes_tarea, name='listar-informes-tareas'),
+    path(r'informes-tarea/obtener/<int:informe_id>/', obtener_informe_tarea, name='obtener-informe-tarea'),
+    #Actualizar
+    path(r'informes-tarea/actualizar/<int:informe_id>/', actualizar_informe_tarea, name='actualizar-informe-tarea'),
+    #Eliminar
+    path(r'informes-tarea/eliminar/<int:informe_id>/', eliminar_informe_tarea, name='eliminar-informe-tarea'),
 ]
 
 urlpatterns += router.urls
