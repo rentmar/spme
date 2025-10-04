@@ -24,6 +24,9 @@ class ActividadesMapper:
             "actividades_finalizadas": response["numero_actividades_finalizadas"],
             "total_presupuesto": response["suma_presupuestos"],
             "total_presupuesto_global": response["suma_presupuestos_globales"],
+            "pei_vigentes": response["numero_pei_vigentes"],
+            "total_pei": response["numero_total_pei"],
+            "total_proyectos": response["numero_total_proyectos"],
         }
 
     @staticmethod

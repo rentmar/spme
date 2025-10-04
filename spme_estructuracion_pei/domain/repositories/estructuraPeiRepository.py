@@ -17,3 +17,9 @@ class EstructuracionPeiRepository:
     def obtenerEstructuraPei(self):
         
         return self.estructuracionPeiDataAccess.obtenerEstructuraPei()
+
+    def numeroPeiVigente(self):
+        return self.estructuracionPeiDataAccess.numeroPeiVigente()
+
+    def numeroTotalPei(self):
+        return self.estructuracionPeiDataAccess.numeroTotalPei()

@@ -78,3 +78,6 @@ class DatosDashboardActividadResponse(serializers.Serializer):
     actividades_finalizadas = serializers.IntegerField(allow_null=True)
     total_presupuesto = serializers.DecimalField(max_digits=12,decimal_places=2,allow_null= True)
     total_presupuesto_global = serializers.DecimalField(max_digits=12,decimal_places=2,allow_null= True)
+    pei_vigentes = serializers.IntegerField(allow_null=True)
+    total_pei = serializers.IntegerField(allow_null=True)
+    total_proyectos = serializers.IntegerField(allow_null=True)
