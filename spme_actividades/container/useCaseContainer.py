@@ -4,6 +4,7 @@ from ..domain.usecases.obtenerActividadesGanttUseCase import ObtenerActividadesG
 from ..domain.usecases.obtenerEncabezadoActividadPorIdUseCase import ObtenerEncabezadoActividadPorIdUseCase
 from ..domain.usecases.crearActividadUseCase import CrearActividadUseCase
 from ..domain.usecases.obtenerActividadPorIdUseCase import ObtenerActividadPorIdUseCase
+from ..domain.usecases.obtenerDashboardActividadUseCase import ObtenerDashboardActividadUseCase
 
 class ActividadesUseCaseContainer(containers.DeclarativeContainer):
     # Config del contenedor
@@ -19,3 +20,5 @@ class ActividadesUseCaseContainer(containers.DeclarativeContainer):
     obtenerActividadPorIdUseCase = providers.Singleton(ObtenerActividadPorIdUseCase)
 
     obtenerEncabezadoActividadPorIdUseCase = providers.Singleton(ObtenerEncabezadoActividadPorIdUseCase)
+
+    obtenerDashboardAvtividadUseCase = providers.Singleton(ObtenerDashboardActividadUseCase)

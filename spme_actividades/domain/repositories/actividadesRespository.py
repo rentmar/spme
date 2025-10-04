@@ -37,3 +37,6 @@ class ActividadesRepository:
     
     def sumaPresupuestos(self):
         return self.actividadesDataAccess.sumaPresupuestos()
+
+    def numeroTotalActividades(self):
+        return self.actividadesDataAccess.numeroTotalActividades()

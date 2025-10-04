@@ -9,7 +9,7 @@ class ActividadesPresenter:
         self.crearActividadUseCase = self.useCaseContainer.crearActividadUseCase()
         self.obtenerActividadPorIdUseCase = self.useCaseContainer.obtenerActividadPorIdUseCase()
         self.obtenerEncabezadoActividadPorIdUseCase = self.useCaseContainer.obtenerEncabezadoActividadPorIdUseCase()
-
+        self.obtenerDashboardAvtividadUseCase = self.useCaseContainer.obtenerDashboardAvtividadUseCase()
     def obtenerActividadesUsuario(self, userIdRequest):
         actividadesList = self.obtenerActividadesUsuarioUseCase.execute(userIdRequest)
         if actividadesList is not None:
@@ -47,3 +47,12 @@ class ActividadesPresenter:
             return ActividadesMapper.toObtenerEncabezadoActividadResponse(encabezado)
         else:
             return ActividadesMapper.toErrorResponse("Encabezado de actividad no encontrado")
+
+    def obtenerDatosDashboard(self):
+
+        datosResponse = self.obtenerDashboardAvtividadUseCase.execute()
+
+        if datosResponse is not None:
+            return ActividadesMapper.toDashboardResponse(datosResponse)
+        else:
+            return ActividadesMapper.toErrorResponse("Error Datos Dashboard")

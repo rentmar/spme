@@ -70,3 +70,9 @@ class ObtenerEncabezadoActividadResponse(serializers.Serializer):
     fecha_cierre = serializers.DateField(required=False,allow_null=True)
     presupuesto = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
     responsable = serializers.CharField(max_length=150, required=False,allow_null=True)
+
+class DatosDashboardActividadResponse(serializers.Serializer):
+    actividades_planificadas = serializers.IntegerField(allow_null=True)
+    total_actividades = serializers.IntegerField(allow_null=True)
+    actividades_ejecucion = serializers.IntegerField(allow_null=True)
+    actividades_finalizadas = serializers.IntegerField(allow_null=True)
