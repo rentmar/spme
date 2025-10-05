@@ -453,7 +453,7 @@ class InformeActividad(models.Model):
         verbose_name = 'Informe Actividad'
         verbose_name_plural = 'Informes de Actividad'
 
-
+ 
 #Informe Base
 class InformeBase(PolymorphicModel):
     numeroInforme = models.CharField(max_length=50, blank=True, null=True)
@@ -466,7 +466,7 @@ class InformeBase(PolymorphicModel):
     comentarios_recomendaciones = models.TextField(blank=True, null=True)
     presupuesto_planificado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Presupuesto planificado', blank=True, null=True)
     presupuesto_ejecutado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Presupuesto ejecutado', blank=True, null=True)
-        
+         
     class Meta:
         verbose_name = 'Informe Base actividada y subactividad'
         verbose_name_plural = 'Informes Base actividad y subactividad'

@@ -11,6 +11,7 @@ from .views.proyecto_reporte_view import ProyectoReporteCompletoView, descargar_
 from .views.crear_rep_actividad_tareas_views import generar_reporte_actividad_word
 from .views.bitacora_indicador_views import BitacoraIndicadorViews
 from .views.get_bitacora_id_tipo_views import bitacoras_por_indicador
+from .views.proyectos_report_views import ProyectoReportAllView
 
 router = DefaultRouter()
 
@@ -36,11 +37,12 @@ urlpatterns = [
     #Reporte de Acividades
     path(r'actividades/<int:actividad_id>/reporte/generar/', generar_reporte_actividad, name='generar-reporte-actividad'),
     path(r'actividades/<int:actividad_id>/reporte/info/', info_reporte_actividad, name='info-reporte-actividad'),
-    path(r'actividad/<int:actividad_id>/reporte-word/', generar_reporte_actividad_word, name='actividad_tarea_reporte')
+    path(r'actividad/<int:actividad_id>/reporte-word/', generar_reporte_actividad_word, name='actividad_tarea_reporte'),
     #path(r'proyectos/test-conexion/', test_connection, name='proyecto-test'),
     #path(r'proyectos/<int:id>/detalles/', ProyectoDetailView.as_view(), name='proyecto_detalles_por_id' ),
     #path(r'actualizar-estructura/', actualizar_estructura_completa, name='actualizar_estructura'),
     #path(r'proyectos/diagrama/<int:diagrama_id>/actualizar-estructura/', actualizar_estructura_diagrama, name='actualizar_estructura_transaccional' ),
+    path(r'proyecto-reporte-rapido/<int:proyecto_id>/word/',  ProyectoReportAllView.as_view(), name='proyecto-reporte-descargar'),
 
 
 ] 

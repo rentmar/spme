@@ -14,14 +14,7 @@ class BitacoraIndicador(models.Model):
     reporteEscrito = models.TextField(null=True, blank=True)
     linkSubida = models.TextField(null=True, blank=True)
     tipoIndicador = models.CharField(max_length=100, blank=True, null=True)
-    
-    # Relación con el modelo base de indicadores (puede ser cualquier tipo)
-    # indicador = models.ForeignKey(
-    #     IndicadorProyecto,
-    #     on_delete=models.CASCADE,
-    #     related_name='bitacoras',
-    #     verbose_name='Indicador asociado'
-    # )
+     
 
     #Relacion con la Actividad
     actividad = models.ForeignKey(

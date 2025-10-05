@@ -30,6 +30,7 @@ from .monitoreo.views.viewscrearsolicitudviaje import crear_solicitud_viaje
 from .monitoreo.views.viewobtenerdatosform import obtener_datos_solicitud_fondos
 from .monitoreo.views.crear_rendicion_cuentas_views import crear_rendicion_cuentas
 from .monitoreo.views.info_rendicion_cuentas_views import RendicionCuentasDatosView
+from .monitoreo.views.informe_actividad_views import InformeActividadVersionMView
 #PEI
 from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
 #Proyecto
@@ -95,7 +96,7 @@ router.register(r'solicitud-reembolso', SolicitudReembolsoView, basename='solici
 router.register(r'solicitud-viaje', SolicitudViajeView, basename='solicitud_viaje')
 router.register(r'solicitud-pago-directo', SolicitudPagoDirectoView, basename='sol_pago_directo')
 router.register(r'informe-actividad', InformeActividadView, basename='informe-actividades')
-
+router.register(r'informe-de-actividad', InformeActividadVersionMView, basename='informe_de_actividad')
 
 
 urlpatterns =[
