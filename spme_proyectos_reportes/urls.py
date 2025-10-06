@@ -2,21 +2,18 @@ from django.urls import path, include
 from .views import *
 from rest_framework.routers import DefaultRouter
 from .views.estructura_jerarquica_proy_views import prueba_conexion_reportes, estructura_jerarquica_completa
-from .views.crear_entrada_bitacora_indicador_view import crear_bitacora_indicador
-from .views.obtener_bitacora_indicador_views import obtener_bitacoras_indicador, obtener_bitacoras_indicador_detallado
 from .views.test_docx_view import test_docx_status, test_docx_endpoint
 from .views.reporte_actividad_view import generar_reporte_actividad, info_reporte_actividad
 from .views.estructura_proyecto_reportes_views import ProyectoEstructuraCompletaView
 from .views.proyecto_reporte_view import ProyectoReporteCompletoView, descargar_reporte_proyecto
 from .views.crear_rep_actividad_tareas_views import generar_reporte_actividad_word
-from .views.bitacora_indicador_views import BitacoraIndicadorViews
-from .views.get_bitacora_id_tipo_views import bitacoras_por_indicador
+#from .views.get_bitacora_id_tipo_views import bitacoras_por_indicador
 from .views.proyectos_report_views import ProyectoReportAllView
 
 router = DefaultRouter()
 
 #router.register(r'planes', ProyectoPlanViewSet, basename='proyecto-plan')
-router.register(r'bitacora-indicador', BitacoraIndicadorViews, basename='bitacora_indicadores_views')
+#router.register(r'bitacora-indicador', BitacoraIndicadorViews, basename='bitacora_indicadores_views')
 
 
 urlpatterns = [
@@ -27,10 +24,10 @@ urlpatterns = [
     path(r'test/docx/status/', test_docx_status, name='test-docx-status'),
     path(r'proyectos/<int:id>/estructura-reportes/', ProyectoEstructuraCompletaView.as_view(), name='proyecto_estrucuctura_completa_reportes' ),
     #Registro de bitacoras
-    path(r'bitacora-indicador/crear/', crear_bitacora_indicador, name='crear-bitacora-indicador' ),
-    path(r'bitacora-indicador/obtener/', obtener_bitacoras_indicador, name='obtener_bitacoras_indicador'),
-    path(r'bitacora-indicador/obtener-detallado/', obtener_bitacoras_indicador_detallado, name='obtener_bitacoras_indicador_detallado'),
-    path(r'bitacoras-lista-tipo-id/', bitacoras_por_indicador, name='bitacoras-por-indicador' ),
+    #path(r'bitacora-indicador/crear/', crear_bitacora_indicador, name='crear-bitacora-indicador' ),
+    #path(r'bitacora-indicador/obtener/', obtener_bitacoras_indicador, name='obtener_bitacoras_indicador'),
+    #path(r'bitacora-indicador/obtener-detallado/', obtener_bitacoras_indicador_detallado, name='obtener_bitacoras_indicador_detallado'),
+    #path(r'bitacoras-lista-tipo-id/', bitacoras_por_indicador, name='bitacoras-por-indicador' ),
     #Reporte de proyecto
     path(r'proyectos/<int:id>/reporte-completo/', ProyectoReporteCompletoView.as_view(), name='proyecto-reporte-completo'),
     path(r'proyectos/<int:id>/descargar-reporte/', descargar_reporte_proyecto, name='descargar-reporte-proyecto'),
@@ -43,7 +40,6 @@ urlpatterns = [
     #path(r'actualizar-estructura/', actualizar_estructura_completa, name='actualizar_estructura'),
     #path(r'proyectos/diagrama/<int:diagrama_id>/actualizar-estructura/', actualizar_estructura_diagrama, name='actualizar_estructura_transaccional' ),
     path(r'proyecto-reporte-rapido/<int:proyecto_id>/word/',  ProyectoReportAllView.as_view(), name='proyecto-reporte-descargar'),
-
 
 ] 
 

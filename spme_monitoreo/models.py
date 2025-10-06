@@ -464,9 +464,9 @@ class InformeBase(PolymorphicModel):
     herramientas_evaluacion = models.TextField(blank=True, null=True)
     medios_verificacion = models.TextField(blank=True, null=True)
     comentarios_recomendaciones = models.TextField(blank=True, null=True)
-    presupuesto_planificado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Presupuesto planificado', blank=True, null=True)
-    presupuesto_ejecutado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Presupuesto ejecutado', blank=True, null=True)
-         
+    presupuesto_planificado = models.DecimalField(max_digits=15, decimal_places=2, verbose_name='Presupuesto planificado', blank=True, null=True)
+    presupuesto_ejecutado = models.DecimalField(max_digits=15, decimal_places=2, verbose_name='Presupuesto ejecutado', blank=True, null=True)
+    
     class Meta:
         verbose_name = 'Informe Base actividada y subactividad'
         verbose_name_plural = 'Informes Base actividad y subactividad'
@@ -476,12 +476,17 @@ class InfActividad(InformeBase):
     objetivo_actividad = models.TextField(blank=True, null=True)
     informe_objetivo_actividad = models.TextField(blank=True, null=True)
     tipo_actividad = models.CharField(max_length=255, blank=True, null=True)
+    reporte_tipo = models.TextField(blank=True, null=True)
     procedencia_fondos = models.JSONField(blank=True, null=True)
+    observaciones_presupuesto = models.TextField(blank=True, null=True)  
+    archivos_cuantitativos = models.JSONField(blank=True, null=True)  
+    herramientas_archivos = models.JSONField(blank=True, null=True)  
+    medios_archivos = models.JSONField(blank=True, null=True)  
 
     actividad = models.ForeignKey(
         Actividad,
         on_delete=models.SET_NULL,
-        related_name='activida_informes_de_actividad',
+        related_name='actividad_informes_de_actividad',
         null=True,
         blank=True
     )
@@ -489,6 +494,9 @@ class InfActividad(InformeBase):
     class Meta:
         verbose_name = 'Informe de Actividad'
         verbose_name_plural = 'Informes de actividades'
+
+    def __str__(self):
+        return f"Informe {self.numeroInforme} - {self.actividad.codigo if self.actividad else 'Sin actividad'}"    
 
 
 #Informe de tarea

@@ -31,6 +31,7 @@ from .monitoreo.views.viewobtenerdatosform import obtener_datos_solicitud_fondos
 from .monitoreo.views.crear_rendicion_cuentas_views import crear_rendicion_cuentas
 from .monitoreo.views.info_rendicion_cuentas_views import RendicionCuentasDatosView
 from .monitoreo.views.informe_actividad_views import InformeActividadVersionMView
+from .monitoreo.views.crear_informe_de_actividad_views import InfActividadViewSet
 #PEI
 from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
 #Proyecto
@@ -97,7 +98,7 @@ router.register(r'solicitud-viaje', SolicitudViajeView, basename='solicitud_viaj
 router.register(r'solicitud-pago-directo', SolicitudPagoDirectoView, basename='sol_pago_directo')
 router.register(r'informe-actividad', InformeActividadView, basename='informe-actividades')
 router.register(r'informe-de-actividad', InformeActividadVersionMView, basename='informe_de_actividad')
-
+router.register(r'informe-de-actividad-min', InfActividadViewSet, basename='informe_de_actividad_min' )
 
 urlpatterns =[
     #PEI
