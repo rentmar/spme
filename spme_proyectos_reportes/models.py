@@ -5,7 +5,7 @@ from spme_estructuracion_proyecto.models import(
     IndicadorResultadoObjGral,
     IndicadorResultadoObjEspecifico
     )
-from spme_monitoreo.models import InfActividad
+from spme_monitoreo.models import InfActividad, InfTarea
 from polymorphic.models import PolymorphicModel
 
 
@@ -37,10 +37,24 @@ class BitacoraIndicadorBase(PolymorphicModel):
     archivos_adjuntos = models.JSONField(blank=True, null=True)
     timestamp_registro = models.DateTimeField(blank=True, null=True)
     
+    #Informe de Actividad
     informe_actividad = models.ForeignKey(
         InfActividad,
         on_delete=models.CASCADE,
-        related_name='bitacoras_indicadores_base' 
+        related_name='bitacoras_indicadores_base',
+        blank=True,
+        null=True,
+        verbose_name='Informe de Actividad'
+    )
+
+    #Informe de Tarea/Subactividad
+    informe_tarea = models.ForeignKey(
+        InfTarea,
+        on_delete=models.CASCADE,
+        related_name='bitacoras_tarea_indicadores',
+        blank=True,
+        null=True,
+        verbose_name='Informe de Tarea',
     )
     
     snapshot_indicador = models.JSONField(blank=True, null=True)
@@ -55,7 +69,7 @@ class BitacoraIndicadorOG(BitacoraIndicadorBase):
     indicador_og = models.ForeignKey(
         IndicadorObjetivoGeneral,
         on_delete=models.CASCADE,
-        related_name='bitacoras_og'  # Único para OG
+        related_name='bitacoras_og'  # Único para OG 
     )
     
     class Meta:
