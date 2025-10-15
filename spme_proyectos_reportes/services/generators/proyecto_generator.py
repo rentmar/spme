@@ -9,11 +9,12 @@ class ProyectoGenerator(BaseReportService):
     def generar_reporte_proyecto(self, proyecto_id, incluir_relaciones=True):
         """Genera reporte completo del proyecto (Nivel 1)"""
         try:
-            proyecto = Proyecto.objects.select_related(
-                'pei', 'programa'
-            ).prefetch_related(
-                'instancia_gestora', 'procedencia_fondos'
-            ).get(id=proyecto_id)
+            # proyecto = Proyecto.objects.select_related(
+            #     'pei', 'programa'
+            # ).prefetch_related(
+            #     'instancia_gestora', 'procedencia_fondos'
+            # ).get(id=proyecto_id)
+            proyecto = Proyecto.objects.get(id=proyecto_id)
             
             # Encadenamiento de secciones
             self._agregar_portada(proyecto)

@@ -10,11 +10,17 @@ from .views.crear_rep_actividad_tareas_views import generar_reporte_actividad_wo
 #from .views.get_bitacora_id_tipo_views import bitacoras_por_indicador
 from .views.proyectos_report_views import ProyectoReportAllView
 from .views.reporte_proyecto_view import ReporteProyectoViewSet
+from .views.reporte_objetivo_general_view import ReporteObjetivoGeneralViewSet
+from .views.reporte_encadenado_view import ReporteEncadenadoViewSet
+
 
 router = DefaultRouter()
 
 #router.register(r'planes', ProyectoPlanViewSet, basename='proyecto-plan')
 #router.register(r'bitacora-indicador', BitacoraIndicadorViews, basename='bitacora_indicadores_views')
+router.register(r'proyectos', ReporteProyectoViewSet, basename='reporte-proyecto-nivel1')
+router.register(r'objetivos-generales', ReporteObjetivoGeneralViewSet, basename='reporte-objetivo-general')
+router.register(r'encadenados', ReporteEncadenadoViewSet, basename='reporte-encadenado')
 
 urlpatterns = [
     path(r'test-cnx/', prueba_conexion_reportes, name='reportes-test'),
