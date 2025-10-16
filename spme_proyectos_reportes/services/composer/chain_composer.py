@@ -13,6 +13,7 @@ from spme_estructuracion_proyecto.models import (
     ResultadoOG,
     IndicadorObjetivoGeneral,
     IndicadorResultadoObjGral,
+    IndicadorObjetivoEspecifico,
     Proceso
 )
 from ..generators.proyecto_generator import ProyectoGenerator
@@ -21,6 +22,8 @@ from ..generators.objetivo_especifico_og_generator import ObjetivoEspecificoOGGe
 from ..generators.resultado_og_generator import ResultadoOGGenerator
 from ..generators.indicador_og_generator import IndicadorOGGenerator
 from ..generators.indicador_rog_generator import IndicadorROGGenerator
+from ..generators.indicador_oe_generator import IndicadorOEGenerator
+
 
 class ChainComposer:
     """
@@ -52,7 +55,12 @@ class ChainComposer:
             'indicadorrog': {
                 'generator_class': IndicadorROGGenerator,
                 'nivel': 4
+            },
+             'indicadoroe': {  
+            'generator_class': IndicadorOEGenerator,
+            'nivel': 4
             }
+
         }
     
     def generar_reporte_encadenado(self, modelo, objeto_id, profundidad=2):
@@ -106,7 +114,7 @@ class ChainComposer:
                         
                         # ENCADENAR objetivos específicos del objetivo general si hay profundidad > 2
                         if profundidad > 2:
-                            self._agregar_objetivos_especificos_og(generator, og)
+                            self._agregar_objetivos_especificos_og(generator, og, profundidad)
                         
                         # ENCADENAR resultados del objetivo general si hay profundidad > 2
                         if profundidad > 2:
@@ -127,7 +135,7 @@ class ChainComposer:
             
             # ENCADENAR objetivos específicos del objetivo general si hay profundidad > 1
             if profundidad > 1:
-                self._agregar_objetivos_especificos_og(generator, objetivo_general)
+                self._agregar_objetivos_especificos_og(generator, objetivo_general, profundidad)
             
             # ENCADENAR resultados del objetivo general si hay profundidad > 1
             if profundidad > 1:
@@ -156,6 +164,9 @@ class ChainComposer:
         elif modelo == 'indicadorrog':
             # Para indicador ROG, usar su generador específico
             return generator.generar_reporte_indicador_rog(objeto_id)
+        elif modelo == 'indicadoroe':
+            # Para indicador OE, usar su generador específico
+            return generator.generar_reporte_indicador_oe(objeto_id)
         
         return generator
 
@@ -203,10 +214,12 @@ class ChainComposer:
             generator.document.add_paragraph("―" * 60)
             generator.document.add_paragraph()
 
-    def _agregar_objetivos_especificos_og(self, generator, objetivo_general):
-        """Agrega objetivos específicos relacionados al objetivo general"""
+    def _agregar_objetivos_especificos_og(self, generator, objetivo_general, profundidad):
+        """Agrega objetivos específicos relacionados al objetivo general con niveles inferiores"""
         objetivos_especificos_og = ObjetivoEspecificoProyecto.objects.filter(
             objetivo_general=objetivo_general
+        ).prefetch_related(
+            'indicador_oe'  # Prefetch para indicadores OE
         )
         
         if not objetivos_especificos_og.exists():
@@ -240,7 +253,81 @@ class ChainComposer:
                 tabla_oe.cell(j, 0).paragraphs[0].runs[0].bold = True
             
             generator.document.add_paragraph()
+            
+            # ENCADENAR indicadores del objetivo específico si hay profundidad > 3
+            if profundidad > 3:
+                self._agregar_indicadores_oe(generator, oe)
+            
             generator.document.add_paragraph("―" * 60)
+            generator.document.add_paragraph()
+            
+    def _agregar_indicadores_oe(self, generator, objetivo_especifico):
+        """NUEVO: Agrega indicadores relacionados al objetivo específico"""
+        indicadores_oe = objetivo_especifico.indicador_oe.all()
+        
+        if not indicadores_oe.exists():
+            generator.document.add_heading('Indicadores del Objetivo Específico', level=5)
+            p = generator.document.add_paragraph()
+            p.add_run("No se han definido indicadores para este objetivo específico.").italic = True
+            generator.document.add_paragraph()
+            return
+        
+        generator.document.add_heading('INDICADORES DEL OBJETIVO ESPECÍFICO', level=5)
+        generator.document.add_paragraph("Indicadores para medir el avance del objetivo específico:")
+        
+        for i, indicador in enumerate(indicadores_oe, 1):
+            generator.document.add_heading(f'Indicador {i}: {indicador.codigo}', level=6)
+            
+            # Tabla de información principal del indicador
+            tabla_indicador = generator.document.add_table(rows=8, cols=2)
+            tabla_indicador.style = 'Light List Accent 3'
+            
+            datos_indicador = [
+                ('Código', indicador.codigo or 'No definido'),
+                ('Descripción', indicador.descripcion or 'No disponible'),
+                ('Tipo', indicador.get_tipo_display() if indicador.tipo else 'No definido'),
+                ('Frecuencia', indicador.get_frecuencia_display() if indicador.frecuencia else 'No definida'),
+                ('Línea Base', indicador.baseline or 'No definida'),
+                ('Meta Q1', indicador.target_q1 or 'No definida'),
+                ('Fuente Verificación', indicador.fuente_verificacion or 'No definida'),
+                ('Responsable', indicador.responsable or 'No asignado')
+            ]
+            
+            for j, (campo, valor) in enumerate(datos_indicador):
+                tabla_indicador.cell(j, 0).text = campo
+                tabla_indicador.cell(j, 1).text = str(valor)
+                tabla_indicador.cell(j, 0).paragraphs[0].runs[0].bold = True
+            
+            generator.document.add_paragraph()
+            
+            # Metas adicionales si existen
+            metas_existen = any([
+                indicador.target_q2, indicador.target_q3, indicador.target_q4
+            ])
+            
+            if metas_existen:
+                generator.document.add_heading('Metas Adicionales', level=7)
+                
+                tabla_metas = generator.document.add_table(rows=3, cols=2)
+                tabla_metas.style = 'Light Grid Accent 4'
+                
+                metas = [
+                    ('Meta Q2', indicador.target_q2),
+                    ('Meta Q3', indicador.target_q3),
+                    ('Meta Q4', indicador.target_q4)
+                ]
+                
+                # Filtrar solo metas que existen
+                metas_validas = [(periodo, meta) for periodo, meta in metas if meta]
+                
+                for k, (periodo, meta) in enumerate(metas_validas):
+                    tabla_metas.cell(k, 0).text = periodo
+                    tabla_metas.cell(k, 1).text = meta
+                    tabla_metas.cell(k, 0).paragraphs[0].runs[0].bold = True
+                
+                generator.document.add_paragraph()
+            
+            generator.document.add_paragraph("―" * 40)
             generator.document.add_paragraph()
 
     def _agregar_resultados_og(self, generator, objetivo_general, profundidad):
@@ -387,7 +474,11 @@ class ChainComposer:
     def generar_y_descargar(self, modelo, objeto_id, profundidad=2):
         """Genera y descarga el reporte encadenado"""
         try:
-            if modelo in ['objetivoespecificoog', 'resultadoog', 'indicadorog', 'indicadorrog']:
+            modelos_directos = [
+                'objetivoespecificoog', 'resultadoog', 'indicadorog', 
+                'indicadorrog','indicadoroe'
+                ]
+            if modelo in modelos_directos:
                 # Para estos modelos, manejo directo
                 generator = self.generators_registry[modelo]['generator_class']()
                 if modelo == 'objetivoespecificoog':
@@ -396,8 +487,10 @@ class ChainComposer:
                     buffer = generator.generar_reporte_resultado_og(objeto_id)
                 elif modelo == 'indicadorog':
                     buffer = generator.generar_reporte_indicador_og(objeto_id)
-                else:  # indicadorrog
-                    buffer = generator.generar_reporte_indicador_rog(objeto_id)
+                elif modelo == 'indicadorrog':
+                    buffer = generator.generar_reporte_indicador_rog(objeto_id)    
+                else:  #indicadoroe
+                    buffer = generator.generar_reporte_indicador_oe(objeto_id)
             else:
                 generator = self.generar_reporte_encadenado(modelo, objeto_id, profundidad)
                 buffer = generator._guardar_documento()
