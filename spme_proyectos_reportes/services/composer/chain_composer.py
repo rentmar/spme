@@ -11,10 +11,14 @@ from spme_estructuracion_proyecto.models import (
     ObjetivoGeneralProyecto, 
     ObjetivoEspecificoProyecto,
     ResultadoOG,
+    ResultadoOE,
     IndicadorObjetivoGeneral,
     IndicadorResultadoObjGral,
     IndicadorObjetivoEspecifico,
-    Proceso
+    ProductoOE,
+    Proceso,
+    IndicadorResultadoObjEspecifico,
+    ProductoResultadoOE,
 )
 from ..generators.proyecto_generator import ProyectoGenerator
 from ..generators.objetivo_general_generator import ObjetivoGeneralGenerator
@@ -23,6 +27,12 @@ from ..generators.resultado_og_generator import ResultadoOGGenerator
 from ..generators.indicador_og_generator import IndicadorOGGenerator
 from ..generators.indicador_rog_generator import IndicadorROGGenerator
 from ..generators.indicador_oe_generator import IndicadorOEGenerator
+from ..generators.resultado_oe_generator import ResultadoOEGenerator
+from ..generators.producto_oe_generator import ProductoOEGenerator 
+from ..generators.indicador_roe_generator import IndicadorROEGenerator
+# ✅ AGREGAR ESTOS GENERADORES
+from ..generators.producto_roe_generator import ProductoROEGenerator
+from ..generators.proceso_generator import ProcesoGenerator
 
 
 class ChainComposer:
@@ -48,6 +58,14 @@ class ChainComposer:
                 'generator_class': ResultadoOGGenerator,
                 'nivel': 3
             },
+            'resultadooe': {  
+                'generator_class': ResultadoOEGenerator,
+                'nivel': 4
+            },
+            'productooe': {   
+                'generator_class': ProductoOEGenerator,
+                'nivel': 4
+            },
             'indicadorog': {
                 'generator_class': IndicadorOGGenerator,
                 'nivel': 3
@@ -56,11 +74,30 @@ class ChainComposer:
                 'generator_class': IndicadorROGGenerator,
                 'nivel': 4
             },
-             'indicadoroe': {  
-            'generator_class': IndicadorOEGenerator,
-            'nivel': 4
+            'indicadoroe': {  
+                'generator_class': IndicadorOEGenerator,
+                'nivel': 4
+            },
+            'indicadorroe': {  
+                'generator_class': IndicadorROEGenerator,
+                'nivel': 5
+            },
+            'productoroe': {   
+                'generator_class': ProductoROEGenerator,
+                'nivel': 5
+            },
+            'procesorog': {
+                'generator_class': ProcesoGenerator,
+                'nivel': 4
+            },
+            'procesoroe': {
+                'generator_class': ProcesoGenerator,
+                'nivel': 5
+            },
+            'procesopoe': {
+                'generator_class': ProcesoGenerator,
+                'nivel': 5
             }
-
         }
     
     def generar_reporte_encadenado(self, modelo, objeto_id, profundidad=2):
@@ -159,15 +196,28 @@ class ChainComposer:
         
         elif modelo == 'indicadorog':
             # Para indicador OG, usar su generador específico
-            return generator.generar_reporte_indicador_og(objeto_id)
-        
+            return generator.generar_reporte_indicador_og(objeto_id)        
         elif modelo == 'indicadorrog':
             # Para indicador ROG, usar su generador específico
             return generator.generar_reporte_indicador_rog(objeto_id)
         elif modelo == 'indicadoroe':
             # Para indicador OE, usar su generador específico
             return generator.generar_reporte_indicador_oe(objeto_id)
-        
+        elif modelo == 'resultadooe':
+            # Para resultado OE, usar su generador específico
+            return generator.generar_reporte_resultado_oe(objeto_id)
+        elif modelo == 'productooe':
+            # Para producto OE, usar su generador específico
+            return generator.generar_reporte_producto_oe(objeto_id)
+        elif modelo == 'indicadorroe':
+            # Para indicador ROE, usar su generador específico
+            return generator.generar_reporte_indicador_roe(objeto_id)
+        elif modelo == 'productoroe':
+            # Para producto roe, usar su generador especifico
+            return generator.generar_reporte_producto_roe(objeto_id)
+        elif modelo in ['procesorog', 'procesoroe', 'procesopoe']:
+             # Para procesos, usar el generador específico
+            return generator.generar_reporte_proceso(objeto_id, modelo)
         return generator
 
     def _agregar_indicadores_og(self, generator, objetivo_general):
@@ -219,7 +269,9 @@ class ChainComposer:
         objetivos_especificos_og = ObjetivoEspecificoProyecto.objects.filter(
             objetivo_general=objetivo_general
         ).prefetch_related(
-            'indicador_oe'  # Prefetch para indicadores OE
+            'indicador_oe',
+            'resultados_oe',    
+            'productos_oe'      
         )
         
         if not objetivos_especificos_og.exists():
@@ -258,9 +310,104 @@ class ChainComposer:
             if profundidad > 3:
                 self._agregar_indicadores_oe(generator, oe)
             
+            # NUEVO: ENCADENAR resultados del objetivo específico si hay profundidad > 3
+            if profundidad > 3:
+                self._agregar_resultados_oe(generator, oe, profundidad)
+            
+            # NUEVO: ENCADENAR productos del objetivo específico si hay profundidad > 3
+            if profundidad > 3:
+                self._agregar_productos_oe(generator, oe, profundidad)
+            
             generator.document.add_paragraph("―" * 60)
+            generator.document.add_paragraph()  
+
+    def _agregar_resultados_oe(self, generator, objetivo_especifico, profundidad):
+        """Agrega resultados relacionados al objetivo específico"""
+        resultados_oe = objetivo_especifico.resultados_oe.all().prefetch_related(
+            'indicador_res_oe',
+            'productos_res_oe'
+        )
+        
+        if not resultados_oe.exists():
+            generator.document.add_heading('Resultados del Objetivo Específico', level=5)
+            p = generator.document.add_paragraph()
+            p.add_run("No se han definido resultados para este objetivo específico.").italic = True
+            generator.document.add_paragraph()
+            return
+        
+        generator.document.add_heading('RESULTADOS DEL OBJETIVO ESPECÍFICO', level=5)
+        
+        for i, resultado in enumerate(resultados_oe, 1):
+            generator.document.add_heading(f'Resultado {i}: {resultado.codigo}', level=6)
+            
+            tabla_resultado = generator.document.add_table(rows=4, cols=2)
+            tabla_resultado.style = 'Light List Accent 4'
+            
+            datos_resultado = [
+                ('Código', resultado.codigo or 'No definido'),
+                ('Descripción', resultado.descripcion or 'No disponible'),
+                ('Supuestos', resultado.supuestos or 'No definidos'),
+                ('Riesgos', resultado.riesgos or 'No identificados')
+            ]
+            
+            for j, (campo, valor) in enumerate(datos_resultado):
+                tabla_resultado.cell(j, 0).text = campo
+                tabla_resultado.cell(j, 1).text = str(valor)
+                tabla_resultado.cell(j, 0).paragraphs[0].runs[0].bold = True
+            
             generator.document.add_paragraph()
             
+            # ENCADENAR niveles inferiores si hay profundidad > 4
+            if profundidad > 4:
+                self._agregar_nivel_5_resultado_oe(generator, resultado, profundidad)
+            
+            generator.document.add_paragraph("―" * 40)
+            generator.document.add_paragraph()
+
+    def _agregar_productos_oe(self, generator, objetivo_especifico, profundidad):
+        """Agrega productos relacionados al objetivo específico"""
+        productos_oe = objetivo_especifico.productos_oe.all().prefetch_related(
+            'proceso_producto_oe'
+        )
+        
+        if not productos_oe.exists():
+            generator.document.add_heading('Productos del Objetivo Específico', level=5)
+            p = generator.document.add_paragraph()
+            p.add_run("No se han definido productos para este objetivo específico.").italic = True
+            generator.document.add_paragraph()
+            return
+        
+        generator.document.add_heading('PRODUCTOS DEL OBJETIVO ESPECÍFICO', level=5)
+        
+        for i, producto in enumerate(productos_oe, 1):
+            generator.document.add_heading(f'Producto {i}: {producto.codigo}', level=6)
+            
+            tabla_producto = generator.document.add_table(rows=5, cols=2)
+            tabla_producto.style = 'Light List Accent 5'
+            
+            datos_producto = [
+                ('Código', producto.codigo or 'No definido'),
+                ('Descripción', producto.descripcion or 'No disponible'),
+                ('Supuestos', producto.supuestos or 'No definidos'),
+                ('Riesgos', producto.riesgos or 'No identificados'),
+                ('Entregado', 'Sí' if producto.entregado else 'No')
+            ]
+            
+            for j, (campo, valor) in enumerate(datos_producto):
+                tabla_producto.cell(j, 0).text = campo
+                tabla_producto.cell(j, 1).text = str(valor)
+                tabla_producto.cell(j, 0).paragraphs[0].runs[0].bold = True
+            
+            generator.document.add_paragraph()
+            
+            # ENCADENAR procesos del producto si hay profundidad > 4
+            if profundidad > 4:
+                self._agregar_procesos_producto_oe(generator, producto)
+            
+            generator.document.add_paragraph("―" * 40)
+            generator.document.add_paragraph()
+
+
     def _agregar_indicadores_oe(self, generator, objetivo_especifico):
         """NUEVO: Agrega indicadores relacionados al objetivo específico"""
         indicadores_oe = objetivo_especifico.indicador_oe.all()
@@ -378,6 +525,174 @@ class ChainComposer:
             generator.document.add_paragraph("―" * 60)
             generator.document.add_paragraph()
 
+    def _agregar_procesos_rog(self, generator, resultado_og):
+        """Agrega procesos relacionados al resultado OG"""
+        procesos_rog = resultado_og.proceso_resultado_og.all()
+        
+        if not procesos_rog.exists():
+            generator.document.add_heading('Procesos del Resultado OG', level=5)
+            p = generator.document.add_paragraph()
+            p.add_run("No se han definido procesos para este resultado OG.").italic = True
+            generator.document.add_paragraph()
+            return
+        
+        generator.document.add_heading('PROCESOS DEL RESULTADO OG', level=5)
+        generator.document.add_paragraph("Procesos necesarios para alcanzar el resultado OG:")
+        
+        for i, proceso in enumerate(procesos_rog, 1):
+            generator.document.add_heading(f'Proceso {i}: {proceso.codigo}', level=6)
+            
+            tabla_proceso = generator.document.add_table(rows=3, cols=2)
+            tabla_proceso.style = 'Light List Accent 2'
+            
+            datos_proceso = [
+                ('Código', proceso.codigo or 'No definido'),
+                ('Título', proceso.titulo or 'No disponible'),
+                ('Descripción', proceso.descripcion or 'No disponible')
+            ]
+            
+            for j, (campo, valor) in enumerate(datos_proceso):
+                tabla_proceso.cell(j, 0).text = campo
+                tabla_proceso.cell(j, 1).text = str(valor)
+                tabla_proceso.cell(j, 0).paragraphs[0].runs[0].bold = True
+            
+            generator.document.add_paragraph()
+            generator.document.add_paragraph("―" * 50)
+            generator.document.add_paragraph()
+            
+    def _agregar_procesos_producto_oe(self, generator, producto_oe):
+        """Agrega procesos relacionados al producto OE"""
+        procesos_poe = producto_oe.proceso_producto_oe.all()
+        
+        if procesos_poe.exists():
+            generator.document.add_heading('Procesos del Producto', level=7)
+            
+            for proceso in procesos_poe:
+                generator.document.add_heading(f'Proceso: {proceso.codigo}', level=8)
+                
+                tabla_proceso = generator.document.add_table(rows=3, cols=2)
+                tabla_proceso.style = 'Table Grid'
+                
+                datos_proceso = [
+                    ('Código', proceso.codigo or 'No definido'),
+                    ('Título', proceso.titulo or 'No disponible'),
+                    ('Descripción', proceso.descripcion or 'No disponible')
+                ]
+                
+                for i, (campo, valor) in enumerate(datos_proceso):
+                    tabla_proceso.cell(i, 0).text = campo
+                    tabla_proceso.cell(i, 1).text = str(valor)
+                    tabla_proceso.cell(i, 0).paragraphs[0].runs[0].bold = True
+                
+                generator.document.add_paragraph()            
+    
+    def _agregar_indicadores_roe(self, generator, resultado_oe):
+        """Agrega indicadores relacionados al resultado OE"""
+        indicadores_roe = resultado_oe.indicador_res_oe.all()
+        
+        if not indicadores_roe.exists():
+            generator.document.add_heading('Indicadores del Resultado OE', level=7)
+            p = generator.document.add_paragraph()
+            p.add_run("No se han definido indicadores para este resultado OE.").italic = True
+            generator.document.add_paragraph()
+            return
+        
+        generator.document.add_heading('INDICADORES DEL RESULTADO OE', level=7)
+        generator.document.add_paragraph("Indicadores para medir el avance del resultado OE:")
+        
+        for i, indicador in enumerate(indicadores_roe, 1):
+            generator.document.add_heading(f'Indicador {i}: {indicador.codigo}', level=8)
+            
+            # Tabla de información principal del indicador
+            tabla_indicador = generator.document.add_table(rows=8, cols=2)
+            tabla_indicador.style = 'Table Grid'
+            
+            datos_indicador = [
+                ('Código', indicador.codigo or 'No definido'),
+                ('Descripción', indicador.descripcion or 'No disponible'),
+                ('Tipo', indicador.get_tipo_display() if indicador.tipo else 'No definido'),
+                ('Frecuencia', indicador.get_frecuencia_display() if indicador.frecuencia else 'No definida'),
+                ('Línea Base', indicador.baseline or 'No definida'),
+                ('Meta Q1', indicador.target_q1 or 'No definida'),
+                ('Fuente Verificación', indicador.fuente_verificacion or 'No definida'),
+                ('Responsable', indicador.responsable or 'No asignado')
+            ]
+            
+            for j, (campo, valor) in enumerate(datos_indicador):
+                tabla_indicador.cell(j, 0).text = campo
+                tabla_indicador.cell(j, 1).text = str(valor)
+                tabla_indicador.cell(j, 0).paragraphs[0].runs[0].bold = True
+            
+            generator.document.add_paragraph()
+            
+            # Metas adicionales si existen
+            metas_existen = any([
+                indicador.target_q2, indicador.target_q3, indicador.target_q4
+            ])
+            
+            if metas_existen:
+                generator.document.add_heading('Metas Adicionales', level=9)
+                
+                tabla_metas = generator.document.add_table(rows=3, cols=2)
+                tabla_metas.style = 'Table Grid'
+                
+                metas = [
+                    ('Meta Q2', indicador.target_q2),
+                    ('Meta Q3', indicador.target_q3),
+                    ('Meta Q4', indicador.target_q4)
+                ]
+                
+                # Filtrar solo metas que existen
+                metas_validas = [(periodo, meta) for periodo, meta in metas if meta]
+                
+                for k, (periodo, meta) in enumerate(metas_validas):
+                    tabla_metas.cell(k, 0).text = periodo
+                    tabla_metas.cell(k, 1).text = meta
+                    tabla_metas.cell(k, 0).paragraphs[0].runs[0].bold = True
+                
+                generator.document.add_paragraph()
+            
+            generator.document.add_paragraph("―" * 30)
+            generator.document.add_paragraph()
+
+    def _agregar_productos_roe(self, generator, resultado_oe):
+        """Agrega productos relacionados al resultado OE"""
+        productos_roe = resultado_oe.productos_res_oe.all()
+        
+        if not productos_roe.exists():
+            generator.document.add_heading('Productos del Resultado OE', level=5)
+            p = generator.document.add_paragraph()
+            p.add_run("No se han definido productos para este resultado OE.").italic = True
+            generator.document.add_paragraph()
+            return
+        
+        generator.document.add_heading('PRODUCTOS DEL RESULTADO OE', level=5)
+        generator.document.add_paragraph("Productos esperados que contribuyen al resultado OE:")
+        
+        for i, producto in enumerate(productos_roe, 1):
+            generator.document.add_heading(f'Producto {i}: {producto.codigo}', level=6)
+            
+            # Tabla de información principal
+            tabla_producto = generator.document.add_table(rows=5, cols=2)
+            tabla_producto.style = 'Light List Accent 4'
+            
+            datos_producto = [
+                ('Código', producto.codigo or 'No definido'),
+                ('Descripción', producto.descripcion or 'No disponible'),
+                ('Supuestos', producto.supuestos or 'No definidos'),
+                ('Riesgos', producto.riesgos or 'No identificados'),
+                ('Entregado', '✅ Sí' if producto.entregado else '⏳ No')
+            ]
+            
+            for j, (campo, valor) in enumerate(datos_producto):
+                tabla_producto.cell(j, 0).text = campo
+                tabla_producto.cell(j, 1).text = str(valor)
+                tabla_producto.cell(j, 0).paragraphs[0].runs[0].bold = True
+            
+            generator.document.add_paragraph()
+            generator.document.add_paragraph("―" * 50)
+            generator.document.add_paragraph()
+
     def _agregar_nivel_4_resultado_og(self, generator, resultado_og, profundidad):
         """Agrega nivel 4: Indicadores y Procesos del Resultado OG"""
         
@@ -439,17 +754,36 @@ class ChainComposer:
                     
                     generator.document.add_paragraph()
         
-        # PROCESOS del Resultado OG (Nivel 4)
-        procesos_rog = resultado_og.proceso_resultado_og.all()
-        if procesos_rog.exists():
-            generator.document.add_heading('Procesos del Resultado', level=5)
-            generator.document.add_paragraph("Procesos necesarios para alcanzar el resultado:")
+        # ✅ PROCESOS del Resultado OG (Nivel 4)
+        self._agregar_procesos_rog(generator, resultado_og)
+        
+        # Si no hay elementos en el nivel 4
+        if not indicadores_rog.exists() and not resultado_og.proceso_resultado_og.exists():
+            generator.document.add_heading('Elementos de Seguimiento', level=5)
+            p = generator.document.add_paragraph()
+            p.add_run("No se han definido indicadores ni procesos para este resultado.").italic = True
+            generator.document.add_paragraph()
+    
+    def _agregar_nivel_5_resultado_oe(self, generator, resultado_oe, profundidad):
+        """Agrega nivel 5 para resultado OE: Indicadores, Productos, Procesos"""
+        
+        # ✅ Indicadores ROE - usar método existente
+        self._agregar_indicadores_roe(generator, resultado_oe)
+        
+        # ✅ Productos ROE - usar el método específico que ya creaste
+        self._agregar_productos_roe(generator, resultado_oe)
+        
+        # ✅ Procesos ROE - mantener esta parte
+        procesos_roe = resultado_oe.proceso_resultado_oe.all()
+        if procesos_roe.exists():
+            generator.document.add_heading('Procesos del Resultado OE', level=7)
+            generator.document.add_paragraph("Procesos necesarios para alcanzar el resultado OE:")
             
-            for proceso in procesos_rog:
-                generator.document.add_heading(f'Proceso: {proceso.codigo}', level=6)
+            for proceso in procesos_roe:
+                generator.document.add_heading(f'Proceso: {proceso.codigo}', level=8)
                 
                 tabla_proceso = generator.document.add_table(rows=3, cols=2)
-                tabla_proceso.style = 'Light List Accent 2'
+                tabla_proceso.style = 'Table Grid'
                 
                 datos_proceso = [
                     ('Código', proceso.codigo or 'No definido'),
@@ -463,21 +797,16 @@ class ChainComposer:
                     tabla_proceso.cell(i, 0).paragraphs[0].runs[0].bold = True
                 
                 generator.document.add_paragraph()
-        
-        # Si no hay elementos en el nivel 4
-        if not indicadores_rog.exists() and not procesos_rog.exists():
-            generator.document.add_heading('Elementos de Seguimiento', level=5)
-            p = generator.document.add_paragraph()
-            p.add_run("No se han definido indicadores ni procesos para este resultado.").italic = True
-            generator.document.add_paragraph()
-    
+
     def generar_y_descargar(self, modelo, objeto_id, profundidad=2):
         """Genera y descarga el reporte encadenado"""
         try:
             modelos_directos = [
-                'objetivoespecificoog', 'resultadoog', 'indicadorog', 
-                'indicadorrog','indicadoroe'
-                ]
+                'objetivoespecificoog', 'resultadoog', 'resultadooe', 'productooe',
+                'indicadorog', 'indicadorrog', 'indicadoroe', 'indicadorroe', 'productoroe',
+                'procesorog', 'procesoroe', 'procesopoe'  # ✅ NUEVOS
+            ]
+            
             if modelo in modelos_directos:
                 # Para estos modelos, manejo directo
                 generator = self.generators_registry[modelo]['generator_class']()
@@ -485,12 +814,22 @@ class ChainComposer:
                     buffer = generator.generar_reporte_objetivo_especifico_og(objeto_id)
                 elif modelo == 'resultadoog':
                     buffer = generator.generar_reporte_resultado_og(objeto_id)
+                elif modelo == 'resultadooe':
+                    buffer = generator.generar_reporte_resultado_oe(objeto_id)
+                elif modelo == 'productooe':
+                    buffer = generator.generar_reporte_producto_oe(objeto_id)
                 elif modelo == 'indicadorog':
                     buffer = generator.generar_reporte_indicador_og(objeto_id)
                 elif modelo == 'indicadorrog':
                     buffer = generator.generar_reporte_indicador_rog(objeto_id)    
-                else:  #indicadoroe
+                elif modelo == 'indicadoroe':
                     buffer = generator.generar_reporte_indicador_oe(objeto_id)
+                elif modelo == 'indicadorroe':
+                    buffer = generator.generar_reporte_indicador_roe(objeto_id)
+                elif modelo == 'productoroe':
+                    buffer = generator.generar_reporte_producto_roe(objeto_id)
+                elif modelo in ['procesorog', 'procesoroe', 'procesopoe']:  # ✅ NUEVO
+                    buffer = generator.generar_reporte_proceso(objeto_id, modelo)
             else:
                 generator = self.generar_reporte_encadenado(modelo, objeto_id, profundidad)
                 buffer = generator._guardar_documento()

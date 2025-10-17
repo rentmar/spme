@@ -5,6 +5,12 @@ from .resultado_og_generator import ResultadoOGGenerator
 from .indicador_og_generator import IndicadorOGGenerator
 from .indicador_rog_generator import IndicadorROGGenerator
 from .indicador_oe_generator import IndicadorOEGenerator 
+from .resultado_oe_generator import ResultadoOEGenerator  
+from .producto_oe_generator import ProductoOEGenerator    
+from .indicador_roe_generator import IndicadorROEGenerator
+from .producto_roe_generator import ProductoROEGenerator
+from .proceso_generator import ProcesoGenerator
+
 
 __all__ = [
     'ProyectoGenerator', 
@@ -14,4 +20,9 @@ __all__ = [
     'IndicadorOGGenerator',
     'IndicadorROGGenerator',
     'IndicadorOEGenerator', 
+    'ResultadoOEGenerator',
+    'ProductoOEGenerator', 
+    'IndicadorROEGenerator', 
+    'ProductoROEGenerator',
+    'ProcesoGenerator',
     ]
