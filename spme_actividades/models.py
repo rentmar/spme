@@ -212,13 +212,15 @@ class TareaActividad(models.Model):
         ('COMPL','Completada'),
     ]
     estado = models.CharField(max_length=15, choices=ESTADOS_TAREA, default='PEN')
+    codigo = models.CharField(max_length=100, blank=True, null=True, unique=True)
     titulo = models.CharField(max_length=255, blank=True, null=True)
-    descripcion = models.TextField(blank=True, null=True )
-    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    descripcion = models.TextField(blank=True, null=True)
+    fecha_ejecucion = models.DateField(null=True, blank=True)
+    fecha_creacion = models.DateField(null=True, blank=True)
     fecha_limite = models.DateField(null=True, blank=True)
+    presupuestoDesglose = models.JSONField(null=True, blank=True)
     presupuesto = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
-    #Relaciones
     actividad = models.ForeignKey(
         Actividad,
         on_delete=models.SET_NULL,
@@ -234,4 +236,21 @@ class TareaActividad(models.Model):
         ordering = ['-fecha_creacion']
 
     def __str__(self):
-        return f'Tarea: {self.descripcion[:30]}... (Actividad: {self.actividad.codigo})'
+        return f'{self.codigo} - {self.titulo or "Sin título"}'
+
+    def save(self, *args, **kwargs):
+        if not self.pk and not self.codigo and self.actividad:
+            # Contar tareas existentes para esta actividad
+            cantidad_tareas = TareaActividad.objects.filter(
+                actividad=self.actividad
+            ).count()
+            
+            siguiente_numero = cantidad_tareas + 1
+            numero_formateado = f"{siguiente_numero:04d}"
+            self.codigo = f"SACT-{numero_formateado}/{self.actividad.codigo}"
+        
+        if not self.fecha_creacion:
+            from django.utils import timezone
+            self.fecha_creacion = timezone.now()
+        
+        super().save(*args, **kwargs)

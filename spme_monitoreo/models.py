@@ -440,6 +440,8 @@ class InformeActividad(models.Model):
     herramientaEvaluacion = models.TextField(blank=True, null=True)
     descripcionMediosVerificacion = models.TextField(blank=True, null=True)
     comentariosRecomendacion = models.TextField(blank=True, null=True)
+    presupuestoEjecutado = models.JSONField(blank=True, null=True)
+
     actividad = models.ForeignKey(
         Actividad,
         on_delete=models.SET_NULL,
@@ -454,6 +456,75 @@ class InformeActividad(models.Model):
     class Meta:
         verbose_name = 'Informe Actividad'
         verbose_name_plural = 'Informes de Actividad'
+
+ 
+#Informe Base
+class InformeBase(PolymorphicModel):
+    numeroInforme = models.CharField(max_length=50, blank=True, null=True)
+    fecha_ejecucion = models.DateField(blank=True, null=True)
+    contribucion_proyecto = models.JSONField(blank=True, null=True)
+    avance_indicadores = models.JSONField(blank=True, null=True)
+    informacion_cuantitativa = models.TextField(blank=True, null=True)
+    herramientas_evaluacion = models.TextField(blank=True, null=True)
+    medios_verificacion = models.TextField(blank=True, null=True)
+    comentarios_recomendaciones = models.TextField(blank=True, null=True)
+    presupuesto_planificado = models.DecimalField(max_digits=15, decimal_places=2, verbose_name='Presupuesto planificado', blank=True, null=True)
+    presupuesto_ejecutado = models.DecimalField(max_digits=15, decimal_places=2, verbose_name='Presupuesto ejecutado', blank=True, null=True)
+    
+    class Meta:
+        verbose_name = 'Informe Base actividada y subactividad'
+        verbose_name_plural = 'Informes Base actividad y subactividad'
+
+#Informe de actividad
+class InfActividad(InformeBase):
+    objetivo_actividad = models.TextField(blank=True, null=True)
+    informe_objetivo_actividad = models.TextField(blank=True, null=True)
+    tipo_actividad = models.CharField(max_length=255, blank=True, null=True)
+    reporte_tipo = models.TextField(blank=True, null=True)
+    procedencia_fondos = models.JSONField(blank=True, null=True)
+    observaciones_presupuesto = models.TextField(blank=True, null=True)  
+    archivos_cuantitativos = models.JSONField(blank=True, null=True)  
+    herramientas_archivos = models.JSONField(blank=True, null=True)  
+    medios_archivos = models.JSONField(blank=True, null=True)  
+
+    actividad = models.ForeignKey(
+        Actividad,
+        on_delete=models.SET_NULL,
+        related_name='actividad_informes_de_actividad',
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        verbose_name = 'Informe de Actividad'
+        verbose_name_plural = 'Informes de actividades'
+
+    def __str__(self):
+        return f"Informe {self.numeroInforme} - {self.actividad.codigo if self.actividad else 'Sin actividad'}"    
+
+
+#Informe de tarea
+class InfTarea(InformeBase):
+    objetivo_tarea = models.TextField(blank=True, null=True)
+    informe_objetivo_tarea = models.TextField(blank=True, null=True)
+    tipo_actividad = models.CharField(max_length=255, blank=True, null=True)
+    desglose_presupuesto = models.JSONField(blank=True, null=True)
+
+    tarea = models.ForeignKey(
+        TareaActividad,
+        on_delete=models.SET_NULL,
+        related_name='activida_informes_de_actividad',
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        verbose_name = 'Informe de Tarea'
+        verbose_name_plural = 'Informes de Tareas'
+
+    def __str__(self):
+        return f"Informe {self.numeroInforme} - {self.tarea.codigo if self.tarea else 'Sin Tarea'}"    
+
 
 
 

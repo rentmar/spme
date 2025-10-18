@@ -15,6 +15,7 @@ from .viewsactividadestareas import ActividadConTareasListView, ActividadConTare
 from .planificacion.views.viewsactividadplansegbulk import procesar_actividades_planificacion_bulk
 from .actividades.views.actividad_indicador_views import ActividadIndicadorViewSet
 from .actividades.views.lista_actividad_tarea_views import ActividadSubActividadViewSet
+from .actividades.views.tarea_detalles_porid_views import obtener_tarea_detalle
 
 #from planificacion.vistas.viewsrutas import PruebaPlanificacionView
 from .actividades.views.viewsactividadrutas import rutas_actividad, ruta_actividad_proyecto
@@ -29,12 +30,17 @@ from .monitoreo.views.viewscrearsolicitudviaje import crear_solicitud_viaje
 from .monitoreo.views.viewobtenerdatosform import obtener_datos_solicitud_fondos
 from .monitoreo.views.crear_rendicion_cuentas_views import crear_rendicion_cuentas
 from .monitoreo.views.info_rendicion_cuentas_views import RendicionCuentasDatosView
+from .monitoreo.views.informe_actividad_views import InformeActividadVersionMView
+from .monitoreo.views.crear_informe_de_actividad_views import InfActividadViewSet
 #PEI
 from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
 #Proyecto
 from .viewdiagramaporidproyecto import DiagramaPorProyectoView
 #Informe de actividad
 from .monitoreo.views.crear_informe_actividad_views import InformeActividadView
+#Informe de tarea
+from .monitoreo.views.informe_tarea_views import InfTareaMinViews
+from .monitoreo.views.crear_informe_tarea_views import crear_informe_tarea_completo
 #Gannt
 from .actividades.views.datos_gantt_views import actividades_con_estados
 
@@ -89,7 +95,9 @@ router.register(r'solicitud-reembolso', SolicitudReembolsoView, basename='solici
 router.register(r'solicitud-viaje', SolicitudViajeView, basename='solicitud_viaje')
 router.register(r'solicitud-pago-directo', SolicitudPagoDirectoView, basename='sol_pago_directo')
 router.register(r'informe-actividad', InformeActividadView, basename='informe-actividades')
-
+router.register(r'informe-de-actividad', InformeActividadVersionMView, basename='informe_de_actividad')
+router.register(r'informe-de-actividad-min', InfActividadViewSet, basename='informe_de_actividad_min' )
+router.register(r'informe-de-tarea-min', InfTareaMinViews, basename='informe_de_tarea_min' )
 
 
 urlpatterns =[
@@ -149,6 +157,7 @@ urlpatterns =[
     #Actividades-Tareas
     path(r'actividades-con-tareas/', ActividadConTareasListView.as_view(), 
          name='actividades-con-tareas'),
+    path(r'tarea-detalles/<int:tarea_id>/', obtener_tarea_detalle, name='obtener_tarea_detalle'),     
     path(r'actividades-con-tareas/<int:pk>/', ActividadConTareasDetailView.as_view(), name='actividad-detalle-con-tareas'),
     #Ruta de actividad
     path(r'actividades/<int:actividad_id>/ruta-proyecto/', ruta_actividad_proyecto, name="ruta_actividad_proyecto"),
@@ -170,8 +179,8 @@ urlpatterns =[
     path(r'monitoreo/rendicion-cuentas-datos/', RendicionCuentasDatosView.as_view(), name='rendicion-cuentas-datos-form'),
     #Diagrama de Gannt
     path(r'actividades-gannt/', actividades_con_estados, name='actividades-diagrama-gannt' ),
-
-
+    #INFORMDE DE TAREA - SUBACTIVIDAD
+    path(r'crear-informes-tarea-minimo/', crear_informe_tarea_completo, name="crear_informe_tarea"),
 ]
 
 urlpatterns += router.urls

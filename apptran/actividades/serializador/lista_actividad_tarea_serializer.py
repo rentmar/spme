@@ -6,10 +6,7 @@ from spme_autenticacion.models import Usuario
 class TareaActividadSerializer(serializers.ModelSerializer):
     class Meta:
         model = TareaActividad
-        fields = [
-            'id', 'estado', 'titulo', 'descripcion', 
-            'fecha_creacion', 'fecha_limite', 'presupuesto'
-        ]
+        fields = '__all__'
 
 class UsuarioResponsableSerializer(serializers.ModelSerializer):
     nombre_completo = serializers.SerializerMethodField()
