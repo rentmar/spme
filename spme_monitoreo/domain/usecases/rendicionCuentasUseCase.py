@@ -13,4 +13,11 @@ class CrearRendicionCuentasUseCase:
         :return: Resultado de la creación de la rendición.
         """
         return self.rendicionCuentasRepository.crearRendicionCuentas(rendicionData)
-
+    
+    def obtenerRendicionDeCuentas(self, filtros):
+        """
+        Obtiene rendiciones de cuentas con filtros
+        :param filtros: Diccionario con filtros (id_actividad, id_tarea, usuario)
+        :return: Lista de rendiciones de cuentas
+        """
+        return self.rendicionCuentasRepository.obtenerRendicionDeCuentas(filtros)

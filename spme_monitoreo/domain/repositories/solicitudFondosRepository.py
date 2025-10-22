@@ -37,3 +37,11 @@ class SolicitudFondosRepository:
             usuario_id=usuario_id,
             tarea_id=tarea_id
         )
+    
+    def actualizarValidacionSolicitudFondos(self, solicitudData):
+        """
+        Actualiza las validaciones de una solicitud de fondos existente.
+        :param solicitud_data: Datos con las validaciones a actualizar.
+        :return: Resultado de la actualización.
+        """
+        return self.solicitudFondosDataAccess.actualizarValidacionSolicitudFondos(solicitudData)

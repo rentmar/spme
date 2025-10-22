@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from spme.common.MessageManager import MessageType
-from .container.presenterContainer import SolicitudFondosPresenterContainer,RendicionCuentasPresenterContainer,SolicitudReembolsoPresenterContainer,SolicitudViajePresenterContainer,SolicitudPagoDirectoPresenterContainer,DatosFormularioPresenterContainer
+from .container.presenterContainer import ActualizarValidacionRendicionCuentasPresenterContainer,SolicitudFondosPresenterContainer,ActualizarValidacionSolicitudFondosPresenterContainer,RendicionCuentasPresenterContainer,SolicitudReembolsoPresenterContainer,SolicitudViajePresenterContainer,SolicitudPagoDirectoPresenterContainer,DatosFormularioPresenterContainer
 from .domain.models.request.solicitudFondosRequest import CrearSolicitudFondosRequest
 from .domain.models.response.solicitudFondosResponse import CreateSolicitudFondosResponse
 from .domain.models.request.rendicionCuentasRequest import CrearRendicionCuentasRequest
@@ -16,6 +16,12 @@ from .domain.models.request.solicitudPagoDirectoRequest import CrearSolicitudPag
 from .domain.models.response.solicitudPagoDirectoResponse import CreateSolicitudPagoDirectoResponse
 from .domain.models.request.datosFormRequest import ObtenerDatosFormularioRequest
 from .domain.models.response.obtenerDatosFormResponse import ObtenerDatosFormularioResponse
+from .domain.models.request.solicitudFondosUpdateRequest import ActualizarValidacionSolicitudFondosRequest
+from .domain.models.response.solicitudFondosUpdateResponse import ActualizarValidacionSolicitudFondosResponse
+from .domain.models.request.rendicionCuentasRequest import ObtenerRendicionDeCuentasRequest
+from .domain.models.response.rendicionCuentasResponse import ObtenerRendicionDeCuentasResponse
+from .domain.models.request.rendicionCuentasUpdateRequest import ActualizarValidacionRendicionCuentasRequest
+from .domain.models.response.rendicionCuentasUpdateResponse import ActualizarValidacionRendicionCuentasResponse
 
 class SolicitudFondos(APIView):
     """
@@ -237,3 +243,118 @@ class ObtenerDatosFormulario(APIView):
                 return Response({"estado": MessageType.ERROR.value}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({"estado": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
+    
+class ActualizarValidacionSolicitudFondos(APIView):
+    """
+    API para actualizar validaciones de solicitud de fondos
+    """
+    
+    def __init__(self):
+        self.contenedor = ActualizarValidacionSolicitudFondosPresenterContainer()
+        self.actualizarValidacionPresenter = self.contenedor.actualizarValidacionSolicitudFondosPresenter()
+
+    def patch(self, request, *args, **kwargs):
+        try:
+            updateRequest = ActualizarValidacionSolicitudFondosRequest(data=request.data)
+            
+            if updateRequest.is_valid():
+                solicitudResponse = self.actualizarValidacionPresenter.actualizarValidacionSolicitudFondos(
+                    updateRequest.validated_data
+                )
+                response = ActualizarValidacionSolicitudFondosResponse(data=solicitudResponse)
+                
+                if response.is_valid():
+                    return Response(response.data, status=status.HTTP_200_OK)
+                else:
+                    return Response(
+                        {"estado": MessageType.ERROR.value, "errores": response.errors},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+            
+            return Response(
+                {"estado": MessageType.BAD_REQUEST.value, "errores": updateRequest.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        except Exception as e:
+            return Response(
+                {"estado": MessageType.ERROR.value, "mensaje": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class ObtenerRendicionDeCuentas(APIView):
+    """
+    API para obtener rendiciones de cuentas con filtros
+    """
+    def __init__(self):
+        self.contenedor = RendicionCuentasPresenterContainer()
+        self.rendicionCuentasPresenter = self.contenedor.rendicionCuentasPresenter()
+
+    def post(self, request, *args, **kwargs):
+        try:
+            obtenerRendicionRequest = ObtenerRendicionDeCuentasRequest(data=request.data)
+            
+            if obtenerRendicionRequest.is_valid():
+                rendicionesResponse = self.rendicionCuentasPresenter.obtenerRendicionDeCuentas(
+                    obtenerRendicionRequest.validated_data
+                )
+                
+                response = ObtenerRendicionDeCuentasResponse(data=rendicionesResponse)
+                
+                if response.is_valid():
+                    return Response(response.data, status=status.HTTP_200_OK)
+                else:
+                    return Response({
+                        "estado": MessageType.ERROR.value, 
+                        "errores": response.errors
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            return Response({
+                "estado": MessageType.BAD_REQUEST.value, 
+                "errores": obtenerRendicionRequest.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as e:
+            return Response({
+                "estado": MessageType.ERROR.value, 
+                "mensaje": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ActualizarValidacionRendicionCuentas(APIView):
+    """
+    API para actualizar validaciones de rendición de cuentas
+    """
+
+    def __init__(self):
+        self.contenedor = ActualizarValidacionRendicionCuentasPresenterContainer()
+        self.actualizarValidacionPresenter = self.contenedor.actualizarValidacionRendicionCuentasPresenter()
+
+    def patch(self, request, *args, **kwargs):
+        try:
+            updateRequest = ActualizarValidacionRendicionCuentasRequest(data=request.data)
+            
+            if updateRequest.is_valid():
+                rendicionResponse = self.actualizarValidacionPresenter.actualizarValidacionRendicionCuentas(
+                    updateRequest.validated_data
+                )
+                
+                response = ActualizarValidacionRendicionCuentasResponse(data=rendicionResponse)
+                
+                if response.is_valid():
+                    return Response(response.data, status=status.HTTP_200_OK)
+                else:
+                    return Response(
+                        {"estado": MessageType.ERROR.value, "errores": response.errors},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+            
+            return Response(
+                {"estado": MessageType.BAD_REQUEST.value, "errores": updateRequest.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        except Exception as e:
+            return Response(
+                {"estado": MessageType.ERROR.value, "mensaje": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

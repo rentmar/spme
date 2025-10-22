@@ -10,6 +10,70 @@ class ReponseMapper:
         }
     
     @staticmethod
+    def toRendicionesCuentasResponse(rendiciones):
+        """
+        Mapea una lista de objetos RendicionCuentas a formato de respuesta
+        """
+        from spme.common.MessageManager import MessageType
+        
+        if not rendiciones:
+            return {
+                "estado": MessageType.SUCCESS.value,
+                "rendiciones": [],
+                "mensaje": "No se encontraron rendiciones de cuentas"
+            }
+        
+        resultado = []
+        
+        for rendicion in rendiciones:
+            try:
+                rendicion_data = {
+                    "id": getattr(rendicion, 'id', None),
+                    "numeroFormulario": getattr(rendicion, 'numeroFormulario', None),
+                    "cpteDiario": getattr(rendicion, 'cpteDiario', None),
+                    "fechaDesembolso": str(getattr(rendicion, 'fechaDesembolso', '')) if getattr(rendicion, 'fechaDesembolso', None) else None,
+                    "montoAsignado": float(getattr(rendicion, 'montoAsignado', 0)) if getattr(rendicion, 'montoAsignado', None) else None,
+                    "montoDescargado": float(getattr(rendicion, 'montoDescargado', 0)) if getattr(rendicion, 'montoDescargado', None) else None,
+                    "saldo": float(getattr(rendicion, 'saldo', 0)) if getattr(rendicion, 'saldo', None) else None,
+                    "detalleDestinoFondos": getattr(rendicion, 'detalleDestinoFondos', None),
+                    "fechaActividadRC": str(getattr(rendicion, 'fechaActividadRC', '')) if getattr(rendicion, 'fechaActividadRC', None) else None,
+                    "descripcionActividad": getattr(rendicion, 'descripcionActividad', None),
+                    "lugarActividad": getattr(rendicion, 'lugarActividad', None),
+                    "validacionResponsable": getattr(rendicion, 'validacionResponsable', False),
+                    "validacionCoordinador": getattr(rendicion, 'validacionCoordinador', False),
+                    "validacionContador": getattr(rendicion, 'validacionContador', False),
+                    "validacionAdministrador": getattr(rendicion, 'validacionAdministrador', False),
+                    "actividad_id": getattr(rendicion, 'actividad_id', None),
+                    "tarea_id": getattr(rendicion, 'tarea_id', None),
+                    "usuario_id": getattr(rendicion, 'usuario_id', None),
+                    "bloquearIconos": getattr(rendicion, 'bloquearIconos', True),
+                    "administrador_id": getattr(rendicion, 'administrador_id', None),
+                    "contador_id": getattr(rendicion, 'contador_id', None),
+                    "coordinador_id": getattr(rendicion, 'coordinador_id', None),
+                    "responsable_id": getattr(rendicion, 'responsable_id', None),
+                    "solicitudFondos_id": getattr(rendicion, 'solicitudFondos_id', None),
+                    "solicitudReembolso_id": getattr(rendicion, 'solicitudReembolso_id', None),
+                    "solicitudViaje_id": getattr(rendicion, 'solicitudViaje_id', None),
+                    "solicitudPagoDirecto_id": getattr(rendicion, 'solicitudPagoDirecto_id', None),
+                }
+                
+                resultado.append(rendicion_data)
+                
+            except Exception as e:
+                print(f"Error mapeando rendicion {getattr(rendicion, 'id', 'unknown')}: {str(e)}")
+                continue
+        
+        mensaje = f"Se encontraron {len(resultado)} rendiciones de cuentas"
+        if len(resultado) == 1 and rendiciones[0].id:
+            mensaje = f"Rendición de cuentas {rendiciones[0].id} encontrada exitosamente"
+        
+        return {
+            "estado": MessageType.SUCCESS.value,
+            "rendiciones": resultado,
+            "mensaje": mensaje
+        }
+
+    @staticmethod
     def toSolicitudFondosResponse(solicitudFondos):
         return {
             "id": solicitudFondos.id,

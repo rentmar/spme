@@ -41,3 +41,45 @@ class SolicitudFondosDataAccess:
             filtro &= Q(tarea_id__isnull=True)
         
         return SolicitudFondos.objects.filter(filtro)
+    
+    def actualizarValidacionSolicitudFondos(self, solicitudData):
+        """
+        Actualiza las validaciones de una solicitud de fondos existente.
+        :param solicitud_data: Datos con las validaciones a actualizar.
+        :return: Solicitud de fondos actualizada.
+        """
+        solicitud_id = solicitudData.get('solicitud_id')
+        
+        try:
+            solicitud = SolicitudFondos.objects.get(id=solicitud_id)
+            
+            campos_actualizados = False
+            
+            # Verificar si el valor para 'validacion_responsable' existe y no es None
+            if solicitudData.get('validacion_responsable') is not None:
+                solicitud.validacionResponsable = solicitudData['validacion_responsable']
+                campos_actualizados = True
+                
+            # Verificar si el valor para 'validacion_coordinador' existe y no es None
+            if solicitudData.get('validacion_coordinador') is not None:
+                solicitud.validacionCoordinador = solicitudData['validacion_coordinador']
+                campos_actualizados = True
+            
+            if campos_actualizados:
+                solicitud.save()
+                
+            return {
+                "id": solicitud.id,
+                "mensaje": "Validaciones actualizadas exitosamente",
+                "validacion_responsable": solicitud.validacionResponsable,
+                "validacion_coordinador": solicitud.validacionCoordinador
+            }
+            
+        except SolicitudFondos.DoesNotExist:
+            return {
+                "mensaje": f"La solicitud de fondos con ID {solicitud_id} no existe"
+            }
+        except Exception as e:
+            return {
+                "mensaje": f"Error al actualizar las validaciones: {str(e)}"
+            }

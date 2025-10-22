@@ -14,3 +14,19 @@ class RendicionCuentasRepository:
         """
         return self.rendicionCuentasDataAccess.crearRendicionCuentas(rendicionData)
 
+    def obtenerRendicionDeCuentas(self, filtros):
+        """
+        Obtiene rendiciones de cuentas con filtros
+        :param filtros: Diccionario con filtros
+        :return: Lista de rendiciones de cuentas
+        """
+        return self.rendicionCuentasDataAccess.obtenerRendicionDeCuentas(filtros)
+
+    def actualizarValidacionRendicionCuentas(self, rendicionData):
+        """
+        Actualiza las validaciones de una rendición de cuentas existente.
+
+        :param rendicion_data: Datos con las validaciones a actualizar.
+        :return: Resultado de la actualización.
+        """
+        return self.rendicionCuentasDataAccess.actualizarValidacionRendicionCuentas(rendicionData)

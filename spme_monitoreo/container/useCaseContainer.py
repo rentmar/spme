@@ -5,6 +5,8 @@ from ..domain.usecases.solicitudReembolsoUseCase import CrearSolicitudReembolsoU
 from ..domain.usecases.solicitudViajeUseCase import CrearSolicitudViajeUseCase
 from ..domain.usecases.solicitudPagoDirectoUseCase import CrearSolicitudPagoDirectoUseCase
 from ..domain.usecases.obtenerDatosFormularioUseCase import ObtenerDatosFormularioUseCase
+from ..domain.usecases.actualizarValidacionSolicitudFondosUseCase import ActualizarValidacionSolicitudFondosUseCase
+from ..domain.usecases.actualizarValidacionRendicionCuentasUseCase import ActualizarValidacionRendicionCuentasUseCase
 
 class CrearSolicitudFondosUseCaseContainer(containers.DeclarativeContainer):
     # Config del contenedor
@@ -45,3 +47,21 @@ class ObtenerDatosFormularioUseCaseContainer(containers.DeclarativeContainer):
 
     # Proveedor de dependencias
     obtenerDatosFormularioUseCase = providers.Singleton(ObtenerDatosFormularioUseCase)
+
+class ActualizarValidacionSolicitudFondosUseCaseContainer(containers.DeclarativeContainer):
+    # Config del contenedor
+    config = providers.Configuration()
+    
+    # Proveedor de dependencias
+    actualizarValidacionSolicitudFondosUseCase = providers.Singleton(
+        ActualizarValidacionSolicitudFondosUseCase
+    )
+
+class ActualizarValidacionRendicionCuentasUseCaseContainer(containers.DeclarativeContainer):
+    # Config del contenedor
+    config = providers.Configuration()
+
+    # Proveedor de dependencias
+    actualizarValidacionRendicionCuentasUseCase = providers.Singleton(
+        ActualizarValidacionRendicionCuentasUseCase
+    )

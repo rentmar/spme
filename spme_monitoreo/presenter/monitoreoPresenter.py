@@ -1,4 +1,4 @@
-from spme_monitoreo.container.useCaseContainer import CrearSolicitudFondosUseCaseContainer,CrearRendicionCuentasUseCaseContainer,CrearSolicitudReembolsoUseCaseContainer,CrearSolicitudViajeUseCaseContainer,CrearSolicitudPagoDirectoUseCaseContainer,ObtenerDatosFormularioUseCaseContainer
+from spme_monitoreo.container.useCaseContainer import CrearSolicitudFondosUseCaseContainer,ActualizarValidacionSolicitudFondosUseCaseContainer,ActualizarValidacionRendicionCuentasUseCaseContainer,CrearRendicionCuentasUseCaseContainer,CrearSolicitudReembolsoUseCaseContainer,CrearSolicitudViajeUseCaseContainer,CrearSolicitudPagoDirectoUseCaseContainer,ObtenerDatosFormularioUseCaseContainer
 from spme_monitoreo.mappers.monitoreoMapper import ReponseMapper
 
 class SolicitudFondosPresenter:
@@ -43,6 +43,14 @@ class RendicionCuentasPresenter:
             return ReponseMapper.toSuccessResponse(crearRendicionCuentas)
         else:
             return ReponseMapper.toErrorResponse("Error al crear la rendicion de cuentas")
+    
+    def obtenerRendicionDeCuentas(self, filtros):
+        rendiciones = self.crearRendicionCuentasUseCase.obtenerRendicionDeCuentas(filtros)
+        if rendiciones is not None:
+            return ReponseMapper.toRendicionesCuentasResponse(rendiciones)
+        else:
+            return ReponseMapper.toErrorResponse("Error al obtener las rendiciones de cuentas")
+
         
 class SolicitudReembolsoPresenter:
     def __init__(self):
@@ -94,3 +102,28 @@ class DatosFormularioPresenter:
             return obtenerDatos
         else:
             return ReponseMapper.toErrorResponse("Error al obtener los datos del formulario")
+        
+class ActualizarValidacionSolicitudFondosPresenter:
+    def __init__(self):
+        self.useCaseContainer = ActualizarValidacionSolicitudFondosUseCaseContainer()
+        self.actualizarValidacionUseCase = self.useCaseContainer.actualizarValidacionSolicitudFondosUseCase()
+
+    def actualizarValidacionSolicitudFondos(self, requestData):
+        actualizarValidacion = self.actualizarValidacionUseCase.execute(requestData)
+        if actualizarValidacion is not None:
+            return actualizarValidacion
+        else:
+            return {"mensaje": "Error al actualizar la validación de la solicitud de fondos"}
+
+class ActualizarValidacionRendicionCuentasPresenter:
+    def __init__(self):
+        self.useCaseContainer = ActualizarValidacionRendicionCuentasUseCaseContainer()
+        self.actualizarValidacionUseCase = self.useCaseContainer.actualizarValidacionRendicionCuentasUseCase()
+
+    def actualizarValidacionRendicionCuentas(self, requestData):
+        actualizarValidacion = self.actualizarValidacionUseCase.execute(requestData)
+        
+        if actualizarValidacion is not None:
+            return actualizarValidacion
+        else:
+            return {"mensaje": "Error al actualizar la validación de la rendición de cuentas"}

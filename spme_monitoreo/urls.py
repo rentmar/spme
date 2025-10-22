@@ -14,5 +14,8 @@ urlpatterns = [
     path(r'crearSolicitudViaje/',views.SolicitudViaje.as_view(), name='crearSolicitudViaje'),
     path(r'crearSolicitudPagoDirecto/',views.SolicitudPagoDirecto.as_view(), name='crearSolicitudPagoDirecto'),
     path(r'obtenerDatosFormulario/', views.ObtenerDatosFormulario.as_view(), name='obtenerDatosFormulario'),
+    path('actualizar-validacion-solicitud-fondos/', views.ActualizarValidacionSolicitudFondos.as_view(), name='actualizar_validacion_solicitud_fondos'),
+    path(r'obtenerRendicionDeCuentas/',views.ObtenerRendicionDeCuentas.as_view(), name='obtenerRendicionDeCuentas'),
+    path(r'actualizar-validacion-rendicion-cuentas/', views.ActualizarValidacionRendicionCuentas.as_view(), name='actualizar_validacion_rendicion_cuentas'),
 ]
 urlpatterns += router.urls

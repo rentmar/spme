@@ -44,5 +44,34 @@ class CrearRendicionCuentasRequest(serializers.Serializer):
             "idUsuario": internal_value.get("id_usuario"),
             "idActividad": internal_value.get("id_actividad"),
         }
-          
-    
+
+class ObtenerRendicionDeCuentasRequest(serializers.Serializer):
+    """
+    Request para obtener rendiciones de cuentas - soporta ambos modos
+    """
+    id_rendicionCuentas = serializers.IntegerField(required=False, allow_null=True)
+    id_actividad = serializers.IntegerField(required=False, allow_null=True)
+    id_tarea = serializers.IntegerField(required=False, allow_null=True)
+    usuario = serializers.IntegerField(required=False, allow_null=True)
+
+    def validate(self, data):
+        """
+        Validación personalizada para asegurar que se envíen parámetros válidos
+        """
+        # Si no se envía ningún parámetro, permitir obtener todas las rendiciones
+        if not any([data.get('id_rendicionCuentas'), data.get('id_actividad'), data.get('id_tarea'), data.get('usuario')]):
+            return data  # Permitir obtener todas las rendiciones
+        
+        return data
+
+    def to_internal_value(self, data):
+        """
+        Convierte los campos a un formato interno.
+        """
+        internal_value = super().to_internal_value(data)
+        return {
+            "id_rendicionCuentas": internal_value.get("id_rendicionCuentas"),
+            "id_actividad": internal_value.get("id_actividad"),
+            "id_tarea": internal_value.get("id_tarea"),
+            "usuario": internal_value.get("usuario"),
+        }
