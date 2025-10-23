@@ -308,7 +308,7 @@ class IndicadorProyecto(PolymorphicModel):
     frecuencia = models.CharField(max_length=15, choices=FREQ, default='Mensual')
     
     #Este campo no se usa - por el momento
-    responsable = models.CharField(blank=True, null=True)
+    responsable = models.CharField(blank=True, null=True, max_length=100)
 
     #Linea base
     baseline = models.CharField(

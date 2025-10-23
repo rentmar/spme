@@ -41,6 +41,8 @@ from .monitoreo.views.crear_informe_actividad_views import InformeActividadView
 #Informe de tarea
 from .monitoreo.views.informe_tarea_views import InfTareaMinViews
 from .monitoreo.views.crear_informe_tarea_views import crear_informe_tarea_completo
+#lista de informes actividad - subactividad
+from .monitoreo.views.lista_informes_actividad_views import actividad_informes_completos
 #Gannt
 from .actividades.views.datos_gantt_views import actividades_con_estados
 
@@ -181,6 +183,8 @@ urlpatterns =[
     path(r'actividades-gannt/', actividades_con_estados, name='actividades-diagrama-gannt' ),
     #INFORMDE DE TAREA - SUBACTIVIDAD
     path(r'crear-informes-tarea-minimo/', crear_informe_tarea_completo, name="crear_informe_tarea"),
+    #Lista de informes actividad
+    path(r'actividades/<int:actividad_id>/informes-completos/', actividad_informes_completos, name='actividad-informes-completos'),
 ]
 
 urlpatterns += router.urls

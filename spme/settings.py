@@ -97,6 +97,21 @@ DATABASES = {
     }
 }
 
+DATABASES = {
+     'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'spme_db_red',
+        'USER': 'django_user',
+        'PASSWORD': 'djangopass123',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
+        'CONN_MAX_AGE': 300,  # Conexiones persistentes
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
