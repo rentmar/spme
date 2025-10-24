@@ -96,6 +96,12 @@ class SolicitudReembolso(models.Model):
     fechaSolicitud = models.DateField(verbose_name='Fecha solicitud', blank=True, null=True)
     montoSolicitado = models.DecimalField(max_digits=6,decimal_places=2,verbose_name ='Monto solicitado',blank=True, null=True)
 
+    fechaDondeSeRealizoActividad = models.DateField(
+        verbose_name='Fecha donde se realizó la actividad', 
+        blank=True, 
+        null=True
+    )
+
 
     #Campos Extra
     descripcionReposicion = models.TextField(blank=True,null=True)
