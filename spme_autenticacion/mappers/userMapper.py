@@ -1,5 +1,5 @@
 from ..domain.models.request.userRequest import CrearUsuarioRequest
-from spme.common.MessageManager import MessageType
+from spme.common.MessageManager import MessageType 
 
 class UserMapper:
     
@@ -32,6 +32,7 @@ class UserMapper:
             "usuario": user.username,
             "rol":user.cargo,
             "permisos": user.permisos,
+            "id": user.id
         }
 
     @staticmethod
