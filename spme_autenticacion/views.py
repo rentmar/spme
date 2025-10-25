@@ -22,7 +22,7 @@ class ObtenerUsuario(APIView):
         if obtenerUsuarioRequestRequest.is_valid():
 
             usuarioResponse = self.usurioPresenter.obtenerUsuario(obtenerUsuarioRequestRequest.validated_data)
-
+            
             response =  UsuarioResponse(data=usuarioResponse)
 
             if response.is_valid():
@@ -147,7 +147,7 @@ class AutenticacionUsuario(APIView):
         if userRequest.is_valid():
 
             userResponse = self.usurioPresenter.autenticarUsuario(userRequest.validated_data)
-
+            
             response = AutenticacionUsuarioResponse(data=userResponse)
 
             if response.is_valid():

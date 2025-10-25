@@ -25,6 +25,7 @@ class ActualizarUsuarioResponse(serializers.Serializer):
     mensaje = serializers.CharField(required=False, allow_blank=True, max_length=150)
 
 class AutenticacionUsuarioResponse(serializers.Serializer):
+    id = serializers.IntegerField()
     validacion = serializers.BooleanField(required=False)
     mensaje = serializers.CharField(required=False, allow_blank=True, max_length=150)
     usuario = serializers.CharField(required=False, allow_blank=False, max_length=150)
