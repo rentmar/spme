@@ -180,7 +180,8 @@ class ChainComposer:
         
         elif modelo == 'objetivoespecificoog':
             # Para objetivo específico del OG, usar su generador específico
-            return generator.generar_reporte_objetivo_especifico_og(objeto_id)
+            #return generator.generar_reporte_objetivo_especifico_og(objeto_id)
+            return generator.generar_reporte_objetivo_especifico_og(objeto_id, profundidad)
         
         elif modelo == 'resultadoog':
             # Para resultado OG, usar su generador específico
@@ -820,7 +821,8 @@ class ChainComposer:
                 # Para estos modelos, manejo directo
                 generator = self.generators_registry[modelo]['generator_class']()
                 if modelo == 'objetivoespecificoog':
-                    buffer = generator.generar_reporte_objetivo_especifico_og(objeto_id)
+                    #buffer = generator.generar_reporte_objetivo_especifico_og(objeto_id)
+                    buffer = generator.generar_reporte_objetivo_especifico_og(objeto_id, profundidad)
                 elif modelo == 'resultadoog':
                     buffer = generator.generar_reporte_resultado_og(objeto_id)
                 elif modelo == 'resultadooe':
