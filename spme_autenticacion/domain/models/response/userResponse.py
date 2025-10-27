@@ -39,3 +39,4 @@ class ListaUsuariosResponse(serializers.Serializer):
 
 class ListaValidadoresResponse(serializers.Serializer):
     validadores = UsuarioValidadorResponse(many=True)
+ 
