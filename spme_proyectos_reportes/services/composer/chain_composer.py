@@ -306,20 +306,25 @@ class ChainComposer:
             
             generator.document.add_paragraph()
             
-            # ENCADENAR indicadores del objetivo específico si hay profundidad > 3
-            if profundidad > 3:
+            # ✅ CORRECCIÓN: Usar profundidad > 2 en lugar de > 3
+            # El objetivo específico es nivel 3, sus elementos son nivel 4
+            # Si profundidad es 3, debería mostrar nivel 4
+            # Si profundidad es 4, debería mostrar nivel 5
+            
+            # ENCADENAR indicadores del objetivo específico si hay profundidad > 2
+            if profundidad > 2:
                 self._agregar_indicadores_oe(generator, oe)
             
-            # NUEVO: ENCADENAR resultados del objetivo específico si hay profundidad > 3
-            if profundidad > 3:
+            # ENCADENAR resultados del objetivo específico si hay profundidad > 2
+            if profundidad > 2:
                 self._agregar_resultados_oe(generator, oe, profundidad)
             
-            # NUEVO: ENCADENAR productos del objetivo específico si hay profundidad > 3
-            if profundidad > 3:
+            # ENCADENAR productos del objetivo específico si hay profundidad > 2
+            if profundidad > 2:
                 self._agregar_productos_oe(generator, oe, profundidad)
             
             generator.document.add_paragraph("―" * 60)
-            generator.document.add_paragraph()  
+            generator.document.add_paragraph()
 
     def _agregar_resultados_oe(self, generator, objetivo_especifico, profundidad):
         """Agrega resultados relacionados al objetivo específico"""
@@ -357,8 +362,12 @@ class ChainComposer:
             
             generator.document.add_paragraph()
             
-            # ENCADENAR niveles inferiores si hay profundidad > 4
-            if profundidad > 4:
+            # ✅ CORRECCIÓN: Usar profundidad > 3 en lugar de > 4
+            # El resultado OE es nivel 4, sus elementos son nivel 5
+            # Si profundidad es 4, debería mostrar nivel 5
+            
+            # ENCADENAR niveles inferiores si hay profundidad > 3
+            if profundidad > 3:
                 self._agregar_nivel_5_resultado_oe(generator, resultado, profundidad)
             
             generator.document.add_paragraph("―" * 40)
