@@ -40,6 +40,7 @@ from .viewdiagramaporidproyecto import DiagramaPorProyectoView
 from .monitoreo.views.crear_informe_actividad_views import InformeActividadView
 #Informe de tarea
 from .monitoreo.views.informe_tarea_views import InfTareaMinViews
+from .monitoreo.views.informe_tarea_por_idtarea_views import InfTareaViewSet
 from .monitoreo.views.crear_informe_tarea_views import crear_informe_tarea_completo
 #lista de informes actividad - subactividad
 from .monitoreo.views.lista_informes_actividad_views import actividad_informes_completos
@@ -100,6 +101,7 @@ router.register(r'informe-actividad', InformeActividadView, basename='informe-ac
 router.register(r'informe-de-actividad', InformeActividadVersionMView, basename='informe_de_actividad')
 router.register(r'informe-de-actividad-min', InfActividadViewSet, basename='informe_de_actividad_min' )
 router.register(r'informe-de-tarea-min', InfTareaMinViews, basename='informe_de_tarea_min' )
+router.register(r'informe-subactividad-min', InfTareaViewSet, basename='informe-subactividad')
 
 
 urlpatterns =[
