@@ -1,12 +1,16 @@
 from dependency_injector import containers, providers
-from ..domain.usecases.solicitudFondosUseCase import CrearSolicitudFondosUseCase
-from ..domain.usecases.rendicionCuentasUseCase import CrearRendicionCuentasUseCase
-from ..domain.usecases.solicitudReembolsoUseCase import CrearSolicitudReembolsoUseCase
-from ..domain.usecases.solicitudViajeUseCase import CrearSolicitudViajeUseCase
-from ..domain.usecases.solicitudPagoDirectoUseCase import CrearSolicitudPagoDirectoUseCase
-from ..domain.usecases.obtenerDatosFormularioUseCase import ObtenerDatosFormularioUseCase
-from ..domain.usecases.actualizarValidacionSolicitudFondosUseCase import ActualizarValidacionSolicitudFondosUseCase
-from ..domain.usecases.actualizarValidacionRendicionCuentasUseCase import ActualizarValidacionRendicionCuentasUseCase
+from spme_monitoreo.domain.usecases.solicitudFondosUseCase import CrearSolicitudFondosUseCase
+from spme_monitoreo.domain.usecases.rendicionCuentasUseCase import CrearRendicionCuentasUseCase
+from spme_monitoreo.domain.usecases.solicitudReembolsoUseCase import CrearSolicitudReembolsoUseCase
+from spme_monitoreo.domain.usecases.solicitudViajeUseCase import CrearSolicitudViajeUseCase
+from spme_monitoreo.domain.usecases.solicitudPagoDirectoUseCase import CrearSolicitudPagoDirectoUseCase
+from spme_monitoreo.domain.usecases.obtenerDatosFormularioUseCase import ObtenerDatosFormularioUseCase
+from spme_monitoreo.domain.usecases.actualizarValidacionSolicitudFondosUseCase import ActualizarValidacionSolicitudFondosUseCase
+from spme_monitoreo.domain.usecases.actualizarValidacionRendicionCuentasUseCase import ActualizarValidacionRendicionCuentasUseCase
+from spme_monitoreo.domain.usecases.actualizarValidacionSolicitudReembolsoUseCase import ActualizarValidacionSolicitudReembolsoUseCase
+from spme_monitoreo.domain.usecases.formaPagoUseCase import FormaPagoUseCase
+from spme_monitoreo.domain.usecases.actualizarValidacionSolicitudViajeUseCase import ActualizarValidacionSolicitudViajeUseCase
+from spme_monitoreo.domain.usecases.actualizarValidacionSolicitudPagoDirectoUseCase import ActualizarValidacionSolicitudPagoDirectoUseCase
 
 class CrearSolicitudFondosUseCaseContainer(containers.DeclarativeContainer):
     # Config del contenedor
@@ -64,4 +68,38 @@ class ActualizarValidacionRendicionCuentasUseCaseContainer(containers.Declarativ
     # Proveedor de dependencias
     actualizarValidacionRendicionCuentasUseCase = providers.Singleton(
         ActualizarValidacionRendicionCuentasUseCase
+    )
+
+class ActualizarValidacionSolicitudReembolsoUseCaseContainer(containers.DeclarativeContainer):
+    # Config del contenedor
+    config = providers.Configuration()
+    
+    # Proveedor de dependencias
+    actualizarValidacionSolicitudReembolsoUseCase = providers.Singleton(
+        ActualizarValidacionSolicitudReembolsoUseCase
+    )
+
+class FormaPagoUseCaseContainer(containers.DeclarativeContainer):
+    # Config del contenedor
+    config = providers.Configuration()
+
+    # Proveedor de dependencias
+    formaPagoUseCase = providers.Singleton(FormaPagoUseCase)
+
+class ActualizarValidacionSolicitudViajeUseCaseContainer(containers.DeclarativeContainer):
+    # Config del contenedor
+    config = providers.Configuration()
+    
+    # Proveedor de dependencias
+    actualizarValidacionSolicitudViajeUseCase = providers.Singleton(
+        ActualizarValidacionSolicitudViajeUseCase
+    )
+
+class ActualizarValidacionSolicitudPagoDirectoUseCaseContainer(containers.DeclarativeContainer):
+    # Config del contenedor
+    config = providers.Configuration()
+    
+    # Proveedor de dependencias
+    actualizarValidacionSolicitudPagoDirectoUseCase = providers.Singleton(
+        ActualizarValidacionSolicitudPagoDirectoUseCase
     )

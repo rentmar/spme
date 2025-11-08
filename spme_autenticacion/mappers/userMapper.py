@@ -32,7 +32,10 @@ class UserMapper:
             "usuario": user.username,
             "rol":user.cargo,
             "permisos": user.permisos,
+            "id": user.id,
         }
+        print(f"🟠 [UserMapper] Construyendo respuesta: {response_data}")  # ← LOG
+        return response_data
 
     @staticmethod
     def toAutenticacionErrorResponse(error_message):

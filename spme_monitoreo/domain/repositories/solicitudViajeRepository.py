@@ -13,4 +13,12 @@ class SolicitudViajeRepository:
         :return: Resultado de la creación de la solicitud.
         """
         return self.solicitudViajeDataAccess.crearSolicitudViaje(solicitudData)
-   
+    
+    def obtenerSolicitudesViaje(self, filtros):
+        """
+        Obtiene solicitudes de viaje con filtros
+        """
+        return self.solicitudViajeDataAccess.obtenerSolicitudesViaje(filtros)
+    
+    def actualizarValidacionSolicitudViaje(self, solicitudData):
+        return self.solicitudViajeDataAccess.actualizarValidacionSolicitudViaje(solicitudData)

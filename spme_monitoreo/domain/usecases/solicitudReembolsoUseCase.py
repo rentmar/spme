@@ -13,4 +13,11 @@ class CrearSolicitudReembolsoUseCase:
         :return: Resultado de la creación de la solicitud.
         """
         return self.solicitudReembolsoRepository.crearSolicitudReembolso(solicitudData)
-
+    
+    def obtenerSolicitudReembolso(self, filtros):
+        """
+        Obtiene solicitudes de reembolso con filtros
+        :param filtros: Diccionario con filtros (id_solicitudReembolso, id_actividad, id_tarea, usuario)
+        :return: Lista de solicitudes de reembolso
+        """
+        return self.solicitudReembolsoRepository.obtenerSolicitudReembolso(filtros)

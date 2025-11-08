@@ -1,10 +1,11 @@
 from dependency_injector import containers, providers
-from ..domain.repositories.solicitudFondosRepository import SolicitudFondosRepository
-from ..domain.repositories.rendicionCuentasRepository import RendicionCuentasRepository
-from ..domain.repositories.solicitudReembolsoRepository import SolicitudReembolsoRepository
-from ..domain.repositories.solicitudViajeRepository import SolicitudViajeRepository
-from ..domain.repositories.solicitudPagoDirectoRepository import SolicitudPagoDirectoRepository
-from ..domain.repositories.formaPagoRepository import FormaPagoRepository
+from spme_monitoreo.domain.repositories.solicitudFondosRepository import SolicitudFondosRepository
+from spme_monitoreo.domain.repositories.rendicionCuentasRepository import RendicionCuentasRepository
+from spme_monitoreo.domain.repositories.solicitudReembolsoRepository import SolicitudReembolsoRepository
+from spme_monitoreo.domain.repositories.solicitudViajeRepository import SolicitudViajeRepository
+from spme_monitoreo.domain.repositories.solicitudPagoDirectoRepository import SolicitudPagoDirectoRepository
+from spme_monitoreo.domain.repositories.formaPagoRepository import FormaPagoRepository
+from spme_monitoreo.domain.repositories.solicitudViajeRepository import SolicitudViajeRepository
 
 class SolicitudFondosRepositoryContainer(containers.DeclarativeContainer):
 
@@ -42,4 +43,15 @@ class FormaPagoRepositoryContainer(containers.DeclarativeContainer):
 
     formaPagoRepository = providers.Singleton(FormaPagoRepository)
 
+class FormaPagoRepositoryContainer(containers.DeclarativeContainer):
+    
+    config = providers.Configuration()
 
+    formaPagoRepository = providers.Singleton(FormaPagoRepository)
+
+class SolicitudViajeRepositoryContainer(containers.DeclarativeContainer):
+    # Config del contenedor
+    config = providers.Configuration()
+    
+    # Proveedor de dependencias
+    solicitudViajeRepository = providers.Singleton(SolicitudViajeRepository)

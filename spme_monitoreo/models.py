@@ -100,10 +100,15 @@ class SolicitudReembolso(models.Model):
     fechaSolicitud = models.DateField(verbose_name='Fecha solicitud', blank=True, null=True)
     montoSolicitado = models.DecimalField(max_digits=6,decimal_places=2,verbose_name ='Monto solicitado',blank=True, null=True)
 
+    fechaDondeSeRealizoActividad = models.DateField(
+        verbose_name='Fecha donde se realizó la actividad', 
+        blank=True, 
+        null=True
+    )
 
     #Campos Extra
     descripcionReposicion = models.TextField(blank=True,null=True)
-
+    objetivoReposicion = models.TextField(blank=True, null=True, verbose_name='Objetivo de Reposición')
 
     #discriminador
     bloquearIconos = models.BooleanField(default=True)
@@ -242,13 +247,10 @@ class SolicitudViaje (models.Model):
 
 class SolicitudPagoDirecto(models.Model):
     numeroFormulario = models.CharField(max_length=150, blank=True, null=True)
-    nombre = models.CharField(max_length=50, verbose_name='nombre', blank=True, null=True)
-    paterno = models.CharField(max_length=50, verbose_name='paterno', blank=True, null=True)
-    materno = models.CharField(max_length=50, verbose_name='materno', blank=True, null=True)
-    ci = models.CharField(max_length=15, verbose_name='ci', blank=True, null=True)
-    banco = models.CharField(max_length=50, verbose_name='banco', blank=True, null=True)
-    numeroCuenta = models.CharField(max_length=50, verbose_name='numero cuenta', blank=True, null=True)
-    cargo = models.CharField(max_length=30, verbose_name='cargo', blank=True, null=True)
+    descripcion_actividad = models.TextField(blank=True, null=True, verbose_name='Descripción de la actividad')
+    fecha_realizacion = models.DateField(blank=True, null=True, verbose_name='Fecha de realización')
+    objetivo_actividad = models.TextField(blank=True, null=True, verbose_name='Objetivo de la actividad')
+    fuente_financiamiento = models.CharField(max_length=255, blank=True, null=True, verbose_name='Fuente de financiamiento')
     detalleDestinoFondos = models.JSONField(verbose_name='detalle_destino_fondos', blank=True, null=True)
 
     #Discriminador

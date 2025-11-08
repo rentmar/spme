@@ -17,5 +17,13 @@ urlpatterns = [
     path('actualizar-validacion-solicitud-fondos/', views.ActualizarValidacionSolicitudFondos.as_view(), name='actualizar_validacion_solicitud_fondos'),
     path(r'obtenerRendicionDeCuentas/',views.ObtenerRendicionDeCuentas.as_view(), name='obtenerRendicionDeCuentas'),
     path(r'actualizar-validacion-rendicion-cuentas/', views.ActualizarValidacionRendicionCuentas.as_view(), name='actualizar_validacion_rendicion_cuentas'),
+    path(r'obtenerSolicitudReembolso/',views.ObtenerSolicitudReembolso.as_view(), name='obtenerSolicitudReembolso'),
+    path(r'actualizar-validacion-solicitud-reembolso/', views.ActualizarValidacionSolicitudReembolso.as_view(), name='actualizar_validacion_solicitud_reembolso'),
+    path(r'obtenerFormasPago/', views.ObtenerFormasPago.as_view(), name='obtenerFormasPago'),
+    path(r'diagnosticarSolicitudViaje/', views.DiagnosticarSolicitudViaje.as_view(), name='diagnosticarSolicitudViaje'),
+    path(r'obtenerSolicitudesViaje/', views.ObtenerSolicitudesViaje.as_view(), name='obtenerSolicitudesViaje'),
+    path(r'actualizar-validacion-solicitud-viaje/', views.ActualizarValidacionSolicitudViaje.as_view(), name='actualizar_validacion_solicitud_viaje'),
+    path(r'obtenerSolicitudesPagoDirecto/', views.ObtenerSolicitudesPagoDirecto.as_view(), name='obtenerSolicitudesPagoDirecto'),
+    path(r'actualizar-validacion-solicitud-pago-directo/', views.ActualizarValidacionSolicitudPagoDirecto.as_view(), name='actualizar_validacion_solicitud_pago_directo'),
 ]
 urlpatterns += router.urls

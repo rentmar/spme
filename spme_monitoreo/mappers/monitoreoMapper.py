@@ -10,6 +10,14 @@ class ReponseMapper:
         }
     
     @staticmethod
+    def toSuccessResponseSolicitudViaje(response):
+        return {
+            "id": response.id,
+            "mensaje": MessageType.SUCCESS.value,
+            "numero_formulario": response.numeroFormulario,
+        }
+    
+    @staticmethod
     def toRendicionesCuentasResponse(rendiciones):
         """
         Mapea una lista de objetos RendicionCuentas a formato de respuesta
@@ -140,8 +148,212 @@ class ReponseMapper:
         return resultado
     
     @staticmethod
+    def toSolicitudesReembolsoResponse(solicitudes):
+        """
+        Mapea una lista de objetos SolicitudReembolso a formato de respuesta
+        """
+        from spme.common.MessageManager import MessageType
+
+        if not solicitudes:
+            return {
+                "estado": MessageType.SUCCESS.value,
+                "solicitudes": [],
+                "mensaje": "No se encontraron solicitudes de reembolso"
+            }
+
+        resultado = []
+        for solicitud in solicitudes:
+            try:
+                solicitud_data = {
+                    "id": getattr(solicitud, 'id', None),
+                    "numeroFormulario": getattr(solicitud, 'numeroFormulario', None),
+                    "detalleDestinoFondos": getattr(solicitud, 'detalleDestinoFondos', None),
+                    "formaPago_id": getattr(solicitud, 'formaPago_id', None),
+                    "lugarSolicitud": getattr(solicitud, 'lugarSolicitud', None),
+                    "fechaSolicitud": str(getattr(solicitud, 'fechaSolicitud', '')) if getattr(solicitud, 'fechaSolicitud', None) else None,
+                    "montoSolicitado": float(getattr(solicitud, 'montoSolicitado', 0)) if getattr(solicitud, 'montoSolicitado', None) else None,
+                    "fechaDondeSeRealizoActividad": str(getattr(solicitud, 'fechaDondeSeRealizoActividad', '')) if getattr(solicitud, 'fechaDondeSeRealizoActividad', None) else None,
+                    "descripcionReposicion": getattr(solicitud, 'descripcionReposicion', None),
+                    "objetivoReposicion": getattr(solicitud, 'objetivoReposicion', None),
+                    "validacionResponsable": getattr(solicitud, 'validacionResponsable', False),
+                    "validacionCoordinador": getattr(solicitud, 'validacionCoordinador', False),
+                    "responsable_id": getattr(solicitud, 'responsable_id', None),
+                    "coordinador_id": getattr(solicitud, 'coordinador_id', None),
+                    "usuario_id": getattr(solicitud, 'usuario_id', None),
+                    "actividad_id": getattr(solicitud, 'actividad_id', None),
+                    "tarea_id": getattr(solicitud, 'tarea_id', None),
+                    "creado_el": str(getattr(solicitud, 'creado_el', '')) if getattr(solicitud, 'creado_el', None) else None,
+                    "modificado_el": str(getattr(solicitud, 'modificado_el', '')) if getattr(solicitud, 'modificado_el', None) else None,
+                }
+                resultado.append(solicitud_data)
+            except Exception as e:
+                print(f"Error mapeando solicitud {getattr(solicitud, 'id', 'unknown')}: {str(e)}")
+                continue
+
+        mensaje = f"Se encontraron {len(resultado)} solicitudes de reembolso"
+        if len(resultado) == 1 and solicitudes[0].id:
+            mensaje = f"Solicitud de reembolso {solicitudes[0].id} encontrada exitosamente"
+
+        return {
+            "estado": MessageType.SUCCESS.value,
+            "solicitudes": resultado,
+            "mensaje": mensaje
+        }
+    
+    @staticmethod
+    def toFormasPagoResponse(formasPago):
+        """
+        Mapea una lista de objetos FormaPago a formato de respuesta
+        """
+        from spme.common.MessageManager import MessageType
+        
+        if not formasPago:
+            return {
+                "estado": MessageType.SUCCESS.value,
+                "formasPago": [],
+                "mensaje": "No se encontraron formas de pago"
+            }
+        
+        resultado = []
+        for formaPago in formasPago:
+            try:
+                formaPago_data = {
+                    "id": getattr(formaPago, 'id', None),
+                    "codigo": getattr(formaPago, 'codigo', None),  # CAMBIADO: nombre -> codigo
+                    "formaPago": getattr(formaPago, 'formaPago', None),  # NUEVO CAMPO
+                    # ELIMINADOS: nombre, descripcion, estado, fecha_creacion, fecha_actualizacion
+                }
+                resultado.append(formaPago_data)
+            except Exception as e:
+                print(f"Error mapeando forma de pago {getattr(formaPago, 'id', 'unknown')}: {str(e)}")
+                continue
+        
+        mensaje = f"Se encontraron {len(resultado)} formas de pago"
+        if len(resultado) == 1 and formasPago[0].id:
+            mensaje = f"Forma de pago {formasPago[0].id} encontrada exitosamente"
+        
+        return {
+            "estado": MessageType.SUCCESS.value,
+            "formasPago": resultado,
+            "mensaje": mensaje
+        }
+    
+    @staticmethod
+    def toSolicitudesViajeResponse(solicitudes):
+        """
+        Mapea una lista de objetos SolicitudViaje a formato de respuesta
+        """
+        from spme.common.MessageManager import MessageType
+
+        if not solicitudes:
+            return {
+                "estado": MessageType.SUCCESS.value,
+                "solicitudes": [],
+                "mensaje": "No se encontraron solicitudes de viaje"
+            }
+
+        resultado = []
+        for solicitud in solicitudes:
+            try:
+                solicitud_data = {
+                    "id": getattr(solicitud, 'id', None),
+                    "numeroFormulario": getattr(solicitud, 'numeroFormulario', None),
+                    "evento": getattr(solicitud, 'evento', None),
+                    "lugarEvento": getattr(solicitud, 'lugarEvento', None),
+                    "institucionesParticipantes": getattr(solicitud, 'institucionesParticipantes', None),
+                    "organizador": getattr(solicitud, 'organizador', None),
+                    "quienCubreGastos": getattr(solicitud, 'quienCubreGastos', None),
+                    "justificacionAsistencia": getattr(solicitud, 'justificacionAsistencia', None),
+                    "fondosUnitas": getattr(solicitud, 'fondosUnitas', None),
+                    "tareasPrevias": getattr(solicitud, 'tareasPrevias', None),
+                    "formaPago_id": getattr(solicitud, 'formaPago_id', None),
+                    "montoSolicitado": float(getattr(solicitud, 'montoSolicitado', 0)) if getattr(solicitud, 'montoSolicitado', None) else None,
+                    "lugarSolicitud": getattr(solicitud, 'lugarSolicitud', None),
+                    "fechaSolicitud": str(getattr(solicitud, 'fechaSolicitud', '')) if getattr(solicitud, 'fechaSolicitud', None) else None,
+                    "fechaEvento": str(getattr(solicitud, 'fechaEvento', '')) if getattr(solicitud, 'fechaEvento', None) else None,
+                    "detalleGasto": getattr(solicitud, 'detalleGasto', None),
+                    "validacionResponsable": getattr(solicitud, 'validacionResponsable', False),
+                    "validacionCoordinador": getattr(solicitud, 'validacionCoordinador', False),
+                    "responsable_id": getattr(solicitud, 'responsable_id', None),
+                    "coordinador_id": getattr(solicitud, 'coordinador_id', None),
+                    "usuario_id": getattr(solicitud, 'usuario_id', None),
+                    "actividad_id": getattr(solicitud, 'actividad_id', None),
+                    "tarea_id": getattr(solicitud, 'tarea_id', None),
+                    "bloquearIconos": getattr(solicitud, 'bloquearIconos', True),
+                }
+                resultado.append(solicitud_data)
+            except Exception as e:
+                print(f"Error mapeando solicitud {getattr(solicitud, 'id', 'unknown')}: {str(e)}")
+                continue
+
+        mensaje = f"Se encontraron {len(resultado)} solicitudes de viaje"
+        if len(resultado) == 1 and solicitudes[0].id:
+            mensaje = f"Solicitud de viaje {solicitudes[0].id} encontrada exitosamente"
+
+        return {
+            "estado": MessageType.SUCCESS.value,
+            "solicitudes": resultado,
+            "mensaje": mensaje
+        }
+    
+    @staticmethod
+    def toSolicitudesPagoDirectoResponse(solicitudes):
+        """
+        Mapea una lista de objetos SolicitudPagoDirecto a formato de respuesta
+        """
+        from spme.common.MessageManager import MessageType
+
+        if not solicitudes:
+            return {
+                "estado": MessageType.SUCCESS.value,
+                "solicitudes": [],
+                "mensaje": "No se encontraron solicitudes de pago directo"
+            }
+
+        resultado = []
+        for solicitud in solicitudes:
+            try:
+                solicitud_data = {
+                    "id": getattr(solicitud, 'id', None),
+                    "numeroFormulario": getattr(solicitud, 'numeroFormulario', None),
+                    "descripcion_actividad": getattr(solicitud, 'descripcion_actividad', None),
+                    "fecha_realizacion": str(getattr(solicitud, 'fecha_realizacion', '')) if getattr(solicitud, 'fecha_realizacion', None) else None,
+                    "objetivo_actividad": getattr(solicitud, 'objetivo_actividad', None),
+                    "fuente_financiamiento": getattr(solicitud, 'fuente_financiamiento', None),
+                    "detalleDestinoFondos": getattr(solicitud, 'detalleDestinoFondos', None),
+                    "formaPago_id": getattr(solicitud, 'formaPago_id', None),
+                    "lugarSolicitud": getattr(solicitud, 'lugarSolicitud', None),
+                    "fechaSolicitud": str(getattr(solicitud, 'fechaSolicitud', '')) if getattr(solicitud, 'fechaSolicitud', None) else None,
+                    "montoSolicitado": float(getattr(solicitud, 'montoSolicitado', 0)) if getattr(solicitud, 'montoSolicitado', None) else None,
+                    "validacionResponsable": getattr(solicitud, 'validacionResponsable', False),
+                    "validacionCoordinador": getattr(solicitud, 'validacionCoordinador', False),
+                    "responsable_id": getattr(solicitud, 'responsable_id', None),
+                    "coordinador_id": getattr(solicitud, 'coordinador_id', None),
+                    "usuario_id": getattr(solicitud, 'usuario_id', None),
+                    "actividad_id": getattr(solicitud, 'actividad_id', None),
+                    "tarea_id": getattr(solicitud, 'tarea_id', None),
+                    "bloquearIconos": getattr(solicitud, 'bloquearIconos', True),
+                }
+                resultado.append(solicitud_data)
+            except Exception as e:
+                print(f"Error mapeando solicitud {getattr(solicitud, 'id', 'unknown')}: {str(e)}")
+                continue
+
+        mensaje = f"Se encontraron {len(resultado)} solicitudes de pago directo"
+        if len(resultado) == 1 and solicitudes[0].id:
+            mensaje = f"Solicitud de pago directo {solicitudes[0].id} encontrada exitosamente"
+
+        return {
+            "estado": MessageType.SUCCESS.value,
+            "solicitudes": resultado,
+            "mensaje": mensaje
+        }
+
+    @staticmethod
     def toErrorResponse(errorMessage):
         return {
             "id":0,
+            "numero_formulario": "",
+            "objetivo_reposicion": "",
             "mensaje": errorMessage,
         }

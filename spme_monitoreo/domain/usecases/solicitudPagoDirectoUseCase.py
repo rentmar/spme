@@ -14,3 +14,10 @@ class CrearSolicitudPagoDirectoUseCase:
         """
         return self.solicitudPagoDirectoRepository.crearSolicitudPagoDirecto(solicitudData)
 
+    def obtenerSolicitudesPagoDirecto(self, filtros):
+        """
+        Obtiene solicitudes de pago directo con filtros
+        :param filtros: Diccionario con filtros (id_solicitudPagoDirecto, id_actividad, id_tarea, usuario)
+        :return: Lista de solicitudes de pago directo
+        """
+        return self.solicitudPagoDirectoRepository.obtenerSolicitudesPagoDirecto(filtros)

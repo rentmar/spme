@@ -14,3 +14,11 @@ class FormaPagoRepository:
         :return: Resultado de obtener forma de pago.
         """
         return self.formaPagoDataAccess.obtenerFormaPagoPoId(idPago)
+    
+    def obtenerFormasPago(self, filtros):
+        """
+        Obtiene formas de pago con filtros
+        :param filtros: Diccionario con filtros
+        :return: Lista de formas de pago
+        """
+        return self.formaPagoDataAccess.obtenerFormasPago(filtros)

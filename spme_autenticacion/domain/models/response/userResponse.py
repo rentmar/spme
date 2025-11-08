@@ -30,8 +30,13 @@ class AutenticacionUsuarioResponse(serializers.Serializer):
     usuario = serializers.CharField(required=False, allow_blank=False, max_length=150)
     rol = serializers.CharField(required=False, allow_blank=True, max_length=20)
     permisos = serializers.CharField(required=False, allow_blank=True, max_length=20)
+    id = serializers.IntegerField()   # agregado por will
     # token = serializers.CharField(required=False, allow_blank=True, max_length=200)
     # refresh_token = serializers.CharField(required=False, allow_blank=True, max_length=200)
+
+    def to_representation(self, instance):
+        print(f"🟣 [Serializer] Datos antes de serializar: {instance}")  # ← LOG
+        return super().to_representation(instance)
 
 class ListaUsuariosResponse(serializers.Serializer):
     usuarios = UsuarioResponse(many=True)
