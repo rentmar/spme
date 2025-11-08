@@ -229,7 +229,7 @@ class TareaActividad(models.Model):
         blank=True,
         verbose_name='Actividad asociada'
     )
-
+ 
     class Meta:
         verbose_name = 'Tarea de Actividad'
         verbose_name_plural = 'Tareas de Actividad'

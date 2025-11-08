@@ -13,6 +13,8 @@ from .views.reporte_proyecto_view import ReporteProyectoViewSet
 from .views.reporte_objetivo_general_view import ReporteObjetivoGeneralViewSet
 from .views.reporte_encadenado_view import ReporteEncadenadoViewSet
 
+from .views.actividad_views import ActividadReportView
+
 
 router = DefaultRouter()
 
@@ -46,6 +48,8 @@ urlpatterns = [
     #path(r'actualizar-estructura/', actualizar_estructura_completa, name='actualizar_estructura'),
     #path(r'proyectos/diagrama/<int:diagrama_id>/actualizar-estructura/', actualizar_estructura_diagrama, name='actualizar_estructura_transaccional' ),
     path(r'proyecto-reporte-rapido/<int:proyecto_id>/word/',  ProyectoReportAllView.as_view(), name='proyecto-reporte-descargar'),
+    path(r'actividades/reporte/', ActividadReportView.as_view(), name='actividades-list'),
+    path(r'actividades/reporte/<int:actividad_id>/', ActividadReportView.as_view(), name='actividad-report'),
 
 ] 
 

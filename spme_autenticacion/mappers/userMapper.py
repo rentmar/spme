@@ -1,5 +1,5 @@
 from ..domain.models.request.userRequest import CrearUsuarioRequest
-from spme.common.MessageManager import MessageType
+from spme.common.MessageManager import MessageType 
 
 class UserMapper:
     
