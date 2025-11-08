@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'spme_planificacion',
     'spme_programas',
     'spme_proyectos_reportes',
+    'spme_gestion_acceso',
     'apptran', #Aplicacion de transicion
     'system_config', #Configuracion del sistema
 ]
