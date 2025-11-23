@@ -1,19 +1,11 @@
 from django.db import models
 from spme_autenticacion.models import Usuario
 from spme_estructuracion_proyecto.models import InstanciaGestora, Proyecto
+from .constants import NivelesAcceso
 
 #Permisos de Instancia Gestora
 class UserInstanciaGestora(models.Model):
-    LECTURA = 1
-    EDICION = 2
-    ADMINISTRACION = 3
-
-    NIVEL_ACCESO_CHOICES = [
-        (LECTURA, 'Solo lectura'),
-        (EDICION, 'Edicion'),
-        (ADMINISTRACION, 'Administracion')
-    ]
-
+   
     usuario = models.ForeignKey(
         Usuario,
         on_delete=models.CASCADE,
@@ -26,7 +18,7 @@ class UserInstanciaGestora(models.Model):
         related_name='usuarios_instancia',
     )
 
-    nivel_acceso = models.IntegerField(choices=NIVEL_ACCESO_CHOICES, default=LECTURA)
+    nivel_acceso = models.IntegerField(choices=NivelesAcceso.CHOICES, default=NivelesAcceso.LECTURA)
     fecha_asignacion = models.DateTimeField(auto_now_add=True)
     activo = models.BooleanField(default=True)
 
@@ -36,22 +28,16 @@ class UserInstanciaGestora(models.Model):
         verbose_name_plural = 'Usuarios - Instancias Gestoras'
 
     def __str__(self):
-        nivel_texto = dict(self.NIVEL_ACCESO_CHOICES).get(self.nivel_acceso, 'Desconocido')
+        nivel_texto = dict(NivelesAcceso.CHOICES).get(self.nivel_acceso, 'Desconocido')
         return f"{self.usuario.username} - {self.instancia_gestora.instancia} ({nivel_texto})"
+
+        #nivel_texto = dict(self.NIVEL_ACCESO_CHOICES).get(self.nivel_acceso, 'Desconocido')
+        #return f"{self.usuario.username} - {self.instancia_gestora.instancia} ({nivel_texto})"
 
 
 #Permisos para los proyectos
 class PermisoProyectoEspecifico(models.Model):
-    LECTURA = 1
-    EDICION = 2
-    ADMINISTRACION = 3
-
-    TIPO_ACCESO_CHOICES = [
-        (LECTURA, 'Solo lectura'),
-        (EDICION, 'Edicion'),
-        (ADMINISTRACION, 'Administracion'),
-    ]
-
+    
     usuario = models.ForeignKey(
         Usuario,
         on_delete=models.CASCADE,
@@ -64,7 +50,7 @@ class PermisoProyectoEspecifico(models.Model):
         related_name='permisos_usuarios_especificos'
     )
 
-    tipo_acceso = models.IntegerField(choices=TIPO_ACCESO_CHOICES, default=LECTURA)
+    tipo_acceso = models.IntegerField(choices=NivelesAcceso.CHOICES, default=NivelesAcceso.LECTURA)
     fecha_asignacion = models.DateTimeField(auto_now_add=True)
     fecha_expiracion = models.DateTimeField(null=True, blank=True)
 

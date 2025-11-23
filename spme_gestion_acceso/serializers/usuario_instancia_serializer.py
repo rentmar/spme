@@ -1,6 +1,8 @@
+# spme_gestion_acceso/serializers/usuario_instancia_serializer.py
 from rest_framework import serializers
 from ..models import UserInstanciaGestora, PermisoProyectoEspecifico
 from ..services.permission_service import PermissionService
+from ..constants import NivelesAcceso  # ✅ Importar constantes
 
 class UserInstanciaGestoraSerializer(serializers.ModelSerializer):
     usuario_username = serializers.CharField(source='usuario.username', read_only=True)
@@ -21,7 +23,8 @@ class UserInstanciaGestoraSerializer(serializers.ModelSerializer):
         return obj.usuario.get_full_name()
     
     def get_nivel_acceso_display(self, obj):
-        return PermissionService().obtener_nombre_nivel_acceso(obj.nivel_acceso)
+        # ✅ USAR constantes centralizadas
+        return NivelesAcceso.NOMBRES.get(obj.nivel_acceso, 'Desconocido')
 
 class PermisoProyectoEspecificoSerializer(serializers.ModelSerializer):
     usuario_username = serializers.CharField(source='usuario.username', read_only=True)
@@ -45,7 +48,8 @@ class PermisoProyectoEspecificoSerializer(serializers.ModelSerializer):
         return obj.usuario.get_full_name()
     
     def get_tipo_acceso_display(self, obj):
-        return PermissionService().obtener_nombre_nivel_acceso(obj.tipo_acceso)
+        # ✅ USAR constantes centralizadas
+        return NivelesAcceso.NOMBRES.get(obj.tipo_acceso, 'Desconocido')
     
     def validate(self, data):
         from django.utils import timezone

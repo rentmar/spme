@@ -7,6 +7,8 @@ from .views.permisos_views import (
     lista_proyectos_accesibles
 )
 from .views.usuario_instancia_views import UserInstanciaGestoraViewSet, PermisoProyectoEspecificoViewSet
+from .views.lista_usuarios_views import UsuarioListAPIView
+
 
 router = DefaultRouter()
 
@@ -23,8 +25,9 @@ urlpatterns = [
     path(r'permisos/verificar-acceso/<int:proyecto_id>/', verificar_acceso_proyecto, name='verificar_acceso_proyecto'),
     path(r'permisos/proyectos/', lista_proyectos_accesibles, name='lista_proyectos_accesibles'),
     #Endpoints adicionales
-    path(r'api/user-instancias/mis-instancias/', UserInstanciaGestoraViewSet.as_view({'get': 'mis_instancias'}), name='mis_instancias'),
-    path(r'api/permisos-especificos/mis-permisos/', PermisoProyectoEspecificoViewSet.as_view({'get': 'mis_permisos_especificos'}), name='mis_permisos_especificos'),
+    path(r'user-instancias/mis-instancias/', UserInstanciaGestoraViewSet.as_view({'get': 'mis_instancias'}), name='mis_instancias'),
+    path(r'permisos-especificos/mis-permisos/', PermisoProyectoEspecificoViewSet.as_view({'get': 'mis_permisos_especificos'}), name='mis_permisos_especificos'),
+    path(r'lista-usuarios/', UsuarioListAPIView.as_view(), name='lista-usuarios' ),
 
 ]
 

@@ -1,23 +1,28 @@
+# spme_gestion_acceso/services/permission_service.py
 from django.utils import timezone
 from django.core.cache import cache
 from django.db import models
 from ..models import UserInstanciaGestora, PermisoProyectoEspecifico
+from ..constants import NivelesAcceso, CacheKeys, Configuracion  
 
 class PermissionService:
-    SIN_ACCESO = 0
-    LECTURA = 1
-    EDICION = 2
-    ADMINISTRACION = 3
+    # ✅ USAR constantes centralizadas
+    SIN_ACCESO = NivelesAcceso.SIN_ACCESO
+    LECTURA = NivelesAcceso.LECTURA
+    EDICION = NivelesAcceso.EDICION
+    ADMINISTRACION = NivelesAcceso.ADMINISTRACION
     
     def __init__(self):
-        self.cache_timeout = 300
+        self.cache_timeout = Configuracion.CACHE_TIMEOUT
     
-    def _get_cache_key(self, usuario_id, tipo='instancias'):
-        return f'permisos:{usuario_id}:{tipo}'
+    # ❌ ELIMINAR métodos de generación de cache keys
+    # def _get_cache_key(self, usuario_id, tipo='instancias'):
+    #     return f'permisos:{usuario_id}:{tipo}'
     
     def obtener_instancias_gestoras_usuario(self, usuario):
         """Obtiene las instancias gestoras del usuario con cache"""
-        cache_key = self._get_cache_key(usuario.id, 'instancias')
+        # ✅ USAR constantes de cache
+        cache_key = CacheKeys.instancias_usuario(usuario.id)
         cached = cache.get(cache_key)
         
         if cached is not None:
@@ -32,7 +37,6 @@ class PermissionService:
     
     def _obtener_instancias_del_proyecto(self, proyecto):
         """Obtiene las instancias gestoras de un proyecto"""
-        # Para ManyToManyField, usamos values_list directamente
         return proyecto.instancia_gestora.values_list('id', flat=True)
     
     def tiene_acceso_proyecto(self, usuario, proyecto):
@@ -40,7 +44,8 @@ class PermissionService:
         if getattr(usuario, 'is_superuser', False):
             return True, self.ADMINISTRACION
             
-        cache_key = f'permisos:{usuario.id}:proyecto:{proyecto.id}'
+        # ✅ USAR constantes de cache
+        cache_key = CacheKeys.proyecto_usuario(usuario.id, proyecto.id)
         cached = cache.get(cache_key)
         
         if cached is not None:
@@ -82,7 +87,6 @@ class PermissionService:
         from spme_estructuracion_proyecto.models import Proyecto
         
         if getattr(usuario, 'is_superuser', False):
-            # Para superusuarios, usar prefetch_related en lugar de select_related
             return Proyecto.objects.all().prefetch_related('instancia_gestora')
             
         if nivel_minimo is None:
@@ -94,12 +98,10 @@ class PermissionService:
             if ui.nivel_acceso >= nivel_minimo
         ]
         
-        # Proyectos por instancia gestora (ManyToMany)
         proyectos_por_instancia = Proyecto.objects.filter(
             instancia_gestora__in=instancias_con_nivel_suficiente
         ).prefetch_related('instancia_gestora').distinct()
         
-        # Proyectos por permisos específicos
         permisos_activos = PermisoProyectoEspecifico.objects.filter(
             usuario=usuario, activo=True, tipo_acceso__gte=nivel_minimo
         ).exclude(
@@ -130,18 +132,24 @@ class PermissionService:
         return acceso and nivel >= self.ADMINISTRACION
     
     def obtener_nombre_nivel_acceso(self, nivel):
-        nombres = {
-            self.SIN_ACCESO: 'Sin acceso',
-            self.LECTURA: 'Solo lectura',
-            self.EDICION: 'Edición',
-            self.ADMINISTRACION: 'Administración'
-        }
-        return nombres.get(nivel, 'Desconocido')
+        # ✅ USAR constantes centralizadas
+        return NivelesAcceso.NOMBRES.get(nivel, 'Desconocido')
     
     def invalidar_cache_usuario(self, usuario_id):
         """Invalidar cache cuando cambian los permisos"""
+        # ✅ USAR constantes de cache
         cache_keys = [
-            self._get_cache_key(usuario_id, 'instancias'),
-            self._get_cache_key(usuario_id, 'proyectos'),
+            CacheKeys.instancias_usuario(usuario_id),
+            CacheKeys.proyectos_usuario(usuario_id),
         ]
+        
+        # También invalidar cache de proyectos específicos
+        # Esto requiere una consulta, pero es necesaria para consistencia
+        proyectos_usuario = PermisoProyectoEspecifico.objects.filter(
+            usuario_id=usuario_id
+        ).values_list('proyecto_id', flat=True)
+        
+        for proyecto_id in proyectos_usuario:
+            cache_keys.append(CacheKeys.proyecto_usuario(usuario_id, proyecto_id))
+        
         cache.delete_many(cache_keys)
