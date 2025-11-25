@@ -1,3 +1,4 @@
+import json
 from spme_monitoreo.container.useCaseContainer import (
     CrearSolicitudFondosUseCaseContainer,
     ActualizarValidacionSolicitudFondosUseCaseContainer,
@@ -18,14 +19,72 @@ class SolicitudFondosPresenter:
         self.useCaseContainer = CrearSolicitudFondosUseCaseContainer()
         self.crearSolicitudFondosUseCase = self.useCaseContainer.crearSolicitudFondosUseCase()
 
-    def crearSolicitudFondos(self, requestData):
-        crearSolicitud = self.crearSolicitudFondosUseCase.execute(requestData)
-        if crearSolicitud is not None:
-            return ReponseMapper.toSuccessResponse(crearSolicitud)
-        else:
-            return ReponseMapper.toErrorResponse("Error al crear la solicitud de fondos")
+    # def crearSolicitudFondos(self, requestData):
+    #     crearSolicitud = self.crearSolicitudFondosUseCase.execute(requestData)
+    #     if crearSolicitud is not None:
+    #         return ReponseMapper.toSuccessResponse(crearSolicitud)
+    #     else:
+    #         return ReponseMapper.toErrorResponse("Error al crear la solicitud de fondos")
     
-        # Nuevo método para obtener todas las solicitudes
+    def crearSolicitudFondos(self, requestData):
+            """
+            Mapea el payload del frontend a los nombres de campos del modelo
+            y llama al caso de uso para crear la solicitud de fondos.
+            """
+            try:
+                # No es necesario deserializar si viene del serializer validated_data, ya son dicts
+                detalleDestinoFondos = requestData.get('detalleDestinoFondos', {})
+                datosFormaPago = requestData.get('datos_forma_pago', {})
+
+                # Mapeo de claves del payload (requestData) a nombres de campos del modelo (solicitudData)
+                solicitudData = {
+                    # Campos JSON
+                    'detalleDestinoFondos': detalleDestinoFondos,
+                    'datos_forma_pago': datosFormaPago,
+
+                    # Campos directos (CamelCase o snake_case que coinciden)
+                    'lugarSolicitud': requestData.get('lugarSolicitud'),
+                    'fechaSolicitud': requestData.get('fechaSolicitud'),
+                    'fechaRealizacionActividad': requestData.get('fechaRealizacionActividad'),
+                    'montoSolicitado': requestData.get('montoSolicitado'),
+                    'validacionResponsable': requestData.get('validacionResponsable'),
+                    'validacionCoordinador': requestData.get('validacionCoordinador'),
+                    'descripcion_actividad': requestData.get('descripcion_actividad'),
+                    'objetivo_actividad': requestData.get('objetivo_actividad'),
+
+                    # IDs de Claves Foráneas (deben terminar en '_id')
+                    'formaPago_id': requestData.get('formaPago_id'), 
+                    'responsable_id': requestData.get('responsable_id'),
+                    'coordinador_id': requestData.get('coordinador_id'),
+                    'usuario_id': requestData.get('usuario_id'),
+                    'actividad_id': requestData.get('actividad_id'),
+                    'tarea_id': requestData.get('tarea_id'),
+                    
+                    # Campos con valor por defecto
+                    'numeroFormulario': requestData.get('numeroFormulario'),
+                    'bloquearIconosSolFondos': requestData.get('bloquearIconosSolFondos', True),
+                }
+
+                # NO filtrar campos opcionales (descripcion_actividad, objetivo_actividad, datos_forma_pago)
+                # ya que el modelo los acepta como null=True y deben poder guardarse incluso si son None
+                # Solo filtramos campos que realmente no pueden ser None (campos requeridos)
+                # solicitudData = {k: v for k, v in solicitudData.items() if v is not None}  # COMENTADO
+                
+                # Se llama al caso de uso con los datos mapeados
+                crearSolicitud = self.crearSolicitudFondosUseCase.execute(solicitudData)
+                
+                if crearSolicitud is not None:
+                    return ReponseMapper.toSuccessResponse(crearSolicitud)
+                else:
+                    return ReponseMapper.toErrorResponse("Error al crear la solicitud de fondos")
+            
+            except json.JSONDecodeError:
+                return ReponseMapper.toErrorResponse("Error en el formato JSON de detalle_destino_fondos o datos_forma_pago")
+            except Exception as e:
+                # Loguear el error y retornar una respuesta de error general
+                print(f"Error al procesar solicitud: {e}") 
+                return ReponseMapper.toErrorResponse(f"Error interno al crear la solicitud de fondos: {str(e)}")
+
     def obtenerSolicitudesFondos(self):
         solicitudes = self.crearSolicitudFondosUseCase.obtenerTodasLasSolicitudes()
         if solicitudes is not None:

@@ -30,6 +30,10 @@ class SolicitudFondos(models.Model):
     montoSolicitado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Monto Solicitado', blank=True, null=True)
     #Actividad
     fechaRealizacionActividad = models.DateField(verbose_name="Fecha de realizacion del actividad", blank=True, null=True)
+
+    descripcion_actividad = models.TextField(verbose_name='Descripción de la actividad', blank=True, null=True)
+    objetivo_actividad = models.TextField(verbose_name='Objetivo de la actividad', blank=True, null=True)
+    datos_forma_pago = models.JSONField(verbose_name='Datos de forma de pago', blank=True, null=True)
     #Discriminador
     bloquearIconosSolFondos = models.BooleanField(default=True)
     #Validacion

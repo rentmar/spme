@@ -10,7 +10,53 @@ class SolicitudFondosDataAccess:
         :param solicitud_data: Datos de la solicitud de fondos.
         :return: Resultado de la creación de la solicitud.
         """
-        return SolicitudFondos.objects.create(**solicitudData)
+        print("Datos recibidos en DataAccess:", solicitudData)  # DEBUG
+        try:
+            # Mapeo explícito de campos para asegurar que coincidan con el modelo
+            mapped_data = {
+                'detalleDestinoFondos': solicitudData.get('detalleDestinoFondos'),
+                'formaPago_id': solicitudData.get('formaPago_id'),
+                'lugarSolicitud': solicitudData.get('lugarSolicitud'),
+                'fechaSolicitud': solicitudData.get('fechaSolicitud'),
+                'fechaRealizacionActividad': solicitudData.get('fechaRealizacionActividad'),
+                'montoSolicitado': solicitudData.get('montoSolicitado'),
+                'validacionResponsable': solicitudData.get('validacionResponsable'),
+                'responsable_id': solicitudData.get('responsable_id'),
+                'validacionCoordinador': solicitudData.get('validacionCoordinador'),
+                'coordinador_id': solicitudData.get('coordinador_id'),
+                'usuario_id': solicitudData.get('usuario_id'),
+                'actividad_id': solicitudData.get('actividad_id'),
+                'tarea_id': solicitudData.get('tarea_id'),
+                'numeroFormulario': solicitudData.get('numeroFormulario'),
+                'descripcion_actividad': solicitudData.get('descripcion_actividad'),
+                'objetivo_actividad': solicitudData.get('objetivo_actividad'),
+                'datos_forma_pago': solicitudData.get('datos_forma_pago'),
+                'bloquearIconosSolFondos': solicitudData.get('bloquearIconosSolFondos'),
+            }
+            
+            # NO filtrar campos opcionales - permitir que se guarden como None si es necesario
+            # Los campos descripcion_actividad, objetivo_actividad, datos_forma_pago deben poder ser None
+            # mapped_data = {k: v for k, v in mapped_data.items() if v is not None}  # COMENTADO
+            
+            print("Datos mapeados en DataAccess:", mapped_data)  # DEBUG
+            solicitud = SolicitudFondos.objects.create(**mapped_data)
+            print("Solicitud creada con ID:", solicitud.id)  # DEBUG
+            # Verificar los campos guardados
+            solicitud_refreshed = SolicitudFondos.objects.get(id=solicitud.id)
+            print("Campos guardados:")
+            print("numeroFormulario:", solicitud_refreshed.numeroFormulario)
+            print("descripcion_actividad:", solicitud_refreshed.descripcion_actividad)
+            print("objetivo_actividad:", solicitud_refreshed.objetivo_actividad)
+            print("datos_forma_pago:", solicitud_refreshed.datos_forma_pago)
+            print("fechaRealizacionActividad:", solicitud_refreshed.fechaRealizacionActividad)
+            print("bloquearIconosSolFondos:", solicitud_refreshed.bloquearIconosSolFondos)
+            return solicitud_refreshed
+        except Exception as e:
+            print("❌ Error en DataAccess:", str(e))
+            print("Tipo de error:", type(e).__name__)
+            import traceback
+            print("Traceback:", traceback.format_exc())
+            raise e
 
     def obtenerSolicitudesFondos(self):
         """

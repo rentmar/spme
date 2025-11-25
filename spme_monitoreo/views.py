@@ -565,7 +565,7 @@ class DiagnosticarSolicitudViaje(APIView):
         try:
             # Paso 1: Verificar modelo básico
             diagnostic_info["pasos"].append("Paso 1: Verificar importación del modelo")
-            from ..models import SolicitudViaje
+            #from ..models import SolicitudViaje
             diagnostic_info["modelo_importado"] = True
             
             # Paso 2: Verificar conteo de registros
