@@ -35,6 +35,12 @@ from .monitoreo.views.informe_actividad_views import InformeActividadVersionMVie
 from .monitoreo.views.crear_informe_de_actividad_views import InfActividadViewSet
 #PEI
 from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
+from .actividadespei.views.listar_actividades_pei_views import actividades_pei_con_tareas
+from .pei.views.obtener_estructura_pei_views import estructura_pei_completa
+from .actividadespei.views.crear_actividad_pei_views import crear_actividad_pei, actualizar_actividad_pei
+from .actividadespei.views.tarea_actividad_pei_views import TareaActividadPeiViewSet
+from .actividadespei.views.obtener_actividad_pei_porid_views import ActividadConTareasView
+from .actividadespei.views.actualizar_actividades_pei_bulk_views import actualizar_multiples_actividades
 #Proyecto
 from .viewdiagramaporidproyecto import DiagramaPorProyectoView
 #Informe de actividad
@@ -57,7 +63,7 @@ router.register(r'objetivos-pei', ObjetivosPeiViewModel, basename='obj.pei')
 router.register(r'indicadores-cuantitativos', IndicadorPeiCuantitativoViewSet)
 router.register(r'indicadores-cualitativos', IndicadorPeiCualitativoViewSet)
 router.register(r'factores-criticos', FactoresCriticosView, basename='factores_criticos')
-
+router.register(r'tareas-actividad-pei', TareaActividadPeiViewSet, basename='tareas-actividad-pei')
 
 #PROYECTOS
 router.register(r'proyectos', ProyectoViewModel, basename='proyectos')
@@ -109,6 +115,12 @@ urlpatterns =[
     path(r'pei-vigente/', obtener_pei_vigente, name='pei-vigente'),
     path(r'pei-vigente/<int:pei_id>/', establecer_pei_vigente, name='establecer-pei-vigente'),
     path(r'pei/<int:pei_id>/factores-criticos/', factores_criticos_por_pei,name='pei-lista-fac-criticos'),
+    path(r'pei/<int:pei_id>/actividades-con-tareas/', actividades_pei_con_tareas, name='actividades_pei_con_tareas'),
+    path(r'pei/<int:pei_id>/estructura/', estructura_pei_completa, name='obtener-estructura-peis'),
+    path(r'pei/actividades/crear/', crear_actividad_pei, name='crear_actividad_pei'),
+    path(r'pei/actividad/<int:actividad_id>/actualizar/', actualizar_actividad_pei, name='actualizar_actividad_pei'),
+    path(r'pei/actividad/<int:id>/tareas/', ActividadConTareasView.as_view(), name='actividad-con-tareas'),
+    path(r'pei/actividades/actualizar-lote/',actualizar_multiples_actividades, name='actualizar-multiples-actividades_pei'),
     ######################## USUARIOS #################################
     # Autenticación
     path('usr/registrar/', RegistrarUsuarioView.as_view(), name='registrar-usuario'),

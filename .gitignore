@@ -166,3 +166,5 @@ __pycache__/
 *.log
 
 *.sqlite3
+
+gitlog.txt

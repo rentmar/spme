@@ -196,14 +196,6 @@ class Actividad(models.Model):
         return f'Actividad: {self.codigo}'    
 
     
-    class Meta:
-        verbose_name = 'Actividad'
-        verbose_name_plural = 'Actividades'
-
-    def __str__(self):
-        return f'Actividad: {self.codigo}'    
-    
-
 #Tareas de la actividad
 class TareaActividad(models.Model):
     ESTADOS_TAREA = [
