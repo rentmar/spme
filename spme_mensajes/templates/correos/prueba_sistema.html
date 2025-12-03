@@ -1,0 +1,75 @@
+{% extends "correos/base_correo.html" %}
+
+{% block title %}Prueba del Sistema - SPME{% endblock %}
+
+{% block header_title %}
+    Prueba del Sistema
+    <span class="badge badge-prueba">TEST</span>
+{% endblock %}
+
+{% block header_subtitle %}Verificación de funcionamiento{% endblock %}
+
+{% block content %}
+    <div class="alert alert-info">
+        <strong>🧪 Este es un correo de prueba del sistema</strong><br>
+        Si recibes este correo, significa que el sistema de mensajería está funcionando correctamente.
+    </div>
+
+    <div class="email-message">
+        <p>Hola <strong>{{ nombre_usuario|default:"Usuario" }}</strong>,</p>
+        
+        <p>Este correo ha sido generado automáticamente para verificar que el sistema de notificaciones 
+        por correo electrónico del <strong>Sistema de Planificación, Monitoreo y Evaluación (SPME)</strong> 
+        está operativo y configurado correctamente.</p>
+        
+        <p>No es necesario que realices ninguna acción. Este mensaje confirma que:</p>
+        
+        <ul>
+            <li>✅ El sistema de colas (RabbitMQ) está funcionando</li>
+            <li>✅ Los workers de Celery están procesando tareas</li>
+            <li>✅ La configuración de correos electrónicos es correcta</li>
+            <li>✅ Las plantillas HTML se renderizan adecuadamente</li>
+        </ul>
+    </div>
+
+    <div class="email-details">
+        <h3 style="margin-top: 0; color: #1e3c72;">📋 Detalles de la Prueba</h3>
+        
+        <div class="detail-item">
+            <div class="detail-label">Fecha y hora:</div>
+            <div>{{ fecha_hora|date:"d/m/Y H:i:s" }}</div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">ID de Tarea:</div>
+            <div><code>{{ task_id }}</code></div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">Destinatario:</div>
+            <div>{{ email }}</div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">Sistema:</div>
+            <div>SPME v{{ version|default:"1.0" }}</div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">Entorno:</div>
+            <div>{{ entorno|default:"Desarrollo" }}</div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <p>Para acceder al sistema, haz clic en el siguiente botón:</p>
+        <a href="{{ app_url }}" class="email-button">🔷 Acceder a SPME</a>
+    </div>
+
+    <div style="margin-top: 30px; padding: 15px; background-color: #f8f9fa; border-radius: 6px;">
+        <p style="margin: 0; font-size: 14px; color: #6c757d;">
+            <strong>📝 Nota:</strong> Si recibiste este correo por error o no solicitaste esta prueba, 
+            por favor contacta al equipo de soporte técnico.
+        </p>
+    </div>
+{% endblock %}

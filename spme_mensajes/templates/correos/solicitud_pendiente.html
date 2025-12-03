@@ -1,0 +1,113 @@
+{% extends "correos/base_correo.html" %}
+
+{% block title %}Solicitud Pendiente - SPME{% endblock %}
+
+{% block header_title %}
+    Solicitud Pendiente de Aprobación
+    <span class="badge badge-pendiente">PENDIENTE</span>
+{% endblock %}
+
+{% block header_subtitle %}Requiere tu revisión{% endblock %}
+
+{% block content %}
+    <div class="alert alert-warning">
+        <strong>⏳ Tienes una solicitud pendiente de revisión</strong><br>
+        La solicitud {{ solicitud_codigo }} está esperando tu aprobación.
+    </div>
+
+    <div class="email-message">
+        <p>Hola <strong>{{ nombre_revisor }}</strong>,</p>
+        
+        <p>Se ha registrado una nueva solicitud en el sistema que requiere tu revisión y aprobación.</p>
+        
+        <p><strong>{{ nombre_solicitante }}</strong> ha enviado la solicitud 
+        <strong>"{{ titulo_solicitud }}"</strong> que actualmente se encuentra en estado 
+        <strong>Pendiente de Aprobación</strong>.</p>
+        
+        <p>Por favor, revisa los detalles de la solicitud y procede con su aprobación o 
+        devolución según corresponda.</p>
+    </div>
+
+    <div class="email-details">
+        <h3 style="margin-top: 0; color: #1e3c72;">📋 Detalles de la Solicitud</h3>
+        
+        <div class="detail-item">
+            <div class="detail-label">Código:</div>
+            <div><strong>{{ solicitud_codigo }}</strong></div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">Título:</div>
+            <div>{{ titulo_solicitud }}</div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">Solicitante:</div>
+            <div>{{ nombre_solicitante }}</div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">Fecha de solicitud:</div>
+            <div>{{ fecha_solicitud|date:"d/m/Y H:i" }}</div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">Tipo:</div>
+            <div>{{ tipo_solicitud|default:"General" }}</div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">Prioridad:</div>
+            <div>
+                {% if prioridad == 'alta' %}
+                    🔴 <strong>Alta</strong>
+                {% elif prioridad == 'media' %}
+                    🟡 Media
+                {% else %}
+                    🟢 Baja
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">Plazo de revisión:</div>
+            <div>
+                {% if plazo_revision %}
+                    📅 {{ plazo_revision|date:"d/m/Y" }}
+                {% else %}
+                    Sin plazo específico
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if descripcion %}
+        <div class="detail-item" style="flex-direction: column;">
+            <div class="detail-label">Descripción:</div>
+            <div style="margin-top: 5px;">{{ descripcion|linebreaks }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <p>Para revisar esta solicitud, haz clic en el siguiente botón:</p>
+        <a href="{{ url_revision }}" class="email-button">📋 Revisar Solicitud</a>
+        <p style="margin-top: 10px; font-size: 14px; color: #6c757d;">
+            <em>Enlace directo: {{ url_revision }}</em>
+        </p>
+    </div>
+
+    <div style="margin-top: 30px; padding: 20px; background-color: #fff3cd; border-radius: 6px; border-left: 4px solid #ffc107;">
+        <h4 style="margin-top: 0; color: #856404;">📝 Acciones requeridas</h4>
+        <ol style="margin-bottom: 0;">
+            <li>Revisar los detalles de la solicitud</li>
+            <li>Verificar que cumple con los requisitos establecidos</li>
+            <li>Aprobar o devolver con observaciones según corresponda</li>
+            <li>Registrar cualquier comentario adicional en el sistema</li>
+        </ol>
+    </div>
+
+    <div style="margin-top: 25px; font-size: 14px; color: #6c757d; text-align: center;">
+        <p><strong>⏰ Importante:</strong> Por favor, revisa esta solicitud a la brevedad posible 
+        para no retrasar el proceso.</p>
+    </div>
+{% endblock %}
