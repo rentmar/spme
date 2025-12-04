@@ -122,6 +122,9 @@ class ReponseMapper:
                     "tarea_id": getattr(solicitud, 'tarea_id', None),
                     "fechaRealizacionActividad": str(getattr(solicitud, 'fechaRealizacionActividad', '')) if getattr(solicitud, 'fechaRealizacionActividad', None) else None,
                     "bloquearIconosSolFondos": getattr(solicitud, 'bloquearIconosSolFondos', True),
+                    "descripcion_actividad": getattr(solicitud, 'descripcion_actividad', None),
+                    "objetivo_actividad": getattr(solicitud, 'objetivo_actividad', None),
+                    "datos_forma_pago": getattr(solicitud, 'datos_forma_pago', None),
                 }
                 
                 # Campos de auditoría (manejo seguro)

@@ -90,6 +90,13 @@ class SolicitudFondosCreateSerializer(serializers.ModelSerializer):
         allow_null=True
     )
 
+    # Campo id_actividad explícito para manejar la asignación directa
+    id_actividad = serializers.IntegerField(
+        write_only=True,
+        required=False,
+        allow_null=True
+    )
+
     class Meta:
         model = SolicitudFondos
         fields = [
@@ -98,16 +105,18 @@ class SolicitudFondosCreateSerializer(serializers.ModelSerializer):
             'validacion_responsable', 'id_responsable', 'validacion_coordinador', 
             'id_coordinador', 'id_usuario', 'actividad', 'id_tarea',
             # NUEVOS CAMPOS
-            'descripcion_actividad', 'objetivo_actividad', 'datos_forma_pago'
+            'descripcion_actividad', 'objetivo_actividad', 'datos_forma_pago',
+            'id_actividad'
         ]
 
     @transaction.atomic
     def create(self, validated_data):
         # Extraer y procesar los datos de actividad si vienen
         actividad_data = validated_data.pop('actividad', None)
+        id_actividad_directo = validated_data.pop('id_actividad', None)
         actividad_obj = None
         
-        # Si viene actividad en el formato, actualizar la actividad existente
+        # Prioridad 1: Si viene actividad_data (objeto JSON), usar su id_actividad
         if actividad_data and 'id_actividad' in actividad_data:
             try:
                 actividad_id = actividad_data['id_actividad']
@@ -125,9 +134,6 @@ class SolicitudFondosCreateSerializer(serializers.ModelSerializer):
                 if campos_actualizados:
                     actividad_obj.save()
                 
-                # Asignar la actividad actualizada a la solicitud de fondos
-                validated_data['actividad'] = actividad_obj
-                
             except Actividad.DoesNotExist:
                 raise serializers.ValidationError(
                     {"actividad": f"La actividad con ID {actividad_id} no existe."}
@@ -136,6 +142,19 @@ class SolicitudFondosCreateSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     {"actividad": f"Error al actualizar la actividad: {str(e)}"}
                 )
+        
+        # Prioridad 2: Si no se procesó arriba pero viene id_actividad directo
+        elif id_actividad_directo:
+            try:
+                actividad_obj = Actividad.objects.get(id=id_actividad_directo)
+            except Actividad.DoesNotExist:
+                raise serializers.ValidationError(
+                    {"id_actividad": f"La actividad con ID {id_actividad_directo} no existe."}
+                )
+
+        # Asignar el objeto actividad a validated_data si se encontró
+        if actividad_obj:
+            validated_data['actividad'] = actividad_obj
         
         # Procesar los nuevos campos directamente en la solicitud de fondos
         # Estos campos se guardarán directamente en el modelo SolicitudFondos

@@ -155,6 +155,30 @@ class RendicionCuentasCreateSerializer(serializers.ModelSerializer):
         """Permitir fechas nulas"""
         return value  # Acepta tanto fechas como null
 
+    def to_internal_value(self, data):
+        """
+        Convierte valores 0 a None para campos de usuarios
+        Esto permite que el frontend envíe 0 en lugar de null
+        """
+        # Crear una copia mutable de los datos
+        data_copy = data.copy() if hasattr(data, 'copy') else dict(data)
+        
+        # Lista de campos de usuario que pueden recibir 0 como null
+        user_fields = [
+            'idresponsable', 
+            'idadministrador', 
+            'idcontador', 
+            'idcoordinador', 
+            'idusuarioLogeado'
+        ]
+        
+        # Convertir 0 a None para cada campo de usuario
+        for field in user_fields:
+            if field in data_copy and data_copy[field] == 0:
+                data_copy[field] = None
+        
+        return super().to_internal_value(data_copy)
+
     def create(self, validated_data):
         # Extraer datos relacionados
         detalle_destino_fondos = validated_data.pop('detalleDestinoFondos', [])
