@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'polymorphic',
+    'django_celery_results',
     'spme_web',
     'spme_api',
     'spme_autenticacion',
@@ -52,6 +53,8 @@ INSTALLED_APPS = [
     'spme_planificacion',
     'spme_programas',
     'spme_proyectos_reportes',
+    'spme_gestion_acceso',
+    'spme_mensajes',
     'apptran', #Aplicacion de transicion
     'system_config', #Configuracion del sistema
 ]
@@ -242,3 +245,33 @@ LOGGING = {
         },
     },
 }
+
+
+# RabbitMQ configuracion
+CELERY_BROKER_URL = 'amqp://admin:admin@localhost:5672//'
+CELERY_RESULT_BACKEND = 'django-db' #Backend para resultados
+
+#Serializacion
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+#Hora Boliviana
+CELERY_TIMEZONE = 'America/La_Paz'
+
+########### Configuracion de email con gmail #################3
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+#Credenciales
+EMAIL_HOST_USER = 'MRolqueza@gmail.com'
+EMAIL_HOST_PASSWORD = 'oadt trbi jwck wwab'
+DEFAULT_FROM_EMAIL = 'MRolqueza@gmail.com'
+
+# Configuración adicional para mejor rendimiento
+EMAIL_TIMEOUT = 30
+EMAIL_SSL_KEYFILE = None
+EMAIL_SSL_CERTFILE = None
+

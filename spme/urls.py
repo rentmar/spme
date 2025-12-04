@@ -39,5 +39,9 @@ urlpatterns = [
     path('api-proy/', include('spme_estructuracion_proyecto.urls'),),
     #Api de reportes
     path('api-rep/', include('spme_proyectos_reportes.urls')),
+    #Api de gestion acceso
+    path('api-gaxs/', include('spme_gestion_acceso.urls')),
+    #Api de mensajeria
+    path('api-msg/', include('spme_mensajes.urls')),
 ]
 

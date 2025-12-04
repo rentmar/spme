@@ -1,0 +1,130 @@
+{% extends "correos/base_correo.html" %}
+
+{% block title %}Solicitud Aprobada - SPME{% endblock %}
+
+{% block header_title %}
+    Solicitud Aprobada
+    <span class="badge badge-aprobado">APROBADA</span>
+{% endblock %}
+
+{% block header_subtitle %}¡Tu solicitud ha sido aprobada!{% endblock %}
+
+{% block content %}
+    <div class="alert alert-success">
+        <strong>✅ ¡Excelente noticia!</strong><br>
+        Tu solicitud {{ solicitud_codigo }} ha sido <strong>aprobada</strong>.
+    </div>
+
+    <div class="email-message">
+        <p>Hola <strong>{{ nombre_solicitante }}</strong>,</p>
+        
+        <p>Nos complace informarte que tu solicitud <strong>"{{ titulo_solicitud }}"</strong> 
+        ha sido <strong>aprobada exitosamente</strong> por {{ nombre_aprobador }}.</p>
+        
+        <p>Felicitaciones 🎉. Ahora puedes proceder con los siguientes pasos del proceso.</p>
+        
+        <p>El equipo de revisión ha determinado que tu solicitud cumple con todos los requisitos 
+        establecidos y ha sido autorizada para continuar.</p>
+    </div>
+
+    <div class="email-details">
+        <h3 style="margin-top: 0; color: #1e3c72;">📋 Detalles de la Aprobación</h3>
+        
+        <div class="detail-item">
+            <div class="detail-label">Código de solicitud:</div>
+            <div><strong>{{ solicitud_codigo }}</strong></div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">Título:</div>
+            <div>{{ titulo_solicitud }}</div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">Aprobada por:</div>
+            <div>{{ nombre_aprobador }}</div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">Fecha de aprobación:</div>
+            <div>{{ fecha_aprobacion|date:"d/m/Y H:i" }}</div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">Número de aprobación:</div>
+            <div><code>{{ numero_aprobacion|default:"N/A" }}</code></div>
+        </div>
+        
+        {% if observaciones %}
+        <div class="detail-item" style="flex-direction: column;">
+            <div class="detail-label">Observaciones:</div>
+            <div style="margin-top: 5px; background-color: #f8f9fa; padding: 10px; border-radius: 4px;">
+                {{ observaciones|linebreaks }}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if proximos_pasos %}
+        <div class="detail-item" style="flex-direction: column;">
+            <div class="detail-label">Próximos pasos:</div>
+            <div style="margin-top: 5px;">
+                {{ proximos_pasos|linebreaks }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <p>Para ver los detalles completos de tu solicitud aprobada:</p>
+        <a href="{{ url_detalles }}" class="email-button">📄 Ver Solicitud Aprobada</a>
+        
+        {% if url_siguiente_paso %}
+        <p style="margin-top: 20px;">O continúa con el siguiente paso:</p>
+        <a href="{{ url_siguiente_paso }}" class="email-button" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+            🚀 Continuar Proceso
+        </a>
+        {% endif %}
+    </div>
+
+    <div style="margin-top: 30px; padding: 20px; background-color: #d4edda; border-radius: 6px; border-left: 4px solid #28a745;">
+        <h4 style="margin-top: 0; color: #155724;">📋 Resumen del proceso</h4>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #c3e6cb;"><strong>Estado actual:</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #c3e6cb;">
+                    <span style="color: #28a745;">✅ Aprobado</span>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #c3e6cb;"><strong>Siguiente fase:</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #c3e6cb;">
+                    {{ siguiente_fase|default:"Implementación" }}
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #c3e6cb;"><strong>Responsable:</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #c3e6cb;">
+                    {{ responsable_siguiente|default:"Equipo correspondiente" }}
+                </td>
+            </tr>
+            {% if fecha_limite %}
+            <tr>
+                <td style="padding: 8px;"><strong>Fecha límite:</strong></td>
+                <td style="padding: 8px;">
+                    📅 {{ fecha_limite|date:"d/m/Y" }}
+                </td>
+            </tr>
+            {% endif %}
+        </table>
+    </div>
+
+    <div style="margin-top: 25px; text-align: center; color: #28a745;">
+        <p style="font-size: 16px;">
+            <strong>🌟 ¡Felicidades por este logro!</strong>
+        </p>
+        <p style="font-size: 14px; color: #6c757d;">
+            Continúa con el excelente trabajo y no dudes en contactar al equipo de soporte 
+            si necesitas asistencia en los siguientes pasos.
+        </p>
+    </div>
+{% endblock %}
