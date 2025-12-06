@@ -50,7 +50,8 @@ from .monitoreo.views.informe_tarea_views import InfTareaMinViews
 from .monitoreo.views.crear_informe_tarea_views import crear_informe_tarea_completo
 #Gannt
 from .actividades.views.datos_gantt_views import actividades_con_estados
-
+#Usuarios
+from .usuarios.views.usuario_views import listar_usuarios, buscar_usuarios_autocomplete, obtener_usuario_actual, listar_usuarios_publico
 
 
 
@@ -197,6 +198,11 @@ urlpatterns =[
     path(r'crear-informes-tarea-minimo/', crear_informe_tarea_completo, name="crear_informe_tarea"),
     #Lista de informe actividad
     path(r'actividades/<int:actividad_id>/informes-completos/', actividad_informes_completos, name='actividad-informes-completos'),
+    #Usuarios
+    path(r'usuarios/', listar_usuarios, name='listar_usuarios'),
+    path(r'usuarios/buscar/', buscar_usuarios_autocomplete, name='buscar_usuarios'),
+    path(r'usuarios/actual/', obtener_usuario_actual, name='usuario_actual'),
+    path(r'usuarios/public/', listar_usuarios_publico, name='usuarios_public'),
 ]
 
 urlpatterns += router.urls
