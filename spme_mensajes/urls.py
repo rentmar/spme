@@ -26,6 +26,14 @@ from .views.mensaje_views import(
     obtener_ejemplos,
     enviar_mensaje_prueba,
 )
+#Mensajes
+from .views.mensajeria_views import (
+    CrearMensajeView,
+    CrearMensajeSistemaView,
+    CrearMensajeMultipleView,
+)
+
+from .views.mensaje_automatico_sistema_views import CrearMensajeAutomaticoSistemaView
 
 
 
@@ -62,8 +70,11 @@ urlpatterns = [
     #Pruebas y ejemplos
     path(r'mensajes/ejemplos/', obtener_ejemplos, name='ejemplos'),
     path(r'prueba/', enviar_mensaje_prueba, name='enviar_prueba'),
-    
-    
+    #mensajes
+    path(r'mensajes/crear/', CrearMensajeView.as_view(), name='crear_mensaje'),
+    path(r'mensajes/crear/sistema/', CrearMensajeSistemaView.as_view(), name='crear_mensaje_sistema'),
+    path(r'mensajes/crear/multiple/', CrearMensajeMultipleView.as_view(), name='crear_mensaje_multiple'),
+    path(r'mensajes/crear/sistema-automatico/', CrearMensajeAutomaticoSistemaView.as_view(), name='crear_mensaje_sistema_automatico'),
     
 ] 
 
