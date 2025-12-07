@@ -51,6 +51,7 @@ def obtener_permisos_usuario(request):
             'nombre_completo': user.get_full_name(),
             'ci': user.ci,
             'cargo': user.cargo,
+            'correo': user.correo,
 
             #Informacion bancaria
             'banco': user.banco,
