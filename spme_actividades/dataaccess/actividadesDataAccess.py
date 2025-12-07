@@ -76,7 +76,15 @@ class ActividadesDataAccess:
                 "tipo_id": actividad.tipo_id
             }
         return data
-            
+
+    def numeroTotalActividades(self):
+        """
+        Obtiene el total de actividades.
+
+        :return: Total de actividades.
+        """
+        return Actividad.objects.filter(estaInactiva=0).count()
+
     def totalActividadesPlanificadas(self):
         """
         Obtiene el total de actividades planificadas.

@@ -14,7 +14,7 @@ class ObtenerActividadesGanttUseCase:
         if actividades: 
             for actividad in actividades:
                 responsable_id = actividad.get("responsable_id")
-                if responsable_id:
+                if responsable_id is not None:
                     nombre_responsable = self.userRepository.obtenerNombreUsuarioPorId(responsable_id)
                     if nombre_responsable:
                         actividad['nombre_responsable'] = (

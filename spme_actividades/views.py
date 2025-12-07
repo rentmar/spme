@@ -5,7 +5,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from .common.MessageManager import MessageType
 from .domain.models.request.actividadesRequest import ObtenerActividadIdRequest,CrearActividadRequest,ObtenerActividadesUsuarioRequest,ObtenerEncabezadoPorIdRequest
-from .domain.models.response.actividadesResponse import ActividadesUsuarioResponse,ActividadesGanttResponse,CrearActividadResponse,ObtenerActividadIdResponse,ObtenerEncabezadoActividadResponse
+from .domain.models.response.actividadesResponse import ActividadesUsuarioResponse,ActividadesGanttResponse,CrearActividadResponse,ObtenerActividadIdResponse,ObtenerEncabezadoActividadResponse,DatosDashboardActividadResponse
 from .container.presenterContainer import ActividadesPresenterContainer
 
 class ObtenerActividadesUsuario(APIView):
@@ -131,8 +131,27 @@ class ObtenerEncabezadoActividad(APIView):
             if response.is_valid():
                 return Response(response.data, status=status.HTTP_200_OK)
             else:
-                print("Serializer Errors:", response.errors)
                 return Response({"estado": MessageType.NOT_FOUND.value}, status=status.HTTP_404_NOT_FOUND)
 
         else:
             return Response({"estado": MessageType.BAD_REQUEST.value}, status=status.HTTP_400_BAD_REQUEST)
+
+class DashboardActividad(APIView):
+    """
+    API para obtener datos dashboard actividades
+    """
+    def __init__(self):
+        self.contenedor = ActividadesPresenterContainer()
+        self.actividadesPresenter = self.contenedor.actividadesPresenter()
+
+    def get(self, requets, *args, **kwargs):
+
+        responseDashboard = self.actividadesPresenter.obtenerDatosDashboard()
+
+        response = DatosDashboardActividadResponse(data=responseDashboard)
+
+        if response.is_valid():
+            return Response(response.data, status=status.HTTP_200_OK)
+        else:
+            return Response({"estado": MessageType.NOT_FOUND.value}, status=status.HTTP_404_NOT_FOUND)
+    
