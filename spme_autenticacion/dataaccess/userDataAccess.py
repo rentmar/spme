@@ -26,7 +26,7 @@ class UserDataAccess:
         :param user_name: Nombre de usuario a buscar.
         :return: Usuario encontrado o None si no existe.
         """
-        usuario = Usuario.objects.filter(is_active=True,username=userName).values('id','nombre','paterno','materno','cargo','permisos','ci','banco','numero_cuenta').first()
+        usuario = Usuario.objects.filter(is_active=True,username=userName).values('id','nombre','paterno','materno','cargo','permisos','correo','ci','banco','numero_cuenta').first()
 
         if usuario:
             return usuario
@@ -58,6 +58,7 @@ class UserDataAccess:
             nombre=userData["nombre"],
             paterno=userData["paterno"],
             materno=userData["materno"],
+            correo= userData["correo"],
             ci=userData["ci"],
             cargo=userData["cargo"],
             banco=userData["banco"],
@@ -78,7 +79,7 @@ class UserDataAccess:
         try:
             usuario = Usuario.objects.get(id=userData["id"])
 
-            campos_normales = ['username', 'nombre', 'paterno', 'materno', 'ci', 'cargo', 'banco',
+            campos_normales = ['username', 'nombre', 'paterno', 'materno','correo','ci', 'cargo', 'banco',
                             'numero_cuenta', 'tipo_cuenta', 'is_active', 'permisos']
 
             for campo in campos_normales:
@@ -105,7 +106,7 @@ class UserDataAccess:
         Obtiene la lista de usuarios.
         :return: Lista de usuarios.
         """
-        return Usuario.objects.filter(is_superuser=False).values('id','username','nombre','paterno','materno','ci','cargo','permisos','banco','numero_cuenta','tipo_cuenta','is_active')
+        return Usuario.objects.filter(is_superuser=False).values('id','username','nombre','paterno','materno','correo','ci','cargo','permisos','banco','numero_cuenta','tipo_cuenta','is_active')
 
     def obtenerListaValidadores(self):
         """

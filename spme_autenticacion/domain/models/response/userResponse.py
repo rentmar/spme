@@ -9,6 +9,7 @@ class UsuarioValidadorResponse(serializers.Serializer):
   
 class UsuarioResponse(UsuarioValidadorResponse):
     usuario = serializers.CharField(required=False, allow_blank=True, max_length=150)
+    correo = serializers.CharField(required=False,allow_blank= True,max_length=100)
     ci = serializers.CharField(required=False,allow_blank=True, max_length=12)
     banco = serializers.CharField(required=False,allow_blank=True, max_length=50)
     numero_cuenta = serializers.CharField(required=False,allow_blank=True, max_length=50)
