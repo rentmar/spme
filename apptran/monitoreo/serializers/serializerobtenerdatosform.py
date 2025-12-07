@@ -7,7 +7,7 @@ from spme_monitoreo.models import FormaPago
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['id', 'nombre', 'paterno', 'materno', 'cargo', 'ci', 'banco', 'permisos']
+        fields = ['id', 'nombre', 'paterno', 'materno', 'cargo', 'ci', 'banco', 'permisos', 'correo']
 
 class ValidadorSerializer(serializers.ModelSerializer):
     class Meta:
