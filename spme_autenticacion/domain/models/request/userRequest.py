@@ -21,6 +21,7 @@ class UsuarioRequest(serializers.Serializer):
     nombre = serializers.CharField(max_length=150, required=True, allow_blank=False)
     paterno = serializers.CharField(max_length=150, required=True, allow_blank=False)
     materno = serializers.CharField(max_length=150, required=True, allow_blank=False)
+    correo = serializers.CharField(max_length=150, required=False, allow_blank=True)
     ci = serializers.CharField(max_length=15, required=True, allow_blank=False)
     cargo = serializers.CharField(max_length=50, required=True, allow_blank=False)
     banco = serializers.CharField(max_length=100, required=True, allow_blank=False)
@@ -39,6 +40,7 @@ class UsuarioRequest(serializers.Serializer):
             'nombre': internal_value['nombre'],
             'paterno': internal_value['paterno'],
             'materno': internal_value['materno'],
+            'correo': internal_value['correo'],
             'ci': internal_value['ci'],
             'cargo': internal_value['cargo'],
             'banco': internal_value['banco'],
@@ -64,6 +66,7 @@ class ActualizarUsuarioRequest(serializers.Serializer):
     nombre = serializers.CharField(max_length=150, required=False, allow_blank=True)
     paterno = serializers.CharField(max_length=150, required=False, allow_blank=True)
     materno = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    correo = serializers.CharField(max_length=150, required=False, allow_blank=True)
     ci = serializers.CharField(max_length=15, required=False, allow_blank=True)
     cargo = serializers.CharField(max_length=50, required=False, allow_blank=True)
     banco = serializers.CharField(max_length=100, required=False, allow_blank=True)
@@ -80,6 +83,7 @@ class ActualizarUsuarioRequest(serializers.Serializer):
             'nombre': internal_value.get('nombre'),
             'paterno': internal_value.get('paterno'),
             'materno': internal_value.get('materno'),
+            'correo': internal_value.get('correo'),
             'ci': internal_value.get('ci'),
             'cargo': internal_value.get('cargo'),
             'banco': internal_value.get('banco'),

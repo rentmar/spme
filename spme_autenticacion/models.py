@@ -30,6 +30,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     nombre = models.CharField(max_length=30, blank=True)
     paterno = models.CharField(max_length=30, blank=True)
     materno = models.CharField(max_length=150, blank=True)
+    correo = models.CharField(max_length=150,blank=True)
     ci = models.CharField(max_length=15,blank=True)
     cargo = models.CharField(max_length=50,blank=True)
     banco = models.CharField(max_length=75,blank=True)
@@ -44,7 +45,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     objects = UsuarioManager()
 
     USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['nombre', 'paterno', 'materno','permisos','ci','cargo']
+    REQUIRED_FIELDS = ['nombre', 'paterno', 'materno','permisos','correo','ci','cargo']
 
     groups = models.ManyToManyField(
         'auth.Group',

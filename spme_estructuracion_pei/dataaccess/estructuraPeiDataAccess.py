@@ -26,3 +26,19 @@ class EstructuracionPeiDataAccess:
     
     def obtenerEstructuraPei(self):
         return EstructuraPei.objects.all().first()
+
+    def numeroPeiVigente(self):
+        """
+        Obtiene el numero total de Pei Vigente.
+
+        :return: Total de actividades finalizadas .
+        """
+        return EstructuraPei.objects.filter(esta_vigente=True).count()
+
+    def numeroTotalPei(self):
+        """
+        Obtiene el numero total de Pei.
+
+        :return: Total de actividades finalizadas.
+        """
+        return EstructuraPei.objects.count()

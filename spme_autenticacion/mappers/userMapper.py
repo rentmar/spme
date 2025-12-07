@@ -27,6 +27,7 @@ class UserMapper:
     @staticmethod
     def toAutenticacionSuccessResponse(user):
         return {
+            "id": user.id,
             "validacion": True,
             "mensaje": MessageType.AUTHORIZED.value,
             "usuario": user.username,
@@ -69,6 +70,7 @@ class UserMapper:
             "nombre": user.get("nombre"),
             "paterno": user.get("paterno"),
             "materno": user.get("materno"),
+            "correo": user.get("correo"),
             "ci": user.get("ci"),
             "cargo": user.get("cargo"),
             "permisos": user.get("permisos"),

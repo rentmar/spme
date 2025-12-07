@@ -18,7 +18,7 @@ class UsuarioPresenter:
         Obtiene el usuario a partir de la solicitud.
         """
         usuario = self.userUseCase.execute(userRequest['username'])
-        
+
         if usuario is not None:
             return usuario
         else:
