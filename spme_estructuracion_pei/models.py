@@ -4,6 +4,7 @@ from polymorphic.models import PolymorphicModel
 
 class EstructuraPei(models.Model):
     id = models.AutoField(primary_key=True)
+    codigo = models.CharField(max_length=20, blank=True, null=True)
     titulo = models.CharField(max_length=50, verbose_name='tiulo')
     descripcion = models.TextField(max_length=250,verbose_name='descripcion', blank=False, null=False)
     fecha_creacion = models.DateTimeField(verbose_name='fecha_creacion')
@@ -23,7 +24,6 @@ class EstructuraPei(models.Model):
 
 ####################### PEI ##########################################
 class Pei(models.Model):
-    codigo = models.CharField(max_length=50, blank=True, null=True)
     titulo = models.CharField(max_length=255)
     descripcion = models.TextField(blank=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
