@@ -231,18 +231,24 @@ class TareaActividad(models.Model):
         return f'{self.codigo} - {self.titulo or "Sin título"}'
 
     def save(self, *args, **kwargs):
-        if not self.pk and not self.codigo and self.actividad:
-            # Contar tareas existentes para esta actividad
-            cantidad_tareas = TareaActividad.objects.filter(
-                actividad=self.actividad
-            ).count()
-            
-            siguiente_numero = cantidad_tareas + 1
-            numero_formateado = f"{siguiente_numero:04d}"
-            self.codigo = f"SACT-{numero_formateado}/{self.actividad.codigo}"
+        # Normalizar codigo vacío a None
+        if self.codigo == '':
+            self.codigo = None
+        
+        # Si es una nueva tarea sin código, guardar primero para obtener el ID
+        is_new = not self.pk
+        needs_codigo = not self.codigo and self.actividad
         
         if not self.fecha_creacion:
             from django.utils import timezone
-            self.fecha_creacion = timezone.now()
+            self.fecha_creacion = timezone.now().date()
         
+        # Guardar para obtener el ID si es necesario
         super().save(*args, **kwargs)
+        
+        # Generar código usando el ID único de la tarea
+        if is_new and needs_codigo:
+            numero_formateado = f"{self.pk:04d}"
+            self.codigo = f"SACT-{numero_formateado}/{self.actividad.codigo}"
+            # Guardar nuevamente con el código generado
+            super().save(update_fields=['codigo'])
