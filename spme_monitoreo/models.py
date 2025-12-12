@@ -38,10 +38,10 @@ class SolicitudFondos(models.Model):
     bloquearIconosSolFondos = models.BooleanField(default=True)
     #Validacion
     validacionResponsable = models.BooleanField(default=False)
-    responsable = models.ForeignKey(
+    contador = models.ForeignKey(
         Usuario,
         on_delete=models.SET_NULL,
-        related_name='usuario_responsable_solicitud',
+        related_name='usuario_contador_solicitud',
         null=True,
         blank=True,
     )
@@ -102,27 +102,23 @@ class SolicitudReembolso(models.Model):
     )
     lugarSolicitud = models.CharField(max_length=50, verbose_name='Lugar solicitud', blank=True, null=True)
     fechaSolicitud = models.DateField(verbose_name='Fecha solicitud', blank=True, null=True)
-    montoSolicitado = models.DecimalField(max_digits=6,decimal_places=2,verbose_name ='Monto solicitado',blank=True, null=True)
-
-    fechaDondeSeRealizoActividad = models.DateField(
-        verbose_name='Fecha donde se realizó la actividad', 
-        blank=True, 
-        null=True
-    )
-
-    #Campos Extra
-    descripcionReposicion = models.TextField(blank=True,null=True)
-    objetivoReposicion = models.TextField(blank=True, null=True, verbose_name='Objetivo de Reposición')
-
-    #discriminador
+    montoSolicitado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Monto solicitado', blank=True, null=True)
+    descripcion_actividad = models.TextField(blank=True, null=True, verbose_name='Descripción de la actividad')
+    objetivo_actividad = models.TextField(blank=True, null=True, verbose_name='Objetivo de la actividad')
+    datos_forma_pago = models.JSONField(blank=True, null=True, verbose_name='Datos de forma de pago')
+    fechaRealizacionActividad = models.DateField(blank=True, null=True, verbose_name='Fecha de realizacion del actividad')
+    
+    # Old field - to be removed in next migration
     bloquearIconos = models.BooleanField(default=True)
+    
+    bloquearIconosSolFondos = models.BooleanField(default=True)  # NUEVO CAMPO
 
     #Validaciones
-    validacionResponsable = models.BooleanField(default=False)
-    responsable = models.ForeignKey(
+    validacionContador = models.BooleanField(default=False)
+    contador = models.ForeignKey(
         Usuario,
         on_delete=models.SET_NULL,
-        related_name='usuario_responsable_reembolso',
+        related_name='usuario_contador_reembolso',
         null=True,
         blank=True,
     )
@@ -251,15 +247,7 @@ class SolicitudViaje (models.Model):
 
 class SolicitudPagoDirecto(models.Model):
     numeroFormulario = models.CharField(max_length=150, blank=True, null=True)
-    descripcion_actividad = models.TextField(blank=True, null=True, verbose_name='Descripción de la actividad')
-    fecha_realizacion = models.DateField(blank=True, null=True, verbose_name='Fecha de realización')
-    objetivo_actividad = models.TextField(blank=True, null=True, verbose_name='Objetivo de la actividad')
-    fuente_financiamiento = models.CharField(max_length=255, blank=True, null=True, verbose_name='Fuente de financiamiento')
     detalleDestinoFondos = models.JSONField(verbose_name='detalle_destino_fondos', blank=True, null=True)
-
-    #Discriminador
-    bloquearIconos = models.BooleanField(default=True)
-
     formaPago = models.ForeignKey(
         FormaPago,
         on_delete=models.SET_NULL,
@@ -267,17 +255,25 @@ class SolicitudPagoDirecto(models.Model):
         null=True,
         blank=True,
     )
-
-    lugarSolicitud = models.CharField(max_length=50, verbose_name='lugar_solicitud', blank=True, null=True)
+    lugarSolicitud = models.TextField(blank=True, null=True)
     fechaSolicitud = models.DateField(verbose_name='fecha_solicitud', blank=True, null=True)
     montoSolicitado = models.DecimalField(max_digits=6,decimal_places=2,verbose_name ='monto_solicitado',blank=True, null=True)
+    #Actividad
+    fechaRealizacionActividad = models.DateField(verbose_name="Fecha de realizacion del actividad", blank=True, null=True)
 
+    descripcion_actividad = models.TextField(blank=True, null=True, verbose_name='Descripción de la actividad')
+    objetivo_actividad = models.TextField(blank=True, null=True, verbose_name='Objetivo de la actividad')
+    datos_forma_pago = models.JSONField(verbose_name='Datos de forma de pago', blank=True, null=True)
+    
+    #Discriminador
+    bloquearIconosSolFondos = models.BooleanField(default=True)
+    
      #Validaciones
     validacionResponsable = models.BooleanField(default=False)
-    responsable = models.ForeignKey(
+    contador = models.ForeignKey(
         Usuario,
         on_delete=models.SET_NULL,
-        related_name='usuario_responsable_sol_pago_directo',
+        related_name='usuario_contador_sol_pago_directo',
         null=True,
         blank=True,
     )
@@ -342,6 +338,7 @@ class RendicionCuentas(models.Model):
         blank=True,
     )
     fechaActividad = models.DateField(verbose_name='Fecha de la actividad', blank=True, null=True)
+    fechaRendicion = models.DateField(verbose_name='Fecha de Rendición', auto_now_add=True, blank=True, null=True)
     descripcionActividad = models.TextField(blank=True, null=True)
     lugarActividad = models.TextField(blank=True, null=True)
     tarea = models.ForeignKey(

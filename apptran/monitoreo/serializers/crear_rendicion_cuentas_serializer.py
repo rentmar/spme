@@ -70,8 +70,7 @@ class RendicionCuentasCreateSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True
     )
-    FechaActividad = serializers.DateField(
-        source='fechaActividad', 
+    fechaActividad = serializers.DateField(
         required=False, 
         allow_null=True
     )
@@ -120,7 +119,7 @@ class RendicionCuentasCreateSerializer(serializers.ModelSerializer):
         fields = [
             # Campos básicos
             'numeroFormulario', 'cpteDiario', 'fechaDesembolso', 
-            'montoDescargado', 'saldo', 'detalleDestinoFondos',
+            'montoDescargado', 'montoAsignado', 'saldo', 'detalleDestinoFondos',
             
             # Validaciones
             'validacionResponsable', 'validacionCoordinador',
@@ -132,7 +131,7 @@ class RendicionCuentasCreateSerializer(serializers.ModelSerializer):
             
             # Actividad
             'descripcionActividad', 'lugarActividad', 
-            'FechaActividad', 'idActividad',
+            'fechaActividad', 'idActividad', 'fechaRendicion',
             
             # Bloqueo
             'bloquearIconoRC',
@@ -183,9 +182,16 @@ class RendicionCuentasCreateSerializer(serializers.ModelSerializer):
         # Extraer datos relacionados
         detalle_destino_fondos = validated_data.pop('detalleDestinoFondos', [])
         
+        # Ignorar numeroFormulario si viene en los datos, ya que se autogenera
+        validated_data.pop('numeroFormulario', None)
+
         # Crear la instancia de RendicionCuentas
         rendicion = RendicionCuentas.objects.create(**validated_data)
         
+        # Generar número de formulario basado en el ID
+        rendicion.numeroFormulario = f"FRC-{rendicion.id}"
+        rendicion.save()
+
         # Asignar el detalle de destino de fondos si existe
         if detalle_destino_fondos:
             rendicion.detalleDestinoFondos = detalle_destino_fondos

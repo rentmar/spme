@@ -49,8 +49,8 @@ class SolicitudPagoDirectoDataAccess:
             else:
                 raise ValueError("formaPago_id es requerido")
             
-            # Obtener otras instancias necesarias
-            responsable_id = solicitudData.get('responsable_id')
+            # Obtener instancias
+            responsable_id = solicitudData.get('contador_id') # Renombrado
             coordinador_id = solicitudData.get('coordinador_id')
             usuario_id = solicitudData.get('usuario_id')
             actividad_id = solicitudData.get('actividad_id')
@@ -62,29 +62,38 @@ class SolicitudPagoDirectoDataAccess:
             actividad = Actividad.objects.get(id=actividad_id) if actividad_id else None
             tarea = TareaActividad.objects.get(id=tarea_id) if tarea_id else None
             
-            # Crear la solicitud con las instancias correctas
+            # Crear la solicitud inicial sin numeroFormulario definitivo
             solicitud = SolicitudPagoDirecto.objects.create(
-                numeroFormulario=numero_formulario,
+                numeroFormulario="TEMP", # Se actualizará después
                 descripcion_actividad=solicitudData.get('descripcion_actividad'),
-                fecha_realizacion=solicitudData.get('fecha_realizacion'),
+                fechaRealizacionActividad=solicitudData.get('fechaRealizacionActividad'),
                 objetivo_actividad=solicitudData.get('objetivo_actividad'),
-                fuente_financiamiento=solicitudData.get('fuente_financiamiento'),
+                # fuente_financiamiento ELIMINADO
                 detalleDestinoFondos=solicitudData.get('detalleDestinoFondos'),
-                formaPago=forma_pago,  # Usar la instancia, no el ID
+                datos_forma_pago=solicitudData.get('datos_forma_pago'),
+                formaPago=forma_pago,
                 lugarSolicitud=solicitudData.get('lugarSolicitud'),
                 fechaSolicitud=solicitudData.get('fechaSolicitud'),
                 montoSolicitado=solicitudData.get('montoSolicitado'),
                 validacionResponsable=solicitudData.get('validacionResponsable', False),
-                responsable=responsable,  # Usar la instancia
+                contador=responsable,
                 validacionCoordinador=solicitudData.get('validacionCoordinador', False),
-                coordinador=coordinador,  # Usar la instancia
-                usuario=usuario,  # Usar la instancia
-                actividad=actividad,  # Usar la instancia
-                tarea=tarea,  # Usar la instancia (puede ser None)
-                bloquearIconos=solicitudData.get('bloquearIconos', True)
+                coordinador=coordinador,
+                usuario=usuario,
+                actividad=actividad,
+                tarea=tarea,
+                bloquearIconosSolFondos=solicitudData.get('bloquearIconosSolFondos', True)
             )
             
-            logger.info(f"Solicitud creada exitosamente: {solicitud.id}")
+            # Generar numeroFormulario: {codigo_actividad} - SPD {id}
+            # Ejemplo: ACT - SPD 00012
+            codigo_actividad = actividad.codigo if actividad else "SN"
+            nuevo_numero_formulario = f"{codigo_actividad} - SPD {solicitud.id:05d}"
+            
+            solicitud.numeroFormulario = nuevo_numero_formulario
+            solicitud.save()
+            
+            logger.info(f"Solicitud creada exitosamente: {solicitud.id}, Codigo: {solicitud.numeroFormulario}")
             return solicitud
             
         except FormaPago.DoesNotExist:

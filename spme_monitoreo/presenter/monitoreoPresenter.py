@@ -54,7 +54,7 @@ class SolicitudFondosPresenter:
 
                     # IDs de Claves Foráneas (deben terminar en '_id')
                     'formaPago_id': requestData.get('formaPago_id'), 
-                    'responsable_id': requestData.get('responsable_id'),
+                    'contador_id': requestData.get('contador_id'),
                     'coordinador_id': requestData.get('coordinador_id'),
                     'usuario_id': requestData.get('usuario_id'),
                     'actividad_id': requestData.get('actividad_id'),

@@ -46,6 +46,12 @@ class SolicitudFondosCreateSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True
     )
+    contador_id = serializers.PrimaryKeyRelatedField(
+        queryset=Usuario.objects.all(),
+        source='contador',
+        required=False,
+        allow_null=True
+    )
     
     # Campo para bloquear iconos
     bloquear_icono_sf = serializers.BooleanField(
@@ -103,7 +109,7 @@ class SolicitudFondosCreateSerializer(serializers.ModelSerializer):
             'numero_formulario', 'detalle_destino_fondos', 'bloquear_icono_sf', 'forma_pago', 
             'lugar_solicitud', 'fecha_solicitud', 'fecha_realizacion_actividad', 'monto_solicitado', 
             'validacion_responsable', 'id_responsable', 'validacion_coordinador', 
-            'id_coordinador', 'id_usuario', 'actividad', 'id_tarea',
+            'id_coordinador', 'id_usuario', 'contador_id', 'actividad', 'id_tarea',
             # NUEVOS CAMPOS
             'descripcion_actividad', 'objetivo_actividad', 'datos_forma_pago',
             'id_actividad'
@@ -174,16 +180,30 @@ class SolicitudFondosCreateSerializer(serializers.ModelSerializer):
                     {"datos_forma_pago": "Los datos de forma de pago deben ser un objeto JSON válido."}
                 )
         
-        # Generar número de formulario automáticamente solo si no se proporcionó uno
-        if ('numeroFormulario' not in validated_data or 
-            not validated_data.get('numeroFormulario')):
-            last_solicitud = SolicitudFondos.objects.order_by('-id').first()
-            last_number = last_solicitud.id if last_solicitud else 0
-            validated_data['numeroFormulario'] = f"SF-{last_number + 1:04d}"
-        
         try:
+            # Limpiar campos que no pertenecen al modelo pero están en validated_data por el serializer
+            if 'responsable' in validated_data:
+                # Si existe contador, preferimos ese. Si no, usamos responsable como contador si se desea, 
+                # pero aqui solo lo eliminamos para evitar el error.
+                # O si se quiere dar soporte a id_responsable como alias de contador:
+                # if 'contador' not in validated_data:
+                #    validated_data['contador'] = validated_data.pop('responsable')
+                # else:
+                validated_data.pop('responsable')
+
             # Crear la solicitud de fondos dentro de la misma transacción
             solicitud = super().create(validated_data)
+            
+            # Generar número de formulario basado en el ID real y Código de Actividad
+            # Formato: {codigo_actividad} - SF {id}
+            codigo_actividad = "SN"
+            if solicitud.actividad and solicitud.actividad.codigo:
+                codigo_actividad = solicitud.actividad.codigo
+            
+            # Siempre regenerar el número de formulario para asegurar el formato correcto
+            solicitud.numeroFormulario = f"{codigo_actividad} - SF {solicitud.id:05d}"
+            solicitud.save(update_fields=['numeroFormulario'])
+
             return solicitud
             
         except Exception as e:

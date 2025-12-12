@@ -5,24 +5,29 @@ class CrearSolicitudPagoDirectoRequest(serializers.Serializer):
     Request para crear una Solicitud de Pago Directo.
     """
     descripcion_actividad = serializers.CharField(required=True, allow_blank=False)
-    fecha_realizacion = serializers.DateField(required=True)
+    fecha_realizacion_actividad = serializers.DateField(required=True) # Renombrado de fecha_realizacion
     objetivo_actividad = serializers.CharField(required=True, allow_blank=False)
-    fuente_financiamiento = serializers.CharField(max_length=255, required=True)
     
     detalle_destino_fondos = serializers.JSONField(required=True)
     forma_pago = serializers.IntegerField(required=True)
-    lugar_solicitud = serializers.CharField(max_length=50, required=True)
+    lugar_solicitud = serializers.CharField(required=True)
     fecha_solicitud = serializers.DateField(required=True)
     monto_solicitado = serializers.DecimalField(max_digits=6, decimal_places=2, required=True)
     
     # Validaciones
     validacion_responsable = serializers.BooleanField(default=False)
-    id_responsable = serializers.IntegerField(required=True)
+    contador_id = serializers.IntegerField(required=True) # Renombrado de id_contador
     validacion_coordinador = serializers.BooleanField(default=False)
     id_coordinador = serializers.IntegerField(required=True)
     id_usuario = serializers.IntegerField(required=True)
     id_actividad = serializers.IntegerField(required=True)
     id_tarea = serializers.IntegerField(required=False, allow_null=True)
+    
+    # Nuevo campo de payload
+    bloquear_icono_sf = serializers.BooleanField(default=True)
+    
+    # Nuevo campo
+    datos_forma_pago = serializers.JSONField(required=True)
 
     def to_internal_value(self, data):
         """
@@ -30,15 +35,10 @@ class CrearSolicitudPagoDirectoRequest(serializers.Serializer):
         """
         internal_value = super().to_internal_value(data)
         
-        # Log para debug
-        print(f"Datos después de validación: {internal_value}")
-        
         return {
-            # NUEVOS CAMPOS:
             'descripcion_actividad': internal_value['descripcion_actividad'],
-            'fecha_realizacion': internal_value['fecha_realizacion'],
+            'fechaRealizacionActividad': internal_value['fecha_realizacion_actividad'], # Mapping correcto
             'objetivo_actividad': internal_value['objetivo_actividad'],
-            'fuente_financiamiento': internal_value['fuente_financiamiento'],
             
             'detalleDestinoFondos': internal_value['detalle_destino_fondos'],
             'formaPago_id': int(internal_value['forma_pago']),
@@ -46,13 +46,14 @@ class CrearSolicitudPagoDirectoRequest(serializers.Serializer):
             'fechaSolicitud': internal_value['fecha_solicitud'],
             'montoSolicitado': internal_value['monto_solicitado'],
             'validacionResponsable': internal_value['validacion_responsable'],
-            'responsable_id': int(internal_value['id_responsable']),
+            'contador_id': int(internal_value['contador_id']), # Mapping correcto
             'validacionCoordinador': internal_value['validacion_coordinador'],
             'coordinador_id': int(internal_value['id_coordinador']),
             'usuario_id': int(internal_value['id_usuario']),
             'actividad_id': int(internal_value['id_actividad']),
             'tarea_id': internal_value.get('id_tarea'),
-            'bloquearIconos': True  # Valor por defecto
+            'datos_forma_pago': internal_value['datos_forma_pago'],
+            'bloquearIconosSolFondos': internal_value.get('bloquear_icono_sf', True)  # Mapeado de payload a modelo
         }
     
 class ObtenerSolicitudesPagoDirectoRequest(serializers.Serializer):

@@ -12,7 +12,7 @@ class CrearSolicitudFondosRequest(serializers.Serializer):
     fecha_realizacion_actividad = serializers.DateField(required=False, allow_null=True)  # NUEVO CAMPO
     monto_solicitado = serializers.DecimalField(max_digits=6, decimal_places=2)
     validacion_responsable = serializers.BooleanField(default=False)
-    id_responsable = serializers.IntegerField(required=True, allow_null=False)
+    contador_id = serializers.IntegerField(required=True, allow_null=False)
     validacion_coordinador = serializers.BooleanField(default=False)
     id_coordinador = serializers.IntegerField(required=True, allow_null=False)
     id_usuario = serializers.IntegerField(required=True, allow_null=False)
@@ -57,7 +57,7 @@ class CrearSolicitudFondosRequest(serializers.Serializer):
             'fechaRealizacionActividad': internal_value.get('fecha_realizacion_actividad'),
             'montoSolicitado': internal_value['monto_solicitado'],
             'validacionResponsable': internal_value['validacion_responsable'],
-            'responsable_id': int(internal_value['id_responsable']),
+            'contador_id': int(internal_value['contador_id']),
             'validacionCoordinador': internal_value['validacion_coordinador'],
             'coordinador_id': int(internal_value['id_coordinador']),
             'usuario_id': int(internal_value['id_usuario']),

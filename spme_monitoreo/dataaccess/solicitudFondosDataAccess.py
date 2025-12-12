@@ -1,5 +1,6 @@
 from ..models import SolicitudFondos
 from django.db.models import Q
+from spme_actividades.models import Actividad
 
 class SolicitudFondosDataAccess:
     
@@ -21,13 +22,13 @@ class SolicitudFondosDataAccess:
                 'fechaRealizacionActividad': solicitudData.get('fechaRealizacionActividad'),
                 'montoSolicitado': solicitudData.get('montoSolicitado'),
                 'validacionResponsable': solicitudData.get('validacionResponsable'),
-                'responsable_id': solicitudData.get('responsable_id'),
+                'contador_id': solicitudData.get('contador_id'),
                 'validacionCoordinador': solicitudData.get('validacionCoordinador'),
                 'coordinador_id': solicitudData.get('coordinador_id'),
                 'usuario_id': solicitudData.get('usuario_id'),
                 'actividad_id': solicitudData.get('actividad_id'),
                 'tarea_id': solicitudData.get('tarea_id'),
-                'numeroFormulario': solicitudData.get('numeroFormulario'),
+                'numeroFormulario': "TEMP", # Se actualizará después
                 'descripcion_actividad': solicitudData.get('descripcion_actividad'),
                 'objetivo_actividad': solicitudData.get('objetivo_actividad'),
                 'datos_forma_pago': solicitudData.get('datos_forma_pago'),
@@ -35,12 +36,29 @@ class SolicitudFondosDataAccess:
             }
             
             # NO filtrar campos opcionales - permitir que se guarden como None si es necesario
-            # Los campos descripcion_actividad, objetivo_actividad, datos_forma_pago deben poder ser None
             # mapped_data = {k: v for k, v in mapped_data.items() if v is not None}  # COMENTADO
             
-            print("Datos mapeados en DataAccess:", mapped_data)  # DEBUG
+            print("Datos mapeados en DataAccess con TEMP numeroFormulario:", mapped_data)
             solicitud = SolicitudFondos.objects.create(**mapped_data)
-            print("Solicitud creada con ID:", solicitud.id)  # DEBUG
+            print("Solicitud creada con ID:", solicitud.id)
+            
+            # Generar numeroFormulario: {codigo_actividad} - SF {id}
+            # Ejemplo: ACT - SF 00012
+            actividad_id = solicitudData.get('actividad_id')
+            codigo_actividad = "SN"
+            
+            if actividad_id:
+                try:
+                   actividad = Actividad.objects.get(id=actividad_id)
+                   codigo_actividad = actividad.codigo if actividad.codigo else "SN"
+                except Actividad.DoesNotExist:
+                   codigo_actividad = "SN"
+            
+            nuevo_numero_formulario = f"{codigo_actividad} - SF {solicitud.id:05d}"
+            solicitud.numeroFormulario = nuevo_numero_formulario
+            solicitud.save()
+            print(f"numeroFormulario actualizado a: {solicitud.numeroFormulario}")
+
             # Verificar los campos guardados
             solicitud_refreshed = SolicitudFondos.objects.get(id=solicitud.id)
             print("Campos guardados:")
