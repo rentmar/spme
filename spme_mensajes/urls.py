@@ -35,6 +35,11 @@ from .views.mensajeria_views import (
 
 from .views.mensaje_automatico_sistema_views import CrearMensajeAutomaticoSistemaView
 
+#Eliminar mensajes
+from .views.eliminar_mensajes_views import MensajeViewSet
+#Cabiar estado mensajes
+from .views.cambiar_estado_view import CambiarEstadoMensajesView
+
 
 
 router = DefaultRouter()
@@ -58,7 +63,7 @@ urlpatterns = [
     path(r'mensajes/enviar/', crear_mensaje_privado, name='enviar_mensaje'),
     path(r'mensajes/<int:mensaje_id>/estado/', actualizar_estado_mensaje, name='actualizar_estado'),
     #Operaciones masivas
-    path(r'marcar-leidos/', marcar_varios_leido, name='marcar_varios_leido'),
+    path(r'mensajes/marcar-leidos/', marcar_varios_leido, name='marcar_varios_leido'),
     path(r'marcar-todos-leidos/', marcar_todos_leido, name='marcar_todos_leido'),
     #busqueda y estadistica
     path(r'mensajes/buscar/', buscar_mensajes, name='buscar_mensajes'),
@@ -75,6 +80,12 @@ urlpatterns = [
     path(r'mensajes/crear/sistema/', CrearMensajeSistemaView.as_view(), name='crear_mensaje_sistema'),
     path(r'mensajes/crear/multiple/', CrearMensajeMultipleView.as_view(), name='crear_mensaje_multiple'),
     path(r'mensajes/crear/sistema-automatico/', CrearMensajeAutomaticoSistemaView.as_view(), name='crear_mensaje_sistema_automatico'),
+    #Eliminar mensajes 
+    path(r'mensajes/eliminar-multiples/', MensajeViewSet.as_view({'delete': 'eliminar_mensajes'}), name='mensaje-eliminar-multiples'),
+    path(r'mensajes/<int:pk>/eliminar/', MensajeViewSet.as_view({'delete': 'eliminar_mensaje'}), name='mensaje-eliminar-individual'),
+    #Modificar estados
+    path(r'mensajes/cambiar-estado/', CambiarEstadoMensajesView.as_view(), name='mensaje-cambiar-estado'),
+    #
     
 ] 
 

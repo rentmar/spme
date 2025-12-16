@@ -60,12 +60,15 @@ class ActividadesMapper:
     def toActividadesGanttResponse(actividades):
         lista = []
         for actividad in actividades:
+            act = actividad['descripcion']
+            if act == '':
+                act = "No definido"
             nombre_responsable = actividad.get('nombre_responsable')
             act = {
                 "nombre_responsable": nombre_responsable if nombre_responsable is not None else "No Definido",
                 "codigo": actividad['codigo'] if actividad['codigo'] is not None else "No Definido",
                 "nombre_corto": actividad['nombreCorto'] if actividad['nombreCorto'] is not None else "No Definido",
-                "descripcion": actividad['descripcion'] if actividad['descripcion'] is not None else "No Definido",
+                "descripcion": act if act is not None  else "No Definido",
                 "tipo": actividad['tipo_id'] if actividad['tipo_id'] is not None else "No Definido",
                 "fecha_programada": actividad['fecha_programada'] if actividad['fecha_programada'] is not None else "2000-01-01",
                 "fecha_inicio": actividad['fecha_inicio'] if actividad['fecha_inicio'] is not None else "2000-01-01",

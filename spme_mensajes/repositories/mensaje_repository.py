@@ -27,7 +27,7 @@ class MensajeRepository:
         try:
             queryset = MensajeUsuario.objects.filter(
                 destinatario_id=destinatario_id,
-                estado__in=[EstadoMensaje.NO_LEIDO, EstadoMensaje.LEIDO, EstadoMensaje.ARCHIVADO]
+                estado__in=[EstadoMensaje.NO_LEIDO, EstadoMensaje.LEIDO, EstadoMensaje.ARCHIVADO, EstadoMensaje.ELIMINADO]
             )
             #Aplicar filtros
             if estado:
@@ -63,7 +63,7 @@ class MensajeRepository:
         try:
             queryset = MensajeUsuario.objects.filter(
                 destinatario_id=destinatario_id,
-                estado__in=[EstadoMensaje.NO_LEIDO, EstadoMensaje.LEIDO, EstadoMensaje.ARCHIVADO]
+                estado__in=[EstadoMensaje.NO_LEIDO, EstadoMensaje.LEIDO, EstadoMensaje.ARCHIVADO, EstadoMensaje.ELIMINADO]
             )
             if estado:
                 queryset = queryset.filter(estado=estado)
