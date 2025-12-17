@@ -396,3 +396,115 @@ class MensajeService:
         except Exception as e:
             logger.error(f"Error obteniendo mensajes para proyecto {proyecto_id}: {str(e)}")
             raise
+
+    # En mensaje_service.py, agregar este nuevo método al final de la clase MensajeService:
+    @staticmethod
+    def enviar_mensaje_multiple_remitente(remitente_id, destinatarios_ids, asunto, contenido, tipo=None, prioridad=None, metadata=None):
+        """
+        Envía un mensaje a múltiples destinatarios con remitente
+        
+        Args:
+            remitente_id: ID del usuario remitente
+            destinatarios_ids: Lista de IDs de destinatarios
+            asunto: Asunto del mensaje
+            contenido: Contenido del mensaje
+            tipo: Tipo de mensaje (opcional, default: PRIVADO)
+            prioridad: Prioridad (opcional, default: 1)
+            metadata: Metadatos adicionales
+        
+        Returns:
+            Dict con resultados
+        """
+        try:
+            mensajes_creados = []
+            errores = []
+            
+            # Filtrar el remitente de la lista de destinatarios
+            destinatarios_filtrados = [
+                id for id in destinatarios_ids 
+                if id != remitente_id
+            ]
+            
+            if not destinatarios_filtrados:
+                return {
+                    'success': False,
+                    'error': 'No hay destinatarios válidos (no puedes enviarte mensajes a ti mismo)'
+                }
+            
+            # Preparar datos base
+            tipo_final = tipo or TipoMensaje.PRIVADO
+            prioridad_final = prioridad or 1
+            
+            # Mapear íconos por tipo de mensaje
+            iconos_por_tipo = {
+                TipoMensaje.PRIVADO: '✉️',
+                TipoMensaje.SISTEMA: '🔔',
+                TipoMensaje.ALERTA: '⚠️',
+                TipoMensaje.RECORDATORIO: '📅',
+                TipoMensaje.REPROGRAMACION: '🔄',
+                TipoMensaje.RETRASO: '⏰',
+            }
+            
+            icono = iconos_por_tipo.get(tipo_final, '✉️')
+            
+            for destinatario_id in destinatarios_filtrados:
+                try:
+                    # Crear datos del mensaje individual
+                    mensaje_data = {
+                        'remitente_id': remitente_id,
+                        'destinatario_id': destinatario_id,
+                        'asunto': asunto,
+                        'contenido': contenido,
+                        'tipo': tipo_final,
+                        'prioridad': prioridad_final,
+                        'routing_key': 'mensaje.usuario.privado',
+                        'metadata': metadata or {},
+                        'icono': icono,
+                    }
+                    
+                    # Crear mensaje usando el repositorio
+                    mensaje = MensajeRepository.crear_mensaje(mensaje_data)
+                    
+                    mensajes_creados.append({
+                        'destinatario_id': destinatario_id,
+                        'mensaje_id': mensaje.pk,
+                        'message_id': mensaje.message_id,
+                        'tipo': mensaje.tipo,
+                        'prioridad': mensaje.prioridad
+                    })
+                    
+                    logger.info(f"Mensaje {tipo_final} enviado de {remitente_id} a {destinatario_id}")
+                    
+                except Exception as e:
+                    errores.append({
+                        'destinatario_id': destinatario_id,
+                        'error': str(e)
+                    })
+                    logger.error(f"Error enviando mensaje a destinatario {destinatario_id}: {str(e)}")
+            
+            # Verificar si hubo algún éxito
+            if len(mensajes_creados) == 0:
+                return {
+                    'success': False,
+                    'error': 'No se pudo enviar el mensaje a ningún destinatario',
+                    'errores_detallados': errores
+                }
+            
+            return {
+                'success': True,
+                'data': {
+                    'total_solicitados': len(destinatarios_ids),
+                    'total_enviados': len(mensajes_creados),
+                    'total_errores': len(errores),
+                    'mensajes_creados': mensajes_creados,
+                    'errores': errores if errores else None
+                },
+                'message': f'Mensaje enviado a {len(mensajes_creados)} destinatario(s)'
+            }
+            
+        except Exception as e:
+            logger.error(f"Error en enviar_mensaje_multiple_remitente: {str(e)}")
+            return {
+                'success': False,
+                'error': str(e)
+            }

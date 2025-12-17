@@ -15,6 +15,7 @@ from .views.mensaje_views import(
     obtener_bandeja_entrada,
     obtener_mensaje,
     crear_mensaje_privado,
+    crear_mensaje_multiple,
     actualizar_estado_mensaje,
     marcar_varios_leido,
     marcar_todos_leido,
@@ -23,8 +24,10 @@ from .views.mensaje_views import(
     enviar_alerta_actividad,
     obtener_mensajes_actividad,
     obtener_mensajes_proyecto,
+    obtener_mensajes_enviados,
     obtener_ejemplos,
     enviar_mensaje_prueba,
+
 )
 #Mensajes
 from .views.mensajeria_views import (
@@ -65,6 +68,8 @@ urlpatterns = [
     #Operaciones masivas
     path(r'mensajes/marcar-leidos/', marcar_varios_leido, name='marcar_varios_leido'),
     path(r'marcar-todos-leidos/', marcar_todos_leido, name='marcar_todos_leido'),
+    path(r'mensajes/enviados/', obtener_mensajes_enviados, name='obtener_mensajes_enviados'),
+    path(r'mensajes/remite-enviar-multiple/', crear_mensaje_multiple, name='enviar_mensaje_multiple'),
     #busqueda y estadistica
     path(r'mensajes/buscar/', buscar_mensajes, name='buscar_mensajes'),
     path(r'mensajes/estadisticas/', obtener_estadisticas, name='obtener_estadisticas'),

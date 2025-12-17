@@ -240,3 +240,94 @@ class BuscarMensajesSerializer(serializers.Serializer):
     """
     query = serializers.CharField(max_length=100, min_length=3)
     limit = serializers.IntegerField(default=20, min_value=1, max_value=100)
+
+#Serializador para los mensajes masivos con remitente
+# Archivo: mensaje_serializer.py (agregar al final)
+
+# En mensaje_serializer.py, modificar solo el CrearMensajeMultipleSerializer:
+
+# En mensaje_serializer.py, modificar SOLO el CrearMensajeMultipleSerializer:
+
+class CrearMensajeMultipleSerializer(serializers.Serializer):
+    """
+    Serializer para crear mensajes a múltiples destinatarios
+    """
+    destinatarios_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        min_length=1,
+        max_length=50,
+        help_text="Lista de IDs de destinatarios"
+    )
+    asunto = serializers.CharField(
+        max_length=255, 
+        required=False, 
+        default="Sin asunto",
+        help_text="Asunto del mensaje"
+    )
+    contenido = serializers.CharField(
+        help_text="Contenido del mensaje"
+    )
+    tipo = serializers.ChoiceField(  # ← NUEVO CAMPO
+        choices=TipoMensaje.choices,
+        required=False,
+        default=TipoMensaje.PRIVADO,
+        help_text="Tipo de mensaje"
+    )
+    prioridad = serializers.IntegerField(
+        min_value=1, 
+        max_value=3, 
+        default=1,
+        help_text="Prioridad (1=baja, 2=media, 3=alta)"
+    )
+    metadata = serializers.DictField(
+        required=False, 
+        default=dict,
+        help_text="Metadatos adicionales"
+    )
+    
+    def validate_destinatarios_ids(self, value):
+        """Validar que no haya duplicados"""
+        if len(value) != len(set(value)):
+            raise serializers.ValidationError("La lista de destinatarios contiene duplicados")
+        return value
+    
+    def validate(self, data):
+        """Validación personalizada"""
+        from spme_autenticacion.models import Usuario
+        
+        # Verificar que todos los destinatarios existen
+        destinatarios_existentes = Usuario.objects.filter(
+            id__in=data['destinatarios_ids']
+        ).count()
+        
+        if destinatarios_existentes != len(data['destinatarios_ids']):
+            raise serializers.ValidationError({
+                'destinatarios_ids': 'Uno o más destinatarios no existen en el sistema'
+            })
+        
+        return data
+
+class MensajesEnviadosSerializer(serializers.Serializer):
+    """
+    Serializer para la consulta de mensajes enviados
+    """
+    destinatario_id = serializers.IntegerField(
+        required=False,
+        help_text="Filtrar por destinatario específico"
+    )
+    tipo = serializers.ChoiceField(
+        choices=TipoMensaje.choices,
+        required=False,
+        help_text="Filtrar por tipo de mensaje"
+    )
+    limit = serializers.IntegerField(
+        min_value=1, 
+        max_value=100, 
+        default=50,
+        help_text="Límite de resultados por página"
+    )
+    offset = serializers.IntegerField(
+        min_value=0, 
+        default=0,
+        help_text="Offset para paginación"
+    )
