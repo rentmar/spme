@@ -44,9 +44,11 @@ class ReponseMapper:
                     "montoDescargado": float(getattr(rendicion, 'montoDescargado', 0)) if getattr(rendicion, 'montoDescargado', None) else None,
                     "saldo": float(getattr(rendicion, 'saldo', 0)) if getattr(rendicion, 'saldo', None) else None,
                     "detalleDestinoFondos": getattr(rendicion, 'detalleDestinoFondos', None),
-                    "fechaActividadRC": str(getattr(rendicion, 'fechaActividadRC', '')) if getattr(rendicion, 'fechaActividadRC', None) else None,
+                    "fechaActividad": str(getattr(rendicion, 'fechaActividad', '')) if getattr(rendicion, 'fechaActividad', None) else None,
                     "descripcionActividad": getattr(rendicion, 'descripcionActividad', None),
                     "lugarActividad": getattr(rendicion, 'lugarActividad', None),
+                    "fechaRendicion": str(getattr(rendicion, 'fechaRendicion', '')) if getattr(rendicion, 'fechaRendicion', None) else None,
+                    "lugarRendicion": getattr(rendicion, 'lugarActividad', None),
                     "validacionResponsable": getattr(rendicion, 'validacionResponsable', False),
                     "validacionCoordinador": getattr(rendicion, 'validacionCoordinador', False),
                     "validacionContador": getattr(rendicion, 'validacionContador', False),
@@ -282,6 +284,7 @@ class ReponseMapper:
                     "actividad_id": getattr(solicitud, 'actividad_id', None),
                     "tarea_id": getattr(solicitud, 'tarea_id', None),
                     "bloquearIconos": getattr(solicitud, 'bloquearIconos', True),
+                    "datos_forma_pago": getattr(solicitud, 'datos_forma_pago', None),
                 }
                 resultado.append(solicitud_data)
             except Exception as e:

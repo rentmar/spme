@@ -121,7 +121,6 @@ class RendicionCuentasPresenter:
             return ReponseMapper.toRendicionesCuentasResponse(rendiciones)
         else:
             return ReponseMapper.toErrorResponse("Error al obtener las rendiciones de cuentas")
-
         
 class SolicitudReembolsoPresenter:
     def __init__(self):

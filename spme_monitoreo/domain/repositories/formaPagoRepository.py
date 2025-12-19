@@ -6,14 +6,14 @@ class FormaPagoRepository:
         self.contenedor = FormaPagoDataAccessContainer()
         self.formaPagoDataAccess = self.contenedor.formaPagoDataAccess()
 
-    def obtenerFormaPagoPoId(self, idPago):
+    def obtenerFormaPagoPorId(self, idPago):
         """
         Obtiene forma de pago del id en la base de datos.
 
         :param id pago: Datos id forma de pago.
         :return: Resultado de obtener forma de pago.
         """
-        return self.formaPagoDataAccess.obtenerFormaPagoPoId(idPago)
+        return self.formaPagoDataAccess.obtenerFormaPagoPorId(idPago)
     
     def obtenerFormasPago(self, filtros):
         """

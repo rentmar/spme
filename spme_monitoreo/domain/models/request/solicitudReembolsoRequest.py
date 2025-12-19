@@ -2,46 +2,49 @@ from rest_framework import serializers
 
 class CrearSolicitudReembolsoRequest(serializers.Serializer):
     """
-    Request para crear una Solicitud de Reembolso (Reposición).
+    Request para crear una Solicitud de Reembolso.
     """
-    detalle_destino_fondos = serializers.JSONField(allow_null=False, required=True)
-    forma_pago = serializers.IntegerField(required=True, allow_null=False)
-    lugar_solicitud = serializers.CharField(max_length=50)
-    fecha_solicitud = serializers.DateField()
-    fecha_realizacion_actividad = serializers.DateField(required=False, allow_null=True)
-    monto_solicitado = serializers.DecimalField(max_digits=6, decimal_places=2)
-    descripcion_actividad = serializers.CharField(required=False, allow_blank=True, allow_null=True)
-    objetivo_actividad = serializers.CharField(required=False, allow_blank=True, allow_null=True)
-    datos_forma_pago = serializers.JSONField(required=False, allow_null=True)
+    detalle_destino_fondos = serializers.JSONField(required=False)
+    forma_pago = serializers.IntegerField(required=False)
+    lugar_solicitud = serializers.CharField(max_length=50, required=False)
+    fecha_solicitud = serializers.DateField(required=False)
+    fecha_realizacion_actividad = serializers.DateField(required=False)
+    monto_solicitado = serializers.DecimalField(max_digits=6, decimal_places=2, required=False)
+    validacion_responsable = serializers.BooleanField(default=False, required=False)
+    contador_id = serializers.IntegerField(required=False)
+    validacion_coordinador = serializers.BooleanField(default=False, required=False)
+    id_coordinador = serializers.IntegerField(required=False)
+    id_usuario = serializers.IntegerField(required=False)
+    id_actividad = serializers.IntegerField(required=False)
+    descripcion_actividad = serializers.CharField(max_length=255, required=False)
+    objetivo_actividad = serializers.CharField(max_length=255, required=False)
+    datos_forma_pago = serializers.JSONField(required=False)
     bloquear_icono_sf = serializers.BooleanField(default=True, required=False)
-    codigo_actividad = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    codigo_actividad = serializers.CharField(max_length=50, required=False)
     
-    # Validaciones
-    validacion_responsable = serializers.BooleanField(default=False)
-    contador_id = serializers.IntegerField(required=True, allow_null=False)
-    validacion_coordinador = serializers.BooleanField(default=False)
-    id_coordinador = serializers.IntegerField(required=True, allow_null=False)
-    id_usuario = serializers.IntegerField(required=True, allow_null=False)
-    id_actividad = serializers.IntegerField(required=True, allow_null=False)
-    id_tarea = serializers.IntegerField(required=False, allow_null=True)
-
     def to_internal_value(self, data):
         """
-        Convierte los campos a un formato interno.
+        Convierte los campos a un formato interno que coincide con el modelo.
         """
         internal_value = super().to_internal_value(data)
-        result = {
-            'detalleDestinoFondos': internal_value['detalle_destino_fondos'],
-            'formaPago_id': int(internal_value['forma_pago']),
-            'lugarSolicitud': internal_value['lugar_solicitud'],
-            'fechaSolicitud': internal_value['fecha_solicitud'],
-            'montoSolicitado': internal_value['monto_solicitado'],
-            'validacionContador': internal_value['validacion_responsable'],
-            'contador_id': int(internal_value['contador_id']),
-            'validacionCoordinador': internal_value['validacion_coordinador'],
-            'coordinador_id': int(internal_value['id_coordinador']),
-            'usuario_id': int(internal_value['id_usuario']),
-            'actividad_id': int(internal_value['id_actividad']),
+        return {
+            "detalleDestinoFondos": internal_value.get("detalle_destino_fondos"),
+            "formaPago_id": internal_value.get("forma_pago"),
+            "lugarSolicitud": internal_value.get("lugar_solicitud"),
+            "fechaSolicitud": internal_value.get("fecha_solicitud"),
+            "fechaRealizacionActividad": internal_value.get("fecha_realizacion_actividad"),
+            "montoSolicitado": internal_value.get("monto_solicitado"),
+            "validacionResponsable": internal_value.get("validacion_responsable"),
+            "contador_id": internal_value.get("contador_id"),
+            "validacionCoordinador": internal_value.get("validacion_coordinador"),
+            "coordinador_id": internal_value.get("id_coordinador"),
+            "usuario_id": internal_value.get("id_usuario"),
+            "actividad_id": internal_value.get("id_actividad"),
+            "descripcion_actividad": internal_value.get("descripcion_actividad"),
+            "objetivo_actividad": internal_value.get("objetivo_actividad"),
+            "datos_forma_pago": internal_value.get("datos_forma_pago"),
+            "bloquearIconos": internal_value.get("bloquear_icono_sf"),
+            "codigo_actividad": internal_value.get("codigo_actividad")
         }
 
         # CAMPOS OPCIONALES
@@ -59,9 +62,6 @@ class CrearSolicitudReembolsoRequest(serializers.Serializer):
         
         if internal_value.get('id_tarea') is not None:
             result['tarea_id'] = internal_value.get('id_tarea')
-        
-        if internal_value.get('bloquear_icono_sf') is not None:
-            result['bloquearIconosSolFondos'] = internal_value.get('bloquear_icono_sf')
         
         print("Datos mapeados para crear solicitud reembolso:", result)
         return result

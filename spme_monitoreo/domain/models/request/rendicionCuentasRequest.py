@@ -9,7 +9,12 @@ class CrearRendicionCuentasRequest(serializers.Serializer):
     monto_asignado = serializers.DecimalField(max_digits=6, decimal_places=2)
     monto_descargado = serializers.DecimalField(max_digits=6, decimal_places=2)
     saldo = serializers.DecimalField(max_digits=6, decimal_places=2)
-    detalle_destino_fondos = serializers.JSONField()
+    detalle_destino_fondos = serializers.JSONField(required=False, allow_null=True)
+    fecha_actividad = serializers.DateField(required=False, allow_null=True)
+    descripcion_actividad = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    lugar_actividad = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    fecha_rendicion = serializers.DateField(required=False, allow_null=True)
+    lugar_rendicion = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     validacion_contador = serializers.BooleanField(default=False)
     id_contador = serializers.IntegerField(required=True, allow_null=False)
     validacion_responsable = serializers.BooleanField(default=False)
@@ -20,6 +25,7 @@ class CrearRendicionCuentasRequest(serializers.Serializer):
     id_administrador = serializers.IntegerField(required=True, allow_null=False)
     id_usuario = serializers.IntegerField(required=True, allow_null=False)
     id_actividad = serializers.IntegerField(required=True, allow_null=False)
+    id_tarea = serializers.IntegerField(required=False, allow_null=True)
 
     def to_internal_value(self, data):
         """
@@ -33,6 +39,11 @@ class CrearRendicionCuentasRequest(serializers.Serializer):
             "montoDescargado": internal_value.get("monto_descargado"),
             "saldo": internal_value.get("saldo"),
             "detalleDestinoFondos": internal_value.get("detalle_destino_fondos"),
+            "fechaActividad": internal_value.get("fecha_actividad"),
+            "descripcionActividad": internal_value.get("descripcion_actividad"),
+            "lugarActividad": internal_value.get("lugar_actividad"),
+            "fechaRendicion": internal_value.get("fecha_rendicion"),
+            "lugarRendicion": internal_value.get("lugar_rendicion"),
             "validacionContador": internal_value.get("validacion_contador"),
             "idContador": internal_value.get("id_contador"),
             "validacionResponsable": internal_value.get("validacion_responsable"),
@@ -43,6 +54,7 @@ class CrearRendicionCuentasRequest(serializers.Serializer):
             "idAdministrador": internal_value.get("id_administrador"),
             "idUsuario": internal_value.get("id_usuario"),
             "idActividad": internal_value.get("id_actividad"),
+            "idTarea": internal_value.get("id_tarea"),
         }
 
 class ObtenerRendicionDeCuentasRequest(serializers.Serializer):

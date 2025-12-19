@@ -25,6 +25,7 @@ class CrearSolicitudViajeRequest(serializers.Serializer):
     id_usuario = serializers.IntegerField(required=True)
     id_actividad = serializers.IntegerField(required=True)
     id_tarea = serializers.IntegerField(required=False, allow_null=True)
+    datos_forma_pago = serializers.JSONField(required=False, allow_null=True, help_text="Datos de forma de pago (transferencia, otros, etc.)")
     #datosSV = serializers.JSONField(required=False, allow_null=True)
 
     def to_internal_value(self, data):
@@ -57,7 +58,8 @@ class CrearSolicitudViajeRequest(serializers.Serializer):
             'coordinador_id': int(internal_value['id_coordinador']),
             'usuario_id': int(internal_value['id_usuario']),
             'actividad_id': int(internal_value['id_actividad']),
-            'tarea_id': internal_value.get('id_tarea')
+            'tarea_id': internal_value.get('id_tarea'),
+            'datos_forma_pago': internal_value.get('datos_forma_pago', None)
         }
         
         if 'datosSV' in data and data['datosSV'] is not None:

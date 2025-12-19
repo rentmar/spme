@@ -7,13 +7,23 @@ from spme_monitoreo.models import (RendicionCuentas, SolicitudReembolso,
 from decimal import Decimal, InvalidOperation
 
 class DetalleDestinoFondosSerializer(serializers.Serializer):
+    fecha = serializers.CharField(
+        required=False, 
+        allow_blank=True, 
+        default=None
+    )
+    
+    partida = serializers.CharField(
+        required=False, 
+        allow_blank=True, 
+        allow_null=True, 
+        default=None
+    )
+    # fecha = serializers.DateField(required=False, allow_null=True, default=None)
+    # partida = serializers.CharField(required=False, allow_blank=True, allow_null=True, default=None)
     factura_recibo = serializers.CharField(required=False, allow_blank=True, default="")
     descripcion = serializers.CharField(required=False, allow_blank=True, default="")
-    monto = serializers.CharField(
-        required=False, 
-        allow_null=True,
-        default=0
-    )
+    monto = serializers.CharField(required=False, allow_null=True, default=0)
     def validate_monto(self, value):
         """Convierte el string a decimal si es necesario"""
         if value and isinstance(value, str):
@@ -76,11 +86,11 @@ class RendicionCuentasCreateSerializer(serializers.ModelSerializer):
     )
     
     # Campos de bloqueo
-    bloquearIconoRC = serializers.BooleanField(
-        source='bloquearIconos', 
-        required=False, 
-        default=True
-    )
+    # bloquearIconoRC = serializers.BooleanField(
+    #     source='bloquearIconos', 
+    #     required=False, 
+    #     default=True
+    # )
     
     # Campos de relación con solicitudes
     idSolicitudFondos = serializers.PrimaryKeyRelatedField(
@@ -134,7 +144,8 @@ class RendicionCuentasCreateSerializer(serializers.ModelSerializer):
             'fechaActividad', 'idActividad', 'fechaRendicion',
             
             # Bloqueo
-            'bloquearIconoRC',
+            # 'bloquearIconoRC',
+            'bloquearIconos',
             
             # Relaciones con solicitudes
             'idSolicitudFondos', 'idSolicitudReembolso',

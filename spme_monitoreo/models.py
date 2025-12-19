@@ -107,12 +107,10 @@ class SolicitudReembolso(models.Model):
     objetivo_actividad = models.TextField(blank=True, null=True, verbose_name='Objetivo de la actividad')
     datos_forma_pago = models.JSONField(blank=True, null=True, verbose_name='Datos de forma de pago')
     fechaRealizacionActividad = models.DateField(blank=True, null=True, verbose_name='Fecha de realizacion del actividad')
-    
-    # Old field - to be removed in next migration
-    bloquearIconos = models.BooleanField(default=True)
-    
-    bloquearIconosSolFondos = models.BooleanField(default=True)  # NUEVO CAMPO
 
+    #Bloquear iconos
+    bloquearIconos = models.BooleanField(default=True)
+        
     #Validaciones
     validacionContador = models.BooleanField(default=False)
     contador = models.ForeignKey(
@@ -235,7 +233,14 @@ class SolicitudViaje (models.Model):
         related_name='tarea_solicitud_sol_viaje',
         null=True,
         blank=True,
-    )      
+    )
+    
+    datos_forma_pago = models.JSONField(
+        verbose_name='Datos de forma de pago', 
+        blank=True, 
+        null=True,
+        help_text='Información de forma de pago (transferencia, otros, etc.)'
+    ) 
     
     def __str__(self):
         return f"{self.numeroFormulario}"
@@ -341,6 +346,7 @@ class RendicionCuentas(models.Model):
     fechaRendicion = models.DateField(verbose_name='Fecha de Rendición', auto_now_add=True, blank=True, null=True)
     descripcionActividad = models.TextField(blank=True, null=True)
     lugarActividad = models.TextField(blank=True, null=True)
+    lugarRendicion = models.TextField(blank=True, null=True)
     tarea = models.ForeignKey(
         TareaActividad,
         on_delete=models.SET_NULL,
@@ -381,7 +387,7 @@ class RendicionCuentas(models.Model):
     administrador = models.ForeignKey(
         Usuario,
         on_delete=models.SET_NULL,
-        related_name='usario_administrador_rendicion',
+        related_name='usuario_administrador_rendicion',
         null=True,
         blank=True,
     )

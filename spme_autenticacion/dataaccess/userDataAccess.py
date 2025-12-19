@@ -42,6 +42,17 @@ class UserDataAccess:
         if usuario:
             return usuario
         return None
+    
+    def usuarioPorId(self, userId):
+        """
+        Obtiene un usuario por su ID.
+        :param userId: ID del usuario a buscar.
+        :return: Usuario encontrado o None si no existe.
+        """
+        try:
+            return Usuario.objects.get(id=userId)
+        except Usuario.DoesNotExist:
+            return None
 
     def createUser(self, userData):
         """
