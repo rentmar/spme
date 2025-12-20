@@ -12,9 +12,16 @@ from ..serializers.mensaje_serializer import (
     ActualizarEstadoMensajeSerializer,
     MarcarVariosLeidoSerializer,
     ConteoMensajesSerializer,
-    BuscarMensajesSerializer
+    BuscarMensajesSerializer,
+    CrearMensajeMultipleSerializer,
+    MensajesEnviadosSerializer,
 )
+
+from ..services.mensaje_service import MensajeRepository
 from django.utils import timezone
+import logging
+
+logger = logging.getLogger(__name__)
 
 # ============================================================================
 # BANDEJA DE ENTRADA
@@ -190,6 +197,167 @@ def crear_mensaje_privado(request):
             'success': False,
             'error': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+#Envio de mensajes masivos con remitente
+# Archivo: mensaje_views.py (agregar después de la función crear_mensaje_privado)
+
+# Reemplazar la función crear_mensaje_multiple en mensaje_views.py con esta versión mejorada
+
+# En mensaje_views.py, reemplazar la función crear_mensaje_multiple con esta versión:
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def crear_mensaje_multiple(request):
+    """
+    Envía un mensaje a múltiples destinatarios
+    
+    POST /api/mensajes/remite-enviar-multiple/
+    
+    Body:
+    {
+        "destinatarios_ids": [2, 3, 4],
+        "asunto": "Mensaje para el equipo",
+        "contenido": "Contenido del mensaje para todos",
+        "tipo": "privado",        # ← Nuevo campo opcional
+        "prioridad": 3,           # ← Ahora se guardará correctamente
+        "metadata": {}
+    }
+    
+    Returns:
+        {
+            "success": true,
+            "data": {...},
+            "message": "Mensaje enviado a 3 destinatarios"
+        }
+    """
+    try:
+        usuario = request.user
+        
+        # Validar datos con serializer
+        serializer = CrearMensajeMultipleSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({
+                'success': False,
+                'errors': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        data = serializer.validated_data
+        
+        # Usar el nuevo método de servicio
+        resultado = MensajeService.enviar_mensaje_multiple_remitente(
+            remitente_id=usuario.pk,
+            destinatarios_ids=data['destinatarios_ids'],
+            asunto=data['asunto'],
+            contenido=data['contenido'],
+            tipo=data.get('tipo'),           # ← Pasar tipo
+            prioridad=data.get('prioridad'),  # ← Pasar prioridad
+            metadata=data.get('metadata', {})
+        )
+        
+        if resultado['success']:
+            status_code = status.HTTP_201_CREATED 
+            if resultado['data'].get('errores'):
+                status_code = status.HTTP_207_MULTI_STATUS
+            
+            mensaje_respuesta = resultado['message']
+            if resultado['data'].get('errores'):
+                mensaje_respuesta += f' (con {len(resultado["data"]["errores"])} error(es))'
+            
+            return Response({
+                'success': True,
+                'data': resultado['data'],
+                'message': mensaje_respuesta
+            }, status=status_code)
+        else:
+            return Response({
+                'success': False,
+                'error': resultado.get('error'),
+                'errores_detallados': resultado.get('errores_detallados')
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+    except Exception as e:
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# Reemplazar la función obtener_mensajes_enviados en mensaje_views.py con esta versión mejorada
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def obtener_mensajes_enviados(request):
+    """
+    Obtiene todos los mensajes enviados por el usuario autenticado
+    
+    GET /api/mensajes/enviados/
+    
+    Query Params:
+        destinatario_id: Filtrar por destinatario específico (opcional)
+        tipo: Filtro por tipo (privado, sistema, etc.)
+        limit: Límite de resultados (default: 50, max: 100)
+        offset: Offset para paginación (default: 0)
+    
+    Returns:
+        {
+            "success": true,
+            "data": {
+                "mensajes": [...],
+                "paginacion": {...},
+                "estadisticas": {...}
+            }
+        }
+    """
+    try:
+        usuario = request.user
+        
+        # Validar parámetros con serializer
+        serializer = MensajesEnviadosSerializer(data=request.GET)
+        if not serializer.is_valid():
+            return Response({
+                'success': False,
+                'errors': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        filtros = serializer.validated_data
+        
+        # Obtener mensajes enviados usando el repositorio
+        mensajes = MensajeRepository.obtener_mensajes_enviados(
+            remitente_id=usuario.pk,
+            filtros=filtros
+        )
+        
+        # Contar total de mensajes enviados
+        conteos = MensajeRepository.contar_mensajes_enviados(
+            remitente_id=usuario.pk,
+            filtros=filtros
+        )
+        
+        # Formatear respuesta
+        resultado = {
+            'mensajes': [msg.obtener_datos_contexto() for msg in mensajes],
+            'paginacion': {
+                'total': conteos['total'],
+                'limit': filtros['limit'],
+                'offset': filtros['offset'],
+                'has_more': (filtros['offset'] + filtros['limit']) < conteos['total']
+            },
+            'estadisticas': conteos
+        }
+        
+        return Response({
+            'success': True,
+            'data': resultado
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
 @api_view(['PUT'])
 @authentication_classes([JWTAuthentication])

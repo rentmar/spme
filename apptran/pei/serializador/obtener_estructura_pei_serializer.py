@@ -1,102 +1,86 @@
+# serializers.py
 from rest_framework import serializers
+from django.db.models import Q
 from spme_estructuracion_pei.models import (
-    Pei, 
-    ObjetivoPei, 
-    FactoresCriticos, 
-    IndicadorPeiCuantitativo, 
-    IndicadorPeiCualitativo
+    Pei, ObjetivoPei, FactoresCriticos, 
+    IndicadorPeiBase, IndicadorPeiCuantitativo, IndicadorPeiCualitativo
 )
 
 class FactoresCriticosSerializer(serializers.ModelSerializer):
     class Meta:
         model = FactoresCriticos
-        fields = '__all__'
+        fields = ['id', 'factor_critico']
 
-class IndicadorPeiCuantitativoSerializer(serializers.ModelSerializer):
+# Serializador común para campos base
+class IndicadorBaseSerializer(serializers.ModelSerializer):
     class Meta:
+        model = IndicadorPeiBase
+        fields = [
+            'id', 'codigo', 'descripcion',
+            'captura_informacion', 'responsabilidad',
+            'frecuencia_recopilacion', 'uso_informacion'
+        ]
+
+# Extender el serializador base para cada tipo
+class IndicadorCuantitativoDetailSerializer(IndicadorBaseSerializer):
+    tipo = serializers.CharField(default='indicadorpeicuantitativo', read_only=True)
+    numerador = serializers.CharField()
+    denominador = serializers.CharField()
+    umbral_des_numeral = serializers.IntegerField()
+    
+    class Meta(IndicadorBaseSerializer.Meta):
         model = IndicadorPeiCuantitativo
-        fields = '__all__'
+        fields = IndicadorBaseSerializer.Meta.fields + [
+            'tipo', 'numerador', 'denominador', 'umbral_des_numeral',
+            'umbral_des_literal_um1', 'umbral_des_literal_um2',
+            'umbral_des_literal_um3'
+        ]
 
-class IndicadorPeiCualitativoSerializer(serializers.ModelSerializer):
-    class Meta:
+class IndicadorCualitativoDetailSerializer(IndicadorBaseSerializer):
+    tipo = serializers.CharField(default='indicadorpeicualitativo', read_only=True)
+    
+    class Meta(IndicadorBaseSerializer.Meta):
         model = IndicadorPeiCualitativo
-        fields = '__all__'
+        fields = IndicadorBaseSerializer.Meta.fields + [
+            'tipo', 'umbral_des_literal_um1', 'umbral_des_literal_um2',
+            'umbral_des_literal_um3'
+        ]
 
 class ObjetivoPeiSerializer(serializers.ModelSerializer):
+    indicadores = serializers.SerializerMethodField()
     factores_criticos = FactoresCriticosSerializer(many=True, read_only=True)
-    
-    # Usar SerializerMethodField para obtener los indicadores específicos
-    indicadores_cuantitativos = serializers.SerializerMethodField()
-    indicadores_cualitativos = serializers.SerializerMethodField()
     
     class Meta:
         model = ObjetivoPei
-        fields = [
-            'id', 'codigo', 'descripcion', 
-            'factores_criticos', 'indicadores_cuantitativos', 'indicadores_cualitativos'
-        ]
+        fields = ['id', 'codigo', 'descripcion', 'indicadores', 'factores_criticos']
     
-    def get_indicadores_cuantitativos(self, obj):
-        cuantitativos = IndicadorPeiCuantitativo.objects.filter(objetivo=obj)
-        return IndicadorPeiCuantitativoSerializer(cuantitativos, many=True).data
-    
-    def get_indicadores_cualitativos(self, obj):
-        cualitativos = IndicadorPeiCualitativo.objects.filter(objetivo=obj)
-        return IndicadorPeiCualitativoSerializer(cualitativos, many=True).data
+    def get_indicadores(self, obj):
+        # Usar una sola consulta optimizada
+        from django.db.models import Prefetch
+        
+        # Obtener todos los indicadores del objetivo con sus tipos específicos
+        cuantitativos = obj.indicador_pei_objetivo.instance_of(IndicadorPeiCuantitativo)
+        cualitativos = obj.indicador_pei_objetivo.instance_of(IndicadorPeiCualitativo)
+        
+        # Serializar cada tipo
+        cuantitativos_data = IndicadorCuantitativoDetailSerializer(cuantitativos, many=True).data
+        cualitativos_data = IndicadorCualitativoDetailSerializer(cualitativos, many=True).data
+        
+        # Combinar resultados
+        combined = list(cuantitativos_data) + list(cualitativos_data)
+        
+        # Ordenar por código si existe, si no por ID
+        combined.sort(key=lambda x: (x.get('codigo', ''), x.get('id', 0)))
+        
+        return combined
 
-class ResumenEstructuraSerializer(serializers.Serializer):
-    """Serializer para el resumen de totales"""
-    total_objetivos = serializers.IntegerField()
-    total_factores_criticos = serializers.IntegerField()
-    total_indicadores_cuantitativos = serializers.IntegerField()
-    total_indicadores_cualitativos = serializers.IntegerField()
-    total_indicadores = serializers.SerializerMethodField()
-    
-    def get_total_indicadores(self, obj):
-        return obj['total_indicadores_cuantitativos'] + obj['total_indicadores_cualitativos']
-
-class PeiEstructuraSerializer(serializers.ModelSerializer):
-    # Incluir todos los objetivos del PEI con su estructura completa
-    objetivos = ObjetivoPeiSerializer(
-        source='pei_obj_general', 
-        many=True, 
-        read_only=True
-    )
-    
-    # Resumen de totales en un campo separado
-    resumen = serializers.SerializerMethodField()
+class PeiSerializer(serializers.ModelSerializer):
+    objetivos = ObjetivoPeiSerializer(many=True, read_only=True, source='pei_obj_general')
     
     class Meta:
         model = Pei
         fields = [
-            'id', 'codigo', 'titulo', 'descripcion',
-            'fecha_creacion', 'fecha_inicio', 'fecha_fin',
-            'esta_vigente', 'creado_el', 'modificado_el',
-            'objetivos', 'resumen'
+            'id', 'titulo', 'descripcion', 'fecha_creacion',
+            'fecha_inicio', 'fecha_fin', 'esta_vigente',
+            'objetivos'
         ]
-    
-    def get_resumen(self, obj):
-        # Calcular todos los totales
-        total_objetivos = obj.pei_obj_general.count()
-        
-        total_factores_criticos = FactoresCriticos.objects.filter(
-            objetivo_especifico__in=obj.pei_obj_general.all()
-        ).count()
-        
-        total_indicadores_cuantitativos = IndicadorPeiCuantitativo.objects.filter(
-            objetivo__in=obj.pei_obj_general.all()
-        ).count()
-        
-        total_indicadores_cualitativos = IndicadorPeiCualitativo.objects.filter(
-            objetivo__in=obj.pei_obj_general.all()
-        ).count()
-        
-        # Crear el objeto de resumen
-        resumen_data = {
-            'total_objetivos': total_objetivos,
-            'total_factores_criticos': total_factores_criticos,
-            'total_indicadores_cuantitativos': total_indicadores_cuantitativos,
-            'total_indicadores_cualitativos': total_indicadores_cualitativos,
-        }
-        
-        return ResumenEstructuraSerializer(resumen_data).data

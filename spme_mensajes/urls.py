@@ -15,6 +15,7 @@ from .views.mensaje_views import(
     obtener_bandeja_entrada,
     obtener_mensaje,
     crear_mensaje_privado,
+    crear_mensaje_multiple,
     actualizar_estado_mensaje,
     marcar_varios_leido,
     marcar_todos_leido,
@@ -23,8 +24,10 @@ from .views.mensaje_views import(
     enviar_alerta_actividad,
     obtener_mensajes_actividad,
     obtener_mensajes_proyecto,
+    obtener_mensajes_enviados,
     obtener_ejemplos,
     enviar_mensaje_prueba,
+
 )
 #Mensajes
 from .views.mensajeria_views import (
@@ -34,6 +37,11 @@ from .views.mensajeria_views import (
 )
 
 from .views.mensaje_automatico_sistema_views import CrearMensajeAutomaticoSistemaView
+
+#Eliminar mensajes
+from .views.eliminar_mensajes_views import MensajeViewSet
+#Cabiar estado mensajes
+from .views.cambiar_estado_view import CambiarEstadoMensajesView
 
 
 
@@ -58,8 +66,10 @@ urlpatterns = [
     path(r'mensajes/enviar/', crear_mensaje_privado, name='enviar_mensaje'),
     path(r'mensajes/<int:mensaje_id>/estado/', actualizar_estado_mensaje, name='actualizar_estado'),
     #Operaciones masivas
-    path(r'marcar-leidos/', marcar_varios_leido, name='marcar_varios_leido'),
+    path(r'mensajes/marcar-leidos/', marcar_varios_leido, name='marcar_varios_leido'),
     path(r'marcar-todos-leidos/', marcar_todos_leido, name='marcar_todos_leido'),
+    path(r'mensajes/enviados/', obtener_mensajes_enviados, name='obtener_mensajes_enviados'),
+    path(r'mensajes/remite-enviar-multiple/', crear_mensaje_multiple, name='enviar_mensaje_multiple'),
     #busqueda y estadistica
     path(r'mensajes/buscar/', buscar_mensajes, name='buscar_mensajes'),
     path(r'mensajes/estadisticas/', obtener_estadisticas, name='obtener_estadisticas'),
@@ -75,6 +85,12 @@ urlpatterns = [
     path(r'mensajes/crear/sistema/', CrearMensajeSistemaView.as_view(), name='crear_mensaje_sistema'),
     path(r'mensajes/crear/multiple/', CrearMensajeMultipleView.as_view(), name='crear_mensaje_multiple'),
     path(r'mensajes/crear/sistema-automatico/', CrearMensajeAutomaticoSistemaView.as_view(), name='crear_mensaje_sistema_automatico'),
+    #Eliminar mensajes 
+    path(r'mensajes/eliminar-multiples/', MensajeViewSet.as_view({'delete': 'eliminar_mensajes'}), name='mensaje-eliminar-multiples'),
+    path(r'mensajes/<int:pk>/eliminar/', MensajeViewSet.as_view({'delete': 'eliminar_mensaje'}), name='mensaje-eliminar-individual'),
+    #Modificar estados
+    path(r'mensajes/cambiar-estado/', CambiarEstadoMensajesView.as_view(), name='mensaje-cambiar-estado'),
+    #
     
 ] 
 

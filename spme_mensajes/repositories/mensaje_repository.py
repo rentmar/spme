@@ -27,7 +27,7 @@ class MensajeRepository:
         try:
             queryset = MensajeUsuario.objects.filter(
                 destinatario_id=destinatario_id,
-                estado__in=[EstadoMensaje.NO_LEIDO, EstadoMensaje.LEIDO, EstadoMensaje.ARCHIVADO]
+                estado__in=[EstadoMensaje.NO_LEIDO, EstadoMensaje.LEIDO, EstadoMensaje.ARCHIVADO, EstadoMensaje.ELIMINADO]
             )
             #Aplicar filtros
             if estado:
@@ -63,7 +63,7 @@ class MensajeRepository:
         try:
             queryset = MensajeUsuario.objects.filter(
                 destinatario_id=destinatario_id,
-                estado__in=[EstadoMensaje.NO_LEIDO, EstadoMensaje.LEIDO, EstadoMensaje.ARCHIVADO]
+                estado__in=[EstadoMensaje.NO_LEIDO, EstadoMensaje.LEIDO, EstadoMensaje.ARCHIVADO, EstadoMensaje.ELIMINADO]
             )
             if estado:
                 queryset = queryset.filter(estado=estado)
@@ -326,6 +326,136 @@ class MensajeRepository:
         except Exception as e:
             logger.error(f"Error obteniendo mensajes para proyecto {proyecto_id}: {str(e)}")
             raise
+
+
+    #Metodos para los mensajes masivos con remitente - agregados version final mensajeria
+    @staticmethod
+    def obtener_mensajes_enviados(remitente_id, filtros=None):
+        """
+        Obtiene mensajes enviados por un usuario
+        
+        Args:
+            remitente_id: ID del usuario remitente
+            filtros: Dict con filtros (destinatario_id, tipo, etc.)
+        
+        Returns:
+            QuerySet de mensajes enviados
+        """
+        try:
+            queryset = MensajeUsuario.objects.filter(
+                remitente_id=remitente_id,
+                estado__in=[EstadoMensaje.NO_LEIDO, EstadoMensaje.LEIDO, EstadoMensaje.ARCHIVADO]
+            )
             
+            # Aplicar filtros
+            if filtros:
+                if filtros.get('destinatario_id'):
+                    queryset = queryset.filter(destinatario_id=filtros['destinatario_id'])
+                if filtros.get('tipo'):
+                    queryset = queryset.filter(tipo=filtros['tipo'])
+            
+            # Excluir mensajes expirados
+            queryset = queryset.filter(
+                Q(fecha_expiracion__isnull=True) | 
+                Q(fecha_expiracion__gt=timezone.now())
+            )
+            
+            return queryset.order_by('-fecha_envio', '-prioridad')[filtros.get('offset', 0):filtros.get('offset', 0) + filtros.get('limit', 50)]
+        
+        except Exception as e:
+            logger.error(f"Error obteniendo mensajes enviados para usuario {remitente_id}: {str(e)}")
+            raise
+
+
+    @staticmethod
+    def contar_mensajes_enviados(remitente_id, filtros=None):
+        """
+        Cuenta mensajes enviados por un usuario
+        
+        Args:
+            remitente_id: ID del usuario remitente
+            filtros: Dict con filtros
+        
+        Returns:
+            Dict con conteos
+        """
+        try:
+            queryset = MensajeUsuario.objects.filter(
+                remitente_id=remitente_id,
+                estado__in=[EstadoMensaje.NO_LEIDO, EstadoMensaje.LEIDO, EstadoMensaje.ARCHIVADO]
+            )
+            
+            # Aplicar filtros
+            if filtros:
+                if filtros.get('destinatario_id'):
+                    queryset = queryset.filter(destinatario_id=filtros['destinatario_id'])
+                if filtros.get('tipo'):
+                    queryset = queryset.filter(tipo=filtros['tipo'])
+            
+            # Excluir expirados
+            queryset = queryset.filter(
+                Q(fecha_expiracion__isnull=True) | 
+                Q(fecha_expiracion__gt=timezone.now())
+            )
+            
+            # Conteo total
+            total = queryset.count()
+            
+            # Conteo por tipo
+            conteo_tipo = queryset.values('tipo').annotate(
+                count=Count('id')
+            )
+            
+            # Conteo por destinatario (top 10)
+            conteo_destinatario = queryset.values('destinatario_id', 'destinatario__username').annotate(
+                count=Count('id')
+            ).order_by('-count')[:10]
+            
+            return {
+                'total': total,
+                'por_tipo': {item['tipo']: item['count'] for item in conteo_tipo},
+                'por_destinatario': [
+                    {
+                        'destinatario_id': item['destinatario_id'],
+                        'username': item['destinatario__username'],
+                        'count': item['count']
+                    }
+                    for item in conteo_destinatario
+                ]
+            }
+        
+        except Exception as e:
+            logger.error(f"Error contando mensajes enviados para usuario {remitente_id}: {str(e)}")
+            raise
+
+
+    @staticmethod
+    def verificar_existencia_destinatarios(destinatarios_ids):
+        """
+        Verifica si los destinatarios existen en el sistema
+        
+        Args:
+            destinatarios_ids: Lista de IDs de usuarios
+        
+        Returns:
+            Tuple (existentes, inexistentes)
+        """
+        try:
+            from spme_autenticacion.models import Usuario
+            
+            # Obtener usuarios existentes
+            usuarios_existentes = Usuario.objects.filter(
+                id__in=destinatarios_ids
+            ).values_list('id', flat=True)
+            
+            existentes = list(usuarios_existentes)
+            inexistentes = [id for id in destinatarios_ids if id not in existentes]
+            
+            return existentes, inexistentes
+        
+        except Exception as e:
+            logger.error(f"Error verificando destinatarios: {str(e)}")
+            raise    
+                
 
                      
