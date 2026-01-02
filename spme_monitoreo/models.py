@@ -353,7 +353,7 @@ class RendicionCuentas(models.Model):
         related_name='rendicion_cuentas_tarea_actividad',
         null=True,
         blank=True,
-    )
+    ) 
     #Discriminador
     bloquearIconos = models.BooleanField(default=True)
     #Validaciones
@@ -465,6 +465,75 @@ class InformeActividad(models.Model):
     class Meta:
         verbose_name = 'Informe Actividad'
         verbose_name_plural = 'Informes de Actividad'
+
+
+#Informe de Actividades - Completo
+class InformeActividadBase(PolymorphicModel):
+    numeroInforme = models.CharField(max_length=50, blank=True, null=True)
+    fechaEjecucion = models.DateField(blank=True, null=True)
+    contribucionProyecto = models.JSONField(blank=True, null=True)
+    avanceIndicadores = models.JSONField(blank=True, null=True)
+    informacionCuantitativa = models.JSONField(blank=True, null=True)
+    herramientasEvaluacion = models.JSONField(blank=True, null=True)
+    mediosVerificacion = models.TextField(blank=True, null=True)
+    comentariosRecomendaciones = models.TextField(blank=True, null=True)
+    presupuestoPlanificado = models.DecimalField(max_digits=15, decimal_places=2, verbose_name='Presupuesto planificado', blank=True, null=True)
+    presupuestoEjecutado = models.DecimalField(max_digits=15, decimal_places=2, verbose_name='Presupuesto ejecutado', blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Informe Base actividada y subactividad principal'
+        verbose_name_plural = 'Informes Base actividad y subactividad principal'
+
+class InformeActividadPrincipal(InformeActividadBase):
+    objetivoActividad = models.TextField(blank=True, null=True)
+    informeObjetivoActividad = models.TextField(blank=True, null=True)
+    tipoActividad = models.CharField(max_length=255, blank=True, null=True)
+    reporteTipo = models.TextField(blank=True, null=True)
+    procedenciaFondos = models.JSONField(blank=True, null=True)
+    observacionesPresupuesto = models.TextField(blank=True, null=True)  
+    archivosCuantitativos = models.JSONField(blank=True, null=True)  
+    herramientasArchivos = models.JSONField(blank=True, null=True)  
+    mediosArchivos = models.JSONField(blank=True, null=True)  
+
+    actividad = models.ForeignKey(
+        Actividad,
+        on_delete=models.SET_NULL,
+        related_name='actividad_informes_de_actividad_principal',
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        verbose_name = 'Informe de Actividad Principal'
+        verbose_name_plural = 'Informes de actividades Principal'
+
+    def __str__(self):
+        return f"Informe {self.numeroInforme} - {self.actividad.codigo if self.actividad else 'Sin actividad'}"    
+
+
+#Informe de subactividad Principal
+class InformeTareaPrincipal(InformeActividadBase):
+    objetivoTarea = models.TextField(blank=True, null=True)
+    informeObjetivoTarea = models.TextField(blank=True, null=True)
+    tipoActividad = models.CharField(max_length=255, blank=True, null=True)
+    desglosePresupuesto = models.JSONField(blank=True, null=True)
+
+    tarea = models.ForeignKey(
+        TareaActividad,
+        on_delete=models.SET_NULL,
+        related_name='tarea_informes_de_subactividad_principal',
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        verbose_name = 'Informe de Tarea Principal'
+        verbose_name_plural = 'Informes de Tareas Principal'
+
+    def __str__(self):
+        return f"Informe {self.numeroInforme} - {self.tarea.codigo if self.tarea else 'Sin Tarea'}"    
+
+
 
  
 #Informe Base

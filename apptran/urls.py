@@ -53,8 +53,9 @@ from .monitoreo.views.crear_informe_tarea_views import crear_informe_tarea_compl
 from .actividades.views.datos_gantt_views import actividades_con_estados
 #Usuarios
 from .usuarios.views.usuario_views import listar_usuarios, buscar_usuarios_autocomplete, obtener_usuario_actual, listar_usuarios_publico
-
-
+#Informe de actividad principal
+from .monitoreo.views.informe_actividad_principal_views import InformeActividadPrincipalView
+from .monitoreo.views.informe_tarea_principal_views import InformeTareaPrincipalView
 
 #PEI
 router = DefaultRouter()
@@ -108,7 +109,8 @@ router.register(r'informe-actividad', InformeActividadView, basename='informe-ac
 router.register(r'informe-de-actividad', InformeActividadVersionMView, basename='informe_de_actividad')
 router.register(r'informe-de-actividad-min', InfActividadViewSet, basename='informe_de_actividad_min' )
 router.register(r'informe-de-tarea-min', InfTareaMinViews, basename='informe_de_tarea_min' )
-
+router.register(r'informe-actividad-principal', InformeActividadPrincipalView, basename='informe_actividad_principal')
+router.register(r'informe-tarea-principal', InformeTareaPrincipalView, basename="informe_sub_actividad_principal")
 
 urlpatterns =[
     #PEI
