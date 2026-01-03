@@ -478,6 +478,16 @@ class Proceso(models.Model):
         help_text='Procesos que se ejecutan para alcanzar el Producto OE',
     )
 
+    objetivo_especifico = models.ForeignKey(
+        ObjetivoEspecificoProyecto,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='proceso_objetivo_especifico',
+        verbose_name='Proceso asociado al Objetivo Especifico',
+        help_text='Procesos que se ejecutan para alcanzar el Objetivo Especifico'
+    )
+
 
     class Meta:
         verbose_name = 'Proceso'
