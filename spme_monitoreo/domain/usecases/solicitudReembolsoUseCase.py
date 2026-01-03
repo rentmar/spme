@@ -25,9 +25,13 @@ class CrearSolicitudReembolsoUseCase:
         if requestData.get("formaPago_id"):
             forma_pago = self.formaPagoRepository.obtenerFormaPagoPorId(requestData["formaPago_id"])
         
-        contador = None
-        if requestData.get("contador_id"):
-            contador = self.userRepository.obtenerUsuarioPorId(requestData["contador_id"])
+        # contador = None
+        # if requestData.get("contador_id"):
+        #     contador = self.userRepository.obtenerUsuarioPorId(requestData["contador_id"])
+
+        responsable = None
+        if requestData.get("responsable_id"):
+            responsable = self.userRepository.obtenerUsuarioPorId(requestData["responsable_id"])
         
         coordinador = None
         if requestData.get("coordinador_id"):
@@ -56,7 +60,8 @@ class CrearSolicitudReembolsoUseCase:
             "fechaRealizacionActividad": requestData.get("fechaRealizacionActividad"),
             "montoSolicitado": requestData.get("montoSolicitado"),
             "validacionContador": requestData.get("validacionResponsable", False),
-            "contador": contador,
+            # "contador": contador,
+            "responsable": responsable,
             "validacionCoordinador": requestData.get("validacionCoordinador", False),
             "coordinador": coordinador,
             "usuario": usuario,

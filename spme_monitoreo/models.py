@@ -112,11 +112,20 @@ class SolicitudReembolso(models.Model):
     bloquearIconos = models.BooleanField(default=True)
         
     #Validaciones
-    validacionContador = models.BooleanField(default=False)
-    contador = models.ForeignKey(
+    # validacionContador = models.BooleanField(default=False)
+    # contador = models.ForeignKey(
+    #     Usuario,
+    #     on_delete=models.SET_NULL,
+    #     related_name='usuario_contador_reembolso',
+    #     null=True,
+    #     blank=True,
+    # )
+
+    validacionResponsable = models.BooleanField(default=False)
+    responsable = models.ForeignKey(
         Usuario,
         on_delete=models.SET_NULL,
-        related_name='usuario_contador_reembolso',
+        related_name='usuario_responsable_reembolso',
         null=True,
         blank=True,
     )
