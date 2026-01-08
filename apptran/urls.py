@@ -43,6 +43,7 @@ from .actividadespei.views.tarea_actividad_pei_views import TareaActividadPeiVie
 from .actividadespei.views.obtener_actividad_pei_porid_views import ActividadConTareasView
 from .actividadespei.views.actualizar_actividades_pei_bulk_views import actualizar_multiples_actividades
 from .pei.views.obtener_estructura_pei_views import estructura_pei
+from .actividadespei.views.lista_actividad_tarea_pei_view import ActividadesConTareasAPIView
 #Proyecto
 from .viewdiagramaporidproyecto import DiagramaPorProyectoView
 #Informe de actividad
@@ -210,6 +211,8 @@ urlpatterns =[
     path(r'usuarios/buscar/', buscar_usuarios_autocomplete, name='buscar_usuarios'),
     path(r'usuarios/actual/', obtener_usuario_actual, name='usuario_actual'),
     path(r'usuarios/public/', listar_usuarios_publico, name='usuarios_public'),
+    #Actividades PEI
+    path(r'actividades-pei-con-tareas/', ActividadesConTareasAPIView.as_view(), name='actividades-pei-con-tareas'),
 ]
 
 urlpatterns += router.urls
