@@ -150,7 +150,7 @@ class IndicadorPeiCualitativo(IndicadorPeiBase):
 
 
 #Actividad 
-class ActividadPei(models.Model):
+class ActividadPei(models.Model): 
     ESTADOS_ACTIVIDAD = [
         ('CRD', 'Creada'),
         ('PLAN', 'Planificada'),
@@ -209,6 +209,7 @@ class ActividadPei(models.Model):
     procedencia_fondos = models.JSONField(null=True, blank=True)   
     #Estado de la actividad
     estado = models.CharField(max_length=15, choices=ESTADOS_ACTIVIDAD, default='CRD')
+    estaInactiva = models.BooleanField(default=False)
     
     #Pei
     pei = models.ForeignKey(
