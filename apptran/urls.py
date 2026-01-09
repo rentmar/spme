@@ -17,6 +17,7 @@ from .actividades.views.actividad_indicador_views import ActividadIndicadorViewS
 from .actividades.views.lista_actividad_tarea_views import ActividadSubActividadViewSet
 from .actividades.views.tarea_detalles_porid_views import obtener_tarea_detalle
 from .actividades.views.lista_informes_actividad_views import actividad_informes_completos
+from .actividadespei.views.actividad_pei_planificacion_lista_views import actividades_por_pei_planificacion
 
 #from planificacion.vistas.viewsrutas import PruebaPlanificacionView
 from .actividades.views.viewsactividadrutas import rutas_actividad, ruta_actividad_proyecto
@@ -171,6 +172,7 @@ urlpatterns =[
     path(r'test/', test_endpoint, name='test-endpoint'),   
     #Actividades y planificacion
     path(r'actividades/proyecto/<int:proyecto_id>/', actividades_por_proyecto, name='actividades_por_proyecto'), 
+    path(r'actividades/pei/<int:pei_id>/', actividades_por_pei_planificacion , name="actividades_por_pei_planificacion"),
     path(r'usuariosnick/', UserListNicksViews.as_view(), name='lista_nicks' ),
     path(r'usuarios/lista-nicks/', lista_nicks_usuarios, name='lista-nicks-usuarios'),
     #Actividades
