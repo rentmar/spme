@@ -1,6 +1,7 @@
 from django.db import models
 from spme_autenticacion.models import Usuario
 from spme_actividades.models import Actividad, TareaActividad
+from spme_estructuracion_pei.models import ActividadPei, TareaActividadPei
 from polymorphic.models import PolymorphicModel
 
 class FormaPago(models.Model):
@@ -612,6 +613,439 @@ class InfTarea(InformeBase):
     def __str__(self):
         return f"Informe {self.numeroInforme} - {self.tarea.codigo if self.tarea else 'Sin Tarea'}"    
 
+
+###################################Formularios actividades PEI####################
+#Formulario de solicitud de fondos
+class SolicitudFondosActPei(models.Model):
+    numeroFormulario = models.CharField(max_length=150, blank=True, null=True)
+    detalleDestinoFondos = models.JSONField(verbose_name='Detalle destino de fondos', blank=True, null=True)
+    formaPago = models.ForeignKey(
+        FormaPago,
+        on_delete=models.SET_NULL,
+        related_name='solicitudes_fondo_pei',
+        verbose_name='Forma de Pago',
+        null=True,
+        blank=True,
+    )
+    lugarSolicitud = models.TextField(blank=True, null=True)
+    fechaSolicitud = models.DateField(verbose_name='Fecha de la solicitud', blank=True, null=True)
+    montoSolicitado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Monto Solicitado', blank=True, null=True)
+    #Actividad
+    fechaRealizacionActividad = models.DateField(verbose_name="Fecha de realizacion del actividad", blank=True, null=True)
+
+    descripcion_actividad = models.TextField(verbose_name='Descripción de la actividad', blank=True, null=True)
+    objetivo_actividad = models.TextField(verbose_name='Objetivo de la actividad', blank=True, null=True)
+    datos_forma_pago = models.JSONField(verbose_name='Datos de forma de pago', blank=True, null=True)
+    #Discriminador
+    bloquearIconosSolFondos = models.BooleanField(default=True)
+    #Validacion
+    validacionResponsable = models.BooleanField(default=False)
+    contador = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_contador_solicitud_pei',
+        null=True,
+        blank=True,
+    )
+    validacionCoordinador = models.BooleanField(default=False)
+    coordinador = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_coordinador_solicitud_pei',
+        null=True,
+        blank=True,
+    )
+    usuario = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_solicitud_pei',
+        null=True,
+        blank=True,
+    )
+    actividad = models.ForeignKey(
+        ActividadPei, 
+        on_delete=models.SET_NULL,
+        related_name='usuario_actividad_pei_solicitud',
+        null=True,
+        blank=True,
+    )
+
+    tarea = models.ForeignKey(
+        TareaActividadPei,
+        on_delete=models.SET_NULL,
+        related_name='tarea_pei_solicitud',
+        null=True,
+        blank=True,
+    )
+
+    # Campos automáticos de Django (si usas auto_now_add y auto_now)
+    # created_at = models.DateTimeField(auto_now_add=True)  # Si existe
+    # updated_at = models.DateTimeField(auto_now=True)      # Si existe
+
+    def __str__(self):
+        return f"{self.numeroFormulario}"
+
+    class Meta:
+        verbose_name = 'Solicitud de Fondos Actividad Pei'
+        verbose_name_plural = 'Solicitudes de Fondos Actividad Pei'
+
+
+#Solicitud de reembolso
+class SolicitudReembolsoActPei(models.Model):
+    #Datos del formulario
+    numeroFormulario = models.CharField(max_length=150, blank=True, null=True)
+    detalleDestinoFondos = models.JSONField(verbose_name='Detalle destino de fondos', blank=True, null=True)
+    formaPago = models.ForeignKey(
+        FormaPago,
+        on_delete=models.SET_NULL,
+        related_name='solicitud_reembolso_pei',
+        blank=True,
+        null=True,
+    )
+    lugarSolicitud = models.CharField(max_length=50, verbose_name='Lugar solicitud', blank=True, null=True)
+    fechaSolicitud = models.DateField(verbose_name='Fecha solicitud', blank=True, null=True)
+    montoSolicitado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Monto solicitado', blank=True, null=True)
+    descripcion_actividad = models.TextField(blank=True, null=True, verbose_name='Descripción de la actividad')
+    objetivo_actividad = models.TextField(blank=True, null=True, verbose_name='Objetivo de la actividad')
+    datos_forma_pago = models.JSONField(blank=True, null=True, verbose_name='Datos de forma de pago')
+    fechaRealizacionActividad = models.DateField(blank=True, null=True, verbose_name='Fecha de realizacion del actividad')
+
+    #Bloquear iconos
+    bloquearIconos = models.BooleanField(default=True)
+        
+    #Validaciones
+    # validacionContador = models.BooleanField(default=False)
+    # contador = models.ForeignKey(
+    #     Usuario,
+    #     on_delete=models.SET_NULL,
+    #     related_name='usuario_contador_reembolso',
+    #     null=True,
+    #     blank=True,
+    # )
+
+    validacionResponsable = models.BooleanField(default=False)
+    responsable = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_responsable_reembolso_pei',
+        null=True,
+        blank=True,
+    )
+
+    validacionCoordinador = models.BooleanField(default=False)
+    coordinador = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_coordinador_reembolso_pei',
+        null=True,
+        blank=True,
+    )
+
+    usuario = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_reembolso_pei',
+        null=True,
+        blank=True,
+    )
+
+    actividad = models.ForeignKey(
+        ActividadPei, 
+        on_delete=models.SET_NULL,
+        related_name='usuario_actividad_pei_reembolso',
+        null=True,
+        blank=True,
+    )
+
+    tarea = models.ForeignKey(
+        TareaActividadPei,
+        on_delete=models.SET_NULL,
+        related_name='tarea_pei_reembolso',
+        null=True,
+        blank=True,
+    )
+
+    def __str__(self):
+        return f"{self.numeroFormulario}"
+
+    class Meta:
+        verbose_name = 'Solicitud de Reembolso Act Pei'
+        verbose_name_plural = 'Solicitudes de Reembolso Act Pei'
+
+#Solicitud de viaje
+class SolicitudViajeActPei(models.Model):
+    #Datos del formulario
+    numeroFormulario = models.CharField(max_length=150, blank=True, null=True)
+    evento = models.TextField(verbose_name='evento', blank=True, null=True)
+    lugarEvento = models.CharField(max_length=50, verbose_name='Lugar del evento', blank=True, null=True)
+    institucionesParticipantes = models.TextField(verbose_name='Instituciones participantes',blank=True, null=True)
+    organizador = models.TextField(verbose_name='Organizador', blank=True, null=True)
+    quienCubreGastos = models.TextField(verbose_name='quien_cubre_gastos', blank=True, null=True)
+    justificacionAsistencia = models.TextField(verbose_name='justificacion_asistencia', blank=True, null=True)
+    fondosUnitas = models.TextField( verbose_name='fondos_unitas', blank=True, null=True)
+    tareasPrevias = models.TextField( verbose_name='tareas_previas', blank=True, null=True)
+
+    #Bloquear iconos
+    bloquearIconos = models.BooleanField(default=True)
+
+    formaPago = models.ForeignKey(
+        FormaPago,
+        on_delete=models.SET_NULL,
+        related_name='solicitud_viaje_fondo_pei',
+        null=True,
+        blank=True,
+    )
+    montoSolicitado = models.DecimalField(max_digits=12,decimal_places=2,verbose_name ='monto_solicitado', blank=True, null=True)
+    lugarSolicitud = models.CharField(max_length=50, verbose_name='lugar_solicitud', blank=True, null=True)
+    fechaSolicitud = models.DateField(verbose_name='fecha_solicitud', blank=True, null=True)
+
+    #Campos extra
+    fechaEvento = models.DateField(blank=True, null=True)
+    detalleGasto = models.JSONField(blank=True, null=True)
+
+    #Validaciones
+    validacionResponsable = models.BooleanField(default=False)
+    responsable = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_responsable_sol_viaje_pei',
+        null=True,
+        blank=True,
+    )
+
+    validacionCoordinador = models.BooleanField(default=False)
+    coordinador = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_coordinador_sol_viaje_pei',
+        null=True,
+        blank=True,
+    )
+
+    usuario = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_sol_viaje_pei',
+        null=True,
+        blank=True,
+    )
+
+    actividad = models.ForeignKey(
+        ActividadPei, 
+        on_delete=models.SET_NULL,
+        related_name='usuario_actividad_sol_viaje_pei',
+        null=True,
+        blank=True,
+    )
+
+    tarea = models.ForeignKey(
+        TareaActividadPei,
+        on_delete=models.SET_NULL,
+        related_name='tarea_solicitud_sol_viaje_pei',
+        null=True,
+        blank=True,
+    )
+    
+    datos_forma_pago = models.JSONField(
+        verbose_name='Datos de forma de pago', 
+        blank=True, 
+        null=True,
+        help_text='Información de forma de pago (transferencia, otros, etc.)'
+    ) 
+    
+    def __str__(self):
+        return f"{self.numeroFormulario}"
+
+    class Meta:
+        verbose_name = 'Solicitud de Viaje Actividad Pei'
+        verbose_name_plural = 'Solicitudes de Viaje Actividad Pei'
+
+
+class SolicitudPagoDirectoActPei(models.Model):
+    numeroFormulario = models.CharField(max_length=150, blank=True, null=True)
+    detalleDestinoFondos = models.JSONField(verbose_name='detalle_destino_fondos', blank=True, null=True)
+    formaPago = models.ForeignKey(
+        FormaPago,
+        on_delete=models.SET_NULL,
+        related_name='solicitud_pago_directo_pei',
+        null=True,
+        blank=True,
+    )
+    lugarSolicitud = models.TextField(blank=True, null=True)
+    fechaSolicitud = models.DateField(verbose_name='fecha_solicitud', blank=True, null=True)
+    montoSolicitado = models.DecimalField(max_digits=6,decimal_places=2,verbose_name ='monto_solicitado',blank=True, null=True)
+    #Actividad
+    fechaRealizacionActividad = models.DateField(verbose_name="Fecha de realizacion del actividad", blank=True, null=True)
+
+    descripcion_actividad = models.TextField(blank=True, null=True, verbose_name='Descripción de la actividad')
+    objetivo_actividad = models.TextField(blank=True, null=True, verbose_name='Objetivo de la actividad')
+    datos_forma_pago = models.JSONField(verbose_name='Datos de forma de pago', blank=True, null=True)
+    
+    #Discriminador
+    bloquearIconosSolFondos = models.BooleanField(default=True)
+    
+     #Validaciones
+    validacionResponsable = models.BooleanField(default=False)
+    contador = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_contador_sol_pago_directo_pei',
+        null=True,
+        blank=True,
+    )
+
+    validacionCoordinador = models.BooleanField(default=False)
+    coordinador = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_coordinador_sol_pago_directo_pei',
+        null=True,
+        blank=True,
+    )
+
+    usuario = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_sol_pago_directo_pei',
+        null=True,
+        blank=True,
+    )
+
+    actividad = models.ForeignKey(
+        ActividadPei, 
+        on_delete=models.SET_NULL,
+        related_name='usuario_actividad_sol_pago_directo_pei',
+        null=True,
+        blank=True,
+    ) 
+
+    tarea = models.ForeignKey(
+        TareaActividadPei,
+        on_delete=models.SET_NULL,
+        related_name='tarea_solicitud_sol_pago_directo_pei',
+        null=True,
+        blank=True,
+    )  
+    
+    def __str__(self):
+        return f"{self.numeroFormulario}"
+
+    class Meta:
+        verbose_name = 'Solicitud de Pago Directo Act Pei'
+        verbose_name_plural = 'Solicitudes de Pago Directo Act Pei'
+
+
+#Rendicion de cuentas
+class RendicionCuentasActPei(models.Model):
+    #Datos del formulario
+    numeroFormulario = models.CharField(max_length=150, blank=True, null=True)
+    cpteDiario = models.CharField(max_length=100, blank=True, null=True)
+    fechaDesembolso = models.DateField(verbose_name='Fecha de desembolso', blank=True, null=True)
+    montoAsignado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Monto asignado', blank=True, null=True)
+    montoDescargado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Monto Descargado', blank=False, null=True)
+    saldo = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Saldo', blank=True, null=True)
+    detalleDestinoFondos = models.JSONField(verbose_name='Detalle destino de fondos', blank=True, null=True)
+    #Informacion sobre Actividades y Tareas
+    actividad = models.ForeignKey(
+        ActividadPei,
+        on_delete=models.SET_NULL,
+        related_name='rendicion_cuentas_actividad_pei',
+        null=True,
+        blank=True,
+    )
+    fechaActividad = models.DateField(verbose_name='Fecha de la actividad', blank=True, null=True)
+    fechaRendicion = models.DateField(verbose_name='Fecha de Rendición', auto_now_add=True, blank=True, null=True)
+    descripcionActividad = models.TextField(blank=True, null=True)
+    lugarActividad = models.TextField(blank=True, null=True)
+    lugarRendicion = models.TextField(blank=True, null=True)
+    tarea = models.ForeignKey(
+        TareaActividadPei,
+        on_delete=models.SET_NULL,
+        related_name='rendicion_cuentas_tarea_actividad_pei',
+        null=True,
+        blank=True,
+    ) 
+    #Discriminador
+    bloquearIconos = models.BooleanField(default=True)
+    #Validaciones
+    validacionResponsable = models.BooleanField(default=False)
+    responsable = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_responsable_rendicion_pei',
+        null=True,
+        blank=True,
+    )
+    validacionCoordinador = models.BooleanField(default=False)    
+    coordinador = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_coordinador_rendicion_pei',
+        null=True,
+        blank=True,
+    )
+
+    validacionContador = models.BooleanField(default=False)
+    contador = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_contador_rendicion_pei',
+        null=True,
+        blank=True,
+    )
+
+    validacionAdministrador = models.BooleanField(default=False)
+    administrador = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_administrador_rendicion_pei',
+        null=True,
+        blank=True,
+    )
+
+    usuario = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='usuario_rendicion_pei',
+        null=True,
+        blank=True,
+    )
+    #Solicitud
+    solicitudFondos = models.ForeignKey(
+        SolicitudFondosActPei,
+        on_delete=models.SET_NULL,
+        related_name='rendicion_sol_fondos_pei',
+        null=True,
+        blank=True,
+    )
+    solicitudReembolso = models.ForeignKey(
+        SolicitudReembolsoActPei,
+        on_delete=models.SET_NULL,
+        related_name='rendicion_sol_reembolso_pei',
+        null=True,
+        blank=True,
+    )
+    solicitudViaje = models.ForeignKey(
+        SolicitudViajeActPei,
+        on_delete=models.SET_NULL,
+        related_name='rendicion_sol_viaje_pei',
+        null=True,
+        blank=True,
+    )
+    solicitudPagoDirecto = models.ForeignKey(
+        SolicitudPagoDirectoActPei,
+        on_delete=models.SET_NULL,
+        related_name='rendicion_sol_pago_directo_pei',
+        null=True,
+        blank=True,
+    )
+
+    def __str__(self):
+        return f"{self.numeroFormulario}"
+
+    class Meta:
+        verbose_name = 'Rendicion de cuentas Actividad PEI'
+        verbose_name_plural = 'Rendiciones de cuentas Actividad PEI'
 
 
 

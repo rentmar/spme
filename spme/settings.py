@@ -104,7 +104,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'spme_db',
         'USER': 'root',
-        'PASSWORD': 'rootpass123',
+        'PASSWORD': '123',
         'HOST': '127.0.0.1',
         'PORT': '3306',
         'OPTIONS': {
