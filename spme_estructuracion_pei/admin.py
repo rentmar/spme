@@ -41,18 +41,6 @@ class TareaActividadPeiAdmin(admin.ModelAdmin):
     # Campos editables
     list_editable = ('estado',)
     
-    # Campos en formulario
-    fields = (
-        'codigo',
-        'titulo',
-        'descripcion',
-        'actividad',
-        'estado',
-        'fecha_ejecucion',
-        'fecha_limite',
-        'presupuesto'
-    )
-    
     # Acciones básicas
     actions = ['marcar_como_completadas']
     

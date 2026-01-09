@@ -45,6 +45,7 @@ from .actividadespei.views.actualizar_actividades_pei_bulk_views import actualiz
 from .pei.views.obtener_estructura_pei_views import estructura_pei
 from .actividadespei.views.lista_actividad_tarea_pei_view import ActividadesConTareasAPIView
 from .actividadespei.views.lista_pei_actividades_views import pei_detalle_actividades, PeiConActividadesAPIView
+from .actividadespei.views.actividades_tareas_pei_views import ActividadPeiConTareasListView
 #Proyecto
 from .viewdiagramaporidproyecto import DiagramaPorProyectoView
 #Informe de actividad
@@ -179,8 +180,8 @@ urlpatterns =[
     path(r'planificaciones/contar/', contar_planificaciones, name='contar_planificaciones'),
     path(r'planificacion/actividades-plan/<int:idproyecto>/', procesar_actividades_planificacion_bulk, name='bulk-actividades-planificacion'),
     #Actividades-Tareas
-    path(r'actividades-con-tareas/', ActividadConTareasListView.as_view(), 
-         name='actividades-con-tareas'),
+    path(r'actividades-con-tareas/', ActividadConTareasListView.as_view(), name='actividades-con-tareas'),
+    path(r'actividades-pei-con-tareas/', ActividadPeiConTareasListView.as_view(), name='actividades-pei-con-tareas'),
     path(r'tarea-detalles/<int:tarea_id>/', obtener_tarea_detalle, name='obtener_tarea_detalle'),     
     path(r'actividades-con-tareas/<int:pk>/', ActividadConTareasDetailView.as_view(), name='actividad-detalle-con-tareas'),
     #Ruta de actividad
