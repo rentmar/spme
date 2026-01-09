@@ -1,157 +1,89 @@
+# serializers.py
 from rest_framework import serializers
-from spme_estructuracion_pei.models import (
-    ActividadPei,
-    ObjetivoPei,
-    IndicadorPeiCuantitativo,
-    IndicadorPeiCualitativo
-)
+from spme_estructuracion_pei.models import ActividadPei, ObjetivoPei, FactoresCriticos, IndicadorPeiCuantitativo, IndicadorPeiCualitativo
 
 class ActividadPeiSerializer(serializers.ModelSerializer):
-    # Campos para las relaciones ManyToMany (write-only)
-    objetivos_pei_ids = serializers.ListField(
-        child=serializers.IntegerField(),
-        write_only=True,
-        required=False,
-        allow_empty=True
-    )
-    factores_criticos_ids = serializers.ListField(
-        child=serializers.IntegerField(),
-        write_only=True,
-        required=False,
-        allow_empty=True
-    )
-    indicadores_cuantitativos_ids = serializers.ListField(
-        child=serializers.IntegerField(),
-        write_only=True,
-        required=False,
-        allow_empty=True
-    )
-    indicadores_cualitativos_ids = serializers.ListField(
-        child=serializers.IntegerField(),
-        write_only=True,
+    # Sobrescribir campos ManyToMany para permitir listas vacías
+    objetivos_pei = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=ObjetivoPei.objects.all(),
         required=False,
         allow_empty=True
     )
     
-    # Campos de solo lectura para mostrar información relacionada
-    objetivos_pei_info = serializers.SerializerMethodField(read_only=True)
-    factores_criticos_info = serializers.SerializerMethodField(read_only=True)
-    indicadores_cuantitativos_info = serializers.SerializerMethodField(read_only=True)
-    indicadores_cualitativos_info = serializers.SerializerMethodField(read_only=True)
-    responsable_info = serializers.SerializerMethodField(read_only=True)
-    tipo_info = serializers.SerializerMethodField(read_only=True)
-    pei_info = serializers.SerializerMethodField(read_only=True)
-
+    factores_criticos = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=FactoresCriticos.objects.all(),
+        required=False,
+        allow_empty=True
+    )
+    
+    indicadores_cuantitativos = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=IndicadorPeiCuantitativo.objects.all(),
+        required=False,
+        allow_empty=True
+    )
+    
+    indicadores_cualitativos = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=IndicadorPeiCualitativo.objects.all(),
+        required=False,
+        allow_empty=True
+    )
+    
     class Meta:
         model = ActividadPei
-        fields = [
-            'id', 'codigo', 'nombreCorto', 'descripcion', 'supuestos', 'riesgos',
-            'objetivo_de_actividad', 'descripcion_evaluacion', 'descripcion_tipo_actividad',
-            'tipo', 'tipo_info', 'fecha_programada', 'fecha_inicio', 'fecha_cierre',
-            'presupuesto', 'presupuestoGlobal', 'totalReportado', 'totalEjecutado', 'saldo',
-            'gradoEjecucion', 'procedencia_fondos', 'estado', 'pei', 'pei_info',
-            'responsable', 'responsable_info', 
-            'objetivos_pei_ids', 'factores_criticos_ids', 
-            'indicadores_cuantitativos_ids', 'indicadores_cualitativos_ids',
-            'objetivos_pei_info', 'factores_criticos_info',
-            'indicadores_cuantitativos_info', 'indicadores_cualitativos_info'
-        ]
+        fields = '__all__'
         extra_kwargs = {
-            'procedencia_fondos': {'required': False, 'allow_null': True},
-            'codigo': {'required': False, 'allow_null': True},
-            'nombreCorto': {'required': False, 'allow_null': True},
+            'objetivos_pei': {'allow_empty': True, 'required': False},
+            'factores_criticos': {'allow_empty': True, 'required': False},
+            'indicadores_cuantitativos': {'allow_empty': True, 'required': False},
+            'indicadores_cualitativos': {'allow_empty': True, 'required': False},
         }
-
-    def get_objetivos_pei_info(self, obj):
-        return [{'id': objetivo.id, 'codigo': objetivo.codigo, 'descripcion': objetivo.descripcion} 
-                for objetivo in obj.objetivos_pei.all()]
-
-    def get_factores_criticos_info(self, obj):
-        return [{'id': factor.id, 'factor_critico': factor.factor_critico} 
-                for factor in obj.factores_criticos.all()]
-
-    def get_indicadores_cuantitativos_info(self, obj):
-        return [{'id': ind.id, 'codigo': ind.codigo, 'descripcion': ind.descripcion} 
-                for ind in obj.indicadores_cuantitativos.all()]
-
-    def get_indicadores_cualitativos_info(self, obj):
-        return [{'id': ind.id, 'codigo': ind.codigo, 'descripcion': ind.descripcion} 
-                for ind in obj.indicadores_cualitativos.all()]
-
-    def get_responsable_info(self, obj):
-        if obj.responsable:
-            return {
-                'id': obj.responsable.id,
-                'username': obj.responsable.username,
-                'nombre_completo': obj.responsable.get_full_name(),
-                'nombre': obj.responsable.nombre,
-                'paterno': obj.responsable.paterno,
-                'materno': obj.responsable.materno,
-                'ci': obj.responsable.ci,
-                'cargo': obj.responsable.cargo,
-                'is_active': obj.responsable.is_active
-            }
-        return None
-
-    def get_tipo_info(self, obj):
-        if obj.tipo:
-            return {
-                'id': obj.tipo.id,
-                'sigla': obj.tipo.sigla,
-                'tipo_actividad': obj.tipo.tipo_actividad
-            }
-        return None
-
-    def get_pei_info(self, obj):
-        if obj.pei:
-            return {
-                'id': obj.pei.id,
-                'codigo': obj.pei.codigo,
-                'titulo': obj.pei.titulo
-            }
-        return None
-
-    def validate_procedencia_fondos(self, value):
-        if value is not None and not isinstance(value, (dict, list)):
-            raise serializers.ValidationError("procedencia_fondos debe ser un objeto JSON válido")
-        return value
-
+    
     def create(self, validated_data):
-        objetivos_pei_ids = validated_data.pop('objetivos_pei_ids', [])
-        factores_criticos_ids = validated_data.pop('factores_criticos_ids', [])
-        indicadores_cuantitativos_ids = validated_data.pop('indicadores_cuantitativos_ids', [])
-        indicadores_cualitativos_ids = validated_data.pop('indicadores_cualitativos_ids', [])
+        """
+        Crear una nueva actividad PEI
+        """
+        # Extraer los datos de las relaciones
+        objetivos_pei = validated_data.pop('objetivos_pei', [])
+        factores_criticos = validated_data.pop('factores_criticos', [])
+        indicadores_cuantitativos = validated_data.pop('indicadores_cuantitativos', [])
+        indicadores_cualitativos = validated_data.pop('indicadores_cualitativos', [])
         
-        actividad = ActividadPei.objects.create(**validated_data)
+        # Crear la instancia principal
+        instance = super().create(validated_data)
         
-        if objetivos_pei_ids:
-            actividad.objetivos_pei.set(objetivos_pei_ids)
-        if factores_criticos_ids:
-            actividad.factores_criticos.set(factores_criticos_ids)
-        if indicadores_cuantitativos_ids:
-            actividad.indicadores_cuantitativos.set(indicadores_cuantitativos_ids)
-        if indicadores_cualitativos_ids:
-            actividad.indicadores_cualitativos.set(indicadores_cualitativos_ids)
+        # Establecer las relaciones
+        instance.objetivos_pei.set(objetivos_pei)
+        instance.factores_criticos.set(factores_criticos)
+        instance.indicadores_cuantitativos.set(indicadores_cuantitativos)
+        instance.indicadores_cualitativos.set(indicadores_cualitativos)
         
-        return actividad
-
+        return instance
+    
     def update(self, instance, validated_data):
-        objetivos_pei_ids = validated_data.pop('objetivos_pei_ids', None)
-        factores_criticos_ids = validated_data.pop('factores_criticos_ids', None)
-        indicadores_cuantitativos_ids = validated_data.pop('indicadores_cuantitativos_ids', None)
-        indicadores_cualitativos_ids = validated_data.pop('indicadores_cualitativos_ids', None)
+        """
+        Actualizar una actividad PEI existente
+        """
+        # Extraer los datos de las relaciones
+        objetivos_pei = validated_data.pop('objetivos_pei', None)
+        factores_criticos = validated_data.pop('factores_criticos', None)
+        indicadores_cuantitativos = validated_data.pop('indicadores_cuantitativos', None)
+        indicadores_cualitativos = validated_data.pop('indicadores_cualitativos', None)
         
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
+        # Actualizar la instancia principal
+        instance = super().update(instance, validated_data)
         
-        if objetivos_pei_ids is not None:
-            instance.objetivos_pei.set(objetivos_pei_ids)
-        if factores_criticos_ids is not None:
-            instance.factores_criticos.set(factores_criticos_ids)
-        if indicadores_cuantitativos_ids is not None:
-            instance.indicadores_cuantitativos.set(indicadores_cuantitativos_ids)
-        if indicadores_cualitativos_ids is not None:
-            instance.indicadores_cualitativos.set(indicadores_cualitativos_ids)
+        # Actualizar las relaciones si se proporcionan
+        if objetivos_pei is not None:
+            instance.objetivos_pei.set(objetivos_pei)
+        if factores_criticos is not None:
+            instance.factores_criticos.set(factores_criticos)
+        if indicadores_cuantitativos is not None:
+            instance.indicadores_cuantitativos.set(indicadores_cuantitativos)
+        if indicadores_cualitativos is not None:
+            instance.indicadores_cualitativos.set(indicadores_cualitativos)
         
         return instance

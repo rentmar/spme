@@ -36,12 +36,16 @@ from .monitoreo.views.crear_informe_de_actividad_views import InfActividadViewSe
 #PEI
 from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
 from .actividadespei.views.listar_actividades_pei_views import actividades_pei_con_tareas
+from .actividadespei.views.actividad_pei_views import ActividadPeiViewModel
 #from .pei.views.obtener_estructura_pei_views import estructura_pei_completa
-from .actividadespei.views.crear_actividad_pei_views import crear_actividad_pei, actualizar_actividad_pei
+from .actividadespei.views.crear_actividad_pei_views import ActividadPeiPrincipalViewSet
 from .actividadespei.views.tarea_actividad_pei_views import TareaActividadPeiViewSet
 from .actividadespei.views.obtener_actividad_pei_porid_views import ActividadConTareasView
 from .actividadespei.views.actualizar_actividades_pei_bulk_views import actualizar_multiples_actividades
 from .pei.views.obtener_estructura_pei_views import estructura_pei
+from .actividadespei.views.lista_actividad_tarea_pei_view import ActividadesConTareasAPIView
+from .actividadespei.views.lista_pei_actividades_views import pei_detalle_actividades, PeiConActividadesAPIView
+from .actividadespei.views.actividades_tareas_pei_views import ActividadPeiConTareasListView
 #Proyecto
 from .viewdiagramaporidproyecto import DiagramaPorProyectoView
 #Informe de actividad
@@ -111,6 +115,9 @@ router.register(r'informe-de-actividad-min', InfActividadViewSet, basename='info
 router.register(r'informe-de-tarea-min', InfTareaMinViews, basename='informe_de_tarea_min' )
 router.register(r'informe-actividad-principal', InformeActividadPrincipalView, basename='informe_actividad_principal')
 router.register(r'informe-tarea-principal', InformeTareaPrincipalView, basename="informe_sub_actividad_principal")
+#Actividades PEI
+router.register(r'actividades-pei', ActividadPeiViewModel, basename='actividades_pei')
+router.register(r'actividades-pei-principal', ActividadPeiPrincipalViewSet, basename='actividades_pei_principal')
 
 urlpatterns =[
     #PEI
@@ -121,8 +128,8 @@ urlpatterns =[
     path(r'pei/<int:pei_id>/factores-criticos/', factores_criticos_por_pei,name='pei-lista-fac-criticos'),
     path(r'pei/<int:pei_id>/actividades-con-tareas/', actividades_pei_con_tareas, name='actividades_pei_con_tareas'),
     #path(r'pei/<int:pei_id>/estructura/', estructura_pei_completa, name='obtener-estructura-peis'),
-    path(r'pei/actividades/crear/', crear_actividad_pei, name='crear_actividad_pei'),
-    path(r'pei/actividad/<int:actividad_id>/actualizar/', actualizar_actividad_pei, name='actualizar_actividad_pei'),
+    #path(r'pei/actividades/crear/', crear_actividad_pei, name='crear_actividad_pei'),
+    #path(r'pei/actividad/<int:actividad_id>/actualizar/', actualizar_actividad_pei, name='actualizar_actividad_pei'),
     path(r'pei/actividad/<int:id>/tareas/', ActividadConTareasView.as_view(), name='actividad-con-tareas'),
     path(r'pei/actividades/actualizar-lote/',actualizar_multiples_actividades, name='actualizar-multiples-actividades_pei'),
     ######################## USUARIOS #################################
@@ -173,8 +180,8 @@ urlpatterns =[
     path(r'planificaciones/contar/', contar_planificaciones, name='contar_planificaciones'),
     path(r'planificacion/actividades-plan/<int:idproyecto>/', procesar_actividades_planificacion_bulk, name='bulk-actividades-planificacion'),
     #Actividades-Tareas
-    path(r'actividades-con-tareas/', ActividadConTareasListView.as_view(), 
-         name='actividades-con-tareas'),
+    path(r'actividades-con-tareas/', ActividadConTareasListView.as_view(), name='actividades-con-tareas'),
+    path(r'actividades-pei-con-tareas/', ActividadPeiConTareasListView.as_view(), name='actividades-pei-con-tareas'),
     path(r'tarea-detalles/<int:tarea_id>/', obtener_tarea_detalle, name='obtener_tarea_detalle'),     
     path(r'actividades-con-tareas/<int:pk>/', ActividadConTareasDetailView.as_view(), name='actividad-detalle-con-tareas'),
     #Ruta de actividad
@@ -206,6 +213,10 @@ urlpatterns =[
     path(r'usuarios/buscar/', buscar_usuarios_autocomplete, name='buscar_usuarios'),
     path(r'usuarios/actual/', obtener_usuario_actual, name='usuario_actual'),
     path(r'usuarios/public/', listar_usuarios_publico, name='usuarios_public'),
+    #Actividades PEI
+    path(r'actividades-pei-con-tareas/', ActividadesConTareasAPIView.as_view(), name='actividades-pei-con-tareas'),
+    path(r'pei/<int:pei_id>/detalle-actividades/', pei_detalle_actividades, name="pei-detalle-actividades"),
+    path(r'pei/<int:pei_id>/con-actividades/', PeiConActividadesAPIView.as_view(), name="pei-con-actividades"),
 ]
 
 urlpatterns += router.urls

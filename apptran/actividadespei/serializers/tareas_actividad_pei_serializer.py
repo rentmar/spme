@@ -5,4 +5,4 @@ class TareaActividadPeiSerializer(serializers.ModelSerializer):
     class Meta:
         model = TareaActividadPei
         fields = '__all__'
-    
+     

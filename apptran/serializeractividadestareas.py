@@ -17,5 +17,5 @@ class ActividadSerializer(serializers.ModelSerializer):
             'id', 'codigo', 'nombreCorto', 'descripcion', 'estado',
             'fecha_programada', 'fecha_inicio', 'fecha_cierre',
             'presupuesto', 'presupuestoGlobal', 'procedencia_fondos','totalReportado',
-            'totalEjecutado', 'saldo', 'gradoEjecucion', 'proyecto_id', 'tareas'
+            'totalEjecutado', 'saldo', 'gradoEjecucion', 'proyecto_id', 'tareas', 'estaInactiva',
         ]

@@ -34,6 +34,7 @@ class ActividadConTareasListView(generics.ListAPIView):
                 'saldo':actividad_data['saldo'], 
                 'gradoEjecucion':actividad_data['gradoEjecucion'],
                 'proyecto_id': actividad_data['proyecto_id'],
+                'estaInactiva': actividad_data['estaInactiva'],
                 'tareas': actividad_data['tareas']
             }
             data.append(actividad_formateada)

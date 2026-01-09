@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'polymorphic',
     'django_celery_results',
+    'auditlog',
     'spme_web',
     'spme_api',
     'spme_autenticacion',
