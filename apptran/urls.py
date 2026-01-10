@@ -18,7 +18,7 @@ from .actividades.views.lista_actividad_tarea_views import ActividadSubActividad
 from .actividades.views.tarea_detalles_porid_views import obtener_tarea_detalle
 from .actividades.views.lista_informes_actividad_views import actividad_informes_completos
 from .actividadespei.views.actividad_pei_planificacion_lista_views import actividades_por_pei_planificacion
-
+from .actividadespei.views.tareas_pei_crud_views import TareaPeiActividadPeiView
 #from planificacion.vistas.viewsrutas import PruebaPlanificacionView
 from .actividades.views.viewsactividadrutas import rutas_actividad, ruta_actividad_proyecto
 from .actividades.views.viewsactividadrutaindicador import obtener_ruta_actividad_con_indicadores
@@ -101,6 +101,7 @@ router.register(r'tipo-actividad', TipoActividadView, basename='tipo_actividad')
 router.register(r'actividades-tareas-lista', ActividadSubActividadViewSet, basename='lista_actividades_tareas')
 #Tareas de Actividades
 router.register(r'tareas-actividad', TareaActividadView, basename='tareas-actividades')
+router.register(r'tareas-pei-actividad-pei', TareaPeiActividadPeiView, basename='tareaspei-actividadpei')
 #Actividad indicadores - bitacora
 router.register(r'actividad-indicadores-proyecto', ActividadIndicadorViewSet, basename='actividad_indicadores_proyecto' )
 #Monitoreo
