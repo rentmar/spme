@@ -35,6 +35,7 @@ from .monitoreo.views.crear_rendicion_cuentas_views import crear_rendicion_cuent
 from .monitoreo.views.info_rendicion_cuentas_views import RendicionCuentasDatosView
 from .monitoreo.views.informe_actividad_views import InformeActividadVersionMView
 from .monitoreo.views.crear_informe_de_actividad_views import InfActividadViewSet
+from .monitoreo.views.sol_fondos_pei_crud_views import SolicitudFondosPeiView
 #PEI
 from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
 from .actividadespei.views.listar_actividades_pei_views import actividades_pei_con_tareas
@@ -118,6 +119,7 @@ router.register(r'informe-de-actividad-min', InfActividadViewSet, basename='info
 router.register(r'informe-de-tarea-min', InfTareaMinViews, basename='informe_de_tarea_min' )
 router.register(r'informe-actividad-principal', InformeActividadPrincipalView, basename='informe_actividad_principal')
 router.register(r'informe-tarea-principal', InformeTareaPrincipalView, basename="informe_sub_actividad_principal")
+router.register(r'solicitud-fondos-pei', SolicitudFondosPeiView, basename='solicitud_fondos_pei')
 #Actividades PEI
 router.register(r'actividades-pei', ActividadPeiViewModel, basename='actividades_pei')
 router.register(r'actividades-pei-principal', ActividadPeiPrincipalViewSet, basename='actividades_pei_principal')
