@@ -36,6 +36,10 @@ from .monitoreo.views.info_rendicion_cuentas_views import RendicionCuentasDatosV
 from .monitoreo.views.informe_actividad_views import InformeActividadVersionMView
 from .monitoreo.views.crear_informe_de_actividad_views import InfActividadViewSet
 from .monitoreo.views.sol_fondos_pei_crud_views import SolicitudFondosPeiView
+from .monitoreo.views.sol_reembolso_pei_crud_view import SolicitudReembolsoActPeiView
+from .monitoreo.views.sol_viaje_pei_crud_views import SolicitudViajeActPeiView
+from .monitoreo.views.sol_pago_dir_pei_crud_views import SolicitudPagoDirectoActPeiView
+from .monitoreo.views.rendicion_cuentas_pei_crud_views import RendicionCuentasActPeiView
 #PEI
 from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
 from .actividadespei.views.listar_actividades_pei_views import actividades_pei_con_tareas
@@ -120,6 +124,10 @@ router.register(r'informe-de-tarea-min', InfTareaMinViews, basename='informe_de_
 router.register(r'informe-actividad-principal', InformeActividadPrincipalView, basename='informe_actividad_principal')
 router.register(r'informe-tarea-principal', InformeTareaPrincipalView, basename="informe_sub_actividad_principal")
 router.register(r'solicitud-fondos-pei', SolicitudFondosPeiView, basename='solicitud_fondos_pei')
+router.register(r'solicitud-reembolso-pei', SolicitudReembolsoActPeiView, basename='solicitud_reembolso_pei')
+router.register(r'solicitud-viaje-pei', SolicitudViajeActPeiView, basename='solicitud_viaje_pei')
+router.register(r'solicitud-pago-directo-pei', SolicitudPagoDirectoActPeiView, basename='solicitud_pago_directo_pei')
+router.register(r'solicitud-rendicion-cuentas-pei', RendicionCuentasActPeiView, basename='sol_rendicion_cuentas_pei')
 #Actividades PEI
 router.register(r'actividades-pei', ActividadPeiViewModel, basename='actividades_pei')
 router.register(r'actividades-pei-principal', ActividadPeiPrincipalViewSet, basename='actividades_pei_principal')
