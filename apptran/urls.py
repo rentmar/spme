@@ -67,6 +67,8 @@ from .usuarios.views.usuario_views import listar_usuarios, buscar_usuarios_autoc
 #Informe de actividad principal
 from .monitoreo.views.informe_actividad_principal_views import InformeActividadPrincipalView
 from .monitoreo.views.informe_tarea_principal_views import InformeTareaPrincipalView
+#Solicitude de viaje PEI
+from .monitoreo.views.obtener_solicitudes_viaje_pei_views import filtrar_solicitudes_viaje
 
 #PEI
 router = DefaultRouter()
@@ -217,6 +219,7 @@ urlpatterns =[
     path(r'monitoreo/obtener-datos-formulario-pei/', obtener_datos_solicitud_fondos_pei, name='obt_datos_form_sol_fondos'),
     path(r'monitoreo/crear-rendicion-cuentas/', crear_rendicion_cuentas, name='form_rendicion_cuentas'),
     path(r'monitoreo/rendicion-cuentas-datos/', RendicionCuentasDatosView.as_view(), name='rendicion-cuentas-datos-form'),
+    path(r'monitoreo/obtener-solicitudes-viaje-pei/', filtrar_solicitudes_viaje, name='solicitudes-de-viaje-filtrar-pei'),
     #Diagrama de Gannt
     path(r'actividades-gannt/', actividades_con_estados, name='actividades-diagrama-gannt' ),
     #INFORMDE DE TAREA - SUBACTIVIDAD
