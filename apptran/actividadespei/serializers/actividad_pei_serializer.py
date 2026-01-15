@@ -6,3 +6,4 @@ class ActividadPeiSerializer(serializers.ModelSerializer):
     class Meta:
         model = ActividadPei
         fields = '__all__'
+ 

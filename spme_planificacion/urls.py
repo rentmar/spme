@@ -5,7 +5,9 @@ from .views.planificacion_proyecto_views import PlanificacionProyectoViewSet
 from .views.cambio_planificacion_proyecto_view import CambioPlanificacionProyectoViewSet
 from .views.planificacion_idproyecto_views import PlanificacionesPorProyectoAPIView
 from .views.cambio_plan_idplan_views import CambiosPlanificacionListView
-
+from .views.planificacion_pei_crud_views import PlanificacionPeiViewSet
+from .views.planificacion_pei_seguimiento_historial_views import SeguimientoPeiView
+from .views.planificacion_pei_bulk_views import ProcesarPlanificacionPeiView
 
 router = DefaultRouter()
 
@@ -13,6 +15,7 @@ router = DefaultRouter()
 #router.register(r'revisiones', PlanRevisionViewSet, basename='plan-revision')
 router.register(r'planificacion-proyecto-respaldo', PlanificacionProyectoViewSet, basename='planificacion_proyecto_respaldo')
 router.register(r'cambio-planificacion-proyecto-respaldo', CambioPlanificacionProyectoViewSet, basename='cambio_planificacion_proyecto_respaldo')
+router.register(r'planificacion-pei-crud', PlanificacionPeiViewSet, basename='planificacion_pei_crud')
 
 urlpatterns = [
     #path(r'planes/<int:plan_id>/crear-revision/', ProyectoPlanViewSet.as_view({'post': 'create_revision'}), name='plan-crear-revision'), 
@@ -21,6 +24,8 @@ urlpatterns = [
     path(r'planificaciones/proyecto/<int:proyecto_id>/', PlanificacionesPorProyectoAPIView.as_view(), name='planificacion-por-proyecto' ),
     #Cambios de una planificacion por id de planificacion
     path(r'planificaciones/<int:planificacion_id>/cambios/', CambiosPlanificacionListView.as_view() , name='planificacion-por-proyecto' ),
+    path(r'planificaciones/seguimiento-pei/<int:pei_id>/', SeguimientoPeiView.as_view() , name='seguimiento_pei'),
+    path(r'planificacion-pei/procesar-bulk/',  ProcesarPlanificacionPeiView.as_view(), name='procesar_planificacion_pei'),
 ]
 
 urlpatterns += router.urls

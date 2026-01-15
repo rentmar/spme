@@ -110,46 +110,69 @@ class PlanRevision(models.Model):
 
 ########################## SEGUIMIENTO DE LA PLANIFICACION PEI ###########################
 
+from django.db import models
+from django.db.models import Max
+from django.utils import timezone
+
 class PlanificacionPei(models.Model):
     """
     Modelo principal para planificación PEI.
-    Incluye seguimiento completo de quién, cuándo y qué se modificó.
+    La versión se incrementa automáticamente por cada PEI.
     """
     
     # -----------------------------------------------------------------
     # 1. RELACIONES PRINCIPALES
     # -----------------------------------------------------------------
-    pei = models.OneToOneField(
-        Pei,  # Asegúrate que 'Pei' esté importado o use string
+    pei = models.ForeignKey(
+        Pei,
         on_delete=models.CASCADE,
         related_name='planificacion_pei',
         verbose_name='PEI Relacionado',
-        help_text='Cada PEI tiene una única planificación'
+        help_text='Cada PEI puede tener multiples planificaciones'
     )
     
     # -----------------------------------------------------------------
     # 2. DATOS DEL FRONTEND (VUE COMPONENT)
     # -----------------------------------------------------------------
-    datos_tabla = models.JSONField(
-        verbose_name='Datos de actividades',
+    datos_tabla_actual = models.JSONField(
+        verbose_name='Datos de actividades Originales',
         default=list,
-        help_text='Estructura JSON completa de actividades y subactividades'
+        help_text='Estructura JSON completa de actividades, su estado y planificacion. Actual.',
+        blank=True,
+        null=True
+    )
+
+    datos_tabla_actualizado = models.JSONField(
+        verbose_name='Datos de actividades Actualizadas',
+        default=list,
+        help_text='Estructura JSON completa de actividades, su estado y planificacion. Actualizado.',
+        blank=True,
+        null=True
+    )
+
+    cambios_efectuados = models.JSONField(
+        verbose_name='Campos actualizados',
+        default=list,
+        help_text='Datos de los cambios efectuados',
+        blank=True,
+        null=True
     )
     
     configuracion = models.JSONField(
         verbose_name='Configuración de tabla',
         default=dict,
+        help_text='Columnas, fórmulas, formatos de visualización',
         blank=True,
-        help_text='Columnas, fórmulas, formatos de visualización'
+        null=True
     )
     
     # -----------------------------------------------------------------
-    # 3. CONTROL DE VERSIONES
+    # 3. CONTROL DE VERSIONES (MODIFICADO)
     # -----------------------------------------------------------------
     version = models.IntegerField(
         default=1,
         verbose_name='Versión',
-        help_text='Número de versión, se incrementa automáticamente al guardar cambios'
+        help_text='Número de versión, se incrementa automáticamente al crear nueva planificación para el mismo PEI'
     )
     
     # -----------------------------------------------------------------
@@ -181,13 +204,13 @@ class PlanificacionPei(models.Model):
     total_actividades = models.IntegerField(
         default=0,
         verbose_name='Total de actividades',
-        help_text='Calculado automáticamente de datos_tabla'
+        help_text='Calculado automáticamente de datos_tabla_actualizado'
     )
     
     total_subactividades = models.IntegerField(
         default=0,
         verbose_name='Total de subactividades',
-        help_text='Calculado automáticamente de datos_tabla'
+        help_text='Calculado automáticamente de datos_tabla_actualizado'
     )
     
     total_presupuesto = models.DecimalField(
@@ -195,13 +218,13 @@ class PlanificacionPei(models.Model):
         decimal_places=2,
         default=0,
         verbose_name='Presupuesto total',
-        help_text='Suma de presupuestos de actividades principales'
+        help_text='Suma de presupuestos de actividades principales de datos_tabla_actualizado'
     )
     
     actividades_planificadas = models.IntegerField(
         default=0,
         verbose_name='Actividades planificadas',
-        help_text='Actividades con fechas de inicio y fin definidas'
+        help_text='Actividades con fechas de inicio y fin definidas en datos_tabla_actualizado'
     )
     
     # -----------------------------------------------------------------
@@ -228,39 +251,53 @@ class PlanificacionPei(models.Model):
     class Meta:
         verbose_name = 'Planificación PEI'
         verbose_name_plural = 'Planificaciones PEI'
-        ordering = ['-actualizado_el']
+        ordering = ['pei', '-version']  # Ordenar por PEI y luego por versión descendente
+        unique_together = ['pei', 'version']  # Cada PEI tiene versiones únicas
         indexes = [
-            # Index para búsquedas comunes
+            models.Index(fields=['pei', 'version']),  # Índice compuesto para búsquedas rápidas
             models.Index(fields=['pei']),
             models.Index(fields=['version']),
             models.Index(fields=['creado_por']),
             models.Index(fields=['actualizado_por']),
             models.Index(fields=['creado_el']),
             models.Index(fields=['actualizado_el']),
-            # Index para reportes
-            models.Index(fields=['total_actividades']),
-            models.Index(fields=['total_presupuesto']),
         ]
     
     def __str__(self):
-        return f"Planificación #{self.id} - {self.pei.titulo} (v{self.version})"
+        return f"PEI {self.pei.id} - Planificación v{self.version}"
     
     # -----------------------------------------------------------------
-    # MÉTODOS PRINCIPALES
+    # MÉTODOS PRINCIPALES - MODIFICADOS
     # -----------------------------------------------------------------
     
     def save(self, *args, **kwargs):
         """
         Sobreescribir save para:
-        1. Incrementar versión en actualizaciones
+        1. Asignar versión secuencial por PEI
         2. Calcular estadísticas automáticas
         3. Manejar lógica de usuario
         """
-        # Incrementar versión solo si es una actualización (ya existe en BD)
-        es_actualizacion = bool(self.pk)
+        es_nuevo = not self.pk
         
-        if es_actualizacion:
-            self.version += 1
+        if es_nuevo:
+            # Para nueva planificación: obtener última versión del mismo PEI y sumar 1
+            ultima_version = PlanificacionPei.objects.filter(
+                pei=self.pei
+            ).aggregate(Max('version'))['version__max']
+            
+            if ultima_version:
+                self.version = ultima_version + 1
+            else:
+                self.version = 1  # Primera versión para este PEI
+            
+            # Para nuevas planificaciones, establecer creado_por si no está definido
+            if not self.creado_por and hasattr(self, 'request_user'):
+                self.creado_por = self.request_user
+        
+        # Para actualizaciones (no nuevas), mantener la versión actual
+        # pero actualizar el usuario de modificación
+        elif not es_nuevo and hasattr(self, 'request_user'):
+            self.actualizado_por = self.request_user
         
         # Calcular estadísticas antes de guardar
         self._calcular_estadisticas()
@@ -270,54 +307,142 @@ class PlanificacionPei(models.Model):
     
     def _calcular_estadisticas(self):
         """
-        Calcular todos los campos automáticos basados en datos_tabla.
-        Se ejecuta automáticamente antes de cada save().
+        Calcular todos los campos automáticos basados en datos_tabla_actualizado.
         """
         try:
-            datos = self.datos_tabla or []
+            datos = self.datos_tabla_actualizado or []
             
-            # Reiniciar contadores
             actividades = 0
             subactividades = 0
             presupuesto_total = 0.0
             planificadas = 0
             
             for item in datos:
-                # Determinar nivel (0 = actividad, 1 = subactividad)
                 nivel = item.get('nivel', 0)
                 
                 if nivel == 0:  # Actividad principal
                     actividades += 1
                     
-                    # Verificar si está planificada
                     if item.get('fecha_inicio_plan') and item.get('fecha_fin_plan'):
                         planificadas += 1
                     
-                    # Sumar presupuesto
                     try:
                         presupuesto = float(item.get('presupuesto', 0) or 0)
                         presupuesto_total += presupuesto
                     except (ValueError, TypeError):
                         pass
                     
-                    # Contar subactividades dentro de esta actividad
                     if 'subactividades' in item and isinstance(item['subactividades'], list):
                         subactividades += len(item['subactividades'])
                 
                 elif nivel == 1:  # Subactividad directa
                     subactividades += 1
             
-            # Actualizar campos
             self.total_actividades = actividades
             self.total_subactividades = subactividades
             self.total_presupuesto = presupuesto_total
             self.actividades_planificadas = planificadas
             
         except Exception as e:
-            # Si hay error en el cálculo, mantener valores actuales
-            # y registrar el error (en producción usar logging)
-            print(f"⚠️ Error calculando estadísticas para planificación {self.id}: {e}")
-            # No lanzar excepción para no interrumpir el save()
+            print(f"⚠️ Error calculando estadísticas para PEI {self.pei.id} v{self.version}: {e}")
+    
+    # -----------------------------------------------------------------
+    # MÉTODOS DE GESTIÓN DE VERSIONES
+    # -----------------------------------------------------------------
+    
+    @classmethod
+    def obtener_ultima_version(cls, pei_id):
+        """
+        Obtener la última versión para un PEI específico.
+        
+        Args:
+            pei_id (int): ID del PEI
+            
+        Returns:
+            PlanificacionPei or None: Última versión o None si no existe
+        """
+        try:
+            return cls.objects.filter(pei_id=pei_id).latest('version')
+        except cls.DoesNotExist:
+            return None
+    
+    @classmethod
+    def obtener_todas_versiones(cls, pei_id):
+        """
+        Obtener todas las versiones de un PEI ordenadas por versión.
+        
+        Args:
+            pei_id (int): ID del PEI
+            
+        Returns:
+            QuerySet: Todas las versiones ordenadas por versión ascendente
+        """
+        return cls.objects.filter(pei_id=pei_id).order_by('version')
+    
+    @classmethod
+    def crear_nueva_version(cls, pei_id, usuario, datos_tabla_actualizado=None, configuracion=None):
+        """
+        Crear una nueva versión para un PEI basada en la última versión.
+        
+        Args:
+            pei_id (int): ID del PEI
+            usuario: Usuario que crea la nueva versión
+            datos_tabla_actualizado (optional): Nuevos datos de tabla
+            configuracion (optional): Nueva configuración
+            
+        Returns:
+            PlanificacionPei: La nueva versión creada
+        """
+        # Obtener la última versión
+        ultima_version = cls.obtener_ultima_version(pei_id)
+        
+        if not ultima_version:
+            # Si no existe versión anterior, crear la primera
+            return cls.objects.create(
+                pei_id=pei_id,
+                datos_tabla_actual=[],
+                datos_tabla_actualizado=datos_tabla_actualizado or [],
+                cambios_efectuados=[],
+                configuracion=configuracion or {},
+                creado_por=usuario,
+                actualizado_por=usuario
+            )
+        
+        # Crear nueva versión basada en la última
+        nueva_version = cls.objects.create(
+            pei_id=pei_id,
+            # Mantener datos originales de la última versión
+            datos_tabla_actual=ultima_version.datos_tabla_actual,
+            # Actualizar con nuevos datos o copiar los existentes
+            datos_tabla_actualizado=datos_tabla_actualizado or ultima_version.datos_tabla_actualizado.copy(),
+            # Inicializar cambios_efectuados como lista vacía
+            cambios_efectuados=[],
+            configuracion=configuracion or ultima_version.configuracion.copy(),
+            creado_por=ultima_version.creado_por,  # Mantener creador original
+            actualizado_por=usuario,               # Nuevo actualizador
+            # La versión se asignará automáticamente en save()
+        )
+        
+        return nueva_version
+    
+    def crear_version_siguiente(self, usuario, datos_tabla_actualizado=None, configuracion=None):
+        """
+        Crear una nueva versión basada en esta versión actual.
+        
+        Args:
+            usuario: Usuario que crea la nueva versión
+            datos_tabla_actualizado (optional): Nuevos datos de tabla
+            configuracion (optional): Nueva configuración
+            
+        Returns:
+            PlanificacionPei: La nueva versión creada
+        """
+        return self.__class__.crear_nueva_version(
+            pei_id=self.pei_id,
+            usuario=usuario,
+            datos_tabla_actualizado=datos_tabla_actualizado or self.datos_tabla_actualizado.copy(),
+            configuracion=configuracion or self.configuracion.copy()
+        )
     
     # -----------------------------------------------------------------
     # MÉTODOS DE UTILIDAD PARA CONSULTAS
@@ -326,15 +451,20 @@ class PlanificacionPei(models.Model):
     def obtener_resumen_auditoria(self):
         """
         Obtener resumen completo de auditoría para esta planificación.
-        
-        Returns:
-            dict: Información estructurada de creación y modificación
         """
         return {
+            'pei': {
+                'id': self.pei.id,
+                'titulo': self.pei.titulo,
+            },
+            'version': {
+                'actual': self.version,
+                'total_versiones': PlanificacionPei.objects.filter(pei=self.pei).count()
+            },
             'creacion': {
                 'usuario': self._obtener_info_usuario(self.creado_por),
                 'fecha': self.creado_el,
-                'version': 1  # La creación siempre es versión 1
+                'version': 1
             },
             'ultima_modificacion': {
                 'usuario': self._obtener_info_usuario(self.actualizado_por),
@@ -354,53 +484,9 @@ class PlanificacionPei(models.Model):
             }
         }
     
-    def obtener_historial_cambios(self):
-        """
-        Obtener historial de cambios desde Audit Log.
-        
-        Returns:
-            QuerySet: Todos los logs de cambios para esta planificación
-        """
-        return self.history.all().order_by('-timestamp')
-    
-    def obtener_cambios_entre_versiones(self, version_inicial, version_final):
-        """
-        Obtener cambios específicos entre dos versiones.
-        
-        Args:
-            version_inicial (int): Versión inicial
-            version_final (int): Versión final
-            
-        Returns:
-            list: Lista de cambios entre las versiones
-        """
-        cambios = []
-        logs = self.history.filter(
-            changes__version__isnull=False
-        ).order_by('timestamp')
-        
-        for log in logs:
-            if 'version' in log.changes:
-                version_log = log.changes['version'].get('new')
-                if version_inicial <= version_log <= version_final:
-                    cambios.append({
-                        'version': version_log,
-                        'timestamp': log.timestamp,
-                        'usuario': self._obtener_info_usuario(log.actor),
-                        'cambios': log.changes
-                    })
-        
-        return cambios
-    
     def _obtener_info_usuario(self, usuario):
         """
         Obtener información estructurada de un usuario.
-        
-        Args:
-            usuario: Instancia del modelo Usuario o None
-            
-        Returns:
-            dict or None: Información del usuario o None
         """
         if not usuario:
             return None
@@ -414,7 +500,7 @@ class PlanificacionPei(models.Model):
         }
     
     # -----------------------------------------------------------------
-    # PROPIEDADES CALCULADAS (PARA TEMPLATES Y APIs)
+    # PROPIEDADES CALCULADAS
     # -----------------------------------------------------------------
     
     @property
@@ -430,101 +516,28 @@ class PlanificacionPei(models.Model):
         return self.total_actividades - self.actividades_planificadas
     
     @property
-    def tiempo_desde_ultima_modificacion(self):
-        """Tiempo transcurrido desde la última modificación"""
-        return timezone.now() - self.actualizado_el
-    
-    @property
-    def es_reciente(self):
-        """¿Fue modificada en las últimas 24 horas?"""
-        return self.tiempo_desde_ultima_modificacion.days == 0
-    
-    # -----------------------------------------------------------------
-    # MÉTODOS PARA OPERACIONES ESPECÍFICAS
-    # -----------------------------------------------------------------
-    
-    def crear_nueva_version(self, usuario, datos_tabla=None, configuracion=None):
-        """
-        Crear una nueva versión manualmente.
-        
-        Args:
-            usuario: Usuario que crea la nueva versión
-            datos_tabla (optional): Nuevos datos de tabla
-            configuracion (optional): Nueva configuración
-            
-        Returns:
-            PlanificacionPei: La nueva versión creada
-        """
-        nueva_version = PlanificacionPei.objects.create(
-            pei=self.pei,
-            datos_tabla=datos_tabla or self.datos_tabla.copy(),
-            configuracion=configuracion or self.configuracion.copy(),
-            creado_por=self.creado_por,  # Mantener creador original
-            actualizado_por=usuario,     # Nuevo actualizador
-            version=self.version + 1     # Incrementar versión
-        )
-        
-        return nueva_version
-    
-    def obtener_actividades_por_responsable(self):
-        """
-        Agrupar actividades por responsable.
-        
-        Returns:
-            dict: Actividades agrupadas por responsable
-        """
-        actividades_por_responsable = {}
-        datos = self.datos_tabla or []
-        
-        for item in datos:
-            if item.get('nivel', 0) == 0:  # Solo actividades principales
-                responsable = item.get('responsable', 'Sin asignar')
-                
-                if responsable not in actividades_por_responsable:
-                    actividades_por_responsable[responsable] = {
-                        'total': 0,
-                        'planificadas': 0,
-                        'presupuesto_total': 0.0,
-                        'actividades': []
-                    }
-                
-                actividades_por_responsable[responsable]['total'] += 1
-                
-                # Verificar si está planificada
-                if item.get('fecha_inicio_plan') and item.get('fecha_fin_plan'):
-                    actividades_por_responsable[responsable]['planificadas'] += 1
-                
-                # Sumar presupuesto
-                try:
-                    presupuesto = float(item.get('presupuesto', 0) or 0)
-                    actividades_por_responsable[responsable]['presupuesto_total'] += presupuesto
-                except (ValueError, TypeError):
-                    pass
-                
-                # Agregar actividad a la lista
-                actividades_por_responsable[responsable]['actividades'].append({
-                    'id': item.get('id'),
-                    'nombre': item.get('actividad', 'Sin nombre'),
-                    'planificada': bool(item.get('fecha_inicio_plan') and item.get('fecha_fin_plan')),
-                    'presupuesto': item.get('presupuesto', 0)
-                })
-        
-        return actividades_por_responsable
+    def es_ultima_version(self):
+        """¿Es esta la última versión del PEI?"""
+        ultima_version = self.__class__.obtener_ultima_version(self.pei_id)
+        return ultima_version and ultima_version.id == self.id
     
     def to_dict(self):
         """
         Convertir modelo a diccionario para serialización.
-        
-        Returns:
-            dict: Representación completa del modelo
         """
         return {
             'id': self.id,
             'pei_id': self.pei.id,
             'pei_titulo': self.pei.titulo,
-            'datos_tabla': self.datos_tabla,
+            'datos_tabla_actual': self.datos_tabla_actual,
+            'datos_tabla_actualizado': self.datos_tabla_actualizado,
+            'cambios_efectuados': self.cambios_efectuados,
             'configuracion': self.configuracion,
-            'version': self.version,
+            'version': {
+                'numero': self.version,
+                'es_ultima': self.es_ultima_version,
+                'total_versiones': PlanificacionPei.objects.filter(pei=self.pei).count()
+            },
             'creado_por': self._obtener_info_usuario(self.creado_por),
             'actualizado_por': self._obtener_info_usuario(self.actualizado_por),
             'estadisticas': {
@@ -541,20 +554,21 @@ class PlanificacionPei(models.Model):
             }
         }
 
-
-
 auditlog.register(
     PlanificacionPei,
     include_fields=[
-        'datos_tabla',
+        'datos_tabla_actual',
+        'datos_tabla_actualizado',
+        'cambios_efectuados',
         'configuracion',
         'version',
         'creado_por',
-        'actualizado_por'
     ],
     exclude_fields=['history', 'actualizado_el', 'creado_el', 'id'],
     mapping_fields={
-        'datos_tabla': 'Actividades',
+        'datos_tabla_actual': 'Actividades',
+        'datos_tabla_actualizado': 'Actividades current',
+        'cambios_efectuados': 'Cambios efectuados',
         'configuracion': 'Configuración',
         'version': 'Versión',
         'creado_por': 'Creado por',

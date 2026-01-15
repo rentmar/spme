@@ -6,4 +6,4 @@ class ActividadPeiViewModel(viewsets.ModelViewSet):
     queryset = ActividadPei.objects.all()
     serializer_class = ActividadPeiSerializer
 
-    
+     
