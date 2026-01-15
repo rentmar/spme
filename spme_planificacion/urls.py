@@ -8,6 +8,7 @@ from .views.cambio_plan_idplan_views import CambiosPlanificacionListView
 from .views.planificacion_pei_crud_views import PlanificacionPeiViewSet
 from .views.planificacion_pei_seguimiento_historial_views import SeguimientoPeiView
 from .views.planificacion_pei_bulk_views import ProcesarPlanificacionPeiView
+from .views.planificacion_proyecto_bulk_views import ActividadProyectoViewSet
 
 router = DefaultRouter()
 
@@ -26,6 +27,7 @@ urlpatterns = [
     path(r'planificaciones/<int:planificacion_id>/cambios/', CambiosPlanificacionListView.as_view() , name='planificacion-por-proyecto' ),
     path(r'planificaciones/seguimiento-pei/<int:pei_id>/', SeguimientoPeiView.as_view() , name='seguimiento_pei'),
     path(r'planificacion-pei/procesar-bulk/',  ProcesarPlanificacionPeiView.as_view(), name='procesar_planificacion_pei'),
+    path(r'planificacion/procesar-bulk/',  ActividadProyectoViewSet.as_view({'post': 'procesar_actividades'}), name='procesar_proyecto_proyecto' ),
 ]
 
 urlpatterns += router.urls
