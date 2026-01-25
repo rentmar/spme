@@ -43,5 +43,8 @@ urlpatterns = [
     path('api-gaxs/', include('spme_gestion_acceso.urls')),
     #Api de mensajeria
     path('api-msg/', include('spme_mensajes.urls')),
+    #Api de fonfosc
+    path('api-ff/', include('spme_fonfosc.urls')),
+
 ]
 

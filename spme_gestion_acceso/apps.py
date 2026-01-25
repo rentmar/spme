@@ -1,3 +1,4 @@
+# spme_gestion_acceso/apps.py
 from django.apps import AppConfig
 
 

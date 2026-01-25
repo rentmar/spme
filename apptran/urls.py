@@ -42,6 +42,7 @@ from .monitoreo.views.sol_pago_dir_pei_crud_views import SolicitudPagoDirectoAct
 from .monitoreo.views.rendicion_cuentas_pei_crud_views import RendicionCuentasActPeiView
 #PEI
 from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
+from .pei.views.detalles_vista_pei_views import PeiDashboardEstructuraSimpleView
 from .actividadespei.views.listar_actividades_pei_views import actividades_pei_con_tareas
 from .actividadespei.views.actividad_pei_views import ActividadPeiViewModel
 #from .pei.views.obtener_estructura_pei_views import estructura_pei_completa
@@ -235,6 +236,8 @@ urlpatterns =[
     path(r'actividades-pei-con-tareas/', ActividadesConTareasAPIView.as_view(), name='actividades-pei-con-tareas'),
     path(r'pei/<int:pei_id>/detalle-actividades/', pei_detalle_actividades, name="pei-detalle-actividades"),
     path(r'pei/<int:pei_id>/con-actividades/', PeiConActividadesAPIView.as_view(), name="pei-con-actividades"),
+    # Dashboard enriquecido del PEI
+    path(r'pei/<int:pk>/dashboard/enriquecido/', PeiDashboardEstructuraSimpleView.as_view(), name='pei-dashboard-enriquecido'),
 ]
 
 urlpatterns += router.urls

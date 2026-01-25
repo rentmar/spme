@@ -2,6 +2,8 @@ from django.db import models
 from spme_estructuracion_pei.models import Pei
 from polymorphic.models import PolymorphicModel
 from spme_programas.models import Programa
+from spme_autenticacion.models import Usuario
+
 
 
 
@@ -61,6 +63,16 @@ class Proyecto(models.Model):
     #Responsable
     instancia_gestora = models.ManyToManyField(InstanciaGestora, related_name='proyectos')
     creado_por = models.CharField(max_length=150, blank=True, null=True)
+    #Propietario del Proyecto
+    propietario = models.ForeignKey(
+        Usuario,
+        on_delete=models.PROTECT,
+        related_name='proyectos_propietario',
+        verbose_name='Propietario del Proyecto',
+        help_text='Propietario del Proyecto',
+        null=True,
+        blank=True,
+    )
 
     #Relaciones
     pei = models.ForeignKey(

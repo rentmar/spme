@@ -2,7 +2,7 @@
 """
 Constantes centralizadas para el sistema de gestión de acceso
 """
-
+ 
 class NivelesAcceso:
     """Constantes para niveles de acceso"""
     SIN_ACCESO = 0

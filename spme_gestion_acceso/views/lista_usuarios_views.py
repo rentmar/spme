@@ -1,3 +1,4 @@
+#spme_gestion_acceso/views/lista_usuarios_views.py
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from spme_autenticacion.models import Usuario
