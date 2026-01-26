@@ -3,7 +3,7 @@ from rest_framework import serializers
 class ActividadGanttResponse(serializers.Serializer):
     nombre_responsable = serializers.CharField(max_length=150,allow_null=True)
     codigo = serializers.CharField(max_length=60,allow_null=True)
-    nombre_corto = serializers.CharField(max_length=100,allow_null=True)
+    nombre_corto = serializers.CharField(max_length=500,allow_null=True)
     descripcion = serializers.CharField(max_length=500,allow_null=True)
     tipo = serializers.CharField(max_length=30,allow_null=True)
     fecha_programada = serializers.DateField(allow_null=True)
