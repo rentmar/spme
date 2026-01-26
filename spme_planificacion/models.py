@@ -157,7 +157,17 @@ class PlanificacionPei(models.Model):
         blank=True,
         null=True
     )
-    
+
+
+    # motivo_cambio = models.TextField(
+    #     verbose_name='Motivo de los cambios en la planificacion',
+    #     help_text= 'Motivo para los cambios',
+    #     blank=True,
+    #     null=True,
+    # )
+
+
+
     configuracion = models.JSONField(
         verbose_name='Configuración de tabla',
         default=dict,
@@ -165,6 +175,7 @@ class PlanificacionPei(models.Model):
         blank=True,
         null=True
     )
+
     
     # -----------------------------------------------------------------
     # 3. CONTROL DE VERSIONES (MODIFICADO)

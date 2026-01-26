@@ -55,7 +55,9 @@ INSTALLED_APPS = [
     'spme_programas',
     'spme_proyectos_reportes',
     'spme_gestion_acceso',
+    'spme_fonfosc',
     'spme_mensajes',
+    'django_celery_beat',
     'apptran', #Aplicacion de transicion
     'system_config', #Configuracion del sistema
 ]
@@ -276,3 +278,31 @@ EMAIL_TIMEOUT = 30
 EMAIL_SSL_KEYFILE = None
 EMAIL_SSL_CERTFILE = None
 
+########################  CELERY BEAT ##############################################
+# Configuración de Celery Beat
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+# Para desarrollo, puedes ver tareas ejecutadas
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutos máximo por tarea
+CELERY_TASK_SOFT_TIME_LIMIT = 25 * 60  # 25 minutos límite suave
+
+# Configuración de resultados
+CELERY_RESULT_EXPIRES = 3600  # 1 hora para mantener resultados
+CELERY_CACHE_BACKEND = 'default'
+
+# Configuración de colas (opcional, recomendado para producción)
+CELERY_TASK_QUEUES = {
+    'default': {
+        'exchange': 'default',
+        'exchange_type': 'direct',
+        'binding_key': 'default',
+    },
+    'high_priority': {
+        'exchange': 'high_priority',
+        'exchange_type': 'direct',
+        'binding_key': 'high_priority',
+    },
+}
+
+CELERY_TASK_DEFAULT_QUEUE = 'default'

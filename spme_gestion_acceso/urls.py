@@ -1,3 +1,4 @@
+#spme_gestion_acceso/urls.py
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 from .views.test_views import TestConnectionView
@@ -31,4 +32,4 @@ urlpatterns = [
 
 ]
 
-urlpatterns += router.urls
+urlpatterns += router.urls 

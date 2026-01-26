@@ -1,3 +1,5 @@
+
+#spme_gestion_acceso/permissions/acceso_proyecto.py
 from rest_framework import permissions
 from ..services.permission_service import PermissionService
 

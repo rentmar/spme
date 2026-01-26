@@ -1,3 +1,4 @@
+#spme_gestion_acceso/views/permisos_views.py
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status, permissions

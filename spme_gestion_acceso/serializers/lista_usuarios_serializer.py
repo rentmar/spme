@@ -1,3 +1,4 @@
+#spme_gestion_acceso/serializers/lista_usuarios_serializer.py
 from rest_framework import serializers
 from spme_autenticacion.models import Usuario
 
