@@ -33,9 +33,10 @@ class ActividadPeiConTareasListView(generics.ListAPIView):
                 'totalEjecutado':actividad_data['totalEjecutado'], 
                 'saldo':actividad_data['saldo'], 
                 'gradoEjecucion':actividad_data['gradoEjecucion'],
-                'pei_id': actividad_data['pei_id'],
+                'pei_id': actividad_data['pei'],
                 'estaInactiva': actividad_data['estaInactiva'],
-                'tareas': actividad_data['tareas_pei']
+                'tareas': actividad_data['tareas_pei'],
+                'responsable': actividad_data['responsable'],
             }
             data.append(actividad_formateada)
 

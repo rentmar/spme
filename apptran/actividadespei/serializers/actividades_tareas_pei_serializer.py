@@ -15,6 +15,7 @@ class ActividadPeiSerializer(serializers.ModelSerializer):
             'id', 'codigo', 'nombreCorto', 'descripcion', 'estado',
             'fecha_programada', 'fecha_inicio', 'fecha_cierre',
             'presupuesto', 'presupuestoGlobal', 'procedencia_fondos','totalReportado',
-            'totalEjecutado', 'saldo', 'gradoEjecucion', 'pei_id', 'tareas_pei', 'estaInactiva',
+            'totalEjecutado', 'saldo', 'gradoEjecucion', 'pei', 'tareas_pei', 'estaInactiva',
+            'responsable',
         ]
          
