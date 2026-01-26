@@ -131,6 +131,7 @@ router.register(r'solicitud-reembolso-pei', SolicitudReembolsoActPeiView, basena
 router.register(r'solicitud-viaje-pei', SolicitudViajeActPeiView, basename='solicitud_viaje_pei')
 router.register(r'solicitud-pago-directo-pei', SolicitudPagoDirectoActPeiView, basename='solicitud_pago_directo_pei')
 router.register(r'solicitud-rendicion-cuentas-pei', RendicionCuentasActPeiView, basename='sol_rendicion_cuentas_pei')
+router.register(r'rendicion-cuentas-pei', RendicionCuentasActPeiView, basename='rendicion_cuentas_pei')
 #Actividades PEI
 router.register(r'actividades-pei', ActividadPeiViewModel, basename='actividades_pei')
 router.register(r'actividades-pei-principal', ActividadPeiPrincipalViewSet, basename='actividades_pei_principal')
