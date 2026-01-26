@@ -8,12 +8,14 @@ from ..serializers.obtener_solicitudes_viaje_pei_serializer import SolicitudViaj
 @api_view(['POST'])
 def filtrar_solicitudes_viaje(request):
     """
-    Endpoint POST para filtrar solicitudes de viaje por actividad y/o tarea
+    Endpoint POST para filtrar solicitudes de viaje por id, actividad y/o tarea
     Acepta:
+    - {"id": id}
     - {"id_actividad": id, "id_tarea": null}
     - {"id_actividad": null, "id_tarea": id}
     - {"id_actividad": id, "id_tarea": id}
-    - {"id_actividad": null, "id_tarea": null} -> ERROR
+    - Combinaciones con id incluido
+    - Todos null -> ERROR
     """
     
     def validar_y_convertir(valor, nombre_campo):
@@ -27,10 +29,12 @@ def filtrar_solicitudes_viaje(request):
     
     try:
         # Obtener y validar datos
+        id_raw = request.data.get('id')
         id_actividad_raw = request.data.get('id_actividad')
         id_tarea_raw = request.data.get('id_tarea')
-        
+
         # Convertir a enteros si no son None
+        id = validar_y_convertir(id_raw, 'id')
         id_actividad = validar_y_convertir(id_actividad_raw, 'id_actividad')
         id_tarea = validar_y_convertir(id_tarea_raw, 'id_tarea')
         
@@ -41,18 +45,21 @@ def filtrar_solicitudes_viaje(request):
         }, status=status.HTTP_400_BAD_REQUEST)
     
     # Validar que al menos un parámetro tenga valor
-    if id_actividad is None and id_tarea is None:
+    if id is None and id_actividad is None and id_tarea is None:
         return Response({
             "estado": "error",
-            "mensaje": "Se requiere al menos uno de los parámetros: id_actividad o id_tarea"
+            "mensaje": "Se requiere al menos uno de los parámetros: id, id_actividad o id_tarea"
         }, status=status.HTTP_400_BAD_REQUEST)
     
     # Construir query dinámico
     queryset = SolicitudViajeActPei.objects.all()
-    
+
+    if id is not None:
+        queryset = queryset.filter(id=id)
+
     if id_actividad is not None:
         queryset = queryset.filter(actividad_id=id_actividad)
-    
+
     if id_tarea is not None:
         queryset = queryset.filter(tarea_id=id_tarea)
     
@@ -77,6 +84,8 @@ def filtrar_solicitudes_viaje(request):
     
     # Información sobre filtros aplicados
     filtros = {}
+    if id is not None:
+        filtros['id'] = id
     if id_actividad is not None:
         filtros['id_actividad'] = id_actividad
     if id_tarea is not None:

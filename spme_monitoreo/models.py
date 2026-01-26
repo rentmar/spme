@@ -794,23 +794,17 @@ class SolicitudReembolsoActPei(models.Model):
         verbose_name_plural = 'Solicitudes de Reembolso Act Pei'
 
     def save(self, *args, **kwargs):
-        # Normalizar codigo vacío a None
         if self.numeroFormulario == '':
             self.numeroFormulario = None
         
-        # Si es una nueva solicitud sin código, guardar primero para obtener el ID
         is_new = not self.pk
         needs_codigo = not self.numeroFormulario and self.actividad
         
-        # Guardar para obtener el ID si es necesario
         super().save(*args, **kwargs)
         
-        # Generar código usando el ID único de la tarea
         if is_new and needs_codigo:
             numero_formateado = f"{self.pk:04d}"
-            #self.numeroFormulario = f"SACT-{numero_formateado}/{self.actividad.codigo}"
-            self.numeroFormulario = f"{self.actividad.codigo}-SR{numero_formateado}"
-            # Guardar nuevamente con el código generado
+            self.numeroFormulario = f"{self.actividad.codigo} - SRPEI {numero_formateado}"
             super().save(update_fields=['numeroFormulario'])
         
 
@@ -1013,7 +1007,7 @@ class SolicitudPagoDirectoActPei(models.Model):
         if is_new and needs_codigo:
             numero_formateado = f"{self.pk:04d}"
             #self.numeroFormulario = f"SACT-{numero_formateado}/{self.actividad.codigo}"
-            self.numeroFormulario = f"{self.actividad.codigo}-SPD{numero_formateado}"
+            self.numeroFormulario = f"{self.actividad.codigo}-SPDPEI{numero_formateado}"
             # Guardar nuevamente con el código generado
             super().save(update_fields=['numeroFormulario'])
         
@@ -1132,23 +1126,17 @@ class RendicionCuentasActPei(models.Model):
         verbose_name_plural = 'Rendiciones de cuentas Actividad PEI'
 
     def save(self, *args, **kwargs):
-        # Normalizar codigo vacío a None
         if self.numeroFormulario == '':
             self.numeroFormulario = None
         
-        # Si es una nueva solicitud sin código, guardar primero para obtener el ID
         is_new = not self.pk
         needs_codigo = not self.numeroFormulario and self.actividad
         
-        # Guardar para obtener el ID si es necesario
         super().save(*args, **kwargs)
         
-        # Generar código usando el ID único de la tarea
         if is_new and needs_codigo:
             numero_formateado = f"{self.pk:04d}"
-            #self.numeroFormulario = f"SACT-{numero_formateado}/{self.actividad.codigo}"
-            self.numeroFormulario = f"{self.actividad.codigo}-RC{numero_formateado}"
-            # Guardar nuevamente con el código generado
+            self.numeroFormulario = f"{self.actividad.codigo} - RCPEI {numero_formateado}"
             super().save(update_fields=['numeroFormulario'])
        
 
