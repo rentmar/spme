@@ -173,3 +173,111 @@ class CorreosEspecificosService:
             'responsable_siguiente': 'Departamento de RRHH',
             'fecha_limite': timezone.now().replace(day=timezone.now().day + 7),
         }
+    
+    # En services/correos_especificos_service.py
+    @classmethod
+    def notificar_nuevo_mensaje(cls, datos_mensaje, contexto_adicional=None):
+        """
+        Notifica nuevo mensaje en bandeja (sencillo)
+        
+        Args:
+            datos_mensaje (dict): {
+                "destinatarios": [
+                    {"email": "a@b.com"},                    # Solo email (requerido)
+                    {"email": "c@d.com", "nombre": "Juan"}   # Email + nombre opcional
+                ],
+                "asunto_mensaje": "Título del mensaje",      # Requerido
+                "contenido_mensaje": "Contenido del mensaje", # Requerido
+                "remitente_nombre": "Remitente",              # Opcional
+                "fecha_envio": datetime,                      # Opcional
+                "url_bandeja": "http://..."                   # Opcional
+            }
+        """
+        try:
+            # Validaciones de campos requeridos
+            if not datos_mensaje.get('destinatarios'):
+                raise ValueError("Se requiere destinatarios")
+            
+            if not datos_mensaje.get('asunto_mensaje'):
+                raise ValueError("Se requiere asunto_mensaje")
+            
+            if not datos_mensaje.get('contenido_mensaje'):
+                raise ValueError("Se requiere contenido_mensaje")
+            
+            # Convertir a lista si es un string (email único)
+            if isinstance(datos_mensaje.get('destinatarios'), str):
+                datos_mensaje['destinatarios'] = [{
+                    'email': datos_mensaje['destinatarios']
+                }]
+            
+            resultados = []
+            
+            for destinatario in datos_mensaje['destinatarios']:
+                # VALIDACIÓN: SOLO EMAIL ES REQUERIDO
+                if not destinatario.get('email'):
+                    continue  # Saltar destinatarios sin email
+                
+                # Extraer nombre (opcional) - si no hay, usar parte del email
+                email = destinatario['email']
+                nombre = destinatario.get('nombre', email.split('@')[0])
+                
+                # Contexto para el template
+                contexto = {
+                    'destinatario_nombre': nombre,
+                    'destinatario_email': email,
+                    'asunto_mensaje': datos_mensaje['asunto_mensaje'],
+                    'contenido_mensaje': datos_mensaje['contenido_mensaje'],
+                    'remitente_nombre': datos_mensaje.get('remitente_nombre', 'Sistema'),
+                    'remitente_email': datos_mensaje.get('remitente_email', ''),
+                    'fecha_envio': datos_mensaje.get('fecha_envio', timezone.now()),
+                    'url_bandeja': datos_mensaje.get('url_bandeja', '#'),
+                    'url_mensaje': datos_mensaje.get('url_mensaje', '#'),
+                    'prioridad': datos_mensaje.get('prioridad', 'normal'),
+                    'tipo_mensaje': datos_mensaje.get('tipo_mensaje', 'mensaje'),
+                    'es_urgente': datos_mensaje.get('prioridad') == 'urgente',
+                    'empresa_nombre': contexto_adicional.get('empresa_nombre', 'Nuestra Empresa') if contexto_adicional else 'Nuestra Empresa'
+                }
+                
+                # Agregar contexto adicional si existe
+                if contexto_adicional:
+                    contexto.update(contexto_adicional)
+                
+                # Enviar correo usando la tarea existente
+                from ..tasks.correos_especificos import enviar_correo_generico
+                
+                task = enviar_correo_generico.delay(
+                    destinatario=email,
+                    asunto_template='correos/nuevo_mensaje_asunto.txt',
+                    cuerpo_template='correos/nuevo_mensaje_cuerpo.html',
+                    contexto=contexto,
+                    nombre=nombre
+                )
+                
+                resultados.append({
+                    'email': email,
+                    'nombre': nombre,
+                    'task_id': task.id,
+                    'success': True
+                })
+            
+            # Si no hay resultados (todos sin email)
+            if not resultados:
+                return {
+                    'success': False,
+                    'error': 'No hay destinatarios válidos (todos sin email)',
+                    'resultados': []
+                }
+            
+            return {
+                'success': True,
+                'resultados': resultados,
+                'mensaje': f'Notificaciones enviadas a {len(resultados)} destinatarios'
+            }
+            
+        except Exception as e:
+            logger.error(f"Error notificando nuevo mensaje: {str(e)}")
+            return {
+                'success': False,
+                'error': str(e),
+                'resultados': []
+            }

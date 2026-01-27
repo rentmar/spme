@@ -212,3 +212,45 @@ def ejemplos_datos(request):
         'success': True,
         'data': ejemplos
     })
+
+# Agrega esta función al final del archivo
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def prueba_correo_nuevo_mensaje(request):
+    """
+    Endpoint para probar correo de nuevo mensaje
+    POST /api/mensajes/correos/nuevo-mensaje/
+    """
+    try:
+        data = request.data
+        
+        if not data.get('destinatarios'):
+            return Response({
+                'success': False,
+                'error': 'El campo destinatarios es requerido'
+            }, status=400)
+        
+        if not data.get('asunto_mensaje'):
+            return Response({
+                'success': False,
+                'error': 'El campo asunto_mensaje es requerido'
+            }, status=400)
+        
+        if not data.get('contenido_mensaje'):
+            return Response({
+                'success': False,
+                'error': 'El campo contenido_mensaje es requerido'
+            }, status=400)
+        
+        resultado = CorreosEspecificosService.notificar_nuevo_mensaje(data)
+        
+        if resultado['success']:
+            return Response(resultado, status=202)
+        else:
+            return Response(resultado, status=500)
+            
+    except Exception as e:
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=500)

@@ -7,6 +7,7 @@ from .views.views_correos_especificos import (
     prueba_correo_prueba, 
     prueba_correo_pendiente,
     prueba_correo_aprobada,
+    prueba_correo_nuevo_mensaje,
     ejemplos_datos,
     )
 
@@ -58,6 +59,7 @@ urlpatterns = [
     path(r'correos/solicitud-pendiente/', prueba_correo_pendiente, name='prueba_correo_pendiente'),
     path(r'correos/solicitud-aprobada/', prueba_correo_aprobada, name='prueba_correo_aprobada'),
     path(r'correos/ejemplos/', ejemplos_datos, name='ejemplos_datos'),
+    path(r'correos/nuevo-mensaje/', prueba_correo_nuevo_mensaje, name='prueba_correo_nuevo_msg' ),
     ######################### Mensajeria ##########################
     #bandeja
     path(r'mensajes/bandeja/', obtener_bandeja_entrada, name='obtener_bandeja'),

@@ -59,6 +59,7 @@ from .actividadespei.views.actividades_tareas_pei_views import ActividadPeiConTa
 from .viewdiagramaporidproyecto import DiagramaPorProyectoView
 #Informe de actividad
 from .monitoreo.views.crear_informe_actividad_views import InformeActividadView
+from .actividades.views.informe_act_principal_crud_view import InformeActividadPrincipalCrudView
 #Informe de tarea
 from .monitoreo.views.informe_tarea_views import InfTareaMinViews
 from .monitoreo.views.crear_informe_tarea_views import crear_informe_tarea_completo
@@ -66,6 +67,7 @@ from .monitoreo.views.crear_informe_tarea_views import crear_informe_tarea_compl
 from .actividades.views.datos_gantt_views import actividades_con_estados
 #Usuarios
 from .usuarios.views.usuario_views import listar_usuarios, buscar_usuarios_autocomplete, obtener_usuario_actual, listar_usuarios_publico
+from .usuarios.views.usuarios_crud_views import UsuarioCrudView
 #Informe de actividad principal
 from .monitoreo.views.informe_actividad_principal_views import InformeActividadPrincipalView
 from .monitoreo.views.informe_tarea_principal_views import InformeTareaPrincipalView
@@ -74,6 +76,8 @@ from .monitoreo.views.obtener_solicitudes_viaje_pei_views import filtrar_solicit
 
 #PEI
 router = DefaultRouter()
+#Usuarios
+router.register(r'usuarios-crud', UsuarioCrudView, basename='usuarios_crud')
 #PEI
 router.register(r'pei', PeiViewModel, basename='pei')
 router.register(r'indicadores', IndicadorPeiViewSet, basename='indicadores')
@@ -134,6 +138,7 @@ router.register(r'solicitud-viaje-pei', SolicitudViajeActPeiView, basename='soli
 router.register(r'solicitud-pago-directo-pei', SolicitudPagoDirectoActPeiView, basename='solicitud_pago_directo_pei')
 router.register(r'solicitud-rendicion-cuentas-pei', RendicionCuentasActPeiView, basename='sol_rendicion_cuentas_pei')
 router.register(r'rendicion-cuentas-pei', RendicionCuentasActPeiView, basename='rendicion_cuentas_pei')
+router.register(r'informe-actividad-principal-crud', InformeActividadPrincipalCrudView, basename='Informe_actividad_principal_crud')
 #Actividades PEI
 router.register(r'actividades-pei', ActividadPeiViewModel, basename='actividades_pei')
 router.register(r'actividades-pei-principal', ActividadPeiPrincipalViewSet, basename='actividades_pei_principal')

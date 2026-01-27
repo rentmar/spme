@@ -6,6 +6,7 @@ from .models import (
     SolicitudReembolsoActPei,
     SolicitudViajeActPei,
     SolicitudPagoDirectoActPei,
+    InformeActividadPrincipal
 )
 #Formas de pago
 admin.site.register(FormaPago)
@@ -29,3 +30,5 @@ admin.site.register(SolicitudPagoDirectoActPei)
 #admin.site.register(InformeActividad)
 admin.site.register(InfActividad)
 admin.site.register(InfTarea)
+
+admin.site.register(InformeActividadPrincipal)

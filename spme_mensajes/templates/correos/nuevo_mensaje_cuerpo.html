@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo mensaje en tu bandeja</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .header {
+            background-color: #2196F3;
+            color: white;
+            padding: 20px;
+            border-radius: 5px 5px 0 0;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+        }
+        .message-card {
+            background-color: #f8f9fa;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            color: #666;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #2196F3;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📬 Nuevo mensaje en tu bandeja</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hola <strong>{{ destinatario_nombre }}</strong>,</p>
+            <p>Has recibido un nuevo mensaje en tu bandeja del sistema:</p>
+            
+            <div class="message-card">
+                <h3>{{ asunto_mensaje }}</h3>
+                <p><strong>De:</strong> {{ remitente_nombre }}</p>
+                {% if remitente_email %}
+                <p><strong>Email:</strong> {{ remitente_email }}</p>
+                {% endif %}
+                <p><strong>Fecha:</strong> {{ fecha_envio|date:"d/m/Y H:i" }}</p>
+                
+                <div style="background-color: white; padding: 15px; margin: 15px 0; border-radius: 3px;">
+                    {{ contenido_mensaje|linebreaks }}
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="{{ url_bandeja }}" class="btn">
+                        Ver en mi bandeja
+                    </a>
+                </div>
+            </div>
+            
+            <p>Para ver el mensaje completo y responder, haz clic en el botón anterior o visita tu bandeja de mensajes.</p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>{{ empresa_nombre }}</strong></p>
+            <p>Este es un mensaje automático del sistema. No respondas a este correo.</p>
+            <p>Si tienes preguntas, contacta al administrador del sistema.</p>
+        </div>
+    </div>
+</body>
+</html>
