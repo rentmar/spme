@@ -1,4 +1,4 @@
-# serializers.py
+# serializers.py 
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.db import transaction
@@ -30,30 +30,30 @@ from spme_autenticacion.models import Usuario
 # from .models import Actividad, TipoActividad, Usuario, Proyecto
 
 
+# serializers.py (agregar al inicio del archivo)
 class ActividadSerializer(serializers.ModelSerializer):
     """
     Serializer específico para importar actividades desde JSON
     Acepta los datos en el formato original
     """
-    # NO usar list(model._meta.fields) - usar nombres explícitos
+    # Campos write_only para relaciones
     tipo_codigo = serializers.CharField(write_only=True, required=False, allow_null=True)
     proyecto_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     responsable_username = serializers.CharField(write_only=True, required=False, allow_null=True)
+    objetivo_pei_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    indicador_pei_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     
     class Meta:
         model = Actividad
-        # Especificar campos EXPLÍCITAMENTE, no usar model._meta.fields
         fields = [
-            'id', 'codigo', 'nombreCorto', 'descripcion', 'supuestos', 
-            'riesgos', 'objetivo_de_actividad', 'descripcion_evaluacion',
-            'descripcion_tipo_actividad', 'fecha_programada', 'fecha_inicio',
-            'fecha_cierre', 'presupuesto', 'presupuestoGlobal', 'totalReportado',
-            'totalEjecutado', 'saldo', 'gradoEjecucion', 'procedencia_fondos',
-            'estado', 'tipo', 'proceso', 'resultado_og', 'resultado_oe',
-            'producto_oe', 'objetivo_pei', 'indicador_pei', 'proyecto',
-            'responsable', 'rutaTrazadoIndicadores', 'factoresCriticos',
-            'estructuraProcedencia', 'estaInactiva',
-            'tipo_codigo', 'proyecto_id', 'responsable_username'
+            'id', 'codigo', 'nombreCorto', 'descripcion', 'supuestos', 'riesgos',
+            'objetivo_de_actividad', 'descripcion_evaluacion', 'descripcion_tipo_actividad',
+            'fecha_programada', 'fecha_inicio', 'fecha_cierre', 'presupuesto', 'presupuestoGlobal',
+            'totalReportado', 'totalEjecutado', 'saldo', 'gradoEjecucion', 'procedencia_fondos',
+            'estado', 'tipo', 'proceso', 'resultado_og', 'resultado_oe', 'producto_oe',
+            'objetivo_pei', 'indicador_pei', 'proyecto', 'responsable', 'rutaTrazadoIndicadores',
+            'factoresCriticos', 'estructuraProcedencia', 'estaInactiva',
+            'tipo_codigo', 'proyecto_id', 'responsable_username', 'objetivo_pei_id', 'indicador_pei_id'
         ]
         read_only_fields = ('id', 'created_at', 'updated_at')
     
@@ -65,6 +65,8 @@ class ActividadSerializer(serializers.ModelSerializer):
         tipo_codigo = data.pop('tipo_codigo', None)
         proyecto_id = data.pop('proyecto_id', None)
         responsable_username = data.pop('responsable_username', None)
+        objetivo_pei_id = data.pop('objetivo_pei_id', None)
+        indicador_pei_id = data.pop('indicador_pei_id', None)
         
         # Procesar tipo (si se recibió tipo_codigo)
         if tipo_codigo and not data.get('tipo'):
@@ -84,54 +86,44 @@ class ActividadSerializer(serializers.ModelSerializer):
             try:
                 data['responsable'] = Usuario.objects.get(username=responsable_username)
             except Usuario.DoesNotExist:
-                data['responsable'] = None  # O puedes asignar un usuario por defecto
+                data['responsable'] = None
+        
+        # Procesar objetivo_pei
+        if objetivo_pei_id and not data.get('objetivo_pei'):
+            try:
+                data['objetivo_pei'] = ObjetivoPei.objects.get(id=objetivo_pei_id)
+            except ObjetivoPei.DoesNotExist:
+                raise ValidationError({'objetivo_pei': f'Objetivo PEI con id {objetivo_pei_id} no existe'})
+        
+        # Procesar indicador_pei
+        if indicador_pei_id and not data.get('indicador_pei'):
+            try:
+                data['indicador_pei'] = IndicadorPeiBase.objects.get(id=indicador_pei_id)
+            except IndicadorPeiBase.DoesNotExist:
+                raise ValidationError({'indicador_pei': f'Indicador PEI con id {indicador_pei_id} no existe'})
         
         return data
-    
-    def _get_or_create_tipo(self, tipo_codigo):
-        """Obtener o crear TipoActividad basado en código"""
-        if not tipo_codigo:
-            return None
-        
-        try:
-            return TipoActividad.objects.get(codigo=tipo_codigo)
-        except TipoActividad.DoesNotExist:
-            # Crear nuevo tipo
-            nombres = {
-                'NODEF': 'No definido',
-                'ACAP': 'Actividad de Capacitación',
-                'PRIN': 'Proyecto de Investigación',
-                'AOP': 'Actividad Operativa',
-                'CSNS': 'Campaña de Sensibilización',
-                'PDES': 'Proyecto de Desarrollo',
-                'AINC': 'Actividad de Incidencia',
-                'AART': 'Actividad de Articulación',
-                'OTRO': 'Otro',
-            }
-            
-            nombre = nombres.get(tipo_codigo, tipo_codigo)
-            
-            return TipoActividad.objects.create(
-                codigo=tipo_codigo,
-                nombre=nombre
-            )
     
     def to_internal_value(self, data):
         """
         Convertir datos de entrada al formato esperado por el modelo
         """
-        # Hacer copia para no modificar original
         processed_data = {}
         
         for key, value in data.items():
+            # Mapear campos de entrada a campos internos
             if key == 'tipo' and isinstance(value, str):
-                # Convertir 'tipo': 'ACAP' -> 'tipo_codigo': 'ACAP'
                 processed_data['tipo_codigo'] = value
             elif key == 'proyecto':
                 processed_data['proyecto_id'] = value
             elif key == 'responsable':
                 processed_data['responsable_username'] = value
+            elif key == 'objetivo_pei':
+                processed_data['objetivo_pei_id'] = value
+            elif key == 'indicador_pei':
+                processed_data['indicador_pei_id'] = value
             else:
                 processed_data[key] = value
         
         return super().to_internal_value(processed_data)
+    

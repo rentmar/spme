@@ -1,4 +1,4 @@
-# views.py
+# views.py 
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -10,6 +10,7 @@ from spme_actividades.models import Actividad, TipoActividad
 from ..serializers.planificacion_proyecto_bulk_serializer import ActividadSerializer
 from spme_autenticacion.models import Usuario
 from spme_estructuracion_proyecto.models import Proyecto
+from spme_estructuracion_pei.models import ObjetivoPei, IndicadorPeiBase
 
 class ActividadProyectoViewSet(viewsets.ModelViewSet):
     queryset = Actividad.objects.all()
@@ -185,12 +186,30 @@ class ActividadProyectoViewSet(viewsets.ModelViewSet):
             except Usuario.DoesNotExist:
                 # Asignar null
                 model_data['responsable'] = None
+
+        # 4. Objetivo PEI
+        if 'objetivo_pei' in data and data['objetivo_pei']:
+            try:
+                objetivo_id = int(data['objetivo_pei'])
+                objetivo_obj = ObjetivoPei.objects.get(id=objetivo_id)
+                model_data['objetivo_pei'] = objetivo_obj
+            except (ValueError, ObjetivoPei.DoesNotExist):
+                model_data['objetivo_pei'] = None        
+        
+        # 5. Indicador PEI
+        if 'indicador_pei' in data and data['indicador_pei']:
+            try:
+                indicador_id = int(data['indicador_pei'])
+                indicador_obj = IndicadorPeiBase.objects.get(id=indicador_id)
+                model_data['indicador_pei'] = indicador_obj
+            except (ValueError, IndicadorPeiBase.DoesNotExist):
+                model_data['indicador_pei'] = None
         
         # 4. Otras relaciones (si existen en tu JSON)
         relaciones = [
-            'proceso', 'resultado_og', 'resultado_oe', 'producto_oe',
-            'objetivo_pei', 'indicador_pei'
+            'proceso', 'resultado_og', 'resultado_oe', 'producto_oe'
         ]
+        'proceso', 'resultado_og', 'resultado_oe', 'producto_oe'
         
         for rel in relaciones:
             if rel in data and data[rel]:
