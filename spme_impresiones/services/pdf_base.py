@@ -28,11 +28,11 @@ class BasePDFGenerator:
         return {
             'fecha_generacion': datetime.now().strftime('%d/%m/%Y %H:%M'),
             'anio_actual': datetime.now().year,
-            'institucion_nombre': 'UNIDAD TÉCNICA DE ASESORAMIENTO SOCIAL - UNITAS',
-            'institucion_direccion': 'Calle José María Larrea Nº 269 (entre calles Ecuador y Sánchez Lima)',
-            'institucion_telefono': '+591 2 242 0469',
-            'institucion_email': 'unitas@unitas.org',
-            'sistema_nombre': 'Sistema de Gestión de Proyectos - SGP',
+            'institucion_nombre': 'RED UNITAS - BOLIVIA',
+            'institucion_direccion': 'Calle Luis Crespo 2532, Sopocachi (La Paz • Bolivia)',
+            'institucion_telefono': '+591 – 2 – 2420512 | +591 – 2 – 2417218',
+            'institucion_email': 'unitas@redunitas.org',
+            'sistema_nombre': 'Sistema de Gestión de Proyectos - SPME',
             'version_sistema': '1.0',
         }
     
