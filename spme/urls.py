@@ -45,6 +45,8 @@ urlpatterns = [
     path('api-msg/', include('spme_mensajes.urls')),
     #Api de fonfosc
     path('api-ff/', include('spme_fonfosc.urls')),
+    #Api para impresiones
+    path('api-print/', include('spme_impresiones.urls')),
 
 ]
 

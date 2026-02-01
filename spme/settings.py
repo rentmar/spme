@@ -57,9 +57,11 @@ INSTALLED_APPS = [
     'spme_gestion_acceso',
     'spme_fonfosc',
     'spme_mensajes',
+    'spme_impresiones',
     'django_celery_beat',
     'apptran', #Aplicacion de transicion
     'system_config', #Configuracion del sistema
+
 ]
 
 MIDDLEWARE = [

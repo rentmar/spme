@@ -71,6 +71,11 @@ from .usuarios.views.usuarios_crud_views import UsuarioCrudView
 #Informe de actividad principal
 from .monitoreo.views.informe_actividad_principal_views import InformeActividadPrincipalView
 from .monitoreo.views.informe_tarea_principal_views import InformeTareaPrincipalView
+from .monitoreo.views.lista_informe_actividad_completo_views import (
+    ActividadInformesCompletosView, 
+    InformesPorFechaView, 
+    ActividadesConResumenInformesView
+    )
 #Solicitude de viaje PEI
 from .monitoreo.views.obtener_solicitudes_viaje_pei_views import filtrar_solicitudes_viaje
 
@@ -246,6 +251,12 @@ urlpatterns =[
     path(r'pei/<int:pei_id>/con-actividades/', PeiConActividadesAPIView.as_view(), name="pei-con-actividades"),
     # Dashboard enriquecido del PEI
     path(r'pei/<int:pk>/dashboard/enriquecido/', PeiDashboardEstructuraSimpleView.as_view(), name='pei-dashboard-enriquecido'),
+    ###################################Informes de Actividad - Principales #####################
+    path(r'actividades/<int:actividad_id>/informes-principal-completos/',ActividadInformesCompletosView.as_view(), name='actividad-informes-completos'),
+    # Endpoint para filtrar informes por fecha
+    path(r'actividades/<int:actividad_id>/informes-principal-completos-por-fecha/', InformesPorFechaView.as_view(), name='informes-por-fecha'),
+    # También puedes agregar un endpoint para lista de actividades con resumen de informes
+    path(r'actividades/con-resumen-informes-principal-completos/', ActividadesConResumenInformesView.as_view(), name='actividades-con-resumen-informes'),
 ]
 
 urlpatterns += router.urls
