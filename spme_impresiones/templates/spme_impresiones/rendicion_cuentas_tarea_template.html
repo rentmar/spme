@@ -299,29 +299,36 @@
             </div>
         </div>
         
-        <!-- ÁREAS DE FIRMA (4 FIRMAS) -->
+        <!-- ÁREAS DE FIRMA (5 FIRMAS - USUARIO QUE RINDE + 4 VALIDACIONES) -->
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 20px;">
-            <!-- Fila 1: Responsable y Coordinador -->
+            <!-- Fila 1: Usuario que rinde y Responsable -->
+            <div class="firma-area">
+                <div class="linea-firma"></div>
+                <div class="nombre-firma">{{ responsable_rendicion.nombre_completo }}</div>
+                <div class="cargo-firma">Quien rinde cuentas</div>
+            </div>
+            
             <div class="firma-area">
                 <div class="linea-firma"></div>
                 <div class="nombre-firma">{{ responsable_nombre }}</div>
                 <div class="cargo-firma">Responsable</div>
             </div>
             
+            <!-- Fila 2: Coordinador y Contador -->
             <div class="firma-area">
                 <div class="linea-firma"></div>
                 <div class="nombre-firma">{{ coordinador_nombre }}</div>
                 <div class="cargo-firma">Coordinador</div>
             </div>
             
-            <!-- Fila 2: Contador y Administrador -->
             <div class="firma-area">
                 <div class="linea-firma"></div>
                 <div class="nombre-firma">{{ contador_nombre }}</div>
                 <div class="cargo-firma">Contador</div>
             </div>
             
-            <div class="firma-area">
+            <!-- Fila 3: Administrador (centrado) -->
+            <div class="firma-area" style="grid-column: span 2;">
                 <div class="linea-firma"></div>
                 <div class="nombre-firma">{{ administrador_nombre }}</div>
                 <div class="cargo-firma">Administrador</div>
