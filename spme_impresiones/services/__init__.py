@@ -2,6 +2,10 @@ from .pdf_base import BasePDFGenerator
 from .pdf_factory import PDFGeneratorFactory
 from .solicitud_fondos_pdf import SolicitudFondosPDFGenerator
 from .solicitud_reembolso_pdf import SolicitudReembolsoPDFGenerator
+from .solicitud_viaje_pdf import SolicitudViajePDFGenerator
+from .solicitud_pago_directo_pdf import SolicitudPagoDirectoPDFGenerator
+from .rendicion_cuentas_pdf import RendicionCuentasPDFGenerator
+from .solicitud_fondos_tarea_pdf import SolicitudFondosTareaPDFGenerator
 
 # Para uso directo
 PDFGeneratorService = PDFGeneratorFactory

@@ -13,24 +13,13 @@ urlpatterns = [
     #Test de conexion
     path(r'test-cnx-impresiones/', TestConexionView.as_view(), name='impresiones-test'),
     ########################## Solicitudes Proyectos #####################################
-    path(r'solicitud-fondos/<int:pk>/pdf/',
-         ReportesViewSet.as_view({'get': 'solicitud_fondos'}),
-         name='solicitud_fondos_pdf'),
-    path(r'solicitud-reembolso/<int:pk>/pdf/',
-         ReportesViewSet.as_view({'get': 'solicitud_reembolso'}),
-         name='solicitud_reembolso_pdf'),
-    
-    path(r'solicitud-viaje/<int:pk>/pdf/',
-         ReportesViewSet.as_view({'get': 'solicitud_viaje'}),
-         name='solicitud_viaje_pdf'),
-    
-    path(r'solicitud-pago-directo/<int:pk>/pdf/',
-         ReportesViewSet.as_view({'get': 'solicitud_pago_directo'}),
-         name='solicitud_pago_directo_pdf'),
-    
-    path(r'rendicion-cuentas/<int:pk>/pdf/',
-         ReportesViewSet.as_view({'get': 'rendicion_cuentas'}),
-         name='rendicion_cuentas_pdf'),
+    path(r'solicitud-fondos/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_fondos'}), name='solicitud_fondos_pdf'),
+    path(r'solicitud-reposicion/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_reembolso'}), name='solicitud_reembolso_pdf'),
+    path(r'solicitud-viaje/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_viaje'}), name='solicitud_viaje_pdf'),
+    path(r'solicitud-pago-directo/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_pago_directo'}), name='solicitud_pago_directo_pdf'),
+    path(r'rendicion-cuentas/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'rendicion_cuentas'}), name='rendicion_cuentas_pdf'),
+    path(r'solicitud-fondos-tarea/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_fondos_tarea'}), name='solicitud_fondos_tarea_pdf'),
+
 ] 
 
 urlpatterns += router.urls

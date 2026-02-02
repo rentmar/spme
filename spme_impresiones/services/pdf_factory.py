@@ -1,5 +1,9 @@
 from .solicitud_fondos_pdf import SolicitudFondosPDFGenerator
 from .solicitud_reembolso_pdf import SolicitudReembolsoPDFGenerator
+from .solicitud_viaje_pdf import SolicitudViajePDFGenerator
+from .solicitud_pago_directo_pdf import SolicitudPagoDirectoPDFGenerator
+from .rendicion_cuentas_pdf import RendicionCuentasPDFGenerator
+from .solicitud_fondos_tarea_pdf import SolicitudFondosTareaPDFGenerator
 # Importa los otros generadores cuando los crees
 
 class PDFGeneratorFactory:
@@ -9,7 +13,11 @@ class PDFGeneratorFactory:
     
     GENERATORS = {
         'SolicitudFondos': SolicitudFondosPDFGenerator,
+        'SolicitudFondosTarea': SolicitudFondosTareaPDFGenerator,
+        'SolicitudViaje': SolicitudViajePDFGenerator,
         'SolicitudReembolso': SolicitudReembolsoPDFGenerator,
+        'SolicitudPagoDirecto': SolicitudPagoDirectoPDFGenerator,
+        'RendicionCuentas': RendicionCuentasPDFGenerator, 
         # Agrega los otros tipos aquí
     }
     

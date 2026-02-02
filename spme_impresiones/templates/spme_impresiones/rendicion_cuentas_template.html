@@ -1,0 +1,518 @@
+{% extends "spme_impresiones/base_template.html" %}
+
+{% block content %}
+    <!-- SECCIÓN 1: INFORMACIÓN BÁSICA -->
+    <div class="seccion compact-section">
+        <div class="seccion-titulo">📋 INFORMACIÓN DE RENDICIÓN</div>
+        
+        <div class="grid-3">
+            <div class="campo">
+                <div class="etiqueta">N° Formulario:</div>
+                <div class="valor" style="font-weight: bold; font-size: 8px;">{{ numero_formulario }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Cpte. Diario:</div>
+                <div class="valor" style="font-size: 8px;">{{ cpte_diario|default:"-" }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Estado:</div>
+                <div class="valor" style="color: {{ estado_color }}; font-weight: bold; font-size: 8px;">
+                    ● {{ estado }}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SECCIÓN 2: INFORMACIÓN DEL RESPONSABLE -->
+    <div class="seccion compact-section">
+        <div class="seccion-titulo">👤 RESPONSABLE DE RENDICIÓN</div>
+        
+        <div class="grid-3">
+            <div class="campo">
+                <div class="etiqueta">Nombre:</div>
+                <div class="valor" style="font-size: 8px; min-height: 20px; word-wrap: break-word;">{{ nombre_solicitante }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">C.I.:</div>
+                <div class="valor" style="font-size: 8px;">{{ documento_identidad|default:"-" }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Cargo:</div>
+                <div class="valor" style="font-size: 8px;">{{ cargo|default:"-" }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SECCIÓN 3: INFORMACIÓN DE LA ACTIVIDAD Y ORIGEN -->
+    <div class="seccion compact-section">
+        <div class="seccion-titulo">📅 INFORMACIÓN DE LA ACTIVIDAD</div>
+        
+        <div class="grid-2">
+            <div class="campo">
+                <div class="etiqueta">Actividad:</div>
+                <div class="valor" style="font-size: 8px; min-height: 20px; word-wrap: break-word;">{{ nombre_actividad|default:"No especificada" }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Código:</div>
+                <div class="valor" style="font-size: 8px;">{{ codigo_actividad|default:"-" }}</div>
+            </div>
+        </div>
+        
+        {% if tipo_solicitud_origen != "No aplica" %}
+        <div class="campo">
+            <div class="etiqueta">Origen de Fondos:</div>
+            <div class="valor" style="background-color: #e3f2fd; padding: 4px 6px; border-radius: 2px; font-size: 8px;">
+                <strong>{{ tipo_solicitud_origen }}</strong> - N° {{ solicitud_origen_numero }}
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="grid-3">
+            <div class="campo">
+                <div class="etiqueta">Fecha Actividad:</div>
+                <div class="valor" style="font-size: 8px;">{{ fecha_actividad|default:"-" }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Fecha Rendición:</div>
+                <div class="valor" style="font-size: 8px;">{{ fecha_rendicion|default:"-" }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Fecha Desembolso:</div>
+                <div class="valor" style="font-size: 8px;">{{ fecha_desembolso|default:"-" }}</div>
+            </div>
+        </div>
+        
+        <div class="campo">
+            <div class="etiqueta">Descripción Actividad:</div>
+            <div class="valor" style="font-size: 8px; min-height: 30px; word-wrap: break-word;">{{ descripcion_actividad|default:"No especificada" }}</div>
+        </div>
+        
+        <div class="grid-2">
+            <div class="campo">
+                <div class="etiqueta">Lugar Actividad:</div>
+                <div class="valor" style="font-size: 8px; word-wrap: break-word;">{{ lugar_actividad|default:"-" }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Lugar Rendición:</div>
+                <div class="valor" style="font-size: 8px; word-wrap: break-word;">{{ lugar_rendicion|default:"-" }}</div>
+            </div>
+        </div>
+        
+        {% if nombre_tarea and nombre_tarea != "No especificado" %}
+        <div class="campo">
+            <div class="etiqueta">Tarea:</div>
+            <div class="valor" style="font-size: 8px; word-wrap: break-word;">{{ nombre_tarea }}</div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- SECCIÓN 4: RESUMEN FINANCIERO -->
+    <div class="seccion">
+        <div class="seccion-titulo">💰 RESUMEN FINANCIERO</div>
+        
+        <div class="grid-3">
+            <div class="campo compact-section" style="text-align: center; background-color: #e3f2fd;">
+                <div class="etiqueta" style="font-size: 8px;">MONTO ASIGNADO</div>
+                <div class="valor" style="font-size: 9px; font-weight: bold; color: #1976d2;">
+                    {{ monto_asignado_formateado }}
+                </div>
+                <div style="font-size: 7px; color: #666; margin-top: 2px;">Total entregado</div>
+            </div>
+            
+            <div class="campo compact-section" style="text-align: center; background-color: #e8f5e9;">
+                <div class="etiqueta" style="font-size: 8px;">MONTO RENDIDO</div>
+                <div class="valor" style="font-size: 9px; font-weight: bold; color: #2e7d32;">
+                    {{ monto_descargado_formateado }}
+                </div>
+                <div style="font-size: 7px; color: #666; margin-top: 2px;">Gastos justificados</div>
+            </div>
+            
+            <div class="campo compact-section" style="text-align: center; background-color: {% if tiene_saldo_favor %}#f1f8e9{% elif tiene_saldo_debito %}#ffebee{% else %}#f5f5f5{% endif %};">
+                <div class="etiqueta" style="font-size: 8px;">
+                    {% if tiene_saldo_favor %}
+                        SALDO A FAVOR
+                    {% elif tiene_saldo_debito %}
+                        SALDO POR COMPLEMENTAR
+                    {% else %}
+                        SALDO
+                    {% endif %}
+                </div>
+                <div class="valor" style="font-size: 9px; font-weight: bold; color: {% if tiene_saldo_favor %}#2e7d32{% elif tiene_saldo_debito %}#d32f2f{% else %}#666666{% endif %};">
+                    {{ saldo_formateado }}
+                </div>
+                <div style="font-size: 7px; color: #666; margin-top: 2px;">
+                    {% if tiene_saldo_favor %}
+                        A devolver
+                    {% elif tiene_saldo_debito %}
+                        Pendiente
+                    {% else %}
+                        Cuadrado
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SECCIÓN 5: DETALLE DE GASTOS -->
+    <div class="seccion">
+        <div class="seccion-titulo">🧾 DETALLE DE GASTOS</div>
+        
+        {% if tiene_gastos %}
+        <table class="tabla tabla-gastos">
+            <thead>
+                <tr>
+                    <th style="font-size: 7px; padding: 3px;">PARTIDA</th>
+                    <th style="font-size: 7px; padding: 3px;">DESCRIPCIÓN</th>
+                    <th style="font-size: 7px; padding: 3px;">FECHA</th>
+                    <th style="font-size: 7px; padding: 3px;">COMPROBANTE</th>
+                    <th style="font-size: 7px; padding: 3px;">MONTO</th>
+                    <th style="font-size: 7px; padding: 3px;">PROVEEDOR</th>
+                    <th style="font-size: 7px; padding: 3px;">ESTADO</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for gasto in detalle_gastos %}
+                <tr>
+                    <td style="font-size: 7px; padding: 3px; word-wrap: break-word;">{{ gasto.partida|default:"-" }}</td>
+                    <td style="font-size: 7px; padding: 3px; word-wrap: break-word;">{{ gasto.descripcion_gasto|default:"-" }}</td>
+                    <td style="font-size: 7px; padding: 3px;">{{ gasto.fecha_gasto_formateada|default:"-" }}</td>
+                    <td style="font-size: 7px; padding: 3px;">
+                        {{ gasto.tipo_comprobante|default:"-" }}
+                        {% if gasto.numero_comprobante and gasto.numero_comprobante != "-" %}
+                        #{{ gasto.numero_comprobante }}
+                        {% endif %}
+                    </td>
+                    <td style="text-align: right; font-size: 7px; padding: 3px;">
+                        Bs. {{ gasto.monto|floatformat:2 }}
+                    </td>
+                    <td style="font-size: 7px; padding: 3px; word-wrap: break-word;">{{ gasto.proveedor|default:"-" }}</td>
+                    <td style="text-align: center; font-size: 7px; padding: 3px;">
+                        {% if gasto.verificado %}
+                        <span style="color: #2e7d32; font-weight: bold;">✓</span>
+                        {% else %}
+                        <span style="color: #f57c00;">⏳</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                
+                <!-- Total -->
+                <tr class="total-row">
+                    <td colspan="4" style="text-align: right; font-weight: bold; font-size: 8px; padding: 4px;">TOTAL GASTOS JUSTIFICADOS:</td>
+                    <td style="text-align: right; font-weight: bold; font-size: 8px; padding: 4px;">
+                        {{ monto_descargado_formateado }}
+                    </td>
+                    <td colspan="2" style="padding: 4px;"></td>
+                </tr>
+            </tbody>
+        </table>
+        {% else %}
+        <div style="text-align: center; padding: 15px; background-color: #f5f5f5; border-radius: 3px; margin: 10px 0;">
+            <span style="color: #999; font-style: italic; font-size: 8px;">No se han registrado gastos en esta rendición</span>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- SECCIÓN 6: VALIDACIONES Y FIRMAS UNIFICADAS -->
+    <div class="seccion">
+        <div class="seccion-titulo">✅ VALIDACIONES Y FIRMAS DE CONFORMIDAD</div>
+        
+        <!-- Estado general -->
+        <div style="text-align: center; padding: 6px; background-color: {{ estado_color }}20; border-radius: 3px; margin-bottom: 15px; border-left: 4px solid {{ estado_color }};">
+            <div style="font-size: 9px; font-weight: bold; color: {{ estado_color }}; margin-bottom: 2px;">
+                ESTADO GENERAL: {{ estado }}
+            </div>
+            <div style="font-size: 7px; color: #666;">
+                {% if es_completo %}
+                ✅ Rendición completamente aprobada
+                {% elif bloqueado %}
+                🔒 Documento bloqueado para edición
+                {% else %}
+                📝 Rendición en proceso de validación
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Validadores con firmas -->
+        <div class="grid-3" style="margin-bottom: 15px;">
+            <!-- Coordinador -->
+            <div class="validacion-firma-item" style="border: 1px solid #e0e0e0; border-radius: 4px; padding: 8px; background-color: {% if validacion_coordinador %}#f8fdf8{% else %}#fff8f8{% endif %};">
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <div style="font-size: 8px; font-weight: bold; margin-bottom: 4px; color: #333;">COORDINADOR</div>
+                    <div style="font-size: 12px; font-weight: bold; color: {% if validacion_coordinador %}#2e7d32{% else %}#d32f2f{% endif %}; margin-bottom: 3px;">
+                        {% if validacion_coordinador %}✓ APROBADO{% else %}✗ PENDIENTE{% endif %}
+                    </div>
+                    <div style="font-size: 7px; color: #666; margin-bottom: 2px;">{{ nombre_coordinador|default:"No asignado" }}</div>
+                </div>
+                
+                <!-- Firma -->
+                <div style="text-align: center; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ddd;">
+                    <div style="border-top: 1px solid #333; width: 80%; margin: 0 auto; padding-top: 5px;"></div>
+                    <div style="font-size: 8px; font-weight: bold; margin-top: 3px;">{{ nombre_coordinador|default:"____________________" }}</div>
+                    <div style="font-size: 7px; color: #666;">COORDINADOR</div>
+                    <div style="font-size: 6px; color: #999; margin-top: 2px;">
+                        {% if validacion_coordinador %}
+                        Fecha: {{ fecha_rendicion|default:"-" }}
+                        {% else %}
+                        Pendiente de firma
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contador -->
+            <div class="validacion-firma-item" style="border: 1px solid #e0e0e0; border-radius: 4px; padding: 8px; background-color: {% if validacion_contador %}#f8fdf8{% else %}#fff8f8{% endif %};">
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <div style="font-size: 8px; font-weight: bold; margin-bottom: 4px; color: #333;">CONTADOR</div>
+                    <div style="font-size: 12px; font-weight: bold; color: {% if validacion_contador %}#2e7d32{% else %}#d32f2f{% endif %}; margin-bottom: 3px;">
+                        {% if validacion_contador %}✓ VERIFICADO{% else %}✗ PENDIENTE{% endif %}
+                    </div>
+                    <div style="font-size: 7px; color: #666; margin-bottom: 2px;">{{ nombre_contador|default:"No asignado" }}</div>
+                </div>
+                
+                <!-- Firma -->
+                <div style="text-align: center; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ddd;">
+                    <div style="border-top: 1px solid #333; width: 80%; margin: 0 auto; padding-top: 5px;"></div>
+                    <div style="font-size: 8px; font-weight: bold; margin-top: 3px;">{{ nombre_contador|default:"____________________" }}</div>
+                    <div style="font-size: 7px; color: #666;">CONTADOR</div>
+                    <div style="font-size: 6px; color: #999; margin-top: 2px;">
+                        {% if validacion_contador %}
+                        Fecha: {{ fecha_rendicion|default:"-" }}
+                        {% else %}
+                        Pendiente de firma
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Administrador -->
+            <div class="validacion-firma-item" style="border: 1px solid #e0e0e0; border-radius: 4px; padding: 8px; background-color: {% if validacion_administrador %}#f8fdf8{% else %}#fff8f8{% endif %};">
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <div style="font-size: 8px; font-weight: bold; margin-bottom: 4px; color: #333;">ADMINISTRADOR</div>
+                    <div style="font-size: 12px; font-weight: bold; color: {% if validacion_administrador %}#2e7d32{% else %}#d32f2f{% endif %}; margin-bottom: 3px;">
+                        {% if validacion_administrador %}✓ APROBADO{% else %}✗ PENDIENTE{% endif %}
+                    </div>
+                    <div style="font-size: 7px; color: #666; margin-bottom: 2px;">{{ nombre_administrador|default:"No asignado" }}</div>
+                </div>
+                
+                <!-- Firma -->
+                <div style="text-align: center; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ddd;">
+                    <div style="border-top: 1px solid #333; width: 80%; margin: 0 auto; padding-top: 5px;"></div>
+                    <div style="font-size: 8px; font-weight: bold; margin-top: 3px;">{{ nombre_administrador|default:"____________________" }}</div>
+                    <div style="font-size: 7px; color: #666;">ADMINISTRADOR</div>
+                    <div style="font-size: 6px; color: #999; margin-top: 2px;">
+                        {% if validacion_administrador %}
+                        Fecha: {{ fecha_rendicion|default:"-" }}
+                        {% else %}
+                        Pendiente de firma
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Firma del responsable de rendición -->
+        <div style="margin-top: 20px; padding: 12px; background-color: #f5f5f5; border-radius: 4px; border: 1px solid #ddd;">
+            <div style="text-align: center; margin-bottom: 10px;">
+                <div style="font-size: 9px; font-weight: bold; color: #333; margin-bottom: 3px;">RESPONSABLE DE RENDICIÓN</div>
+                <div style="font-size: 8px; color: #666;">{{ nombre_solicitante }} - {{ cargo|default:"Responsable" }}</div>
+            </div>
+            
+            <!-- Firma -->
+            <div style="text-align: center; padding-top: 10px; border-top: 1px dashed #ccc;">
+                <div style="border-top: 1px solid #333; width: 60%; margin: 0 auto; padding-top: 8px;"></div>
+                <div style="font-size: 9px; font-weight: bold; margin-top: 5px;">{{ nombre_solicitante }}</div>
+                <div style="font-size: 8px; color: #666;">RESPONSABLE DE RENDICIÓN</div>
+                <div style="font-size: 7px; color: #999; margin-top: 2px;">
+                    Fecha: {{ fecha_rendicion|default:"-" }}
+                </div>
+            </div>
+            
+            <!-- Declaración del responsable -->
+            <div style="margin-top: 15px; padding: 8px; background-color: #fff; border-radius: 3px; border: 1px solid #e0e0e0; font-size: 7px; color: #666;">
+                <div style="font-weight: bold; margin-bottom: 3px;">DECLARACIÓN:</div>
+                <p style="margin: 0; line-height: 1.3;">
+                    Declaro bajo juramento que la información contenida en esta rendición de cuentas es veraz y completa, 
+                    y que los gastos detallados fueron realizados exclusivamente para los fines establecidos en la actividad.
+                </p>
+            </div>
+        </div>
+        
+        <!-- Observaciones finales -->
+        <div style="margin-top: 15px; padding: 10px; background-color: #f5f5f5; border-radius: 4px; font-size: 7px; color: #666; border-left: 3px solid {% if tiene_saldo_favor %}#2e7d32{% elif tiene_saldo_debito %}#d32f2f{% else %}#1976d2{% endif %};">
+            <div style="font-weight: bold; margin-bottom: 4px;">OBSERVACIONES Y DISPOSICIONES FINALES:</div>
+            
+            {% if tiene_saldo_favor %}
+            <p style="margin: 0 0 5px 0; line-height: 1.3;">
+                • Existe un saldo a favor de <strong>{{ saldo_formateado }}</strong> que deberá ser devuelto a caja.
+            </p>
+            <p style="margin: 0 0 5px 0; line-height: 1.3;">
+                • La devolución debe realizarse dentro de los <strong>5 días hábiles</strong> siguientes a la aprobación de esta rendición.
+            </p>
+            <p style="margin: 0; line-height: 1.3; color: #d32f2f;">
+                • Hasta no realizar la devolución correspondiente, no se podrán autorizar nuevas solicitudes de fondos.
+            </p>
+            {% elif tiene_saldo_debito %}
+            <p style="margin: 0 0 5px 0; line-height: 1.3;">
+                • Existe un saldo pendiente de <strong>{{ saldo_formateado }}</strong> por complementar.
+            </p>
+            <p style="margin: 0 0 5px 0; line-height: 1.3;">
+                • Se procederá con el desembolso complementario según disponibilidad presupuestaria.
+            </p>
+            <p style="margin: 0; line-height: 1.3;">
+                • El responsable deberá presentar la documentación complementaria para el desembolso.
+            </p>
+            {% else %}
+            <p style="margin: 0 0 5px 0; line-height: 1.3;">
+                • La rendición se encuentra completamente cuadrada y aprobada.
+            </p>
+            <p style="margin: 0; line-height: 1.3;">
+                • No existen saldos pendientes a favor ni por complementar.
+            </p>
+            {% endif %}
+            
+            {% if es_completo %}
+            <div style="margin-top: 8px; padding: 5px; background-color: #e8f5e9; border-radius: 3px; border-left: 3px solid #2e7d32;">
+                <div style="font-size: 7px; font-weight: bold; color: #2e7d32;">
+                    ✅ ESTA RENDICIÓN HA SIDO COMPLETAMENTE APROBADA POR TODAS LAS INSTANCIAS
+                </div>
+                <div style="font-size: 6px; color: #388e3c; margin-top: 2px;">
+                    Documento válido para fines contables y administrativos
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .grid-2, .grid-3 {
+        display: grid;
+        gap: 10px;
+    }
+    
+    .grid-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .grid-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .tabla-gastos {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 8px 0;
+        font-size: 7px;
+    }
+    
+    .tabla-gastos th,
+    .tabla-gastos td {
+        border: 1px solid #ddd;
+        padding: 3px;
+        text-align: left;
+        vertical-align: top;
+    }
+    
+    .tabla-gastos th {
+        background-color: #1976d2;
+        color: white;
+        font-weight: bold;
+    }
+    
+    .tabla-gastos tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+    
+    .total-row {
+        background-color: #e3f2fd !important;
+        font-weight: bold;
+        border-top: 2px solid #1976d2 !important;
+    }
+    
+    .compact-section .valor {
+        min-height: 18px;
+        word-wrap: break-word;
+    }
+    
+    .seccion {
+        margin-bottom: 15px;
+        page-break-inside: avoid;
+    }
+    
+    .seccion-titulo {
+        background-color: #1976d2;
+        color: white;
+        padding: 5px 8px;
+        font-size: 9px;
+        font-weight: bold;
+        border-radius: 3px;
+        margin-bottom: 10px;
+    }
+    
+    .campo {
+        margin-bottom: 6px;
+    }
+    
+    .etiqueta {
+        font-weight: bold;
+        color: #555;
+        margin-bottom: 2px;
+        font-size: 7px;
+    }
+    
+    .valor {
+        background-color: #f8f9fa;
+        padding: 4px 5px;
+        border-radius: 2px;
+        border: 1px solid #e0e0e0;
+    }
+    
+    .validacion-firma-item {
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .validacion-firma-item:hover {
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        transform: translateY(-1px);
+    }
+    
+    /* Ajustes para impresión */
+    @media print {
+        body {
+            font-size: 8px !important;
+        }
+        
+        .seccion {
+            margin-bottom: 10px;
+        }
+        
+        .tabla-gastos th,
+        .tabla-gastos td {
+            padding: 2px;
+            font-size: 6px;
+        }
+        
+        .grid-3 {
+            gap: 8px;
+        }
+        
+        .validacion-firma-item {
+            page-break-inside: avoid;
+        }
+    }
+</style>
+{% endblock %}

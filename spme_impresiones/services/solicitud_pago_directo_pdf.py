@@ -1,23 +1,23 @@
 from .pdf_base import BasePDFGenerator
-from spme_monitoreo.models import SolicitudReembolso
+from spme_monitoreo.models import SolicitudPagoDirecto
 
-class SolicitudReembolsoPDFGenerator(BasePDFGenerator):
+class SolicitudPagoDirectoPDFGenerator(BasePDFGenerator):
     """
-    Generador específico para Solicitud de Reembolso
+    Generador específico para Solicitud de Pago Directo
     """
     
     def __init__(self):
         super().__init__()
-        self.template_name = 'spme_impresiones/solicitud_reembolso_template.html'
+        self.template_name = 'spme_impresiones/solicitud_pago_directo_template.html'
     
     def prepare_context(self, obj):
         """
-        Prepara el contexto específico para Solicitud de Reembolso
+        Prepara el contexto específico para Solicitud de Pago Directo
         """
-        if not isinstance(obj, SolicitudReembolso):
-            raise ValueError("El objeto debe ser una instancia de SolicitudReembolso")
+        if not isinstance(obj, SolicitudPagoDirecto):
+            raise ValueError("El objeto debe ser una instancia de SolicitudPagoDirecto")
         
-        # Obtener datos del solicitante directamente
+        # Obtener datos del solicitante
         nombre_solicitante = "No asignado"
         documento_identidad = "No asignado"
         cargo = "No asignado"
@@ -27,22 +27,25 @@ class SolicitudReembolsoPDFGenerator(BasePDFGenerator):
             documento_identidad = obj.usuario.ci or "No asignado"
             cargo = obj.usuario.cargo or "No asignado"
         
-        # Procesar detalle de gastos con el formato específico
+        # Procesar detalle de gastos
         detalle_gastos, total_gastos_calculado = self._procesar_detalle_gastos(obj)
         
-        # Obtener datos de responsables
-        nombre_responsable = "No asignado"
-        if obj.responsable:
-            nombre_responsable = f"{obj.responsable.nombre or ''} {obj.responsable.paterno or ''}".strip()
+        # Obtener datos de validaciones
+        nombre_contador = "No asignado"
+        if obj.contador:
+            nombre_contador = f"{obj.contador.nombre or ''} {obj.contador.paterno or ''}".strip()
         
         nombre_coordinador = "No asignado"
         if obj.coordinador:
             nombre_coordinador = f"{obj.coordinador.nombre or ''} {obj.coordinador.paterno or ''}".strip()
         
+        # Procesar datos de forma de pago
+        datos_forma_pago = self._procesar_datos_forma_pago(obj)
+        
         # Construir contexto
         context = {
             # Información del formulario
-            'numero_formulario': obj.numeroFormulario or f"SR-{obj.id:04d}",
+            'numero_formulario': obj.numeroFormulario or f"SPD-{obj.id:04d}",
             'fecha_emision': obj.fechaSolicitud.strftime('%d/%m/%Y') if obj.fechaSolicitud else "No especificada",
             'fecha_solicitud': obj.fechaSolicitud.strftime('%d/%m/%Y') if obj.fechaSolicitud else "No especificada",
             'lugar_solicitud': obj.lugarSolicitud or "No especificado",
@@ -55,50 +58,55 @@ class SolicitudReembolsoPDFGenerator(BasePDFGenerator):
             # Información de la actividad
             'codigo_actividad': obj.actividad.codigo if obj.actividad else "No asignado",
             'nombre_actividad': obj.actividad.nombreCorto if obj.actividad else "No especificado",
+            'estado_actividad': self._get_estado_actividad(obj),
             'fecha_ejecucion': obj.fechaRealizacionActividad.strftime('%d/%m/%Y') if obj.fechaRealizacionActividad else "No especificada",
             'descripcion_actividad': obj.descripcion_actividad or "No especificada",
             'objetivo_actividad': obj.objetivo_actividad or "No especificado",
             
             # Información de pago
             'forma_pago': obj.formaPago.formaPago if obj.formaPago else "No especificada",
-            'total_monto_solicitado': float(obj.montoSolicitado) if obj.montoSolicitado else total_gastos_calculado,
+            'monto_solicitado': float(obj.montoSolicitado) if obj.montoSolicitado else total_gastos_calculado,
             
             # Detalle de gastos
             'detalle_gastos': detalle_gastos,
             
             # Información de validaciones
-            'nombre_responsable': nombre_responsable,
+            'nombre_contador': nombre_contador,
             'nombre_coordinador': nombre_coordinador,
             
             # Datos de forma de pago
-            'datos_forma_pago': self._procesar_datos_forma_pago(obj),
+            'datos_forma_pago': datos_forma_pago,
             
             # Fuentes de financiamiento
             'fuentes_financiamiento': self._procesar_fuentes_financiamiento(obj),
             
             # Metadatos del documento
-            'tipo_documento': 'SOLICITUD DE REEMBOLSO',
-            'subtipo_documento': 'F-02',
+            'tipo_documento': 'SOLICITUD DE PAGO DIRECTO',
+            'subtipo_documento': 'F-04',
         }
         
         return context
     
+    def _get_estado_actividad(self, obj):
+        """Obtiene el estado de la actividad formateado"""
+        if obj.actividad and obj.actividad.estado:
+            estado = obj.actividad.estado
+            estados_map = {
+                'CRD': 'Creada',
+                'PLAN': 'Planificada',
+                'RETR': 'Retraso',
+                'REPROG': 'Reprogramación',
+                'EJEC': 'En Ejecución',
+                'REP': 'En Reporte',
+                'FIN': 'Finalizado',
+            }
+            return estados_map.get(estado, estado)
+        return "No especificado"
+    
     def _procesar_detalle_gastos(self, obj):
         """
-        Procesa el detalle de gastos del reembolso SIN observaciones
-        Formato específico para reembolso:
-        {
-            "items": [
-                {
-                    "fecha": "2026-02-01",
-                    "partida": "1.1.1",
-                    "factura_recibo": "11212121",
-                    "concepto": "Gasto 1",
-                    "monto": 20
-                },
-                ...
-            ]
-        }
+        Procesa el detalle de gastos para pago directo
+        Formato esperado: {"items": [{"partida_sf": "...", "concepto": "...", "monto": ...}]}
         """
         detalle_gastos = []
         total_monto = 0.0
@@ -107,9 +115,9 @@ class SolicitudReembolsoPDFGenerator(BasePDFGenerator):
             return detalle_gastos, total_monto
         
         try:
+            # Normalizar datos
             data_dict = obj.detalleDestinoFondos
             
-            # Si es string, parsear como JSON
             if isinstance(data_dict, str):
                 import json
                 data_dict = json.loads(data_dict)
@@ -121,23 +129,11 @@ class SolicitudReembolsoPDFGenerator(BasePDFGenerator):
             elif isinstance(data_dict, list):
                 items_list = data_dict
             
-            # Procesar cada item con el formato específico de reembolso
+            # Procesar cada item
             for index, item in enumerate(items_list):
                 if isinstance(item, dict):
-                    # Formatear fecha
-                    fecha_gasto = "No especificada"
-                    if item.get('fecha'):
-                        try:
-                            from datetime import datetime
-                            fecha_obj = datetime.strptime(item['fecha'], '%Y-%m-%d')
-                            fecha_gasto = fecha_obj.strftime('%d/%m/%Y')
-                        except:
-                            fecha_gasto = item['fecha']
-                    
-                    # Obtener datos del item
-                    partida = item.get('partida') or item.get('partida_sf') or f"{index + 1}"
-                    factura_recibo = item.get('factura_recibo') or item.get('factura') or item.get('recibo') or '-'
-                    concepto = item.get('concepto') or item.get('descripcion') or f"Gasto {index + 1}"
+                    partida = item.get('partida_sf') or item.get('partida') or item.get('codigo') or f"{index + 1}"
+                    concepto = item.get('concepto') or item.get('descripcion') or item.get('descripcionGasto') or f"Item {index + 1}"
                     
                     monto_raw = item.get('monto') or item.get('valor') or item.get('importe') or 0
                     try:
@@ -146,25 +142,25 @@ class SolicitudReembolsoPDFGenerator(BasePDFGenerator):
                     except (ValueError, TypeError):
                         monto = 0.0
                     
-                    # SIN OBSERVACIONES - eliminado
+                    observaciones = item.get('observaciones') or item.get('observacion') or '-'
+                    
                     detalle_gastos.append({
                         'indice': index + 1,
-                        'fecha': fecha_gasto,
                         'partida': str(partida),
-                        'factura_recibo': str(factura_recibo),
-                        'concepto': str(concepto),
+                        'descripcion_gasto': str(concepto),
                         'monto': monto,
-                        # 'observaciones': str(observaciones),  # ELIMINADO
+                        'observaciones': str(observaciones),
                     })
         
         except Exception as e:
-            print(f"Error procesando detalle de gastos de reembolso: {e}")
+            print(f"Error procesando detalle de gastos para pago directo: {e}")
         
         return detalle_gastos, total_monto
     
     def _procesar_datos_forma_pago(self, obj):
         """
-        Procesa los datos de forma de pago para reembolso
+        Procesa los datos de forma de pago
+        Formato: {"otros": {...}, "transferencia": {...}}
         """
         datos_pago = {
             'tipo': 'efectivo',
@@ -259,5 +255,5 @@ class SolicitudReembolsoPDFGenerator(BasePDFGenerator):
         """
         Genera el nombre del archivo PDF
         """
-        numero = obj.numeroFormulario or f"SR{obj.id:04d}"
-        return f"Solicitud_Reembolso_{numero}.pdf"
+        numero = obj.numeroFormulario or f"SPD{obj.id:04d}"
+        return f"Solicitud_Pago_Directo_{numero}.pdf"

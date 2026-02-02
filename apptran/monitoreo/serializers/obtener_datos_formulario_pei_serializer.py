@@ -13,7 +13,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
 class ValidadorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ['id', 'nombre', 'paterno', 'materno', 'cargo', 'correo']
+        fields = ['id', 'nombre', 'paterno', 'materno', 'cargo', 'correo', 'ci']
 
 class ActividadPeiSerializer(serializers.ModelSerializer):
     fecha_inicio = serializers.DateField()
