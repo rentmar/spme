@@ -59,7 +59,7 @@ class CrearSolicitudReembolsoUseCase:
             "fechaSolicitud": requestData.get("fechaSolicitud"),
             "fechaRealizacionActividad": requestData.get("fechaRealizacionActividad"),
             "montoSolicitado": requestData.get("montoSolicitado"),
-            "validacionContador": requestData.get("validacionResponsable", False),
+            "validacionResponsable": requestData.get("validacionResponsable", False),
             # "contador": contador,
             "responsable": responsable,
             "validacionCoordinador": requestData.get("validacionCoordinador", False),
