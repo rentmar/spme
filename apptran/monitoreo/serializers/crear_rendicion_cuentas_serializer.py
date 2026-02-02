@@ -140,7 +140,7 @@ class RendicionCuentasCreateSerializer(serializers.ModelSerializer):
             'idresponsable', 'idusuarioLogeado',
             
             # Actividad
-            'descripcionActividad', 'lugarActividad', 
+            'descripcionActividad', 'lugarActividad', 'lugarRendicion',
             'fechaActividad', 'idActividad', 'fechaRendicion',
             
             # Bloqueo
