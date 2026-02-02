@@ -1,0 +1,357 @@
+{% extends "spme_impresiones/base_template.html" %}
+
+{% block content %}
+    <!-- ENCABEZADO ESPECIAL PARA VIAJES DE TAREAS -->
+    <div style="text-align: center; margin-bottom: 10px; padding: 8px; background-color: #e8f5e9; border-radius: 4px; border-left: 4px solid #4caf50;">
+        <div style="font-size: 11px; color: #2e7d32; font-weight: bold; margin-bottom: 3px;">
+            ✈️ SOLICITUD DE VIAJE - TAREA
+        </div>
+        <div style="font-size: 8px; color: #546e7a;">
+            Documento específico para viajes relacionados con tareas
+        </div>
+    </div>
+
+    <!-- INFORMACIÓN DEL SOLICITANTE -->
+    <div class="seccion compact-section">
+        <div class="seccion-titulo">👤 SOLICITANTE DEL VIAJE</div>
+        
+        <div class="grid-3">
+            <div class="campo">
+                <div class="etiqueta">Nombre completo:</div>
+                <div class="valor" style="font-size: 9px; font-weight: bold;">{{ solicitante.nombre_completo }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">C.I.:</div>
+                <div class="valor">{{ solicitante.documento_identidad }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Cargo:</div>
+                <div class="valor">{{ solicitante.cargo }}</div>
+            </div>
+        </div>
+        
+        <div class="grid-2">
+            <div class="campo">
+                <div class="etiqueta">Correo electrónico:</div>
+                <div class="valor" style="font-size: 8px;">{{ solicitante.correo }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Usuario sistema:</div>
+                <div class="valor">{{ solicitante.username }}</div>
+            </div>
+        </div>
+        
+        {% if solicitante.banco and solicitante.banco != "No especificado" %}
+        <div style="margin-top: 8px; padding: 6px; background-color: #f1f8e9; border-radius: 3px; border-left: 3px solid #689f38;">
+            <div style="font-size: 8px; font-weight: bold; color: #33691e; margin-bottom: 4px;">🏦 INFORMACIÓN BANCARIA:</div>
+            <div class="grid-3">
+                <div class="campo">
+                    <div class="etiqueta">Banco:</div>
+                    <div class="valor">{{ solicitante.banco }}</div>
+                </div>
+                
+                <div class="campo">
+                    <div class="etiqueta">N° Cuenta:</div>
+                    <div class="valor">{{ solicitante.numero_cuenta }}</div>
+                </div>
+                
+                <div class="campo">
+                    <div class="etiqueta">Tipo Cuenta:</div>
+                    <div class="valor">{{ solicitante.tipo_cuenta }}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- INFORMACIÓN DE LA TAREA -->
+    {% if tarea.codigo %}
+    <div class="seccion compact-section">
+        <div class="seccion-titulo">📋 TAREA ASOCIADA</div>
+        
+        <div class="grid-3">
+            <div class="campo">
+                <div class="etiqueta">Código tarea:</div>
+                <div class="valor">{{ tarea.codigo }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Estado:</div>
+                <div class="valor">{{ tarea.estado }}</div>
+            </div>
+            
+            {% if tarea.presupuesto and tarea.presupuesto > 0 %}
+            <div class="campo">
+                <div class="etiqueta">Presupuesto tarea:</div>
+                <div class="valor">Bs. {{ tarea.presupuesto|floatformat:2 }}</div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="campo">
+            <div class="etiqueta">Título:</div>
+            <div class="valor">{{ tarea.titulo }}</div>
+        </div>
+        
+        {% if tarea.descripcion and tarea.descripcion != "Sin descripción" %}
+        <div class="campo">
+            <div class="etiqueta">Descripción:</div>
+            <div class="valor texto-largo">{{ tarea.descripcion|truncatechars:80 }}</div>
+        </div>
+        {% endif %}
+        
+        <div class="grid-2">
+            <div class="campo">
+                <div class="etiqueta">Fecha ejecución:</div>
+                <div class="valor">{{ tarea.fecha_ejecucion }}</div>
+            </div>
+            
+            {% if tarea.fecha_limite and tarea.fecha_limite != "No especificada" %}
+            <div class="campo">
+                <div class="etiqueta">Fecha límite:</div>
+                <div class="valor">{{ tarea.fecha_limite }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- INFORMACIÓN DEL EVENTO/VIAJE -->
+    <div class="seccion compact-section">
+        <div class="seccion-titulo">🎯 INFORMACIÓN DEL VIAJE/EVENTO</div>
+        
+        <div class="grid-2">
+            <div class="campo">
+                <div class="etiqueta">Evento:</div>
+                <div class="valor">{{ evento }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Lugar evento:</div>
+                <div class="valor">{{ lugar_evento }}</div>
+            </div>
+        </div>
+        
+        <div class="grid-2">
+            <div class="campo">
+                <div class="etiqueta">Fecha evento:</div>
+                <div class="valor">{{ fecha_evento }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Organizador:</div>
+                <div class="valor">{{ organizador }}</div>
+            </div>
+        </div>
+        
+        {% if instituciones_participantes and instituciones_participantes != "No especificado" %}
+        <div class="campo">
+            <div class="etiqueta">Instituciones participantes:</div>
+            <div class="valor texto-largo">{{ instituciones_participantes|truncatechars:100 }}</div>
+        </div>
+        {% endif %}
+        
+        {% if tareas_previas and tareas_previas != "No especificado" %}
+        <div class="campo">
+            <div class="etiqueta">Tareas previas al viaje:</div>
+            <div class="valor texto-largo">{{ tareas_previas|truncatechars:80 }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- JUSTIFICACIÓN Y FINANCIAMIENTO -->
+    <div class="seccion compact-section">
+        <div class="seccion-titulo">📝 JUSTIFICACIÓN Y FINANCIAMIENTO</div>
+        
+        <div class="grid-2">
+            <div class="campo">
+                <div class="etiqueta">Quién cubre gastos:</div>
+                <div class="valor">{{ quien_cubre_gastos }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Fondos UNITAS:</div>
+                <div class="valor">{{ fondos_unitas }}</div>
+            </div>
+        </div>
+        
+        {% if justificacion_asistencia and justificacion_asistencia != "No especificado" %}
+        <div class="campo">
+            <div class="etiqueta">Justificación de asistencia:</div>
+            <div class="valor texto-largo">{{ justificacion_asistencia|truncatechars:120 }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- DETALLE DE GASTOS DEL VIAJE -->
+    <div class="seccion">
+        <div class="seccion-titulo">💰 DETALLE DE GASTOS DEL VIAJE</div>
+        
+        {% if tiene_detalle %}
+        <div style="margin-bottom: 8px; font-size: 8px; color: #666; text-align: right;">
+            Total de items: {{ cantidad_items }}
+        </div>
+        
+        <table class="tabla">
+            <thead>
+                <tr>
+                    <th style="width: 10%;">Fecha</th>
+                    <th style="width: 10%;">Partida</th>
+                    <th style="width: 20%;">Factura/Recibo</th>
+                    <th style="width: 30%;">Descripción/Concepto</th>
+                    <th style="width: 15%; text-align: right;">Monto (Bs.)</th>
+                    <th style="width: 15%;">Observaciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for gasto in detalle_gastos %}
+                <tr>
+                    <td>{{ gasto.fecha|default:"-" }}</td>
+                    <td>{{ gasto.partida|default:"-" }}</td>
+                    <td>{{ gasto.factura_recibo|default:"-" }}</td>
+                    <td class="texto-largo">{{ gasto.descripcion|default:"-" }}</td>
+                    <td style="text-align: right;">{{ gasto.monto|floatformat:2 }}</td>
+                    <td class="texto-largo">{{ gasto.observaciones|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+                
+                <!-- RESUMEN FINANCIERO -->
+                <tr style="background-color: #f8f9fa; font-weight: bold;">
+                    <td colspan="4" style="text-align: right;">TOTAL DE GASTOS:</td>
+                    <td style="text-align: right;">Bs. {{ total_calculado|floatformat:2 }}</td>
+                    <td></td>
+                </tr>
+                
+                <tr style="background-color: #e8f5e9; font-weight: bold;">
+                    <td colspan="4" style="text-align: right; color: #2e7d32;">MONTO SOLICITADO:</td>
+                    <td style="text-align: right; color: #2e7d32;">Bs. {{ monto_solicitado|floatformat:2 }}</td>
+                    <td></td>
+                </tr>
+                
+                {% if monto_solicitado != total_calculado %}
+                <tr style="background-color: #fff3cd;">
+                    <td colspan="4" style="text-align: right; font-style: italic; font-size: 8px;">Diferencia:</td>
+                    <td style="text-align: right; font-style: italic; font-size: 8px; color: #856404;">
+                        Bs. {{ monto_solicitado|add:total_calculado|floatformat:2 }}
+                    </td>
+                    <td style="font-size: 7px; color: #856404;">
+                        {% if monto_solicitado > total_calculado %}
+                        (Mayor a la sumatoria de gastos)
+                        {% else %}
+                        (Menor a la sumatoria de gastos)
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="text-align: center; padding: 15px; background-color: #f5f5f5; border-radius: 3px; color: #757575; font-size: 9px;">
+            No se han registrado detalles de gastos para el viaje
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- INFORMACIÓN DE PAGO -->
+    <div class="seccion compact-section">
+        <div class="seccion-titulo">🏦 INFORMACIÓN DE PAGO</div>
+        
+        <div class="grid-3">
+            <div class="campo">
+                <div class="etiqueta">Forma de pago:</div>
+                <div class="valor">{{ forma_pago }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Lugar solicitud:</div>
+                <div class="valor">{{ lugar_solicitud }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Fecha solicitud:</div>
+                <div class="valor">{{ fecha_solicitud }}</div>
+            </div>
+        </div>
+        
+        <!-- Datos de transferencia si aplica -->
+        {% if forma_pago == 'Transferencia Bancaria' and datos_transferencia %}
+        <div style="margin-top: 8px; padding: 8px; background-color: #f1f8e9; border-radius: 3px;">
+            <div style="font-size: 8px; font-weight: bold; color: #33691e; margin-bottom: 4px;">📋 DATOS DE TRANSFERENCIA:</div>
+            <div class="grid-2">
+                {% if datos_transferencia.nombre_transferencia %}
+                <div class="campo">
+                    <div class="etiqueta">Beneficiario:</div>
+                    <div class="valor">{{ datos_transferencia.nombre_transferencia }}</div>
+                </div>
+                {% endif %}
+                
+                {% if datos_transferencia.ci_transferencia %}
+                <div class="campo">
+                    <div class="etiqueta">C.I.:</div>
+                    <div class="valor">{{ datos_transferencia.ci_transferencia }}</div>
+                </div>
+                {% endif %}
+                
+                {% if datos_transferencia.entidad_bancaria %}
+                <div class="campo">
+                    <div class="etiqueta">Banco:</div>
+                    <div class="valor">{{ datos_transferencia.entidad_bancaria }}</div>
+                </div>
+                {% endif %}
+                
+                {% if datos_transferencia.numero_cuenta %}
+                <div class="campo">
+                    <div class="etiqueta">Cuenta:</div>
+                    <div class="valor">{{ datos_transferencia.numero_cuenta }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- VALIDACIONES Y FIRMAS -->
+    <div class="seccion">
+        <div class="seccion-titulo">✅ VALIDACIONES Y AUTORIZACIONES</div>
+        
+        <div class="grid-2" style="margin-bottom: 15px;">
+            <div style="padding: 8px; background-color: {% if validacion_responsable %}#e8f5e9{% else %}#fff3cd{% endif %}; border-radius: 3px;">
+                <div style="font-size: 9px; font-weight: bold; margin-bottom: 3px;">
+                    {% if validacion_responsable %}✅{% else %}⏳{% endif %} Responsable
+                </div>
+                <div style="font-size: 8px;">{{ responsable_nombre }}</div>
+            </div>
+            
+            <div style="padding: 8px; background-color: {% if validacion_coordinador %}#e8f5e9{% else %}#fff3cd{% endif %}; border-radius: 3px;">
+                <div style="font-size: 9px; font-weight: bold; margin-bottom: 3px;">
+                    {% if validacion_coordinador %}✅{% else %}⏳{% endif %} Coordinador/Dirección
+                </div>
+                <div style="font-size: 8px;">{{ coordinador_nombre }}</div>
+            </div>
+        </div>
+        
+        <!-- ÁREAS DE FIRMA -->
+        <div class="firmas">
+            <div class="firma-area">
+                <div class="linea-firma"></div>
+                <div class="nombre-firma">{{ responsable_nombre }}</div>
+                <div class="cargo-firma">Responsable</div>
+            </div>
+            
+            <div class="firma-area">
+                <div class="linea-firma"></div>
+                <div class="nombre-firma">{{ coordinador_nombre }}</div>
+                <div class="cargo-firma">Coordinador/Dirección</div>
+            </div>
+        </div>
+        
+        {% if bloqueo_iconos %}
+        <div style="margin-top: 10px; padding: 5px; background-color: #ffebee; border-radius: 3px; text-align: center; font-size: 7px; color: #c62828;">
+            ⚠️ Esta solicitud está bloqueada para edición
+        </div>
+        {% endif %}
+    </div>
+{% endblock %}

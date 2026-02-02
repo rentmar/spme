@@ -11,7 +11,14 @@ from spme_monitoreo.models import (
     RendicionCuentas,
 )
 
-from ..services import PDFGeneratorFactory, SolicitudFondosTareaPDFGenerator
+from ..services import (
+    PDFGeneratorFactory, 
+    SolicitudFondosTareaPDFGenerator, 
+    SolicitudReembolsoTareaPDFGenerator,
+    SolicitudViajeTareaPDFGenerator,
+    SolicitudPagoDirectoTareaPDFGenerator,
+    RendicionCuentasTareaPDFGenerator,
+    )
 
 class ReportesViewSet(viewsets.ViewSet):
     """
@@ -128,3 +135,220 @@ class ReportesViewSet(viewsets.ViewSet):
                 {'error': f'Error al generar reporte de tarea: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
+    @action(detail=False, methods=['get'], url_path='solicitud-reembolso-tarea/(?P<pk>[^/.]+)')
+    def solicitud_reembolso_tarea(self, request, pk=None):
+        """
+        Generar reporte ESPECÍFICO para solicitud de reembolso CON TAREA
+        """
+        try:
+            solicitud = get_object_or_404(SolicitudReembolso, pk=pk)
+            
+            # Verificar que tenga tarea asociada
+            if not solicitud.tarea:
+                return Response(
+                    {
+                        'error': 'Documento específico para tarea no aplicable',
+                        'message': 'Esta solicitud de reembolso no tiene una tarea asociada.',
+                        'solicitud_id': solicitud.id,
+                        'numero_formulario': solicitud.numeroFormulario,
+                        'recomendacion': 'Use el endpoint estándar: /api/impresiones/solicitud-reembolso/{id}/pdf/'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Usar el generador específico para reembolso de tareas
+            generator = SolicitudReembolsoTareaPDFGenerator()
+            response = generator.generate(solicitud)
+            
+            return response
+            
+        except SolicitudReembolso.DoesNotExist:
+            return Response(
+                {'error': f'Solicitud de reembolso con ID {pk} no encontrada'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'Error al generar reporte de reembolso de tarea: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+    @action(detail=False, methods=['get'], url_path='solicitud-viaje-tarea/(?P<pk>[^/.]+)')
+    def solicitud_viaje_tarea(self, request, pk=None):
+        """
+        Generar reporte ESPECÍFICO para solicitud de viaje CON TAREA
+        """
+        try:
+            # Intentar convertir pk a entero
+            try:
+                solicitud_id = int(pk)
+            except ValueError:
+                return Response(
+                    {
+                        'error': 'ID inválido',
+                        'message': f'El ID "{pk}" no es un número válido'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Verificar si existe la solicitud
+            try:
+                solicitud = SolicitudViaje.objects.get(pk=solicitud_id)
+            except SolicitudViaje.DoesNotExist:
+                return Response(
+                    {
+                        'error': 'Solicitud no encontrada',
+                        'message': f'No existe una SolicitudViaje con ID {solicitud_id}'
+                    },
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Verificar que tenga tarea asociada
+            if not solicitud.tarea:
+                return Response(
+                    {
+                        'error': 'Documento específico para tarea no aplicable',
+                        'message': 'Esta solicitud de viaje no tiene una tarea asociada.',
+                        'solicitud_id': solicitud.id,
+                        'numero_formulario': solicitud.numeroFormulario,
+                        'recomendacion': 'Use el endpoint estándar: /api/impresiones/solicitud-viaje/{id}/'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Usar el generador específico para viaje de tareas
+            generator = SolicitudViajeTareaPDFGenerator()
+            response = generator.generate(solicitud)
+            
+            return response
+            
+        except Exception as e:
+            return Response(
+                {
+                    'error': 'Error al generar reporte de viaje de tarea',
+                    'message': str(e),
+                    'tipo_error': type(e).__name__
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )    
+
+
+    @action(detail=False, methods=['get'], url_path='solicitud-pago-directo-tarea/(?P<pk>[^/.]+)')
+    def solicitud_pago_directo_tarea(self, request, pk=None):
+        """
+        Generar reporte ESPECÍFICO para solicitud de pago directo CON TAREA
+        """
+        try:
+            # Intentar convertir pk a entero
+            try:
+                solicitud_id = int(pk)
+            except ValueError:
+                return Response(
+                    {
+                        'error': 'ID inválido',
+                        'message': f'El ID "{pk}" no es un número válido'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Verificar si existe la solicitud
+            try:
+                solicitud = SolicitudPagoDirecto.objects.get(pk=solicitud_id)
+            except SolicitudPagoDirecto.DoesNotExist:
+                return Response(
+                    {
+                        'error': 'Solicitud no encontrada',
+                        'message': f'No existe una SolicitudPagoDirecto con ID {solicitud_id}'
+                    },
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Verificar que tenga tarea asociada
+            if not solicitud.tarea:
+                return Response(
+                    {
+                        'error': 'Documento específico para tarea no aplicable',
+                        'message': 'Esta solicitud de pago directo no tiene una tarea asociada.',
+                        'solicitud_id': solicitud.id,
+                        'numero_formulario': solicitud.numeroFormulario,
+                        'recomendacion': 'Use el endpoint estándar: /api/impresiones/solicitud-pago-directo/{id}/'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Usar el generador específico para pago directo de tareas
+            generator = SolicitudPagoDirectoTareaPDFGenerator()
+            response = generator.generate(solicitud)
+            
+            return response
+            
+        except Exception as e:
+            return Response(
+                {
+                    'error': 'Error al generar reporte de pago directo de tarea',
+                    'message': str(e),
+                    'tipo_error': type(e).__name__
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )    
+        
+
+    @action(detail=False, methods=['get'], url_path='rendicion-cuentas-tarea/(?P<pk>[^/.]+)')
+    def rendicion_cuentas_tarea(self, request, pk=None):
+        """
+        Generar reporte ESPECÍFICO para rendición de cuentas CON TAREA
+        """
+        try:
+            # Intentar convertir pk a entero
+            try:
+                rendicion_id = int(pk)
+            except ValueError:
+                return Response(
+                    {
+                        'error': 'ID inválido',
+                        'message': f'El ID "{pk}" no es un número válido'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Verificar si existe la rendición
+            try:
+                rendicion = RendicionCuentas.objects.get(pk=rendicion_id)
+            except RendicionCuentas.DoesNotExist:
+                return Response(
+                    {
+                        'error': 'Rendición no encontrada',
+                        'message': f'No existe una RendicionCuentas con ID {rendicion_id}'
+                    },
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Verificar que tenga tarea asociada
+            if not rendicion.tarea:
+                return Response(
+                    {
+                        'error': 'Documento específico para tarea no aplicable',
+                        'message': 'Esta rendición de cuentas no tiene una tarea asociada.',
+                        'rendicion_id': rendicion.id,
+                        'numero_formulario': rendicion.numeroFormulario,
+                        'recomendacion': 'Use el endpoint estándar: /api/impresiones/rendicion-cuentas/{id}/'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Usar el generador específico para rendición de cuentas de tareas
+            generator = RendicionCuentasTareaPDFGenerator()
+            response = generator.generate(rendicion)
+            
+            return response
+            
+        except Exception as e:
+            return Response(
+                {
+                    'error': 'Error al generar reporte de rendición de cuentas de tarea',
+                    'message': str(e),
+                    'tipo_error': type(e).__name__
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )    

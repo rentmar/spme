@@ -6,6 +6,10 @@ from .solicitud_viaje_pdf import SolicitudViajePDFGenerator
 from .solicitud_pago_directo_pdf import SolicitudPagoDirectoPDFGenerator
 from .rendicion_cuentas_pdf import RendicionCuentasPDFGenerator
 from .solicitud_fondos_tarea_pdf import SolicitudFondosTareaPDFGenerator
+from .solicitud_reembolso_tarea_pdf import SolicitudReembolsoTareaPDFGenerator
+from .solicitud_viaje_tarea_pdf import SolicitudViajeTareaPDFGenerator
+from .solicitud_pago_directo_tarea_pdf import SolicitudPagoDirectoTareaPDFGenerator
+from .rendicion_cuentas_tarea_pdf import RendicionCuentasTareaPDFGenerator
 
 # Para uso directo
 PDFGeneratorService = PDFGeneratorFactory

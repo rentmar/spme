@@ -1,0 +1,332 @@
+{% extends "spme_impresiones/base_template.html" %}
+
+{% block content %}
+    <!-- ENCABEZADO ESPECIAL PARA PAGOS DIRECTOS DE TAREAS -->
+    <div style="text-align: center; margin-bottom: 10px; padding: 8px; background-color: #fff3e0; border-radius: 4px; border-left: 4px solid #ff9800;">
+        <div style="font-size: 11px; color: #ef6c00; font-weight: bold; margin-bottom: 3px;">
+            💰 SOLICITUD DE PAGO DIRECTO - TAREA
+        </div>
+        <div style="font-size: 8px; color: #546e7a;">
+            Documento específico para pagos directos relacionados con tareas
+        </div>
+    </div>
+
+    <!-- INFORMACIÓN DEL SOLICITANTE -->
+    <div class="seccion compact-section">
+        <div class="seccion-titulo">👤 SOLICITANTE DEL PAGO DIRECTO</div>
+        
+        <div class="grid-3">
+            <div class="campo">
+                <div class="etiqueta">Nombre completo:</div>
+                <div class="valor" style="font-size: 9px; font-weight: bold;">{{ solicitante.nombre_completo }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">C.I.:</div>
+                <div class="valor">{{ solicitante.documento_identidad }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Cargo:</div>
+                <div class="valor">{{ solicitante.cargo }}</div>
+            </div>
+        </div>
+        
+        <div class="grid-2">
+            <div class="campo">
+                <div class="etiqueta">Correo electrónico:</div>
+                <div class="valor" style="font-size: 8px;">{{ solicitante.correo }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Usuario sistema:</div>
+                <div class="valor">{{ solicitante.username }}</div>
+            </div>
+        </div>
+        
+        {% if solicitante.banco and solicitante.banco != "No especificado" %}
+        <div style="margin-top: 8px; padding: 6px; background-color: #fff3e0; border-radius: 3px; border-left: 3px solid #ff9800;">
+            <div style="font-size: 8px; font-weight: bold; color: #ef6c00; margin-bottom: 4px;">🏦 INFORMACIÓN BANCARIA:</div>
+            <div class="grid-3">
+                <div class="campo">
+                    <div class="etiqueta">Banco:</div>
+                    <div class="valor">{{ solicitante.banco }}</div>
+                </div>
+                
+                <div class="campo">
+                    <div class="etiqueta">N° Cuenta:</div>
+                    <div class="valor">{{ solicitante.numero_cuenta }}</div>
+                </div>
+                
+                <div class="campo">
+                    <div class="etiqueta">Tipo Cuenta:</div>
+                    <div class="valor">{{ solicitante.tipo_cuenta }}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- INFORMACIÓN DE LA TAREA -->
+    {% if tarea.codigo %}
+    <div class="seccion compact-section">
+        <div class="seccion-titulo">📋 TAREA ASOCIADA</div>
+        
+        <div class="grid-3">
+            <div class="campo">
+                <div class="etiqueta">Código tarea:</div>
+                <div class="valor">{{ tarea.codigo }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Estado:</div>
+                <div class="valor">{{ tarea.estado }}</div>
+            </div>
+            
+            {% if tarea.presupuesto and tarea.presupuesto > 0 %}
+            <div class="campo">
+                <div class="etiqueta">Presupuesto tarea:</div>
+                <div class="valor">Bs. {{ tarea.presupuesto|floatformat:2 }}</div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="campo">
+            <div class="etiqueta">Título:</div>
+            <div class="valor">{{ tarea.titulo }}</div>
+        </div>
+        
+        {% if tarea.descripcion and tarea.descripcion != "Sin descripción" %}
+        <div class="campo">
+            <div class="etiqueta">Descripción:</div>
+            <div class="valor texto-largo">{{ tarea.descripcion|truncatechars:80 }}</div>
+        </div>
+        {% endif %}
+        
+        <div class="grid-2">
+            <div class="campo">
+                <div class="etiqueta">Fecha ejecución:</div>
+                <div class="valor">{{ tarea.fecha_ejecucion }}</div>
+            </div>
+            
+            {% if tarea.fecha_limite and tarea.fecha_limite != "No especificada" %}
+            <div class="campo">
+                <div class="etiqueta">Fecha límite:</div>
+                <div class="valor">{{ tarea.fecha_limite }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- INFORMACIÓN DE LA ACTIVIDAD -->
+    <div class="seccion compact-section">
+        <div class="seccion-titulo">🎯 INFORMACIÓN DE LA ACTIVIDAD</div>
+        
+        <div class="campo">
+            <div class="etiqueta">Descripción:</div>
+            <div class="valor texto-largo">{{ descripcion_actividad|default:"No especificada"|truncatechars:100 }}</div>
+        </div>
+        
+        <div class="campo">
+            <div class="etiqueta">Objetivo:</div>
+            <div class="valor texto-largo">{{ objetivo_actividad|default:"No especificado"|truncatechars:80 }}</div>
+        </div>
+        
+        <div class="grid-2">
+            <div class="campo">
+                <div class="etiqueta">Fecha realización:</div>
+                <div class="valor">{{ fecha_realizacion }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Fecha solicitud:</div>
+                <div class="valor">{{ fecha_solicitud }}</div>
+            </div>
+        </div>
+        
+        <div class="campo">
+            <div class="etiqueta">Lugar solicitud:</div>
+            <div class="valor">{{ lugar_solicitud|default:"No especificado" }}</div>
+        </div>
+    </div>
+
+    <!-- DETALLE DE PAGOS DIRECTOS - ESTRUCTURA ESPECÍFICA -->
+    <div class="seccion">
+        <div class="seccion-titulo">📋 DETALLE DE PAGOS DIRECTOS</div>
+        
+        {% if tiene_detalle %}
+        <div style="margin-bottom: 8px; font-size: 8px; color: #666; text-align: right;">
+            Total de items: {{ cantidad_items }}
+        </div>
+        
+        <table class="tabla">
+            <thead>
+                <tr>
+                    <th style="width: 8%;">N°</th>
+                    <th style="width: 15%;">Partida SF</th>
+                    <th style="width: 42%;">Concepto</th>
+                    <th style="width: 20%; text-align: right;">Monto (Bs.)</th>
+                    <th style="width: 15%;">Observaciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pago in detalle_fondos %}
+                <tr>
+                    <td style="text-align: center;">{{ pago.numero }}</td>
+                    <td>{{ pago.partida_sf|default:"-" }}</td>
+                    <td class="texto-largo">{{ pago.concepto|default:"-" }}</td>
+                    <td style="text-align: right;">{{ pago.monto|floatformat:2 }}</td>
+                    <td class="texto-largo">
+                        {{ pago.observaciones|default:"-" }}
+                        {% if pago.factura_recibo %}
+                        <br><small style="color: #666;">Factura: {{ pago.factura_recibo }}</small>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                
+                <!-- RESUMEN FINANCIERO -->
+                <tr style="background-color: #f8f9fa; font-weight: bold;">
+                    <td colspan="3" style="text-align: right;">TOTAL DE PAGOS:</td>
+                    <td style="text-align: right;">Bs. {{ total_calculado|floatformat:2 }}</td>
+                    <td></td>
+                </tr>
+                
+                <tr style="background-color: #fff3e0; font-weight: bold;">
+                    <td colspan="3" style="text-align: right; color: #ef6c00;">MONTO SOLICITADO:</td>
+                    <td style="text-align: right; color: #ef6c00;">Bs. {{ monto_solicitado|floatformat:2 }}</td>
+                    <td></td>
+                </tr>
+                
+                {% if monto_solicitado != total_calculado %}
+                <tr style="background-color: #fff3cd;">
+                    <td colspan="3" style="text-align: right; font-style: italic; font-size: 8px;">Diferencia:</td>
+                    <td style="text-align: right; font-style: italic; font-size: 8px; color: #856404;">
+                        Bs. {{ monto_solicitado|add:total_calculado|floatformat:2 }}
+                    </td>
+                    <td style="font-size: 7px; color: #856404;">
+                        {% if monto_solicitado > total_calculado %}
+                        (Mayor a la sumatoria de pagos)
+                        {% else %}
+                        (Menor a la sumatoria de pagos)
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="text-align: center; padding: 15px; background-color: #f5f5f5; border-radius: 3px; color: #757575; font-size: 9px;">
+            No se han registrado detalles de pagos directos
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- INFORMACIÓN DE PAGO -->
+    <div class="seccion compact-section">
+        <div class="seccion-titulo">🏦 INFORMACIÓN DE PAGO</div>
+        
+        <div class="grid-3">
+            <div class="campo">
+                <div class="etiqueta">Forma de pago:</div>
+                <div class="valor">{{ forma_pago }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Lugar solicitud:</div>
+                <div class="valor">{{ lugar_solicitud|default:"No especificado" }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Fecha solicitud:</div>
+                <div class="valor">{{ fecha_solicitud }}</div>
+            </div>
+        </div>
+        
+        <!-- Datos de transferencia si aplica -->
+        {% if forma_pago == 'Transferencia Bancaria' and datos_transferencia %}
+        <div style="margin-top: 8px; padding: 8px; background-color: #fff3e0; border-radius: 3px;">
+            <div style="font-size: 8px; font-weight: bold; color: #ef6c00; margin-bottom: 4px;">📋 DATOS DE TRANSFERENCIA:</div>
+            <div class="grid-2">
+                {% if datos_transferencia.nombre_transferencia %}
+                <div class="campo">
+                    <div class="etiqueta">Beneficiario:</div>
+                    <div class="valor">{{ datos_transferencia.nombre_transferencia }}</div>
+                </div>
+                {% endif %}
+                
+                {% if datos_transferencia.ci_transferencia %}
+                <div class="campo">
+                    <div class="etiqueta">C.I.:</div>
+                    <div class="valor">{{ datos_transferencia.ci_transferencia }}</div>
+                </div>
+                {% endif %}
+                
+                {% if datos_transferencia.entidad_bancaria %}
+                <div class="campo">
+                    <div class="etiqueta">Banco:</div>
+                    <div class="valor">{{ datos_transferencia.entidad_bancaria }}</div>
+                </div>
+                {% endif %}
+                
+                {% if datos_transferencia.numero_cuenta %}
+                <div class="campo">
+                    <div class="etiqueta">Cuenta:</div>
+                    <div class="valor">{{ datos_transferencia.numero_cuenta }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- VALIDACIONES Y FIRMAS -->
+    <div class="seccion">
+        <div class="seccion-titulo">✅ VALIDACIONES Y AUTORIZACIONES</div>
+        
+        <div class="grid-2" style="margin-bottom: 15px;">
+            <div style="padding: 8px; background-color: {% if validacion_responsable %}#e8f5e9{% else %}#fff3cd{% endif %}; border-radius: 3px;">
+                <div style="font-size: 9px; font-weight: bold; margin-bottom: 3px;">
+                    {% if validacion_responsable %}✅{% else %}⏳{% endif %} Contador
+                </div>
+                <div style="font-size: 8px;">{{ contador_nombre }}</div>
+            </div>
+            
+            <div style="padding: 8px; background-color: {% if validacion_coordinador %}#e8f5e9{% else %}#fff3cd{% endif %}; border-radius: 3px;">
+                <div style="font-size: 9px; font-weight: bold; margin-bottom: 3px;">
+                    {% if validacion_coordinador %}✅{% else %}⏳{% endif %} Coordinador/Dirección
+                </div>
+                <div style="font-size: 8px;">{{ coordinador_nombre }}</div>
+            </div>
+        </div>
+        
+        <!-- ÁREAS DE FIRMA -->
+        <div class="firmas">
+            <div class="firma-area">
+                <div class="linea-firma"></div>
+                <div class="nombre-firma">{{ contador_nombre }}</div>
+                <div class="cargo-firma">Contador</div>
+            </div>
+            
+            <div class="firma-area">
+                <div class="linea-firma"></div>
+                <div class="nombre-firma">{{ coordinador_nombre }}</div>
+                <div class="cargo-firma">Coordinador/Dirección</div>
+            </div>
+        </div>
+        
+        {% if bloqueo_iconos %}
+        <div style="margin-top: 10px; padding: 5px; background-color: #ffebee; border-radius: 3px; text-align: center; font-size: 7px; color: #c62828;">
+            ⚠️ Esta solicitud está bloqueada para edición
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- INFORMACIÓN ADICIONAL PARA DEBUG -->
+    {% if estructura_original %}
+    <div style="margin-top: 10px; padding: 5px; background-color: #f5f5f5; border-radius: 3px; font-size: 6px; color: #999; text-align: center;">
+        Estructura original: {{ estructura_original }}
+    </div>
+    {% endif %}
+{% endblock %}
