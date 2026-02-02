@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ tipo_documento|default:"Documento" }} - {{ sistema_nombre }}</title>
+    <style>
+        /* Estilos base comunes a todos los documentos */
+        @page {
+            size: A4;
+            margin: 0.8cm;
+            
+            @top-left {
+                content: "{{ subtipo_documento|default:"DOC" }}";
+                font-size: 8px;
+                color: #666;
+            }
+            
+            @top-right {
+                content: counter(page);
+                font-size: 8px;
+                color: #666;
+            }
+            
+            @bottom-center {
+                content: "{{ sistema_nombre }}";
+                font-size: 7px;
+                color: #999;
+            }
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 9px;
+            line-height: 1.2;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #1976d2;
+        }
+        
+        .institucion-info {
+            margin-bottom: 8px;
+        }
+        
+        .institucion-nombre {
+            font-size: 10px;
+            font-weight: bold;
+            color: #1976d2;
+        }
+        
+        .institucion-direccion {
+            font-size: 8px;
+            color: #666;
+        }
+        
+        .titulo-principal {
+            font-size: 12px;
+            font-weight: bold;
+            color: #1976d2;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+        }
+        
+        .subtitulo {
+            font-size: 9px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+        
+        .formulario-info {
+            display: flex;
+            justify-content: space-between;
+            background-color: #f5f5f5;
+            padding: 5px 10px;
+            border-radius: 3px;
+            margin-bottom: 12px;
+            font-size: 8px;
+        }
+        
+        /* Bloques de contenido comunes */
+        .seccion {
+            margin-bottom: 12px;
+            page-break-inside: avoid;
+        }
+        
+        .seccion-titulo {
+            background-color: #1976d2;
+            color: white;
+            padding: 5px 8px;
+            font-size: 9px;
+            font-weight: bold;
+            border-radius: 3px;
+            margin-bottom: 8px;
+        }
+        
+        .campo {
+            margin-bottom: 6px;
+        }
+        
+        .etiqueta {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 2px;
+            font-size: 8px;
+        }
+        
+        .valor {
+            background-color: #f8f9fa;
+            padding: 4px 6px;
+            border-radius: 2px;
+            border: 1px solid #e0e0e0;
+            min-height: 18px;
+            font-size: 9px;
+        }
+        
+        /* Tablas comunes */
+        .tabla {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 8px;
+        }
+        
+        .tabla th {
+            background-color: #1976d2;
+            color: white;
+            padding: 5px;
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid #1565c0;
+            font-size: 8px;
+        }
+        
+        .tabla td {
+            padding: 5px;
+            border: 1px solid #ddd;
+            vertical-align: top;
+            font-size: 8px;
+        }
+        
+        .tabla tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        /* Firmas comunes */
+        .firmas {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .firma-area {
+            text-align: center;
+            padding-top: 30px;
+        }
+        
+        .linea-firma {
+            width: 70%;
+            margin: 0 auto;
+            border-top: 1px solid #333;
+            padding-top: 3px;
+        }
+        
+        .nombre-firma {
+            font-weight: bold;
+            margin-top: 3px;
+            font-size: 9px;
+        }
+        
+        .cargo-firma {
+            font-size: 8px;
+            color: #666;
+        }
+        
+        /* Footer común */
+        .footer {
+            margin-top: 15px;
+            padding-top: 6px;
+            border-top: 1px solid #eee;
+            font-size: 7px;
+            color: #777;
+            text-align: center;
+        }
+        
+        .fecha-generacion {
+            float: right;
+            font-size: 7px;
+            color: #999;
+        }
+        
+        /* Utilidades */
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .texto-largo { line-height: 1.1; font-size: 8px; }
+        .compact-section { background-color: #f8f9fa; padding: 8px; border-radius: 3px; margin-bottom: 10px; }
+        .total-row { background-color: #e3f2fd !important; font-weight: bold; border-top: 1px solid #1976d2; }
+    </style>
+</head>
+<body>
+    <!-- Cabecera común -->
+    <div class="header">
+        <div class="institucion-info">
+            <div class="institucion-nombre">{{ institucion_nombre }}</div>
+            <div class="institucion-direccion">{{ institucion_direccion }}</div>
+        </div>
+        
+        <div class="titulo-principal">{{ tipo_documento|default:"DOCUMENTO" }}</div>
+        {% if subtipo_documento %}
+        <div class="subtitulo">{{ subtipo_documento }}</div>
+        {% endif %}
+        
+        <div class="formulario-info">
+            <div><strong>N°:</strong> {{ numero_formulario|default:"No asignado" }}</div>
+            <div><strong>Fecha:</strong> {{ fecha_emision|default:"No especificada" }}</div>
+            <div class="fecha-generacion">Generado: {{ fecha_generacion }}</div>
+        </div>
+    </div>
+    
+    <!-- Contenido específico (se definirá en plantillas hijas) -->
+    {% block content %}
+    {% endblock %}
+    
+    <!-- Footer común -->
+    <div class="footer">
+        {{ sistema_nombre }} v{{ version_sistema }} | {{ institucion_nombre }} - {{ anio_actual }}
+    </div>
+</body>
+</html>

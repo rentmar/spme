@@ -1,0 +1,326 @@
+{% extends "spme_impresiones/base_template.html" %}
+
+{% block content %}
+    <!-- ENCABEZADO COMPACTO -->
+    <div style="background: linear-gradient(to right, #1976d2, #2196f3); 
+                color: white; 
+                padding: 8px 10px; 
+                border-radius: 3px; 
+                margin-bottom: 15px;
+                text-align: center;">
+        <div style="font-size: 11px; font-weight: bold; margin-bottom: 2px;">
+            🎯 SOLICITUD DE FONDOS - TAREA
+        </div>
+        <div style="font-size: 8px; opacity: 0.9;">
+            Formato exclusivo para solicitudes asociadas a tareas
+        </div>
+    </div>
+    
+    <!-- FILA SUPERIOR: TAREA + SOLICITANTE -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+        
+        <!-- TAREA ASOCIADA (IZQUIERDA) -->
+        <div class="seccion compact-section" style="border: 1px solid #4caf50; border-radius: 3px; padding: 8px;">
+            <div class="seccion-titulo" style="background-color: #4caf50; padding: 4px 6px; font-size: 9px;">📋 TAREA</div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 5px;">
+                <div>
+                    <div class="etiqueta" style="font-size: 7px;">Código:</div>
+                    <div class="valor" style="font-weight: bold; color: #2e7d32; font-size: 9px;">
+                        {{ codigo_tarea|default:"-" }}
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="etiqueta" style="font-size: 7px;">Estado:</div>
+                    <div class="valor">
+                        <span style="padding: 1px 4px; border-radius: 2px; font-size: 7px; 
+                              background-color: {% if estado_tarea_raw == 'COMPL' %}#4caf50{% elif estado_tarea_raw == 'EPROG' %}#ff9800{% else %}#f44336{% endif %};
+                              color: white;">
+                            {{ estado_tarea|default:"PEND" }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 5px;">
+                <div class="etiqueta" style="font-size: 7px;">Título:</div>
+                <div class="valor" style="font-weight: bold; font-size: 9px; line-height: 1.2;">
+                    {{ titulo_tarea|default:"-"|truncatechars:30 }}
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 5px;">
+                <div class="etiqueta" style="font-size: 7px;">Presupuesto:</div>
+                <div class="valor" style="font-weight: bold; color: #2e7d32; font-size: 9px;">
+                    Bs. {{ presupuesto_tarea|floatformat:0|default:"0" }}
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                <div>
+                    <div class="etiqueta" style="font-size: 7px;">Ejecución:</div>
+                    <div class="valor" style="font-size: 8px;">{{ fecha_ejecucion_tarea|default:"-" }}</div>
+                </div>
+                
+                <div>
+                    <div class="etiqueta" style="font-size: 7px;">Límite:</div>
+                    <div class="valor" style="font-size: 8px;">{{ fecha_limite_tarea|default:"-" }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SOLICITANTE (DERECHA) -->
+        <div class="seccion compact-section" style="border: 1px solid #2196f3; border-radius: 3px; padding: 8px;">
+            <div class="seccion-titulo" style="background-color: #2196f3; padding: 4px 6px; font-size: 9px;">👤 SOLICITANTE</div>
+            
+            <div style="margin-bottom: 5px;">
+                <div class="etiqueta" style="font-size: 7px;">Nombre:</div>
+                <div class="valor" style="font-weight: bold; font-size: 9px; line-height: 1.2;">
+                    {{ nombre_solicitante|default:"-" }}
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 5px;">
+                <div>
+                    <div class="etiqueta" style="font-size: 7px;">C.I.:</div>
+                    <div class="valor" style="font-size: 9px;">{{ documento_identidad|default:"-" }}</div>
+                </div>
+                
+                <div>
+                    <div class="etiqueta" style="font-size: 7px;">Cargo:</div>
+                    <div class="valor" style="font-size: 9px;">{{ cargo_solicitante|default:"-"|truncatechars:15 }}</div>
+                </div>
+            </div>
+            
+            <div>
+                <div class="etiqueta" style="font-size: 7px;">Monto Solicitado:</div>
+                <div class="valor" style="font-size: 11px; font-weight: bold; color: #1976d2;">
+                    Bs. {{ total_monto_solicitado|floatformat:2 }}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- INFORMACIÓN DE LA ACTIVIDAD (si existe) -->
+    {% if tiene_actividad_asociada %}
+    <div class="seccion compact-section" style="margin-bottom: 10px; padding: 6px 8px;">
+        <div class="seccion-titulo" style="padding: 3px 6px; font-size: 9px;">📊 ACTIVIDAD PADRE</div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 5px;">
+            <div>
+                <div class="etiqueta" style="font-size: 7px;">Código:</div>
+                <div class="valor" style="font-size: 8px;">{{ codigo_actividad|default:"-" }}</div>
+            </div>
+            
+            <div>
+                <div class="etiqueta" style="font-size: 7px;">Nombre:</div>
+                <div class="valor" style="font-size: 8px;">{{ nombre_actividad|default:"-"|truncatechars:25 }}</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- DETALLES DE LA SOLICITUD -->
+    <div class="seccion compact-section" style="margin-bottom: 10px; padding: 6px 8px;">
+        <div class="seccion-titulo" style="padding: 3px 6px; font-size: 9px;">📝 DETALLES</div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 5px;">
+            <div>
+                <div class="etiqueta" style="font-size: 7px;">Fecha Realización:</div>
+                <div class="valor" style="font-size: 8px;">{{ fecha_realizacion|default:"-" }}</div>
+            </div>
+            
+            <div>
+                <div class="etiqueta" style="font-size: 7px;">Lugar:</div>
+                <div class="valor" style="font-size: 8px;">{{ lugar_solicitud|default:"-"|truncatechars:15 }}</div>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 5px;">
+            <div class="etiqueta" style="font-size: 7px;">Objetivo:</div>
+            <div class="valor" style="font-size: 8px; line-height: 1.2;">
+                {{ objetivo_actividad|default:"-"|truncatechars:50 }}
+            </div>
+        </div>
+    </div>
+    
+    <!-- FORMA DE PAGO -->
+    <div class="seccion compact-section" style="margin-bottom: 10px; padding: 6px 8px;">
+        <div class="seccion-titulo" style="padding: 3px 6px; font-size: 9px;">💳 FORMA DE PAGO</div>
+        
+        <div style="margin-bottom: 5px;">
+            <div class="etiqueta" style="font-size: 7px;">Tipo:</div>
+            <div class="valor" style="font-weight: bold; font-size: 9px; background-color: #e3f2fd; padding: 2px 6px; border-radius: 2px; display: inline-block;">
+                {{ forma_pago|default:"No especificada" }}
+            </div>
+        </div>
+        
+        <!-- DATOS DE TRANSFERENCIA BANCARIA -->
+        {% if es_transferencia and tiene_datos_transferencia %}
+        <div style="padding: 5px; background-color: #e8f5e9; border-radius: 3px; border-left: 2px solid #4caf50;">
+            <div class="grid-2" style="gap: 3px;">
+                <div>
+                    <div class="etiqueta" style="font-size: 7px;">Nombre:</div>
+                    <div class="valor" style="font-size: 8px;">{{ datos_transferencia.nombre|default:"-"|truncatechars:20 }}</div>
+                </div>
+                
+                <div>
+                    <div class="etiqueta" style="font-size: 7px;">C.I.:</div>
+                    <div class="valor" style="font-size: 8px;">{{ datos_transferencia.ci|default:"-" }}</div>
+                </div>
+                
+                <div>
+                    <div class="etiqueta" style="font-size: 7px;">Banco:</div>
+                    <div class="valor" style="font-size: 8px;">{{ datos_transferencia.entidad_bancaria|default:"-"|truncatechars:12 }}</div>
+                </div>
+                
+                <div>
+                    <div class="etiqueta" style="font-size: 7px;">Cuenta:</div>
+                    <div class="valor" style="font-size: 8px;">{{ datos_transferencia.numero_cuenta|default:"-"|truncatechars:15 }}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- DATOS PARA PAGO EN EFECTIVO -->
+        {% if es_efectivo and tiene_datos_efectivo %}
+        <div style="padding: 5px; background-color: #fff3e0; border-radius: 3px; border-left: 2px solid #ff9800;">
+            <div class="grid-2" style="gap: 3px;">
+                <div>
+                    <div class="etiqueta" style="font-size: 7px;">Receptor:</div>
+                    <div class="valor" style="font-size: 8px;">{{ datos_efectivo.nombre|default:"-"|truncatechars:20 }}</div>
+                </div>
+                
+                <div>
+                    <div class="etiqueta" style="font-size: 7px;">C.I.:</div>
+                    <div class="valor" style="font-size: 8px;">{{ datos_efectivo.ci|default:"-" }}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- DATOS PARA PAGO CON CHEQUE -->
+        {% if es_cheque and tiene_datos_cheque %}
+        <div style="padding: 5px; background-color: #e3f2fd; border-radius: 3px; border-left: 2px solid #2196f3;">
+            <div class="grid-2" style="gap: 3px;">
+                <div>
+                    <div class="etiqueta" style="font-size: 7px;">Beneficiario:</div>
+                    <div class="valor" style="font-size: 8px;">{{ datos_cheque.nombre|default:"-"|truncatechars:20 }}</div>
+                </div>
+                
+                <div>
+                    <div class="etiqueta" style="font-size: 7px;">C.I.:</div>
+                    <div class="valor" style="font-size: 8px;">{{ datos_cheque.ci|default:"-" }}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- DETALLE DE GASTOS -->
+    <div class="seccion" style="margin-bottom: 10px; padding: 6px 8px;">
+        <div class="seccion-titulo" style="padding: 3px 6px; font-size: 9px;">💰 DETALLE DE GASTOS</div>
+        
+        {% if tiene_detalle_gastos %}
+        <table class="tabla tabla-gastos" style="font-size: 7px;">
+            <thead>
+                <tr>
+                    <th style="width: 5%; padding: 2px;">N°</th>
+                    <th style="width: 25%; padding: 2px;">PARTIDA</th>
+                    <th style="width: 35%; padding: 2px;">DESCRIPCIÓN</th>
+                    <th style="width: 20%; padding: 2px; text-align: right;">MONTO (Bs.)</th>
+                    <th style="width: 15%; padding: 2px;">OBS.</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for gasto in detalle_gastos|slice:":10" %}
+                <tr>
+                    <td style="padding: 2px; text-align: center;">{{ forloop.counter }}</td>
+                    <td style="padding: 2px;">{{ gasto.partida|default:"-"|truncatechars:15 }}</td>
+                    <td style="padding: 2px;">{{ gasto.descripcion_gasto|default:"-"|truncatechars:25 }}</td>
+                    <td style="padding: 2px; text-align: right;">{{ gasto.monto|floatformat:2 }}</td>
+                    <td style="padding: 2px;">{{ gasto.observaciones|default:"-"|truncatechars:10 }}</td>
+                </tr>
+                {% endfor %}
+                
+                {% if detalle_gastos|length > 10 %}
+                <tr>
+                    <td colspan="5" style="padding: 2px; text-align: center; font-size: 7px; color: #666;">
+                        ... y {{ detalle_gastos|length|add:"-10" }} item{{ detalle_gastos|length|add:"-10"|pluralize:"s" }} más
+                    </td>
+                </tr>
+                {% endif %}
+                
+                <tr style="background-color: #e3f2fd; font-weight: bold;">
+                    <td colspan="3" style="padding: 2px; text-align: right;">TOTAL:</td>
+                    <td style="padding: 2px; text-align: right; font-size: 9px; color: #1976d2;">
+                        Bs. {{ total_monto_solicitado|floatformat:2 }}
+                    </td>
+                    <td style="padding: 2px;"></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div style="font-size: 7px; color: #666; text-align: right; margin-top: 2px;">
+            {{ detalle_gastos|length }} item{{ detalle_gastos|length|pluralize:"s" }}
+        </div>
+        
+        {% else %}
+        <div style="text-align: center; padding: 10px; color: #999; font-size: 8px;">
+            No se han registrado gastos
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- FIRMAS Y VALIDACIONES -->
+    <div class="seccion" style="padding: 6px 8px;">
+        <div class="seccion-titulo" style="padding: 3px 6px; font-size: 9px;">✍️ FIRMAS</div>
+        
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+            <!-- SOLICITANTE -->
+            <div style="text-align: center;">
+                <div style="margin-bottom: 5px;">
+                    <div class="valor" style="font-size: 8px; font-weight: bold;">{{ nombre_solicitante|default:"-" }}</div>
+                </div>
+                
+                <div style="height: 25px; border-bottom: 1px solid #333; margin: 5px auto; width: 90%;"></div>
+                
+                <div style="margin-top: 3px;">
+                    <div class="valor" style="font-size: 8px;">{{ cargo_solicitante|default:"Solicitante" }}</div>
+                </div>
+            </div>
+            
+            <!-- CONTADOR -->
+            <div style="text-align: center;">
+                <div style="margin-bottom: 5px;">
+                    <div class="valor" style="font-size: 8px; font-weight: bold;">{{ nombre_contador|default:"-" }}</div>
+                </div>
+                
+                <div style="height: 25px; border-bottom: 1px solid #333; margin: 5px auto; width: 90%;"></div>
+                
+                <div style="margin-top: 3px;">
+                    <div class="valor" style="font-size: 8px;">Contador</div>
+                </div>
+            </div>
+            
+            <!-- COORDINADOR -->
+            <div style="text-align: center;">
+                <div style="margin-bottom: 5px;">
+                    <div class="valor" style="font-size: 8px; font-weight: bold;">{{ nombre_coordinador|default:"-" }}</div>
+                </div>
+                
+                <div style="height: 25px; border-bottom: 1px solid #333; margin: 5px auto; width: 90%;"></div>
+                
+                <div style="margin-top: 3px;">
+                    <div class="valor" style="font-size: 8px;">Coordinador</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Nota al pie -->
+        <!-- <div style="margin-top: 10px; padding-top: 5px; border-top: 1px dashed #ddd; font-size: 6px; color: #777; text-align: center;">
+            <em>{{ sistema_nombre }} | {{ fecha_generacion }}</em>
+        </div> -->
+    </div>
+{% endblock %}

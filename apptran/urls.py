@@ -59,6 +59,7 @@ from .actividadespei.views.actividades_tareas_pei_views import ActividadPeiConTa
 from .viewdiagramaporidproyecto import DiagramaPorProyectoView
 #Informe de actividad
 from .monitoreo.views.crear_informe_actividad_views import InformeActividadView
+from .actividades.views.informe_act_principal_crud_view import InformeActividadPrincipalCrudView
 #Informe de tarea
 from .monitoreo.views.informe_tarea_views import InfTareaMinViews
 from .monitoreo.views.crear_informe_tarea_views import crear_informe_tarea_completo
@@ -66,14 +67,22 @@ from .monitoreo.views.crear_informe_tarea_views import crear_informe_tarea_compl
 from .actividades.views.datos_gantt_views import actividades_con_estados
 #Usuarios
 from .usuarios.views.usuario_views import listar_usuarios, buscar_usuarios_autocomplete, obtener_usuario_actual, listar_usuarios_publico
+from .usuarios.views.usuarios_crud_views import UsuarioCrudView
 #Informe de actividad principal
 from .monitoreo.views.informe_actividad_principal_views import InformeActividadPrincipalView
 from .monitoreo.views.informe_tarea_principal_views import InformeTareaPrincipalView
+from .monitoreo.views.lista_informe_actividad_completo_views import (
+    ActividadInformesCompletosView, 
+    InformesPorFechaView, 
+    ActividadesConResumenInformesView
+    )
 #Solicitude de viaje PEI
 from .monitoreo.views.obtener_solicitudes_viaje_pei_views import filtrar_solicitudes_viaje
 
 #PEI
 router = DefaultRouter()
+#Usuarios
+router.register(r'usuarios-crud', UsuarioCrudView, basename='usuarios_crud')
 #PEI
 router.register(r'pei', PeiViewModel, basename='pei')
 router.register(r'indicadores', IndicadorPeiViewSet, basename='indicadores')
@@ -134,6 +143,7 @@ router.register(r'solicitud-viaje-pei', SolicitudViajeActPeiView, basename='soli
 router.register(r'solicitud-pago-directo-pei', SolicitudPagoDirectoActPeiView, basename='solicitud_pago_directo_pei')
 router.register(r'solicitud-rendicion-cuentas-pei', RendicionCuentasActPeiView, basename='sol_rendicion_cuentas_pei')
 router.register(r'rendicion-cuentas-pei', RendicionCuentasActPeiView, basename='rendicion_cuentas_pei')
+router.register(r'informe-actividad-principal-crud', InformeActividadPrincipalCrudView, basename='Informe_actividad_principal_crud')
 #Actividades PEI
 router.register(r'actividades-pei', ActividadPeiViewModel, basename='actividades_pei')
 router.register(r'actividades-pei-principal', ActividadPeiPrincipalViewSet, basename='actividades_pei_principal')
@@ -241,6 +251,12 @@ urlpatterns =[
     path(r'pei/<int:pei_id>/con-actividades/', PeiConActividadesAPIView.as_view(), name="pei-con-actividades"),
     # Dashboard enriquecido del PEI
     path(r'pei/<int:pk>/dashboard/enriquecido/', PeiDashboardEstructuraSimpleView.as_view(), name='pei-dashboard-enriquecido'),
+    ###################################Informes de Actividad - Principales #####################
+    path(r'actividades/<int:actividad_id>/informes-principal-completos/',ActividadInformesCompletosView.as_view(), name='actividad-informes-completos'),
+    # Endpoint para filtrar informes por fecha
+    path(r'actividades/<int:actividad_id>/informes-principal-completos-por-fecha/', InformesPorFechaView.as_view(), name='informes-por-fecha'),
+    # También puedes agregar un endpoint para lista de actividades con resumen de informes
+    path(r'actividades/con-resumen-informes-principal-completos/', ActividadesConResumenInformesView.as_view(), name='actividades-con-resumen-informes'),
 ]
 
 urlpatterns += router.urls

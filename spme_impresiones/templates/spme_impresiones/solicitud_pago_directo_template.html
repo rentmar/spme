@@ -1,0 +1,270 @@
+{% extends "spme_impresiones/base_template.html" %}
+
+{% block content %}
+    <!-- SECCIÓN 1: INFORMACIÓN DEL SOLICITANTE -->
+    <div class="seccion compact-section">
+        <div class="seccion-titulo">👤 INFORMACIÓN DEL SOLICITANTE</div>
+        
+        <div class="grid-3">
+            <div class="campo">
+                <div class="etiqueta">Nombre:</div>
+                <div class="valor">{{ nombre_solicitante }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">C.I.:</div>
+                <div class="valor">{{ documento_identidad }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Cargo:</div>
+                <div class="valor">{{ cargo }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SECCIÓN 2: INFORMACIÓN DE LA ACTIVIDAD -->
+    <div class="seccion compact-section">
+        <div class="seccion-titulo">📅 INFORMACIÓN DE LA ACTIVIDAD</div>
+        
+        <div class="grid-3">
+            <div class="campo">
+                <div class="etiqueta">Código:</div>
+                <div class="valor">{{ codigo_actividad }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Actividad:</div>
+                <div class="valor">{{ nombre_actividad }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Estado:</div>
+                <div class="valor">{{ estado_actividad }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Ejecución:</div>
+                <div class="valor">{{ fecha_ejecucion }}</div>
+            </div>
+        </div>
+        
+        <!-- DESCRIPCIÓN -->
+        <div class="campo">
+            <div class="etiqueta">Descripción:</div>
+            <div class="valor">{{ descripcion_actividad|default:"No especificada" }}</div>
+        </div>
+        
+        <!-- OBJETIVO -->
+        <div class="campo">
+            <div class="etiqueta">Objetivo:</div>
+            <div class="valor">{{ objetivo_actividad|default:"No especificado" }}</div>
+        </div>
+        
+        <!-- FINANCIAMIENTO -->
+        <div class="campo">
+            <div class="etiqueta">Financiamiento:</div>
+            <div class="valor">
+                {% if fuentes_financiamiento %}
+                    {% for fuente in fuentes_financiamiento %}
+                        • {{ fuente.nombre }}: Bs.{{ fuente.monto|floatformat:2 }}<br>
+                    {% endfor %}
+                {% else %}
+                    No especificado
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- SECCIÓN 3: DETALLE DE GASTOS PARA PAGO DIRECTO -->
+    <div class="seccion">
+        <div class="seccion-titulo">💰 DETALLE DE GASTOS PARA PAGO DIRECTO</div>
+        
+        {% if detalle_gastos %}
+        <table class="tabla tabla-gastos">
+            <thead>
+                <tr>
+                    <th width="5%">N°</th>
+                    <th width="15%">PARTIDA</th>
+                    <th width="35%">DESCRIPCIÓN</th>
+                    <th width="15%">MONTO (Bs.)</th>
+                    <th width="30%">OBSERVACIONES</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for gasto in detalle_gastos %}
+                <tr>
+                    <td>{{ gasto.indice|default:forloop.counter }}</td>
+                    <td>{{ gasto.partida|default:"-" }}</td>
+                    <td>{{ gasto.descripcion_gasto|default:"-" }}</td>
+                    <td style="text-align: right;">{{ gasto.monto|floatformat:2 }}</td>
+                    <td>{{ gasto.observaciones|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+                
+                <tr class="total-row">
+                    <td colspan="3" style="text-align: right; font-weight: bold;">TOTAL A PAGAR:</td>
+                    <td style="text-align: right; font-weight: bold;">
+                        Bs. {{ monto_solicitado|floatformat:2 }}
+                    </td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div style="margin-top: 5px; font-size: 7px; color: #666; text-align: right;">
+            Total de {{ detalle_gastos|length }} concepto{{ detalle_gastos|length|pluralize:"s" }}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 10px; color: #999; font-size: 8px;">
+            No se ha registrado detalle de gastos para pago directo
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- SECCIÓN 4: INFORMACIÓN ADICIONAL -->
+    <div class="seccion compact-section">
+        <div class="seccion-titulo">📋 INFORMACIÓN ADICIONAL</div>
+        
+        <div class="grid-2">
+            <div class="campo">
+                <div class="etiqueta">Lugar de Solicitud:</div>
+                <div class="valor">{{ lugar_solicitud|default:"No especificado" }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Fecha Solicitud:</div>
+                <div class="valor">{{ fecha_solicitud }}</div>
+            </div>
+        </div>
+        
+        <div class="campo">
+            <div class="etiqueta">Forma de Pago:</div>
+            <div class="valor">{{ forma_pago }}</div>
+        </div>
+        
+        <!-- DATOS DE TRANSFERENCIA BANCARIA -->
+        {% if datos_forma_pago.mostrar_transferencia %}
+        <div class="forma-pago-detalle">
+            <div style="font-weight: bold; color: #1976d2; font-size: 8px; margin-bottom: 3px;">
+                🏦 DATOS DE TRANSFERENCIA BANCARIA:
+            </div>
+            
+            <div class="grid-2" style="gap: 5px;">
+                <div class="campo">
+                    <div class="etiqueta">Nombre:</div>
+                    <div class="valor">{{ datos_forma_pago.transferencia.nombre_transferencia|default:"No especificado" }}</div>
+                </div>
+                
+                <div class="campo">
+                    <div class="etiqueta">C.I.:</div>
+                    <div class="valor">{{ datos_forma_pago.transferencia.ci_transferencia|default:"No especificado" }}</div>
+                </div>
+                
+                {% if datos_forma_pago.transferencia.entidad_bancaria %}
+                <div class="campo">
+                    <div class="etiqueta">Banco:</div>
+                    <div class="valor">{{ datos_forma_pago.transferencia.entidad_bancaria }}</div>
+                </div>
+                {% endif %}
+                
+                {% if datos_forma_pago.transferencia.tipo_cuenta %}
+                <div class="campo">
+                    <div class="etiqueta">Tipo Cuenta:</div>
+                    <div class="valor">{{ datos_forma_pago.transferencia.tipo_cuenta }}</div>
+                </div>
+                {% endif %}
+                
+                {% if datos_forma_pago.transferencia.numero_cuenta %}
+                <div class="campo" style="grid-column: span 2;">
+                    <div class="etiqueta">Número de Cuenta:</div>
+                    <div class="valor">{{ datos_forma_pago.transferencia.numero_cuenta }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- DATOS DE PAGO A TERCEROS/OTROS -->
+        {% if datos_forma_pago.mostrar_otros %}
+        <div class="forma-pago-detalle">
+            <div style="font-weight: bold; color: #1976d2; font-size: 8px; margin-bottom: 3px;">
+                👤 DATOS DE PAGO A TERCEROS:
+            </div>
+            
+            <div class="grid-2" style="gap: 5px;">
+                <div class="campo">
+                    <div class="etiqueta">Nombre:</div>
+                    <div class="valor">{{ datos_forma_pago.otros.nombre_otros|default:"No especificado" }}</div>
+                </div>
+                
+                <div class="campo">
+                    <div class="etiqueta">C.I.:</div>
+                    <div class="valor">{{ datos_forma_pago.otros.ci_otros|default:"No especificado" }}</div>
+                </div>
+            </div>
+            
+            {% if datos_forma_pago.otros.observaciones %}
+            <div class="campo">
+                <div class="etiqueta">Observaciones:</div>
+                <div class="valor">{{ datos_forma_pago.otros.observaciones }}</div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <!-- PAGO DIRECTO EN EFECTIVO -->
+        {% if datos_forma_pago.tipo == 'efectivo' or not datos_forma_pago.mostrar_transferencia and not datos_forma_pago.mostrar_otros %}
+        <div class="forma-pago-detalle">
+            <div style="font-weight: bold; color: #1976d2; font-size: 8px; margin-bottom: 3px;">
+                💵 PAGO DIRECTO EN EFECTIVO
+            </div>
+            <div class="valor">El pago se realizará en efectivo de manera directa.</div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- SECCIÓN 5: FIRMAS Y VALIDACIONES -->
+    <div class="seccion">
+        <div class="seccion-titulo">✍️ FIRMAS Y VALIDACIONES</div>
+        
+        <div class="grid-2">
+            <div>
+                <div class="campo">
+                    <div class="etiqueta">Contador:</div>
+                    <div class="valor">{{ nombre_contador|default:"No asignado" }}</div>
+                </div>
+                
+                <div class="firma-area">
+                    <div class="linea-firma"></div>
+                    <div class="nombre-firma">{{ nombre_contador|default:"____________________" }}</div>
+                    <div class="cargo-firma">Contador</div>
+                </div>
+            </div>
+            
+            <div>
+                <div class="campo">
+                    <div class="etiqueta">Coordinador:</div>
+                    <div class="valor">{{ nombre_coordinador|default:"No asignado" }}</div>
+                </div>
+                
+                <div class="firma-area">
+                    <div class="linea-firma"></div>
+                    <div class="nombre-firma">{{ nombre_coordinador|default:"____________________" }}</div>
+                    <div class="cargo-firma">Coordinador/Dirección</div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 10px; padding: 6px; background-color: #fff8e1; border-radius: 3px; border-left: 3px solid #ff9800;">
+            <div style="font-weight: bold; color: #ff9800; font-size: 8px; margin-bottom: 2px;">
+                ⚠️ NOTA IMPORTANTE:
+            </div>
+            <div style="font-size: 7px; line-height: 1.2;">
+                Este documento autoriza el pago directo a proveedores o terceros, 
+                debiendo presentar la documentación de respaldo correspondiente 
+                (facturas, recibos, contratos) para su registro contable.
+            </div>
+        </div>
+    </div>
+{% endblock %}

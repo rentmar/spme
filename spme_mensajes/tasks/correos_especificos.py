@@ -373,3 +373,46 @@ def enviar_correo_solicitud_aprobada(self, destinatario, datos_aprobacion, conte
             'error': error_msg,
             'tipo': 'solicitud_aprobada'
         }
+    
+
+# ============================================================================
+# 4. Enviar correo generico
+# ============================================================================
+
+@shared_task
+def enviar_correo_generico(destinatario, asunto_template, cuerpo_template, contexto, nombre=None):
+    """
+    Tarea genérica para enviar correos con templates
+    """
+    try:
+        from django.core.mail import EmailMultiAlternatives
+        from django.template.loader import render_to_string
+        from django.utils.html import strip_tags
+        
+        # Renderizar asunto
+        asunto = render_to_string(asunto_template, contexto).strip()
+        
+        # Renderizar cuerpo HTML
+        html_content = render_to_string(cuerpo_template, contexto)
+        
+        # Crear versión de texto plano
+        text_content = strip_tags(html_content)
+        
+        # Crear email
+        email = EmailMultiAlternatives(
+            subject=asunto,
+            body=text_content,
+            to=[destinatario]
+        )
+        
+        email.attach_alternative(html_content, "text/html")
+        
+        # Enviar
+        email.send()
+        
+        logger.info(f"✅ Correo enviado a {destinatario}: {asunto}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"❌ Error enviando correo a {destinatario}: {str(e)}")
+        raise    
