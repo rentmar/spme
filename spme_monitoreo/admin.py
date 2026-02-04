@@ -28,13 +28,6 @@ import json
 
 #Formas de pago
 admin.site.register(FormaPago)
-
-#Solicitudes proyecto
-#admin.site.register(RendicionCuentas)
-#admin.site.register(SolicitudReembolso)
-#admin.site.register(SolicitudPagoDirecto)
-
-
 #SOLICITUDES DEL PEI
 admin.site.register(SolicitudFondosActPei)
 admin.site.register(RendicionCuentasActPei)
@@ -116,7 +109,7 @@ class SolicitudFondosAdmin(admin.ModelAdmin):
         'contador__username',
         'coordinador__username'
     ]
-    
+     
     # Campos de solo lectura
     readonly_fields = ['numeroFormulario', 'fechaSolicitud']
     
