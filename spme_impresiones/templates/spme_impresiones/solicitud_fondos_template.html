@@ -215,7 +215,22 @@
     <div class="seccion">
         <div class="seccion-titulo">✍️ FIRMAS Y VALIDACIONES</div>
         
-        <div class="grid-2">
+        <div class="grid-3">
+            <!-- SOLICITANTE -->
+            <div>
+                <div class="campo">
+                    <div class="etiqueta">Solicitante:</div>
+                    <div class="valor">{{ nombre_solicitante|truncatechars:25 }}</div>
+                </div>
+                
+                <div class="firma-area" style="padding-top: 20px;">
+                    <div class="linea-firma" style="width: 90%;"></div>
+                    <div class="nombre-firma">{{ nombre_solicitante|truncatechars:20 }}</div>
+                    <div class="cargo-firma">{{ cargo|truncatechars:15|default:"Solicitante" }}</div>
+                </div>
+            </div>
+            
+            <!-- CONTADOR -->
             <div>
                 <div class="campo">
                     <div class="etiqueta">Contador:</div>
@@ -229,6 +244,7 @@
                 </div>
             </div>
             
+            <!-- COORDINADOR -->
             <div>
                 <div class="campo">
                     <div class="etiqueta">Coordinador:</div>

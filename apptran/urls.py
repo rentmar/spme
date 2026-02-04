@@ -41,6 +41,16 @@ from .monitoreo.views.sol_viaje_pei_crud_views import SolicitudViajeActPeiView
 from .monitoreo.views.sol_pago_dir_pei_crud_views import SolicitudPagoDirectoActPeiView
 from .monitoreo.views.rendicion_cuentas_pei_crud_views import RendicionCuentasActPeiView
 from .monitoreo.views.sol_reembolso_crud_views import SolicitudReembolsoV2View
+from .solactividad.views.lista_sol_fondos_por_actividad_views import SolicitudesPorActividadConTareaNulaView
+from .solactividad.views.lista_sol_fondos_por_tarea_views import SolicitudesPorActividadYTareaView
+from .solviaje.views.lista_sol_viaje_por_tarea_views import SolicitudesViajePorActividadYTareaView
+from .solpagodirecto.views.lista_sol_pago_directo_por_tarea_views import SolicitudesPagoDirectoPorActividadYTareaView
+from .solreposicion.views.lista_sol_reposicion_por_tarea_views import SolicitudesReembolsoPorActividadYTareaView
+from .solrendicioncuentas.views.lista_rendicion_cuentas_por_tarea_views import RendicionesPorActividadYTareaView
+from .solviaje.views.lista_sol_viaje_por_actividad_views import SolicitudesViajeSinTareaPorActividadView
+from .solpagodirecto.views.lista_sol_pago_directo_por_actividad_views import SolicitudesPagoDirectoSinTareaPorActividadView
+from .solreposicion.views.lista_sol_reposicion_por_actividad_views import SolicitudesReembolsoSinTareaPorActividadView
+from .solrendicioncuentas.views.lista_rendicion_cuentas_por_actividad_views import RendicionesSinTareaPorActividadView
 #PEI
 from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
 from .pei.views.detalles_vista_pei_views import PeiDashboardEstructuraSimpleView
@@ -257,6 +267,22 @@ urlpatterns =[
     path(r'actividades/<int:actividad_id>/informes-principal-completos-por-fecha/', InformesPorFechaView.as_view(), name='informes-por-fecha'),
     # También puedes agregar un endpoint para lista de actividades con resumen de informes
     path(r'actividades/con-resumen-informes-principal-completos/', ActividadesConResumenInformesView.as_view(), name='actividades-con-resumen-informes'),
+    ####################################SOLICITUDES Y RENDICIONES ######################33
+    ##### ACTIVIDADES
+    path(r'solicitudes-fondos/actividad/<int:id_actividad>/', SolicitudesPorActividadConTareaNulaView.as_view(), name='solicitudes-por-actividad'),
+    path(r'solicitudes-viaje/actividad/<int:id_actividad>/', SolicitudesViajeSinTareaPorActividadView.as_view(), name='solicitudes-viaje-sin-tarea-por-actividad'),
+    path(r'solicitudes-pago-directo/actividad/<int:id_actividad>/', SolicitudesPagoDirectoSinTareaPorActividadView.as_view(), name='solicitudes-pago-directo-sin-tarea-por-actividad'),
+    path(r'solicitudes-reembolso/actividad/<int:id_actividad>/', SolicitudesReembolsoSinTareaPorActividadView.as_view(), name='solicitudes-reembolso-sin-tarea-por-actividad'),
+    path(r'rendiciones-cuentas/actividad/<int:id_actividad>/', RendicionesSinTareaPorActividadView.as_view(), name='rendiciones-sin-tarea-por-actividad'),
+    ##Tareas
+    #Solicitud de fondos para tareas
+    path(r'solicitudes-fondos/actividad/<int:id_actividad>/tarea/<int:id_tarea>/', SolicitudesPorActividadYTareaView.as_view(), name='solicitudes-por-actividad-y-tarea'),
+    #Solicitud de viaje
+    path(r'solicitudes-viaje/actividades/<int:id_actividad>/tareas/<int:id_tarea>/', SolicitudesViajePorActividadYTareaView.as_view(), name='solicitudes-viaje-por-actividad-tarea'),
+    #Sol de pago directo
+    path(r'solicitudes-pago-directo/actividades/<int:id_actividad>/tareas/<int:id_tarea>/', SolicitudesPagoDirectoPorActividadYTareaView.as_view(), name='solicitudes-pago-directo-por-actividad-tarea'),
+    path(r'solicitudes-reembolso/actividades/<int:id_actividad>/tareas/<int:id_tarea>/', SolicitudesReembolsoPorActividadYTareaView.as_view(), name='solicitudes-reembolso-por-actividad-tarea'),
+    path(r'rendiciones-cuentas/actividades/<int:id_actividad>/tareas/<int:id_tarea>/', RendicionesPorActividadYTareaView.as_view(),name='rendiciones-por-actividad-tarea'),
 ]
 
 urlpatterns += router.urls

@@ -401,6 +401,7 @@ class ObjetivoEspecificoProySerializer(serializers.ModelSerializer):
     indicador_oe = IndicadorOeSerializer(many=True)
     resultados_oe = ResultadoOeSerializer(many=True)
     productos_oe = ProductoOeSerializer(many=True)    
+    proceso_oe = ProcesoSerializer(many=True, source='proceso_objetivo_especifico')
     class Meta:
         model = ObjetivoEspecificoProyecto
         fields = '__all__'         
