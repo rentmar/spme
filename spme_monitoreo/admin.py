@@ -29,11 +29,287 @@ import json
 #Formas de pago
 admin.site.register(FormaPago)
 #SOLICITUDES DEL PEI
-admin.site.register(SolicitudFondosActPei)
+# admin.site.register(SolicitudFondosActPei)
 admin.site.register(RendicionCuentasActPei)
 admin.site.register(SolicitudReembolsoActPei)
-admin.site.register(SolicitudViajeActPei)
-admin.site.register(SolicitudPagoDirectoActPei)
+#admin.site.register(SolicitudViajeActPei)
+#admin.site.register(SolicitudPagoDirectoActPei)
+
+@admin.register(SolicitudFondosActPei)
+class SolicitudFondosActPeiAdmin(admin.ModelAdmin):
+    # Campos a mostrar en la lista
+    list_display = [
+        'mostrar_id_solicitud',
+        'mostrar_id_actividad',
+        'mostrar_id_tarea',
+        'numeroFormulario',
+        'montoSolicitado',
+        'fechaSolicitud',
+        'usuario'
+    ]
+    
+    # Campos para búsqueda
+    search_fields = [
+        'id',
+        'numeroFormulario',
+        'actividad__id',
+        'tarea__id',
+        'usuario__username'
+    ]
+    
+    # Campos de solo lectura
+    readonly_fields = ['numeroFormulario']
+    
+    # Para ordenar por defecto por ID
+    ordering = ['-id']
+    
+    # Mostrar más elementos por página
+    list_per_page = 50
+    
+    # Métodos personalizados
+    def mostrar_id_solicitud(self, obj):
+        return f"ID: {obj.id}"
+    mostrar_id_solicitud.short_description = 'ID Solicitud'
+    mostrar_id_solicitud.admin_order_field = 'id'
+    
+    def mostrar_id_actividad(self, obj):
+        if obj.actividad:
+            return f"ID: {obj.actividad.id}"
+        return "Sin actividad"
+    mostrar_id_actividad.short_description = 'ID Actividad'
+    mostrar_id_actividad.admin_order_field = 'actividad__id'
+    
+    def mostrar_id_tarea(self, obj):
+        if obj.tarea:
+            return f"ID: {obj.tarea.id}"
+        return "Sin tarea"
+    mostrar_id_tarea.short_description = 'ID Tarea'
+    mostrar_id_tarea.admin_order_field = 'tarea__id'
+
+@admin.register(SolicitudViajeActPei)
+class SolicitudViajeActPeiAdmin(admin.ModelAdmin):
+    # Campos a mostrar en la lista
+    list_display = [
+        'solicitud_id',
+        'actividad_id',
+        'tarea_id',
+        'numeroFormulario',
+        'evento',
+        'lugarEvento',
+        'fechaEvento',
+        'montoSolicitado',
+        'usuario',
+        'bloquearIconos',
+        'validacionResponsable',
+        'validacionCoordinador'
+    ]
+    
+    # Campos para búsqueda
+    search_fields = [
+        'id',
+        'numeroFormulario',
+        'actividad__id',
+        'tarea__id',
+        'evento',
+        'lugarEvento',
+        'usuario__username'
+    ]
+    
+    # Filtros en la barra lateral
+    list_filter = [
+        'validacionResponsable',
+        'validacionCoordinador',
+        'bloquearIconos',
+        'fechaSolicitud',
+        'fechaEvento',
+        'actividad',
+        'tarea'
+    ]
+    
+    # Campos de solo lectura
+    readonly_fields = ['numeroFormulario']
+    
+    # Campos editables en la lista
+    list_editable = [
+        'bloquearIconos',
+        'validacionResponsable',
+        'validacionCoordinador'
+    ]
+    
+    # Para ordenar por defecto por ID
+    ordering = ['-id']
+    
+    # Mostrar más elementos por página
+    list_per_page = 50
+    
+    # Métodos personalizados para mostrar IDs
+    def solicitud_id(self, obj):
+        return obj.id
+    solicitud_id.short_description = 'ID'
+    solicitud_id.admin_order_field = 'id'
+    
+    def actividad_id(self, obj):
+        return obj.actividad.id if obj.actividad else None
+    actividad_id.short_description = 'Actividad ID'
+    actividad_id.admin_order_field = 'actividad__id'
+    
+    def tarea_id(self, obj):
+        return obj.tarea.id if obj.tarea else None
+    tarea_id.short_description = 'Tarea ID'
+    tarea_id.admin_order_field = 'tarea__id'
+    
+    # Configuración del formulario de edición
+    fieldsets = (
+        ('Información General', {
+            'fields': (
+                'numeroFormulario',
+                'fechaSolicitud',
+                'lugarSolicitud',
+                'usuario',
+                'actividad',
+                'tarea'
+            )
+        }),
+        ('Detalles del Evento', {
+            'fields': (
+                'evento',
+                'lugarEvento',
+                'fechaEvento',
+                'institucionesParticipantes',
+                'organizador',
+                'quienCubreGastos',
+                'justificacionAsistencia',
+                'fondosUnitas',
+                'tareasPrevias',
+            )
+        }),
+        ('Información Financiera', {
+            'fields': (
+                'montoSolicitado',
+                'detalleGasto',
+                'formaPago',
+                'datos_forma_pago',
+            )
+        }),
+        ('Validaciones', {
+            'fields': (
+                'validacionResponsable',
+                'responsable',
+                'validacionCoordinador',
+                'coordinador',
+                'bloquearIconos',
+            )
+        }),
+    )
+
+
+@admin.register(SolicitudPagoDirectoActPei)
+class SolicitudPagoDirectoActPeiAdmin(admin.ModelAdmin):
+    # Campos a mostrar en la lista
+    list_display = [
+        'solicitud_id',
+        'actividad_id',
+        'tarea_id',
+        'numeroFormulario',
+        'montoSolicitado',
+        'fechaSolicitud',
+        'usuario',
+        'bloquearIconosSolFondos',
+        'validacionResponsable',
+        'validacionCoordinador'
+    ]
+    
+    # Campos para búsqueda
+    search_fields = [
+        'id',
+        'numeroFormulario',
+        'actividad__id',
+        'tarea__id',
+        'usuario__username',
+        'descripcion_actividad'
+    ]
+    
+    # Filtros en la barra lateral
+    list_filter = [
+        'validacionResponsable',
+        'validacionCoordinador',
+        'bloquearIconosSolFondos',
+        'fechaSolicitud',
+        'fechaRealizacionActividad',
+        'actividad',
+        'tarea'
+    ]
+    
+    # Campos de solo lectura
+    readonly_fields = ['numeroFormulario']
+    
+    # Campos editables en la lista
+    list_editable = [
+        'bloquearIconosSolFondos',
+        'validacionResponsable',
+        'validacionCoordinador'
+    ]
+    
+    # Para ordenar por defecto por ID
+    ordering = ['-id']
+    
+    # Mostrar más elementos por página
+    list_per_page = 50
+    
+    # Métodos personalizados para mostrar IDs
+    def solicitud_id(self, obj):
+        return obj.id
+    solicitud_id.short_description = 'ID'
+    solicitud_id.admin_order_field = 'id'
+    
+    def actividad_id(self, obj):
+        return obj.actividad.id if obj.actividad else None
+    actividad_id.short_description = 'Actividad ID'
+    actividad_id.admin_order_field = 'actividad__id'
+    
+    def tarea_id(self, obj):
+        return obj.tarea.id if obj.tarea else None
+    tarea_id.short_description = 'Tarea ID'
+    tarea_id.admin_order_field = 'tarea__id'
+    
+    # Configuración del formulario de edición
+    fieldsets = (
+        ('Información General', {
+            'fields': (
+                'numeroFormulario',
+                'fechaSolicitud',
+                'lugarSolicitud',
+                'usuario',
+                'actividad',
+                'tarea'
+            )
+        }),
+        ('Detalles de la Actividad', {
+            'fields': (
+                'fechaRealizacionActividad',
+                'descripcion_actividad',
+                'objetivo_actividad',
+            )
+        }),
+        ('Información Financiera', {
+            'fields': (
+                'montoSolicitado',
+                'detalleDestinoFondos',
+                'formaPago',
+                'datos_forma_pago',
+            )
+        }),
+        ('Validaciones', {
+            'fields': (
+                'validacionResponsable',
+                'contador',
+                'validacionCoordinador',
+                'coordinador',
+                'bloquearIconosSolFondos',
+            )
+        }),
+    )
+
 
 #Informes de actividad
 #admin.site.register(InformeActividad)
@@ -42,13 +318,6 @@ admin.site.register(InfTarea)
 
 admin.site.register(InformeActividadPrincipal)
 
-
-from django.contrib import admin
-from django.utils.html import format_html
-from .models import SolicitudFondos
-
-from django.contrib import admin
-from .models import SolicitudFondos
 
 @admin.register(SolicitudFondos)
 class SolicitudFondosAdmin(admin.ModelAdmin):
@@ -325,3 +594,166 @@ class RendicionCuentasAdmin(admin.ModelAdmin):
     
     # Campos para ordenar
     ordering = ['-fechaRendicion', '-id']    
+
+
+
+@admin.register(SolicitudViaje)
+class SolicitudViajeAdmin(admin.ModelAdmin):
+    # Campos a mostrar en la lista - SOLO IDs NUMÉRICOS
+    list_display = [
+        'id',  # ID de la solicitud
+        'numeroFormulario',
+        'fechaSolicitud',
+        'evento',
+        'actividad_id',  # ID numérico directo
+        'tarea_id',      # ID numérico directo
+        'get_solicitante_display',
+        'montoSolicitado',
+        'estado_validacion',
+        'fechaEvento',
+    ]
+    
+    # Campos por los que se puede buscar
+    search_fields = [
+        'numeroFormulario',
+        'evento',
+        'lugarEvento',
+        'organizador',
+        'usuario__username',
+        'usuario__nombre',
+        'usuario__paterno',
+        'usuario__materno',
+        'id',
+    ]
+    
+    # Filtros en la barra lateral
+    list_filter = [
+        'fechaSolicitud',
+        'fechaEvento',
+        'validacionResponsable',
+        'validacionCoordinador',
+        'formaPago',
+        'lugarEvento',
+    ]
+    
+    # Campos de solo lectura
+    readonly_fields = [
+        'numeroFormulario',
+    ]
+    
+    # Campos a mostrar en el formulario de edición
+    fieldsets = (
+        ('Información Básica', {
+            'fields': (
+                'numeroFormulario',
+                'fechaSolicitud',
+                'lugarSolicitud',
+                'montoSolicitado',
+            )
+        }),
+        ('Información del Solicitante', {
+            'fields': (
+                'usuario',
+            )
+        }),
+        ('Información del Evento', {
+            'fields': (
+                'evento',
+                'lugarEvento',
+                'fechaEvento',
+                'organizador',
+                'institucionesParticipantes',
+                'quienCubreGastos',
+            )
+        }),
+        ('Detalles del Viaje', {
+            'fields': (
+                'justificacionAsistencia',
+                'fondosUnitas',
+                'tareasPrevias',
+                'detalleGasto',
+            )
+        }),
+        ('Información de Pago', {
+            'fields': (
+                'formaPago',
+                'datos_forma_pago',
+            )
+        }),
+        ('Validaciones', {
+            'fields': (
+                'validacionResponsable',
+                'responsable',
+                'validacionCoordinador',
+                'coordinador',
+            )
+        }),
+        ('Relaciones', {
+            'classes': ('collapse',),
+            'fields': (
+                'actividad',
+                'tarea',
+            )
+        }),
+        ('Configuración', {
+            'fields': (
+                'bloquearIconos',
+            )
+        }),
+    )
+    
+    # Ordenamiento por defecto
+    ordering = ['-fechaSolicitud', '-id']
+    
+    # Campos por los que se puede hacer clic para editar
+    list_display_links = ['id', 'numeroFormulario']
+    
+    # Paginación
+    list_per_page = 20
+    
+    # ========== MÉTODOS SIMPLES PARA MOSTRAR IDs NUMÉRICOS ==========
+    
+    # Método para mostrar ID numérico de actividad
+    def actividad_id(self, obj):
+        return obj.actividad.id if obj.actividad else '-'
+    actividad_id.short_description = 'ID Actividad'
+    actividad_id.admin_order_field = 'actividad__id'
+    
+    # Método para mostrar ID numérico de tarea
+    def tarea_id(self, obj):
+        return obj.tarea.id if obj.tarea else '-'
+    tarea_id.short_description = 'ID Tarea'
+    tarea_id.admin_order_field = 'tarea__id'
+    
+    # Método personalizado para mostrar estado de validación
+    def estado_validacion(self, obj):
+        if obj.validacionResponsable and obj.validacionCoordinador:
+            return format_html('<span style="color: green; font-weight: bold;">✓ Aprobado</span>')
+        elif obj.validacionResponsable or obj.validacionCoordinador:
+            return format_html('<span style="color: orange; font-weight: bold;">● Pendiente</span>')
+        else:
+            return format_html('<span style="color: red; font-weight: bold;">✗ Por validar</span>')
+    estado_validacion.short_description = 'Estado Validación'
+    
+    # Método personalizado para mostrar "solicitante"
+    def get_solicitante_display(self, obj):
+        if obj.usuario:
+            nombre_completo = f"{obj.usuario.nombre} {obj.usuario.paterno} {obj.usuario.materno}".strip()
+            if nombre_completo:
+                return nombre_completo
+            return obj.usuario.username
+        return "Sin solicitante"
+    get_solicitante_display.short_description = 'Solicitante'
+    get_solicitante_display.admin_order_field = 'usuario'
+    
+    # Para optimizar las consultas
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.select_related(
+            'usuario',
+            'responsable',
+            'coordinador',
+            'formaPago',
+            'actividad',
+            'tarea'
+        )

@@ -51,6 +51,9 @@ from .solviaje.views.lista_sol_viaje_por_actividad_views import SolicitudesViaje
 from .solpagodirecto.views.lista_sol_pago_directo_por_actividad_views import SolicitudesPagoDirectoSinTareaPorActividadView
 from .solreposicion.views.lista_sol_reposicion_por_actividad_views import SolicitudesReembolsoSinTareaPorActividadView
 from .solrendicioncuentas.views.lista_rendicion_cuentas_por_actividad_views import RendicionesSinTareaPorActividadView
+from .solactividad.views.lista_sol_fondos_por_actividad_pei_views import SolicitudesPorActividadPeiConTareaNulaView
+from .solviaje.views.lista_sol_viaje_por_actividad_pei_views import SolicitudesViajePorActividadPeiConTareaNulaView
+from .solpagodirecto.views.lista_sol_pago_directo_por_actividad_pei_views import SolicitudesPagoDirectoPorActividadPeiSinTareaView
 #PEI
 from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
 from .pei.views.detalles_vista_pei_views import PeiDashboardEstructuraSimpleView
@@ -283,6 +286,11 @@ urlpatterns =[
     path(r'solicitudes-pago-directo/actividades/<int:id_actividad>/tareas/<int:id_tarea>/', SolicitudesPagoDirectoPorActividadYTareaView.as_view(), name='solicitudes-pago-directo-por-actividad-tarea'),
     path(r'solicitudes-reembolso/actividades/<int:id_actividad>/tareas/<int:id_tarea>/', SolicitudesReembolsoPorActividadYTareaView.as_view(), name='solicitudes-reembolso-por-actividad-tarea'),
     path(r'rendiciones-cuentas/actividades/<int:id_actividad>/tareas/<int:id_tarea>/', RendicionesPorActividadYTareaView.as_view(),name='rendiciones-por-actividad-tarea'),
+    ###### ACTIVIDADES PEI
+    path(r'solicitudes-fondos/actividad-pei/<int:id_actividad_pei>/', SolicitudesPorActividadPeiConTareaNulaView.as_view(), name='solicitudes-por-actividad-pei'),  
+    path(r'solicitudes-viaje/actividad-pei/<int:id_actividad_pei>/', SolicitudesViajePorActividadPeiConTareaNulaView.as_view(), name='solicitudes-viaje-por-actividad-pei'),
+    path(r'solicitudes-pago-directo/actividad-pei/<int:id_actividad_pei>/', SolicitudesPagoDirectoPorActividadPeiSinTareaView.as_view(), name='solicitudes-pago-directo-sin-tarea'),
+    ###### TAREAS PEI
 ]
 
 urlpatterns += router.urls
