@@ -285,3 +285,90 @@ class SolicitudesViajePorActividadPeiConTareaNulaView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class SolicitudesViajePorTareaActividadPeiView(APIView):
+    """
+    Endpoint para obtener solicitudes de viaje por tarea de ActividadPei
+    """
+    
+    def get(self, request, id_tarea_pei):
+        """
+        GET /api/solicitudes-viaje/tarea-actividad-pei/{id_tarea_pei}/
+        """
+        try:
+            # Verificar si la tarea PEI existe
+            try:
+                tarea_pei = TareaActividadPei.objects.get(id=id_tarea_pei)
+            except TareaActividadPei.DoesNotExist:
+                return Response({
+                    'success': False,
+                    'error': f'Tarea Actividad PEI con ID {id_tarea_pei} no encontrada',
+                    'tarea_pei_id': id_tarea_pei
+                }, status=status.HTTP_404_NOT_FOUND)
+            
+            # Obtener solicitudes relacionadas con esta tarea
+            queryset = SolicitudViajeActPei.objects.filter(
+                tarea_id=id_tarea_pei
+            ).select_related(
+                'actividad', 
+                'tarea', 
+                'formaPago', 
+                'usuario', 
+                'responsable', 
+                'coordinador'
+            )
+            
+            # Aplicar ordenamiento
+            ordenar_por = request.query_params.get('ordenar_por', '-fechaSolicitud')
+            if ordenar_por in ['fechaSolicitud', '-fechaSolicitud', 'montoSolicitado', '-montoSolicitado', 'fechaEvento', '-fechaEvento']:
+                queryset = queryset.order_by(ordenar_por)
+            
+            # Serializar
+            serializer = SolicitudViajeActPeiSimpleSerializer(
+                queryset, 
+                many=True,
+                context={'request': request}
+            )
+            
+            # Información de la tarea PEI
+            tarea_info = {
+                'id': tarea_pei.id,
+                'codigo': tarea_pei.codigo,
+                'titulo': tarea_pei.titulo,
+                'descripcion': tarea_pei.descripcion,
+                'estado': tarea_pei.estado,
+                'estado_display': tarea_pei.get_estado_display(),
+                'fecha_creacion': tarea_pei.fecha_creacion,
+                'fecha_ejecucion': tarea_pei.fecha_ejecucion,
+                'fecha_limite': tarea_pei.fecha_limite,
+                'presupuesto': float(tarea_pei.presupuesto) if tarea_pei.presupuesto else 0,
+                'actividad_pei': {
+                    'id': tarea_pei.actividad.id if tarea_pei.actividad else None,
+                    'codigo': tarea_pei.actividad.codigo if tarea_pei.actividad else None,
+                    'nombre_corto': tarea_pei.actividad.nombreCorto if tarea_pei.actividad else None
+                }
+            }
+            
+            # Calcular estadísticas
+            total_monto = queryset.aggregate(
+                total=Coalesce(Sum('montoSolicitado'), 0, output_field=DecimalField())
+            )['total']
+            
+            return Response({
+                'success': True,
+                'tarea_pei': tarea_info,
+                'estadisticas': {
+                    'total_solicitudes': queryset.count(),
+                    'total_monto': float(total_monto)
+                },
+                'solicitudes_viaje': serializer.data
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            import traceback
+            return Response({
+                'success': False,
+                'error': 'Error interno del servidor',
+                'detalle': str(e),
+                'traceback': traceback.format_exc(),
+                'tarea_pei_id': id_tarea_pei
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
