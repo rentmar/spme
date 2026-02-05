@@ -55,6 +55,7 @@ from .solactividad.views.lista_sol_fondos_por_actividad_pei_views import Solicit
 from .solviaje.views.lista_sol_viaje_por_actividad_pei_views import SolicitudesViajePorActividadPeiConTareaNulaView
 from .solpagodirecto.views.lista_sol_pago_directo_por_actividad_pei_views import SolicitudesPagoDirectoPorActividadPeiSinTareaView
 from .solreposicion.views.lista_sol_reposicion_por_actividad_pei_views import SolicitudesReembolsoPorActividadPeiSinTareaView
+from .solrendicioncuentas.views.lista_rendicion_cuentas_por_actividad_pei_views import RendicionesCuentasPorActividadPeiSinTareaView
 #PEI
 from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
 from .pei.views.detalles_vista_pei_views import PeiDashboardEstructuraSimpleView
@@ -292,6 +293,7 @@ urlpatterns =[
     path(r'solicitudes-viaje/actividad-pei/<int:id_actividad_pei>/', SolicitudesViajePorActividadPeiConTareaNulaView.as_view(), name='solicitudes-viaje-por-actividad-pei'),
     path(r'solicitudes-pago-directo/actividad-pei/<int:id_actividad_pei>/', SolicitudesPagoDirectoPorActividadPeiSinTareaView.as_view(), name='solicitudes-pago-directo-sin-tarea'),
     path(r'solicitudes-reembolso/actividad-pei/<int:id_actividad_pei>/', SolicitudesReembolsoPorActividadPeiSinTareaView.as_view(), name='solicitudes-reembolso-sin-tarea'),
+    path(r'rendiciones-cuentas/actividad-pei/<int:id_actividad_pei>/', RendicionesCuentasPorActividadPeiSinTareaView.as_view(), name='rendiciones-cuentas-sin-tarea'),
     ###### TAREAS PEI
 ]
 

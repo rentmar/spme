@@ -30,7 +30,7 @@ import json
 admin.site.register(FormaPago)
 #SOLICITUDES DEL PEI
 # admin.site.register(SolicitudFondosActPei)
-admin.site.register(RendicionCuentasActPei)
+#admin.site.register(RendicionCuentasActPei)
 #admin.site.register(SolicitudReembolsoActPei)
 #admin.site.register(SolicitudViajeActPei)
 #admin.site.register(SolicitudPagoDirectoActPei)
@@ -413,6 +413,178 @@ class SolicitudReembolsoActPeiAdmin(admin.ModelAdmin):
                 'responsable',
                 'validacionCoordinador',
                 'coordinador',
+                'bloquearIconos',
+            )
+        }),
+    )
+
+
+
+from django.contrib import admin
+from django.utils.html import format_html
+from .models import RendicionCuentasActPei
+
+@admin.register(RendicionCuentasActPei)
+class RendicionCuentasActPeiAdmin(admin.ModelAdmin):
+    # Campos a mostrar en la lista (incluyendo los editables)
+    list_display = [
+        'solicitud_id',
+        'actividad_id',
+        'tarea_id',
+        'numeroFormulario',
+        'montoAsignado',
+        'montoDescargado',
+        'saldo',
+        'usuario',
+        'fechaRendicion',
+        'tipo_solicitud',
+        'estado_validaciones',
+        'bloquearIconos',
+        'validacionResponsable',
+        'validacionCoordinador',
+        'validacionContador',
+        'validacionAdministrador'
+    ]
+    
+    # Campos para búsqueda
+    search_fields = [
+        'id',
+        'numeroFormulario',
+        'actividad__id',
+        'tarea__id',
+        'usuario__username',
+        'cpteDiario',
+        'descripcionActividad'
+    ]
+    
+    # Filtros en la barra lateral
+    list_filter = [
+        'validacionResponsable',
+        'validacionCoordinador',
+        'validacionContador',
+        'validacionAdministrador',
+        'bloquearIconos',
+        'fechaActividad',
+        'fechaRendicion',
+        'actividad',
+        'tarea'
+    ]
+    
+    # Campos de solo lectura
+    readonly_fields = ['numeroFormulario', 'fechaRendicion', 'saldo']
+    
+    # Campos editables en la lista (deben estar en list_display)
+    list_editable = [
+        'bloquearIconos',
+        'validacionResponsable',
+        'validacionCoordinador',
+        'validacionContador',
+        'validacionAdministrador'
+    ]
+    
+    # Para ordenar por defecto por ID
+    ordering = ['-id']
+    
+    # Mostrar más elementos por página
+    list_per_page = 50
+    
+    # Métodos personalizados para mostrar IDs
+    def solicitud_id(self, obj):
+        return obj.id
+    solicitud_id.short_description = 'ID'
+    solicitud_id.admin_order_field = 'id'
+    
+    def actividad_id(self, obj):
+        return obj.actividad.id if obj.actividad else None
+    actividad_id.short_description = 'Actividad ID'
+    actividad_id.admin_order_field = 'actividad__id'
+    
+    def tarea_id(self, obj):
+        return obj.tarea.id if obj.tarea else None
+    tarea_id.short_description = 'Tarea ID'
+    tarea_id.admin_order_field = 'tarea__id'
+    
+    # Método para mostrar tipo de solicitud
+    def tipo_solicitud(self, obj):
+        if obj.solicitudFondos:
+            return 'Fondos PEI'
+        elif obj.solicitudReembolso:
+            return 'Reembolso PEI'
+        elif obj.solicitudViaje:
+            return 'Viaje PEI'
+        elif obj.solicitudPagoDirecto:
+            return 'Pago Directo PEI'
+        return 'Sin solicitud'
+    tipo_solicitud.short_description = 'Tipo Solicitud'
+    
+    # Método para mostrar estado de validaciones (solo lectura, no editable)
+    def estado_validaciones(self, obj):
+        validaciones = []
+        if obj.validacionResponsable:
+            validaciones.append('Resp')
+        if obj.validacionCoordinador:
+            validaciones.append('Coord')
+        if obj.validacionContador:
+            validaciones.append('Cont')
+        if obj.validacionAdministrador:
+            validaciones.append('Admin')
+        
+        if validaciones:
+            return format_html(
+                '<span style="color: {}; font-weight: bold;">{}</span>',
+                'green' if len(validaciones) == 4 else 'orange',
+                ', '.join(validaciones)
+            )
+        return format_html('<span style="color: red; font-weight: bold;">Pendiente</span>')
+    estado_validaciones.short_description = 'Validaciones'
+    
+    # Configuración del formulario de edición
+    fieldsets = (
+        ('Información General', {
+            'fields': (
+                'numeroFormulario',
+                'fechaRendicion',
+                'lugarRendicion',
+                'usuario',
+                'actividad',
+                'tarea'
+            )
+        }),
+        ('Información de la Actividad', {
+            'fields': (
+                'fechaActividad',
+                'descripcionActividad',
+                'lugarActividad',
+            )
+        }),
+        ('Información Financiera', {
+            'fields': (
+                'cpteDiario',
+                'fechaDesembolso',
+                'montoAsignado',
+                'montoDescargado',
+                'saldo',
+                'detalleDestinoFondos',
+            )
+        }),
+        ('Solicitud Relacionada', {
+            'fields': (
+                'solicitudFondos',
+                'solicitudReembolso',
+                'solicitudViaje',
+                'solicitudPagoDirecto',
+            )
+        }),
+        ('Validaciones', {
+            'fields': (
+                'validacionResponsable',
+                'responsable',
+                'validacionCoordinador',
+                'coordinador',
+                'validacionContador',
+                'contador',
+                'validacionAdministrador',
+                'administrador',
                 'bloquearIconos',
             )
         }),
