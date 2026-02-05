@@ -31,7 +31,7 @@ admin.site.register(FormaPago)
 #SOLICITUDES DEL PEI
 # admin.site.register(SolicitudFondosActPei)
 admin.site.register(RendicionCuentasActPei)
-admin.site.register(SolicitudReembolsoActPei)
+#admin.site.register(SolicitudReembolsoActPei)
 #admin.site.register(SolicitudViajeActPei)
 #admin.site.register(SolicitudPagoDirectoActPei)
 
@@ -306,6 +306,114 @@ class SolicitudPagoDirectoActPeiAdmin(admin.ModelAdmin):
                 'validacionCoordinador',
                 'coordinador',
                 'bloquearIconosSolFondos',
+            )
+        }),
+    )
+
+
+@admin.register(SolicitudReembolsoActPei)
+class SolicitudReembolsoActPeiAdmin(admin.ModelAdmin):
+    # Campos a mostrar en la lista
+    list_display = [
+        'solicitud_id',
+        'actividad_id',
+        'tarea_id',
+        'numeroFormulario',
+        'montoSolicitado',
+        'fechaSolicitud',
+        'usuario',
+        'bloquearIconos',
+        'validacionResponsable',
+        'validacionCoordinador'
+    ]
+    
+    # Campos para búsqueda
+    search_fields = [
+        'id',
+        'numeroFormulario',
+        'actividad__id',
+        'tarea__id',
+        'usuario__username',
+        'descripcion_actividad'
+    ]
+    
+    # Filtros en la barra lateral
+    list_filter = [
+        'validacionResponsable',
+        'validacionCoordinador',
+        'bloquearIconos',
+        'fechaSolicitud',
+        'fechaRealizacionActividad',
+        'actividad',
+        'tarea'
+    ]
+    
+    # Campos de solo lectura
+    readonly_fields = ['numeroFormulario']
+    
+    # Campos editables en la lista
+    list_editable = [
+        'bloquearIconos',
+        'validacionResponsable',
+        'validacionCoordinador'
+    ]
+    
+    # Para ordenar por defecto por ID
+    ordering = ['-id']
+    
+    # Mostrar más elementos por página
+    list_per_page = 50
+    
+    # Métodos personalizados para mostrar IDs
+    def solicitud_id(self, obj):
+        return obj.id
+    solicitud_id.short_description = 'ID'
+    solicitud_id.admin_order_field = 'id'
+    
+    def actividad_id(self, obj):
+        return obj.actividad.id if obj.actividad else None
+    actividad_id.short_description = 'Actividad ID'
+    actividad_id.admin_order_field = 'actividad__id'
+    
+    def tarea_id(self, obj):
+        return obj.tarea.id if obj.tarea else None
+    tarea_id.short_description = 'Tarea ID'
+    tarea_id.admin_order_field = 'tarea__id'
+    
+    # Configuración del formulario de edición
+    fieldsets = (
+        ('Información General', {
+            'fields': (
+                'numeroFormulario',
+                'fechaSolicitud',
+                'lugarSolicitud',
+                'usuario',
+                'actividad',
+                'tarea'
+            )
+        }),
+        ('Detalles de la Actividad', {
+            'fields': (
+                'fechaRealizacionActividad',
+                'descripcion_actividad',
+                'objetivo_actividad',
+            )
+        }),
+        ('Información Financiera', {
+            'fields': (
+                'montoSolicitado',
+                'detalleDestinoFondos',
+                'formaPago',
+                'datos_forma_pago',
+            )
+        }),
+        ('Validaciones', {
+            'fields': (
+                'validacionResponsable',
+                'responsable',
+                'validacionCoordinador',
+                'coordinador',
+                'bloquearIconos',
             )
         }),
     )
