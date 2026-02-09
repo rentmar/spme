@@ -532,11 +532,6 @@ class InformeActividadPrincipal(InformeActividadBase):
         null=True,
         blank=True
     )
-
-    class Meta:
-        verbose_name = 'Informe de Actividad Principal'
-        verbose_name_plural = 'Informes de actividades Principal'
-
     def __str__(self):
         return f"Informe {self.numeroInforme} - {self.actividad.codigo if self.actividad else 'Sin actividad'}"    
 
@@ -563,9 +558,14 @@ class InformeTareaPrincipal(InformeActividadBase):
     def __str__(self):
         return f"Informe {self.numeroInforme} - {self.tarea.codigo if self.tarea else 'Sin Tarea'}"    
 
+    class Meta:
+        verbose_name = 'Informe de Actividad Principal'
+        verbose_name_plural = 'Informes de actividades Principal'
+
+    def __str__(self):
+        return f"Informe {self.numeroInforme} - {self.actividad.codigo if self.actividad else 'Sin actividad'}"    
 
 
- 
 #Informe Base
 class InformeBase(PolymorphicModel):
     numeroInforme = models.CharField(max_length=50, blank=True, null=True)

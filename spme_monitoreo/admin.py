@@ -8,7 +8,8 @@ from .models import (
     FormaPago, 
     InformeActividad, 
     InfActividad, 
-    InfTarea
+    InfTarea,
+
     )
 from .models import (
     SolicitudFondosActPei,
@@ -16,7 +17,9 @@ from .models import (
     SolicitudReembolsoActPei,
     SolicitudViajeActPei,
     SolicitudPagoDirectoActPei,
-    InformeActividadPrincipal
+    InformeActividadPrincipal,
+    InformeTareaPrincipal,
+    InformeActividadBase
 )
 from django.utils.html import format_html
 
@@ -24,6 +27,9 @@ from django.contrib import admin
 from django.utils.safestring import mark_safe
 from .models import SolicitudPagoDirecto
 import json
+
+from polymorphic.admin import PolymorphicParentModelAdmin, PolymorphicChildModelAdmin
+
 
 
 #Formas de pago
@@ -34,6 +40,134 @@ admin.site.register(FormaPago)
 #admin.site.register(SolicitudReembolsoActPei)
 #admin.site.register(SolicitudViajeActPei)
 #admin.site.register(SolicitudPagoDirectoActPei)
+
+from django.contrib import admin
+from polymorphic.admin import PolymorphicParentModelAdmin, PolymorphicChildModelAdmin
+
+from django.contrib import admin
+from django.contrib.admin import ModelAdmin
+
+
+from django.contrib import admin
+from .models import InformeActividadPrincipal
+
+
+from django.contrib import admin
+from .models import InformeActividadPrincipal
+
+@admin.register(InformeActividadPrincipal)
+class InformeActividadPrincipalAdmin(admin.ModelAdmin):
+    # Verifica qué campos existen realmente en tu modelo base
+    # Puedes inspeccionar los campos con: print([f.name for f in InformeActividadPrincipal._meta.fields])
+    
+    list_display = [
+        'id',
+        'numeroInforme',
+        'actividad_id',  # Método personalizado
+        'actividad_codigo',  # Método personalizado
+        'tipoActividad',
+        # Solo incluir campos que realmente existan
+    ]
+    
+    search_fields = [
+        'numeroInforme',
+        'tipoActividad',
+        'actividad__codigo',
+    ]
+    
+    list_filter = [
+        'tipoActividad',
+        # Solo incluir campos que existan para filtrar
+    ]
+    
+    # Método para mostrar ID de actividad
+    def actividad_id(self, obj):
+        return obj.actividad.id if obj.actividad else None
+    actividad_id.short_description = 'ID Actividad'
+    actividad_id.admin_order_field = 'actividad__id'
+    
+    # Método para mostrar código de actividad
+    def actividad_codigo(self, obj):
+        return obj.actividad.codigo if obj.actividad else 'Sin actividad'
+    actividad_codigo.short_description = 'Código Actividad'
+    actividad_codigo.admin_order_field = 'actividad__codigo'
+
+
+from django.contrib import admin
+from .models import InformeTareaPrincipal
+
+@admin.register(InformeTareaPrincipal)
+class InformeTareaPrincipalAdmin(admin.ModelAdmin):
+    # Campos a mostrar en la lista
+    list_display = [
+        'id',
+        'numeroInforme',
+        'tarea_id',  # Método personalizado para ID de tarea
+        'tarea_codigo',  # Método personalizado para código
+        'tipoActividad',
+    ]
+    
+    # Campos para búsqueda
+    search_fields = [
+        'numeroInforme',
+        'tipoActividad',
+        'tarea__codigo',  # Buscar por código de tarea
+        'objetivoTarea',
+    ]
+    
+    # Filtros laterales
+    list_filter = [
+        'tipoActividad',
+    ]
+    
+    # Campos de solo lectura en el formulario de edición
+    readonly_fields = [
+        'tarea_info_display',  # Método personalizado para mostrar info de tarea
+    ]
+    
+    # Campos a mostrar en el formulario de edición
+    fieldsets = (
+        ('Información General', {
+            'fields': (
+                'numeroInforme',
+                'tarea_info_display',
+                'tarea',
+                'tipoActividad',
+            )
+        }),
+        ('Contenido del Informe', {
+            'fields': (
+                'objetivoTarea',
+                'informeObjetivoTarea',
+            )
+        }),
+        ('Presupuesto', {
+            'fields': (
+                'desglosePresupuesto',
+            ),
+            'classes': ('collapse',),  # Sección colapsable
+        }),
+    )
+    
+    # Método para mostrar información de la tarea en el formulario
+    def tarea_info_display(self, obj):
+        if obj.tarea:
+            return f"ID: {obj.tarea.id} | Código: {obj.tarea.codigo}"
+        return "Sin tarea asignada"
+    tarea_info_display.short_description = 'Información de Tarea'
+    
+    # Método para mostrar el ID de la tarea en la lista
+    def tarea_id(self, obj):
+        return obj.tarea.id if obj.tarea else None
+    tarea_id.short_description = 'ID Tarea'
+    tarea_id.admin_order_field = 'tarea__id'  # Permite ordenar por ID
+    
+    # Método para mostrar el código de la tarea en la lista
+    def tarea_codigo(self, obj):
+        return obj.tarea.codigo if obj.tarea else 'Sin tarea'
+    tarea_codigo.short_description = 'Código Tarea'
+    tarea_codigo.admin_order_field = 'tarea__codigo'  # Permite ordenar por código
+
 
 @admin.register(SolicitudFondosActPei)
 class SolicitudFondosActPeiAdmin(admin.ModelAdmin):
@@ -596,7 +730,7 @@ class RendicionCuentasActPeiAdmin(admin.ModelAdmin):
 admin.site.register(InfActividad)
 admin.site.register(InfTarea)
 
-admin.site.register(InformeActividadPrincipal)
+#admin.site.register(InformeActividadPrincipal)
 
 
 @admin.register(SolicitudFondos)

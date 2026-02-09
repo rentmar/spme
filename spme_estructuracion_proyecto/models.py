@@ -411,7 +411,7 @@ class IndicadorObjetivoEspecifico(IndicadorProyecto):
     )
     class Meta:
         verbose_name = 'Indicador Objetivo Especifico de Proyecto'
-        verbose_name_plural = 'Indicadores Resultado Objetivo General de Proyecto'
+        verbose_name_plural = 'Indicadores Objetivo Especifico de Proyecto'
 
 #Indicador Resultado de Objetivo Especifico
 class IndicadorResultadoObjEspecifico(IndicadorProyecto):
@@ -591,7 +591,7 @@ class ProductoGeneral(ProductoProyecto):
         help_text='Producto que puede asociarse a todos los nodos',
     )
 
-
+ 
 
     #relaciones
     class Meta:

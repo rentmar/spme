@@ -14,7 +14,11 @@ from .views.reporte_objetivo_general_view import ReporteObjetivoGeneralViewSet
 from .views.reporte_encadenado_view import ReporteEncadenadoViewSet
 
 from .views.actividad_views import ActividadReportView
-
+#BItacoras
+from .views.bitacora_indicador_og_crud_views import BitacoraIndicadorOGViewset
+from .views.bitacora_indicador_oe_crud_views import BitacoraIndicadorOEViewset
+from .views.bitacora_indicador_rog_crud_views import BitacoraIndicadorROGViewset
+from .views.bitacora_indicador_roe_crud_views import BitacoraIndicadorROEViewset
 
 router = DefaultRouter()
 
@@ -23,6 +27,11 @@ router = DefaultRouter()
 router.register(r'proyectos', ReporteProyectoViewSet, basename='reporte-proyecto-nivel1')
 router.register(r'objetivos-generales', ReporteObjetivoGeneralViewSet, basename='reporte-objetivo-general')
 router.register(r'encadenados', ReporteEncadenadoViewSet, basename='reporte-encadenado')
+router.register(r'bitacora-indicador-og-crud', BitacoraIndicadorOGViewset, basename='bitacora-indicador-og_crud')
+router.register(r'bitacora-indicador-oe-crud', BitacoraIndicadorOEViewset, basename='bitacora-indicador-oe_crud')
+router.register(r'bitacora-indicador-rog-crud', BitacoraIndicadorROGViewset, basename='bitacore-indicador-rog_crud')
+router.register(r'bitacora-indicador.roe-crud', BitacoraIndicadorROEViewset, basename='bitacora-indicador.roe_crud')
+
 
 urlpatterns = [
     path(r'test-cnx/', prueba_conexion_reportes, name='reportes-test'),
