@@ -30,7 +30,7 @@ router.register(r'encadenados', ReporteEncadenadoViewSet, basename='reporte-enca
 router.register(r'bitacora-indicador-og-crud', BitacoraIndicadorOGViewset, basename='bitacora-indicador-og_crud')
 router.register(r'bitacora-indicador-oe-crud', BitacoraIndicadorOEViewset, basename='bitacora-indicador-oe_crud')
 router.register(r'bitacora-indicador-rog-crud', BitacoraIndicadorROGViewset, basename='bitacore-indicador-rog_crud')
-router.register(r'bitacora-indicador.roe-crud', BitacoraIndicadorROEViewset, basename='bitacora-indicador.roe_crud')
+router.register(r'bitacora-indicador-roe-crud', BitacoraIndicadorROEViewset, basename='bitacora-indicador.roe_crud')
 
 
 urlpatterns = [

@@ -62,6 +62,7 @@ from .solpagodirecto.views.lista_sol_pago_directo_por_tarea_pei_views import Sol
 from .solreposicion.views.lista_sol_reposicion_por_tarea_pei_views import SolicitudesReembolsoPeiPorActividadYTareaView
 from .solrendicioncuentas.views.lista_rendicion_cuentas_por_tarea_pei_views import RendicionesCuentasPeiPorActividadYTareaView
 from .informeactividadprincipal.views.lista_de_informes_actividad_tarea_por_idact_views import ActividadDetalladaView
+from .solactividad.views.solicitud_fondos_crud_views import SolicitudFondosCrudViews
 #PEI
 from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
 from .pei.views.detalles_vista_pei_views import PeiDashboardEstructuraSimpleView
@@ -147,6 +148,7 @@ router.register(r'actividad-indicadores-proyecto', ActividadIndicadorViewSet, ba
 #Monitoreo
 router.register(r'forma-de-pago', FormaPagoView, basename='forma_de_pago')
 router.register(r'solicitud-fondos', SolicitudFondosViewSet , basename='solicitud_fondos')
+router.register(r'solicitud-fondos-crud', SolicitudFondosCrudViews, basename='sol_fondos_crud')
 router.register(r'rendicion-cuentas', RendicionCuentasView, basename='rendicion_cuentas')
 router.register(r'solicitud-reembolso', SolicitudReembolsoView, basename='solicitud_reembolso')
 router.register(r'solicitud-reembolso-v2', SolicitudReembolsoV2View, basename='sol_reebolso_v2')

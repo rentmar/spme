@@ -63,7 +63,7 @@ class BitacoraIndicadorBase(PolymorphicModel):
         verbose_name = 'Bitácora de Indicador Base'
         verbose_name_plural = 'Bitácoras de Indicadores Base'
         ordering = ['-fecha_registro', '-timestamp_registro']
-
+ 
 # Modelos específicos con related_names únicos
 class BitacoraIndicadorOG(BitacoraIndicadorBase):
     indicador_og = models.ForeignKey(
