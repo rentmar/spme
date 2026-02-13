@@ -9,7 +9,7 @@ admin.site.register(ProcedenciaFondos)
 admin.site.register(DiagramaEstructura)
 #admin.site.register(Proyecto)
 admin.site.register(IndicadorProyecto)
-admin.site.register(IndicadorObjetivoGeneral)
+#admin.site.register(IndicadorObjetivoGeneral)
 admin.site.register(IndicadorObjetivoEspecifico)
 admin.site.register(IndicadorResultadoObjGral)
 admin.site.register(IndicadorResultadoObjEspecifico)
@@ -362,3 +362,46 @@ class ObjetivoEspecificoProyectoAdmin(admin.ModelAdmin):
         if obj:  # Si estamos editando un objeto existente
             return ['proyecto', 'objetivo_general', 'codigo']
         return []
+    
+
+# 📁 admin.py
+from django.contrib import admin
+from .models import IndicadorObjetivoGeneral
+
+@admin.register(IndicadorObjetivoGeneral)
+class IndicadorObjetivoGeneralAdmin(admin.ModelAdmin):
+    # 📌 Lo básico para ver y editar
+    list_display = ['id', 'codigo', 'objetivo_general', 'tipo', 'frecuencia', 'redaccion']
+    list_filter = ['tipo', 'frecuencia', 'redaccion', 'objetivo_general']
+    search_fields = ['codigo', 'descripcion']
+    
+    # 📌 Organización del formulario
+    fieldsets = (
+        ('📋 IDENTIFICACIÓN', {
+            'fields': ('codigo', 'descripcion', 'redaccion', 'fuente_verificacion')
+        }),
+        ('🎯 RELACIÓN', {
+            'fields': ('objetivo_general',)
+        }),
+        ('📊 CONFIGURACIÓN', {
+            'fields': ('tipo', 'frecuencia', 'responsable')
+        }),
+        ('📈 LÍNEA BASE', {
+            'fields': (('baseline', 'fechaLineaBase'),)
+        }),
+        ('🎯 METAS TRIMESTRALES', {
+            'fields': (
+                ('target_q1', 'fechaTargetQ1'),
+                ('target_q2', 'fechaTargetQ2'),
+                ('target_q3', 'fechaTargetQ3'),
+                ('target_q4', 'fechaTargetQ4'),
+            )
+        }),
+        ('👥 META POBLACIONAL', {
+            'fields': (('target_poblacion', 'fechaTargetPoblacion'),)
+        }),
+    )
+    
+    # 📌 Atajos para guardar
+    save_on_top = True
+    list_per_page = 25    

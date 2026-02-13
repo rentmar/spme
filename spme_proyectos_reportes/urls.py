@@ -19,6 +19,13 @@ from .views.bitacora_indicador_og_crud_views import BitacoraIndicadorOGViewset
 from .views.bitacora_indicador_oe_crud_views import BitacoraIndicadorOEViewset
 from .views.bitacora_indicador_rog_crud_views import BitacoraIndicadorROGViewset
 from .views.bitacora_indicador_roe_crud_views import BitacoraIndicadorROEViewset
+#indicadores
+from .views.obtener_indicadores_por_ids_views import (
+    get_indicadores_og_by_ids,
+    get_indicadores_rog_by_ids,
+    get_indicadores_oe_by_ids,
+    get_indicadores_roe_by_ids,
+)
 
 router = DefaultRouter()
 
@@ -59,6 +66,11 @@ urlpatterns = [
     path(r'proyecto-reporte-rapido/<int:proyecto_id>/word/',  ProyectoReportAllView.as_view(), name='proyecto-reporte-descargar'),
     path(r'actividades/reporte/', ActividadReportView.as_view(), name='actividades-list'),
     path(r'actividades/reporte/<int:actividad_id>/', ActividadReportView.as_view(), name='actividad-report'),
+    #Indicadores por IDs
+    path(r'indicador-og/by-ids/', get_indicadores_og_by_ids, name='indicadores-og-by-ids'),
+    path(r'indicador-rog/by-ids/', get_indicadores_rog_by_ids, name='indicadores-rog-by-ids'),
+    path(r'indicador-oe/by-ids/', get_indicadores_oe_by_ids, name='indicadores-oe-by-ids'),
+    path(r'indicador-roe/by-ids/', get_indicadores_roe_by_ids, name='indicadores-roe-by-ids'),
 
 ] 
 
