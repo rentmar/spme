@@ -28,17 +28,17 @@
     <div class="grid-3">
         <div class="campo">
             <div class="etiqueta">Nombre:</div>
-            <div class="valor texto-largo">{{ nombre_solicitante|truncatechars:30 }}</div>
+            <div class="valor texto-largo">{{ nombre_solicitante }}</div>
         </div>
         
         <div class="campo">
             <div class="etiqueta">C.I.:</div>
-            <div class="valor">{{ documento_identidad|truncatechars:15 }}</div>
+            <div class="valor">{{ documento_identidad }}</div>
         </div>
         
         <div class="campo">
             <div class="etiqueta">Cargo:</div>
-            <div class="valor">{{ cargo|truncatechars:20 }}</div>
+            <div class="valor">{{ cargo }}</div>
         </div>
     </div>
 </div>
@@ -50,12 +50,12 @@
     <div class="grid-2">
         <div class="campo">
             <div class="etiqueta">Evento:</div>
-            <div class="valor texto-largo">{{ evento|truncatechars:30 }}</div>
+            <div class="valor texto-largo">{{ evento }}</div>
         </div>
         
         <div class="campo">
             <div class="etiqueta">Lugar:</div>
-            <div class="valor">{{ lugar_evento|truncatechars:25 }}</div>
+            <div class="valor">{{ lugar_evento }}</div>
         </div>
         
         <div class="campo">
@@ -65,13 +65,13 @@
         
         <div class="campo">
             <div class="etiqueta">Organizador:</div>
-            <div class="valor texto-largo">{{ organizador|truncatechars:25 }}</div>
+            <div class="valor texto-largo">{{ organizador }}</div>
         </div>
     </div>
     
     <div class="campo">
         <div class="etiqueta">Instituciones:</div>
-        <div class="valor texto-largo">{{ instituciones_participantes|truncatechars:70 }}</div>
+        <div class="valor texto-largo">{{ instituciones_participantes }}</div>
     </div>
 </div>
 
@@ -82,22 +82,22 @@
     <div class="grid-2">
         <div class="campo">
             <div class="etiqueta">¿Quién cubre?</div>
-            <div class="valor texto-largo">{{ quien_cubre_gastos|truncatechars:30 }}</div>
+            <div class="valor texto-largo">{{ quien_cubre_gastos }}</div>
         </div>
         
         <div class="campo">
             <div class="etiqueta">Justificación:</div>
-            <div class="valor texto-largo">{{ justificacion_asistencia|truncatechars:40 }}</div>
+            <div class="valor texto-largo">{{ justificacion_asistencia }}</div>
         </div>
         
         <div class="campo">
             <div class="etiqueta">Fondos UNITAS:</div>
-            <div class="valor texto-largo">{{ fondos_unitas|truncatechars:30 }}</div>
+            <div class="valor texto-largo">{{ fondos_unitas }}</div>
         </div>
         
         <div class="campo">
             <div class="etiqueta">Tareas Previas:</div>
-            <div class="valor texto-largo">{{ tareas_previas|truncatechars:40 }}</div>
+            <div class="valor texto-largo">{{ tareas_previas }}</div>
         </div>
     </div>
 </div>
@@ -121,7 +121,7 @@
             <tr>
                 <td>{{ gasto.indice }}</td>
                 <td>{{ gasto.partida|default:"-" }}</td>
-                <td class="texto-largo">{{ gasto.concepto|truncatechars:35 }}</td>
+                <td class="texto-largo">{{ gasto.concepto }}</td>
                 <td style="text-align: right;">{{ gasto.monto|floatformat:2 }}</td>
             </tr>
             {% endfor %}
@@ -152,7 +152,7 @@
     <div class="grid-2" style="margin-bottom: 2px;">
         <div class="campo">
             <div class="etiqueta">Lugar:</div>
-            <div class="valor">{{ lugar_solicitud|default:"-"|truncatechars:15 }}</div>
+            <div class="valor">{{ lugar_solicitud|default:"-" }}</div>
         </div>
         
         <div class="campo">
@@ -171,10 +171,10 @@
     <div class="forma-pago-detalle" style="padding: 3px; margin-top: 3px; background-color: #e3f2fd;">
         <div style="font-weight: bold; color: #1565c0; font-size: 7px;">🏦 TRANSFERENCIA BANCARIA:</div>
         <div class="grid-2" style="font-size: 6px;">
-            <div><strong>Titular:</strong> {{ datos_transferencia.transferencia.nombre_transferencia|default:"-"|truncatechars:20 }}</div>
-            <div><strong>C.I.:</strong> {{ datos_transferencia.transferencia.ci_transferencia|default:"-"|truncatechars:12 }}</div>
-            <div><strong>Banco:</strong> {{ datos_transferencia.transferencia.entidad_bancaria|default:"-"|truncatechars:15 }}</div>
-            <div><strong>Cuenta:</strong> {{ datos_transferencia.transferencia.numero_cuenta|default:"-"|truncatechars:15 }}</div>
+            <div><strong>Titular:</strong> {{ datos_transferencia.transferencia.nombre_transferencia|default:"-" }}</div>
+            <div><strong>C.I.:</strong> {{ datos_transferencia.transferencia.ci_transferencia|default:"-" }}</div>
+            <div><strong>Banco:</strong> {{ datos_transferencia.transferencia.entidad_bancaria|default:"-" }}</div>
+            <div><strong>Cuenta:</strong> {{ datos_transferencia.transferencia.numero_cuenta|default:"-" }}</div>
         </div>
     </div>
     {% endif %}
@@ -186,8 +186,8 @@
         
         <!-- BENEFICIARIO (desde "otros") -->
         <div style="font-size: 6px; margin-top: 2px;">
-            <div><strong>Beneficiario:</strong> {{ datos_transferencia.otros.nombre_otros|default:nombre_solicitante|truncatechars:25 }}</div>
-            <div><strong>C.I.:</strong> {{ datos_transferencia.otros.ci_otros|default:documento_identidad|truncatechars:15 }}</div>
+            <div><strong>Beneficiario:</strong> {{ datos_transferencia.otros.nombre_otros|default:nombre_solicitante }}</div>
+            <div><strong>C.I.:</strong> {{ datos_transferencia.otros.ci_otros|default:documento_identidad }}</div>
         </div>
     </div>
     {% endif %}
@@ -199,8 +199,8 @@
         
         <!-- BENEFICIARIO (desde "otros") -->
         <div style="font-size: 6px; margin-top: 2px;">
-            <div><strong>Beneficiario:</strong> {{ datos_transferencia.otros.nombre_otros|default:nombre_solicitante|truncatechars:25 }}</div>
-            <div><strong>C.I.:</strong> {{ datos_transferencia.otros.ci_otros|default:documento_identidad|truncatechars:15 }}</div>
+            <div><strong>Beneficiario:</strong> {{ datos_transferencia.otros.nombre_otros|default:nombre_solicitante }}</div>
+            <div><strong>C.I.:</strong> {{ datos_transferencia.otros.ci_otros|default:documento_identidad }}</div>
         </div>
     </div>
     {% endif %}
@@ -210,8 +210,8 @@
     <div class="forma-pago-detalle" style="padding: 3px; margin-top: 3px; background-color: #f5f5f5;">
         <div style="font-weight: bold; color: #666; font-size: 7px;">👤 PAGO A SOLICITANTE/TERCERO:</div>
         <div style="font-size: 6px; margin-top: 2px;">
-            <div><strong>Nombre:</strong> {{ datos_transferencia.otros.nombre_otros|default:nombre_solicitante|truncatechars:25 }}</div>
-            <div><strong>C.I.:</strong> {{ datos_transferencia.otros.ci_otros|default:documento_identidad|truncatechars:15 }}</div>
+            <div><strong>Nombre:</strong> {{ datos_transferencia.otros.nombre_otros|default:nombre_solicitante }}</div>
+            <div><strong>C.I.:</strong> {{ datos_transferencia.otros.ci_otros|default:documento_identidad }}</div>
         </div>
     </div>
     {% endif %}
@@ -227,8 +227,8 @@
             <div style="font-size: 6px; text-align: center; margin-bottom: 2px; color: #555;">SOLICITANTE</div>
             <div class="firma-area" style="padding-top: 5px;">
                 <div class="linea-firma" style="width: 90%;"></div>
-                <div class="nombre-firma">{{ nombre_solicitante|default:"Solicitante"|truncatechars:18 }}</div>
-                <div class="cargo-firma">{{ cargo|default:"Solicitante"|truncatechars:15 }}</div>
+                <div class="nombre-firma">{{ nombre_solicitante|default:"Solicitante" }}</div>
+                <div class="cargo-firma">{{ cargo|default:"Solicitante" }}</div>
             </div>
         </div>
         
@@ -237,7 +237,7 @@
             <div style="font-size: 6px; text-align: center; margin-bottom: 2px; color: #555;">RESPONSABLE</div>
             <div class="firma-area" style="padding-top: 5px;">
                 <div class="linea-firma" style="width: 90%;"></div>
-                <div class="nombre-firma">{{ nombre_responsable|default:"Responsable"|truncatechars:18 }}</div>
+                <div class="nombre-firma">{{ nombre_responsable|default:"Responsable" }}</div>
                 <div class="cargo-firma">Responsable</div>
             </div>
         </div>
@@ -247,7 +247,7 @@
             <div style="font-size: 6px; text-align: center; margin-bottom: 2px; color: #555;">COORDINADOR</div>
             <div class="firma-area" style="padding-top: 5px;">
                 <div class="linea-firma" style="width: 90%;"></div>
-                <div class="nombre-firma">{{ nombre_coordinador|default:"Coordinador"|truncatechars:18 }}</div>
+                <div class="nombre-firma">{{ nombre_coordinador|default:"Coordinador"}}</div>
                 <div class="cargo-firma">Coordinador</div>
             </div>
         </div>
@@ -256,7 +256,7 @@
     <!-- Actividad relacionada (solo si existe) -->
     {% if codigo_actividad != "No asignado" %}
     <div style="margin-top: 4px; font-size: 6px; text-align: center; color: #666;">
-        Actividad: {{ nombre_actividad|truncatechars:30 }} ({{ codigo_actividad }})
+        Actividad: {{ nombre_actividad }} ({{ codigo_actividad }})
     </div>
     {% endif %}
 </div>
