@@ -1,238 +1,263 @@
 {% extends "spme_impresiones/base_template.html" %}
 
 {% block content %}
-    <!-- SECCIÓN 1: INFORMACIÓN DEL SOLICITANTE -->
-    <div class="seccion compact-section">
-        <div class="seccion-titulo">👤 INFORMACIÓN DEL SOLICITANTE</div>
+<style>
+    /* ESTILOS COMPACTOS PARA UNA SOLA PÁGINA */
+    .seccion { margin-bottom: 6px !important; }
+    .seccion-titulo { padding: 3px 6px !important; font-size: 8px !important; }
+    .campo { margin-bottom: 2px !important; }
+    .etiqueta { font-size: 7px !important; margin-bottom: 0px !important; }
+    .valor { padding: 2px 4px !important; font-size: 7px !important; min-height: 12px !important; }
+    .grid-3, .grid-2 { gap: 4px !important; }
+    .tabla { margin: 3px 0 !important; }
+    .tabla th { padding: 2px !important; font-size: 7px !important; }
+    .tabla td { padding: 2px !important; font-size: 7px !important; }
+    .firma-area { padding-top: 8px !important; }
+    .linea-firma { width: 80% !important; }
+    .nombre-firma { font-size: 7px !important; margin-top: 1px !important; }
+    .cargo-firma { font-size: 6px !important; }
+    .total-row td { font-size: 8px !important; }
+    .compact-section { padding: 4px !important; margin-bottom: 4px !important; }
+    .forma-pago-detalle { padding: 4px !important; margin-top: 4px !important; }
+</style>
+
+<!-- SECCIÓN 1: INFORMACIÓN DEL SOLICITANTE -->
+<div class="seccion compact-section">
+    <div class="seccion-titulo">👤 INFORMACIÓN DEL SOLICITANTE</div>
+    
+    <div class="grid-3">
+        <div class="campo">
+            <div class="etiqueta">Nombre:</div>
+            <div class="valor texto-largo">{{ nombre_solicitante }}</div>
+        </div>
         
-        <div class="grid-3">
-            <div class="campo">
-                <div class="etiqueta">Nombre:</div>
-                <div class="valor texto-largo">{{ nombre_solicitante }}</div>
-            </div>
+        <div class="campo">
+            <div class="etiqueta">C.I.:</div>
+            <div class="valor">{{ documento_identidad }}</div>
+        </div>
+        
+        <div class="campo">
+            <div class="etiqueta">Cargo:</div>
+            <div class="valor">{{ cargo }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- SECCIÓN 2: INFORMACIÓN DEL VIAJE -->
+<div class="seccion compact-section">
+    <div class="seccion-titulo">✈️ INFORMACIÓN DEL VIAJE</div>
+    
+    <div class="grid-2">
+        <div class="campo">
+            <div class="etiqueta">Evento:</div>
+            <div class="valor texto-largo">{{ evento }}</div>
+        </div>
+        
+        <div class="campo">
+            <div class="etiqueta">Lugar:</div>
+            <div class="valor">{{ lugar_evento }}</div>
+        </div>
+        
+        <div class="campo">
+            <div class="etiqueta">Fecha:</div>
+            <div class="valor">{{ fecha_evento }}</div>
+        </div>
+        
+        <div class="campo">
+            <div class="etiqueta">Organizador:</div>
+            <div class="valor texto-largo">{{ organizador }}</div>
+        </div>
+    </div>
+    
+    <div class="campo">
+        <div class="etiqueta">Instituciones:</div>
+        <div class="valor texto-largo">{{ instituciones_participantes }}</div>
+    </div>
+</div>
+
+<!-- SECCIÓN 3: JUSTIFICACIÓN Y FINANCIAMIENTO (COMPACTA) -->
+<div class="seccion compact-section">
+    <div class="seccion-titulo">💰 JUSTIFICACIÓN Y FINANCIAMIENTO</div>
+    
+    <div class="grid-2">
+        <div class="campo">
+            <div class="etiqueta">¿Quién cubre?</div>
+            <div class="valor texto-largo">{{ quien_cubre_gastos }}</div>
+        </div>
+        
+        <div class="campo">
+            <div class="etiqueta">Justificación:</div>
+            <div class="valor texto-largo">{{ justificacion_asistencia }}</div>
+        </div>
+        
+        <div class="campo">
+            <div class="etiqueta">Fondos UNITAS:</div>
+            <div class="valor texto-largo">{{ fondos_unitas }}</div>
+        </div>
+        
+        <div class="campo">
+            <div class="etiqueta">Tareas Previas:</div>
+            <div class="valor texto-largo">{{ tareas_previas }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- SECCIÓN 4: DETALLE DE GASTOS (TABLA COMPACTA) -->
+<div class="seccion">
+    <div class="seccion-titulo">🧾 GASTOS SOLICITADOS</div>
+    
+    {% if detalle_gastos %}
+    <table class="tabla tabla-gastos" style="font-size: 6px;">
+        <thead>
+            <tr>
+                <th width="8%">N°</th>
+                <th width="15%">PARTIDA</th>
+                <th width="57%">CONCEPTO</th>
+                <th width="20%">MONTO</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for gasto in detalle_gastos|slice:":8" %}
+            <tr>
+                <td>{{ gasto.indice }}</td>
+                <td>{{ gasto.partida|default:"-" }}</td>
+                <td class="texto-largo">{{ gasto.concepto }}</td>
+                <td style="text-align: right;">{{ gasto.monto|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
             
-            <div class="campo">
-                <div class="etiqueta">C.I.:</div>
-                <div class="valor">{{ documento_identidad }}</div>
-            </div>
+            {% if detalle_gastos|length > 8 %}
+            <tr>
+                <td colspan="4" style="text-align: center; padding: 2px; color: #666; font-style: italic;">
+                    ... y {{ detalle_gastos|length|add:"-8" }} ítems más
+                </td>
+            </tr>
+            {% endif %}
             
-            <div class="campo">
-                <div class="etiqueta">Cargo:</div>
-                <div class="valor">{{ cargo }}</div>
+            <tr class="total-row">
+                <td colspan="3" style="text-align: right;">TOTAL:</td>
+                <td style="text-align: right;">Bs. {{ monto_solicitado|floatformat:2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+    {% else %}
+    <div class="valor" style="text-align: center; padding: 5px;">Sin gastos</div>
+    {% endif %}
+</div>
+
+<!-- SECCIÓN 5: FORMA DE PAGO (COMPACTA) -->
+<div class="seccion compact-section">
+    <div class="seccion-titulo">📋 FORMA DE PAGO</div>
+    
+    <div class="grid-2" style="margin-bottom: 2px;">
+        <div class="campo">
+            <div class="etiqueta">Lugar:</div>
+            <div class="valor">{{ lugar_solicitud|default:"-" }}</div>
+        </div>
+        
+        <div class="campo">
+            <div class="etiqueta">Fecha:</div>
+            <div class="valor">{{ fecha_solicitud }}</div>
+        </div>
+    </div>
+    
+    <div class="campo">
+        <div class="etiqueta">Forma de Pago:</div>
+        <div class="valor" style="font-weight: bold; color: #1976d2;">{{ forma_pago }}</div>
+    </div>
+    
+    <!-- DATOS DE TRANSFERENCIA BANCARIA -->
+    {% if datos_transferencia.mostrar_transferencia %}
+    <div class="forma-pago-detalle" style="padding: 3px; margin-top: 3px; background-color: #e3f2fd;">
+        <div style="font-weight: bold; color: #1565c0; font-size: 7px;">🏦 TRANSFERENCIA BANCARIA:</div>
+        <div class="grid-2" style="font-size: 6px;">
+            <div><strong>Titular:</strong> {{ datos_transferencia.transferencia.nombre_transferencia|default:"-" }}</div>
+            <div><strong>C.I.:</strong> {{ datos_transferencia.transferencia.ci_transferencia|default:"-" }}</div>
+            <div><strong>Banco:</strong> {{ datos_transferencia.transferencia.entidad_bancaria|default:"-" }}</div>
+            <div><strong>Cuenta:</strong> {{ datos_transferencia.transferencia.numero_cuenta|default:"-" }}</div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- DATOS DE PAGO PARA CHEQUE -->
+    {% if datos_transferencia.mostrar_cheque %}
+    <div class="forma-pago-detalle" style="padding: 3px; margin-top: 3px; background-color: #fff3e0;">
+        <div style="font-weight: bold; color: #bf360c; font-size: 7px;">📄 CHEQUE:</div>
+        
+        <!-- BENEFICIARIO (desde "otros") -->
+        <div style="font-size: 6px; margin-top: 2px;">
+            <div><strong>Beneficiario:</strong> {{ datos_transferencia.otros.nombre_otros|default:nombre_solicitante }}</div>
+            <div><strong>C.I.:</strong> {{ datos_transferencia.otros.ci_otros|default:documento_identidad }}</div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- DATOS DE PAGO PARA EFECTIVO -->
+    {% if datos_transferencia.mostrar_efectivo %}
+    <div class="forma-pago-detalle" style="padding: 3px; margin-top: 3px; background-color: #f0f7f0;">
+        <div style="font-weight: bold; color: #2e7d32; font-size: 7px;">💰 EFECTIVO:</div>
+        
+        <!-- BENEFICIARIO (desde "otros") -->
+        <div style="font-size: 6px; margin-top: 2px;">
+            <div><strong>Beneficiario:</strong> {{ datos_transferencia.otros.nombre_otros|default:nombre_solicitante }}</div>
+            <div><strong>C.I.:</strong> {{ datos_transferencia.otros.ci_otros|default:documento_identidad }}</div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- DATOS DE PAGO A TERCEROS (si existe flag mostrar_otros sin ser cheque/efectivo) -->
+    {% if datos_transferencia.mostrar_otros and not datos_transferencia.mostrar_cheque and not datos_transferencia.mostrar_efectivo %}
+    <div class="forma-pago-detalle" style="padding: 3px; margin-top: 3px; background-color: #f5f5f5;">
+        <div style="font-weight: bold; color: #666; font-size: 7px;">👤 PAGO A SOLICITANTE/TERCERO:</div>
+        <div style="font-size: 6px; margin-top: 2px;">
+            <div><strong>Nombre:</strong> {{ datos_transferencia.otros.nombre_otros|default:nombre_solicitante }}</div>
+            <div><strong>C.I.:</strong> {{ datos_transferencia.otros.ci_otros|default:documento_identidad }}</div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- SECCIÓN 6: FIRMAS (CON SOLICITANTE INCLUIDO) -->
+<div class="seccion" style="margin-top: 4px;">
+    <div class="seccion-titulo" style="padding: 2px 6px;">✍️ FIRMAS Y VALIDACIONES</div>
+    
+    <div class="grid-3" style="gap: 5px;">
+        <!-- SOLICITANTE -->
+        <div>
+            <div style="font-size: 6px; text-align: center; margin-bottom: 2px; color: #555;">SOLICITANTE</div>
+            <div class="firma-area" style="padding-top: 5px;">
+                <div class="linea-firma" style="width: 90%;"></div>
+                <div class="nombre-firma">{{ nombre_solicitante|default:"Solicitante" }}</div>
+                <div class="cargo-firma">{{ cargo|default:"Solicitante" }}</div>
+            </div>
+        </div>
+        
+        <!-- RESPONSABLE -->
+        <div>
+            <div style="font-size: 6px; text-align: center; margin-bottom: 2px; color: #555;">RESPONSABLE</div>
+            <div class="firma-area" style="padding-top: 5px;">
+                <div class="linea-firma" style="width: 90%;"></div>
+                <div class="nombre-firma">{{ nombre_responsable|default:"Responsable" }}</div>
+                <div class="cargo-firma">Responsable</div>
+            </div>
+        </div>
+        
+        <!-- COORDINADOR -->
+        <div>
+            <div style="font-size: 6px; text-align: center; margin-bottom: 2px; color: #555;">COORDINADOR</div>
+            <div class="firma-area" style="padding-top: 5px;">
+                <div class="linea-firma" style="width: 90%;"></div>
+                <div class="nombre-firma">{{ nombre_coordinador|default:"Coordinador"}}</div>
+                <div class="cargo-firma">Coordinador</div>
             </div>
         </div>
     </div>
     
-    <!-- SECCIÓN 2: INFORMACIÓN DEL VIAJE -->
-    <div class="seccion compact-section">
-        <div class="seccion-titulo">✈️ INFORMACIÓN DEL VIAJE</div>
-        
-        <div class="grid-2">
-            <div class="campo">
-                <div class="etiqueta">Evento/Actividad:</div>
-                <div class="valor texto-largo">{{ evento|truncatechars:40 }}</div>
-            </div>
-            
-            <div class="campo">
-                <div class="etiqueta">Lugar del Evento:</div>
-                <div class="valor">{{ lugar_evento|truncatechars:30 }}</div>
-            </div>
-            
-            <div class="campo">
-                <div class="etiqueta">Fecha del Evento:</div>
-                <div class="valor">{{ fecha_evento }}</div>
-            </div>
-            
-            <div class="campo">
-                <div class="etiqueta">Organizador:</div>
-                <div class="valor texto-largo">{{ organizador|truncatechars:30 }}</div>
-            </div>
-        </div>
-        
-        <div class="campo">
-            <div class="etiqueta">Instituciones Participantes:</div>
-            <div class="valor texto-largo">{{ instituciones_participantes|truncatechars:80 }}</div>
-        </div>
+    <!-- Actividad relacionada (solo si existe) -->
+    {% if codigo_actividad != "No asignado" %}
+    <div style="margin-top: 4px; font-size: 6px; text-align: center; color: #666;">
+        Actividad: {{ nombre_actividad }} ({{ codigo_actividad }})
     </div>
-    
-    <!-- SECCIÓN 3: JUSTIFICACIÓN Y FINANCIAMIENTO -->
-    <div class="seccion compact-section">
-        <div class="seccion-titulo">💰 JUSTIFICACIÓN Y FINANCIAMIENTO</div>
-        
-        <div class="campo">
-            <div class="etiqueta">¿Quién cubre los gastos?:</div>
-            <div class="valor texto-largo">{{ quien_cubre_gastos|truncatechars:60 }}</div>
-        </div>
-        
-        <div class="campo">
-            <div class="etiqueta">Justificación de la Asistencia:</div>
-            <div class="valor texto-largo">{{ justificacion_asistencia|truncatechars:80 }}</div>
-        </div>
-        
-        <div class="campo">
-            <div class="etiqueta">Fondos Solicitados a UNITAS:</div>
-            <div class="valor texto-largo">{{ fondos_unitas|truncatechars:60 }}</div>
-        </div>
-        
-        <div class="campo">
-            <div class="etiqueta">Tareas Previas al Viaje:</div>
-            <div class="valor texto-largo">{{ tareas_previas|truncatechars:80 }}</div>
-        </div>
-    </div>
-    
-    <!-- SECCIÓN 4: DETALLE DE GASTOS DEL VIAJE -->
-    <div class="seccion">
-        <div class="seccion-titulo">🧾 DETALLE DE GASTOS SOLICITADOS</div>
-        
-        {% if detalle_gastos %}
-        <table class="tabla tabla-gastos">
-            <thead>
-                <tr>
-                    <th>N°</th>
-                    <th>CONCEPTO</th>
-                    <th>CANT.</th>
-                    <th>UNIDAD</th>
-                    <th>PRECIO UNIT.</th>
-                    <th>SUBTOTAL (Bs.)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for gasto in detalle_gastos %}
-                <tr>
-                    <td>{{ gasto.indice }}</td>
-                    <td class="texto-largo">{{ gasto.concepto|truncatechars:30 }}</td>
-                    <td style="text-align: center;">{{ gasto.cantidad }}</td>
-                    <td>{{ gasto.unidad|default:"-" }}</td>
-                    <td style="text-align: right;">{{ gasto.precio_unitario|floatformat:2 }}</td>
-                    <td style="text-align: right;">{{ gasto.subtotal|floatformat:2 }}</td>
-                </tr>
-                {% endfor %}
-                
-                <tr class="total-row">
-                    <td colspan="5" style="text-align: right; font-weight: bold;">TOTAL SOLICITADO:</td>
-                    <td style="text-align: right; font-weight: bold; font-size: 9px;">
-                        Bs. {{ monto_solicitado|floatformat:2 }}
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        
-        <div style="margin-top: 5px; font-size: 8px; color: #666; text-align: right;">
-            Total de {{ detalle_gastos|length }} concepto{{ detalle_gastos|length|pluralize:"s" }}
-        </div>
-        {% else %}
-        <div class="valor" style="text-align: center; padding: 15px; color: #999;">
-            No se ha registrado detalle de gastos
-        </div>
-        {% endif %}
-    </div>
-    
-    <!-- SECCIÓN 5: INFORMACIÓN ADICIONAL -->
-    <div class="seccion compact-section">
-        <div class="seccion-titulo">📋 INFORMACIÓN ADICIONAL</div>
-        
-        <div class="grid-2">
-            <div class="campo">
-                <div class="etiqueta">Lugar de Solicitud:</div>
-                <div class="valor">{{ lugar_solicitud|default:"-"|truncatechars:20 }}</div>
-            </div>
-            
-            <div class="campo">
-                <div class="etiqueta">Fecha Solicitud:</div>
-                <div class="valor">{{ fecha_solicitud }}</div>
-            </div>
-        </div>
-        
-        <div class="campo">
-            <div class="etiqueta">Forma de Pago:</div>
-            <div class="valor">{{ forma_pago }}</div>
-        </div>
-        
-        <!-- DATOS DE FORMA DE PAGO -->
-        {% if datos_forma_pago.mostrar_transferencia and datos_forma_pago.transferencia %}
-        <div class="forma-pago-detalle mostrar-transferencia">
-            <div class="etiqueta" style="color: #1976d2; margin-bottom: 5px;">🏦 DATOS DE TRANSFERENCIA:</div>
-            
-            <div class="grid-2">
-                <div class="campo">
-                    <div class="etiqueta">Nombre:</div>
-                    <div class="valor texto-largo">{{ datos_forma_pago.transferencia.nombre_transferencia|default:"-"|truncatechars:25 }}</div>
-                </div>
-                
-                <div class="campo">
-                    <div class="etiqueta">C.I.:</div>
-                    <div class="valor">{{ datos_forma_pago.transferencia.ci_transferencia|default:"-" }}</div>
-                </div>
-                
-                <div class="campo">
-                    <div class="etiqueta">Banco:</div>
-                    <div class="valor">{{ datos_forma_pago.transferencia.entidad_bancaria|default:"-"|truncatechars:15 }}</div>
-                </div>
-                
-                <div class="campo">
-                    <div class="etiqueta">Cuenta:</div>
-                    <div class="valor">{{ datos_forma_pago.transferencia.numero_cuenta|default:"-"|truncatechars:12 }}</div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-        
-        {% if datos_forma_pago.mostrar_otros and datos_forma_pago.otros %}
-        <div class="forma-pago-detalle mostrar-otros">
-            <div class="etiqueta" style="color: #1976d2; margin-bottom: 5px;">👤 PAGO A SOLITANTE/TERCEROS:</div>
-            
-            <div class="grid-2">
-                <div class="campo">
-                    <div class="etiqueta">Nombre:</div>
-                    <div class="valor texto-largo">{{ datos_forma_pago.otros.nombre_otros|default:"-"|truncatechars:25 }}</div>
-                </div>
-                
-                <div class="campo">
-                    <div class="etiqueta">C.I.:</div>
-                    <div class="valor">{{ datos_forma_pago.otros.ci_otros|default:"-" }}</div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-    </div>
-    
-    <!-- SECCIÓN 6: FIRMAS Y VALIDACIONES -->
-    <div class="seccion">
-        <div class="seccion-titulo">✍️ FIRMAS Y VALIDACIONES</div>
-        
-        <div class="grid-2">
-            <div>
-                <div class="campo">
-                    <div class="etiqueta">Responsable:</div>
-                    <div class="valor">{{ nombre_responsable|default:"No asignado"|truncatechars:25 }}</div>
-                </div>
-                
-                <div class="firma-area" style="padding-top: 20px;">
-                    <div class="linea-firma" style="width: 90%;"></div>
-                    <div class="nombre-firma">{{ nombre_responsable|default:"____________________"|truncatechars:20 }}</div>
-                    <div class="cargo-firma">Responsable</div>
-                </div>
-            </div>
-            
-            <div>
-                <div class="campo">
-                    <div class="etiqueta">Coordinador:</div>
-                    <div class="valor">{{ nombre_coordinador|default:"No asignado"|truncatechars:25 }}</div>
-                </div>
-                
-                <div class="firma-area" style="padding-top: 20px;">
-                    <div class="linea-firma" style="width: 90%;"></div>
-                    <div class="nombre-firma">{{ nombre_coordinador|default:"____________________"|truncatechars:20 }}</div>
-                    <div class="cargo-firma">Coordinador/Dirección</div>
-                </div>
-            </div>
-        </div>
-        
-        {% if codigo_actividad != "No asignado" %}
-        <div style="margin-top: 15px; padding: 8px; background-color: #f0f7ff; border-radius: 3px;">
-            <div class="etiqueta">Actividad Relacionada:</div>
-            <div class="valor">{{ nombre_actividad }} ({{ codigo_actividad }})</div>
-        </div>
-        {% endif %}
-    </div>
+    {% endif %}
+</div>
 {% endblock %}

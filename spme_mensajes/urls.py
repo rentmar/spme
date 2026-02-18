@@ -92,8 +92,6 @@ urlpatterns = [
     path(r'mensajes/<int:pk>/eliminar/', MensajeViewSet.as_view({'delete': 'eliminar_mensaje'}), name='mensaje-eliminar-individual'),
     #Modificar estados
     path(r'mensajes/cambiar-estado/', CambiarEstadoMensajesView.as_view(), name='mensaje-cambiar-estado'),
-    #
-    
 ] 
 
 urlpatterns += router.urls

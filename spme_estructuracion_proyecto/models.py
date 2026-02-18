@@ -281,7 +281,7 @@ class ProductoResultadoOE(ProductoProyecto):
     class Meta:
         verbose_name = 'Producto del Resultado Objetivo Especifico'
         verbose_name_plural = 'Productos del Resultado Objetivo Especifico'
-
+ 
     
 #Indicadores
 class IndicadorProyecto(PolymorphicModel):

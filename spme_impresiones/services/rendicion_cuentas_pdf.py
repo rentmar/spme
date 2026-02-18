@@ -178,7 +178,7 @@ class RendicionCuentasPDFGenerator(BasePDFGenerator):
                     detalle_gastos.append(gasto)
         
         return detalle_gastos
-    
+        
     def _procesar_item_gasto(self, item):
         """
         Procesa un item individual de gasto
@@ -191,7 +191,9 @@ class RendicionCuentasPDFGenerator(BasePDFGenerator):
             
             fecha_gasto = item.get('fechaGasto') or item.get('fecha') or item.get('fechaComprobante')
             
-            numero_comprobante = item.get('numeroComprobante') or item.get('comprobante') or item.get('numeroFactura') or '-'
+            # ===== CORREGIDO: Usar factura_recibo en lugar de numero_comprobante =====
+            factura_recibo = item.get('factura_recibo') or item.get('numeroComprobante') or item.get('comprobante') or item.get('numeroFactura') or '-'
+            # =========================================================================
             
             monto = item.get('monto') or item.get('valor') or item.get('importe') or 0
             try:
@@ -211,7 +213,7 @@ class RendicionCuentasPDFGenerator(BasePDFGenerator):
                 'partida': partida,
                 'descripcion_gasto': descripcion,
                 'fecha_gasto': fecha_gasto,
-                'numero_comprobante': numero_comprobante,
+                'factura_recibo': factura_recibo,  # CAMBIADO de numero_comprobante a factura_recibo
                 'monto': monto_float,
                 'observaciones': observaciones,
                 'verificado': verificado,

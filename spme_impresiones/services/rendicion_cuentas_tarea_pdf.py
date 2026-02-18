@@ -182,7 +182,7 @@ class RendicionCuentasTareaPDFGenerator(BasePDFGenerator):
             # Datos básicos del formulario
             'numero_formulario': obj.numeroFormulario or f"RC-{obj.id:04d}",
             'fecha_emision': fecha_rendicion,
-            'tipo_documento': 'RENDICIÓN DE CUENTAS - TAREA',
+            'tipo_documento': 'RENDICIÓN DE CUENTAS - SUBACTIVIDAD',
             'subtipo_documento': 'RC-T',
             'cpte_diario': obj.cpteDiario or "No especificado",
             

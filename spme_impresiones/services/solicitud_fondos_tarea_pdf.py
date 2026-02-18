@@ -1,4 +1,4 @@
-import json
+import json 
 from .pdf_base import BasePDFGenerator
 from  spme_monitoreo.models import SolicitudFondos, TareaActividad
 from django.utils import timezone

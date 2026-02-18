@@ -1,356 +1,245 @@
 {% extends "spme_impresiones/base_template.html" %}
 
 {% block content %}
-    <!-- ENCABEZADO ESPECIAL PARA RENDICIÓN DE CUENTAS DE TAREAS -->
-    <div style="text-align: center; margin-bottom: 10px; padding: 8px; background-color: #f3e5f5; border-radius: 4px; border-left: 4px solid #9c27b0;">
-        <div style="font-size: 11px; color: #7b1fa2; font-weight: bold; margin-bottom: 3px;">
-            📊 RENDICIÓN DE CUENTAS - TAREA
+<style>
+    /* COMPRESIÓN MÁXIMA */
+    * { margin:0; padding:0; line-height:1.0; }
+    body { font-family: 'Arial', sans-serif; }
+    .seccion { margin-bottom: 1px !important; }
+    .seccion-titulo { padding: 1px 3px !important; font-size: 7px !important; margin-bottom: 1px !important; background: #1976d2; color: white; font-weight: bold; border-radius: 2px; }
+    .etiqueta { font-size: 5px !important; font-weight: bold; color: #555; }
+    .valor { font-size: 5.5px !important; background: #f8f9fa; padding: 1px 3px; border-radius: 2px; border: 1px solid #e0e0e0; word-wrap: break-word; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; margin-bottom: 1px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; margin-bottom: 1px; }
+    .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1px; margin-bottom: 1px; }
+    
+    /* Tabla ultra compacta */
+    .tabla { width:100%; border-collapse:collapse; font-size:5px; margin:1px 0; }
+    .tabla th { background:#1976d2; color:white; padding:1px; font-size:5px; font-weight:bold; }
+    .tabla td { border:1px solid #ddd; padding:1px; word-wrap:break-word; }
+    
+    .firma { text-align:center; padding:1px; }
+    .linea-firma { border-bottom:1px solid #333; width:90%; margin:2px auto; height:8px; }
+    
+    /* Encabezado */
+    .header-bar { background:linear-gradient(to right,#9c27b0,#ba68c8); color:white; padding:2px 5px; border-radius:2px; margin-bottom:2px; text-align:center; }
+    .header-bar div:first-child { font-size:8px; font-weight:bold; }
+    
+    /* Tarjetas laterales */
+    .card { border:1px solid; border-radius:2px; padding:3px; }
+    
+    /* Badges de estado */
+    .badge-estado { display:inline-block; padding:0 2px; border-radius:1px; color:white; font-size:5px; font-weight:bold; }
+    
+    /* Resumen financiero */
+    .resumen-item { text-align:center; padding:2px; border-radius:2px; }
+</style>
+
+<!-- ENCABEZADO -->
+<div class="header-bar" style="background:linear-gradient(to right,#9c27b0,#ba68c8);">
+    <div>📊 RENDICIÓN DE CUENTAS - SUBACTIVIDAD</div>
+    <div style="font-size:6px;">N° {{ numero_formulario }}</div>
+</div>
+
+<!-- FILA TAREA + RESPONSABLE -->
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:2px; margin-bottom:2px;">
+
+    <!-- TAREA -->
+    <div class="card" style="border-color:#4caf50;">
+        <div class="seccion-titulo" style="background:#4caf50; margin-bottom:2px;">📋 SUBACTIVIDAD</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1px;">
+            <div><span class="etiqueta">Cód:</span> <span class="valor">{{ tarea.codigo|default:"-" }}</span></div>
+            <div><span class="etiqueta">Est:</span> 
+                <span class="badge-estado" style="background:{% if tarea.estado == 'COMPLETADA' %}#4caf50{% elif tarea.estado == 'EN_PROGRESO' %}#ff9800{% else %}#f44336{% endif %};">
+                    {{ tarea.estado|default:"PEND" }}
+                </span>
+            </div>
         </div>
-        <div style="font-size: 8px; color: #546e7a;">
-            Documento específico para rendición de cuentas relacionadas con tareas
+        <div><span class="etiqueta">Título:</span> <span class="valor">{{ tarea.titulo|default:"-" }}</span></div>
+        <div><span class="etiqueta">Ppto:</span> <span class="valor" style="color:#2e7d32;">Bs.{{ tarea.presupuesto|floatformat:0|default:"0" }}</span></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1px;">
+            <div><span class="etiqueta">Ejec:</span> <span class="valor">{{ tarea.fecha_ejecucion|default:"-" }}</span></div>
+            <div><span class="etiqueta">Lím:</span> <span class="valor">{{ tarea.fecha_limite|default:"-" }}</span></div>
         </div>
     </div>
 
-    <!-- INFORMACIÓN DEL RESPONSABLE -->
-    <div class="seccion compact-section">
-        <div class="seccion-titulo">👤 RESPONSABLE DE RENDICIÓN</div>
-        
-        <div class="grid-3">
-            <div class="campo">
-                <div class="etiqueta">Nombre completo:</div>
-                <div class="valor" style="font-size: 9px; font-weight: bold;">{{ responsable_rendicion.nombre_completo }}</div>
-            </div>
-            
-            <div class="campo">
-                <div class="etiqueta">C.I.:</div>
-                <div class="valor">{{ responsable_rendicion.documento_identidad }}</div>
-            </div>
-            
-            <div class="campo">
-                <div class="etiqueta">Cargo:</div>
-                <div class="valor">{{ responsable_rendicion.cargo }}</div>
-            </div>
+    <!-- RESPONSABLE DE RENDICIÓN -->
+    <div class="card" style="border-color:#9c27b0;">
+        <div class="seccion-titulo" style="background:#9c27b0; margin-bottom:2px;">👤 RINDE CUENTAS</div>
+        <div><span class="etiqueta">Nombre:</span> <span class="valor">{{ responsable_rendicion.nombre_completo|default:"-" }}</span></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1px;">
+            <div><span class="etiqueta">CI:</span> <span class="valor">{{ responsable_rendicion.documento_identidad|default:"-" }}</span></div>
+            <div><span class="etiqueta">Cargo:</span> <span class="valor">{{ responsable_rendicion.cargo|default:"-" }}</span></div>
         </div>
-        
-        <div class="grid-2">
-            <div class="campo">
-                <div class="etiqueta">Correo electrónico:</div>
-                <div class="valor" style="font-size: 8px;">{{ responsable_rendicion.correo }}</div>
-            </div>
-            
-            <div class="campo">
-                <div class="etiqueta">Usuario sistema:</div>
-                <div class="valor">{{ responsable_rendicion.username }}</div>
-            </div>
-        </div>
-        
-        {% if responsable_rendicion.banco and responsable_rendicion.banco != "No especificado" %}
-        <div style="margin-top: 8px; padding: 6px; background-color: #f3e5f5; border-radius: 3px; border-left: 3px solid #9c27b0;">
-            <div style="font-size: 8px; font-weight: bold; color: #7b1fa2; margin-bottom: 4px;">🏦 INFORMACIÓN BANCARIA:</div>
-            <div class="grid-3">
-                <div class="campo">
-                    <div class="etiqueta">Banco:</div>
-                    <div class="valor">{{ responsable_rendicion.banco }}</div>
-                </div>
-                
-                <div class="campo">
-                    <div class="etiqueta">N° Cuenta:</div>
-                    <div class="valor">{{ responsable_rendicion.numero_cuenta }}</div>
-                </div>
-                
-                <div class="campo">
-                    <div class="etiqueta">Tipo Cuenta:</div>
-                    <div class="valor">{{ responsable_rendicion.tipo_cuenta }}</div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
+        <div><span class="etiqueta">Usuario:</span> <span class="valor">{{ responsable_rendicion.username|default:"-" }}</span></div>
     </div>
+</div>
 
-    <!-- INFORMACIÓN DE LA TAREA -->
-    {% if tarea.codigo %}
-    <div class="seccion compact-section">
-        <div class="seccion-titulo">📋 TAREA ASOCIADA</div>
-        
-        <div class="grid-3">
-            <div class="campo">
-                <div class="etiqueta">Código tarea:</div>
-                <div class="valor">{{ tarea.codigo }}</div>
-            </div>
-            
-            <div class="campo">
-                <div class="etiqueta">Estado:</div>
-                <div class="valor">{{ tarea.estado }}</div>
-            </div>
-            
-            {% if tarea.presupuesto and tarea.presupuesto > 0 %}
-            <div class="campo">
-                <div class="etiqueta">Presupuesto tarea:</div>
-                <div class="valor">Bs. {{ tarea.presupuesto|floatformat:2 }}</div>
-            </div>
-            {% endif %}
+<!-- RESUMEN FINANCIERO -->
+<div class="seccion compact-section" style="padding:2px; margin-bottom:2px;">
+    <div class="seccion-titulo">💰 RESUMEN FINANCIERO</div>
+    
+    <div class="grid-4">
+        <div><span class="etiqueta">Cpte Diario:</span> <span class="valor">{{ cpte_diario|default:"-" }}</span></div>
+        <div><span class="etiqueta">F.Desembolso:</span> <span class="valor">{{ fecha_desembolso }}</span></div>
+        <div><span class="etiqueta">F.Actividad:</span> <span class="valor">{{ fecha_actividad }}</span></div>
+        <div><span class="etiqueta">F.Rendición:</span> <span class="valor">{{ fecha_rendicion }}</span></div>
+    </div>
+    
+    <!-- CUADRO DE RESULTADOS -->
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1px; margin-top:2px;">
+        <div class="resumen-item" style="background:#e3f2fd;">
+            <div style="font-size:4px; color:#1976d2;">ASIGNADO</div>
+            <div style="font-size:7px; font-weight:bold; color:#1976d2;">Bs.{{ monto_asignado|floatformat:2 }}</div>
         </div>
-        
-        <div class="campo">
-            <div class="etiqueta">Título:</div>
-            <div class="valor">{{ tarea.titulo }}</div>
+        <div class="resumen-item" style="background:#fff3e0;">
+            <div style="font-size:4px; color:#ef6c00;">DESCARGADO</div>
+            <div style="font-size:7px; font-weight:bold; color:#ef6c00;">Bs.{{ monto_descargado|floatformat:2 }}</div>
         </div>
-        
-        {% if tarea.descripcion and tarea.descripcion != "Sin descripción" %}
-        <div class="campo">
-            <div class="etiqueta">Descripción:</div>
-            <div class="valor texto-largo">{{ tarea.descripcion|truncatechars:80 }}</div>
+        <div class="resumen-item" style="background:{% if tiene_saldo %}#ffebee{% else %}#e8f5e9{% endif %};">
+            <div style="font-size:4px; color:{% if tiene_saldo %}#c62828{% else %}#2e7d32{% endif %};">SALDO</div>
+            <div style="font-size:7px; font-weight:bold; color:{% if tiene_saldo %}#c62828{% else %}#2e7d32{% endif %};">Bs.{{ saldo|floatformat:2 }}</div>
         </div>
-        {% endif %}
-        
-        <div class="grid-2">
-            <div class="campo">
-                <div class="etiqueta">Fecha ejecución:</div>
-                <div class="valor">{{ tarea.fecha_ejecucion }}</div>
-            </div>
-            
-            {% if tarea.fecha_limite and tarea.fecha_limite != "No especificada" %}
-            <div class="campo">
-                <div class="etiqueta">Fecha límite:</div>
-                <div class="valor">{{ tarea.fecha_limite }}</div>
-            </div>
-            {% endif %}
-        </div>
+    </div>
+    
+    <!-- SOLICITUD RELACIONADA -->
+    {% if tipo_solicitud != "No especificada" %}
+    <div style="margin-top:1px; background:#e8f5e9; padding:1px; text-align:center;">
+        <span class="etiqueta">Solicitud:</span> 
+        <span class="valor">{{ tipo_solicitud }} - {{ solicitud_numero }}</span>
     </div>
     {% endif %}
+</div>
 
-    <!-- RESUMEN FINANCIERO -->
-    <div class="seccion compact-section">
-        <div class="seccion-titulo">💰 RESUMEN FINANCIERO</div>
-        
-        <div class="grid-4">
-            <div class="campo">
-                <div class="etiqueta">Comprobante Diario:</div>
-                <div class="valor">{{ cpte_diario }}</div>
-            </div>
+<!-- DETALLE DE GASTOS -->
+<div class="seccion" style="padding:2px; margin-bottom:2px;">
+    <div class="seccion-titulo">💰 GASTOS RENDIDOS ({{ cantidad_items }})</div>
+    
+    {% if tiene_detalle %}
+    <table class="tabla">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>FECHA</th>
+                <th>PARTIDA</th>
+                <th>FACTURA</th>
+                <th>DESCRIPCIÓN</th>
+                <th>MONTO</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for gasto in detalle_fondos %}
+            <tr>
+                <td style="text-align:center;">{{ gasto.numero }}</td>
+                <td>{{ gasto.fecha|default:"-" }}</td>
+                <td>{{ gasto.partida|default:"-" }}</td>
+                <td>{{ gasto.factura_recibo|default:"-" }}</td>
+                <td>{{ gasto.descripcion|default:"-" }}</td>  <!-- ← Línea corregida: eliminado gasto.concepto -->
+                <td style="text-align:right;">{{ gasto.monto|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
             
-            <div class="campo">
-                <div class="etiqueta">Fecha Desembolso:</div>
-                <div class="valor">{{ fecha_desembolso }}</div>
-            </div>
+            <tr style="background:#fff3e0; font-weight:bold;">
+                <td colspan="5" style="text-align:right;">TOTAL DESCARGADO:</td>
+                <td style="text-align:right;">Bs.{{ total_calculado|floatformat:2 }}</td>
+            </tr>
             
-            <div class="campo">
-                <div class="etiqueta">Fecha Actividad:</div>
-                <div class="valor">{{ fecha_actividad }}</div>
-            </div>
-            
-            <div class="campo">
-                <div class="etiqueta">Fecha Rendición:</div>
-                <div class="valor">{{ fecha_rendicion }}</div>
-            </div>
-        </div>
-        
-        <!-- CUADRO DE RESULTADOS FINANCIEROS -->
-        <div style="margin-top: 10px; padding: 10px; background-color: #f5f5f5; border-radius: 3px;">
-            <div class="grid-3">
-                <div style="text-align: center; padding: 8px; background-color: #e3f2fd; border-radius: 3px;">
-                    <div style="font-size: 8px; font-weight: bold; color: #1976d2;">MONTO ASIGNADO</div>
-                    <div style="font-size: 10px; font-weight: bold; color: #1976d2;">Bs. {{ monto_asignado|floatformat:2 }}</div>
-                </div>
-                
-                <div style="text-align: center; padding: 8px; background-color: #fff3e0; border-radius: 3px;">
-                    <div style="font-size: 8px; font-weight: bold; color: #ef6c00;">MONTO DESCARGADO</div>
-                    <div style="font-size: 10px; font-weight: bold; color: #ef6c00;">Bs. {{ monto_descargado|floatformat:2 }}</div>
-                </div>
-                
-                <div style="text-align: center; padding: 8px; background-color: {% if tiene_saldo %}#ffebee{% else %}#e8f5e9{% endif %}; border-radius: 3px;">
-                    <div style="font-size: 8px; font-weight: bold; color: {% if tiene_saldo %}#c62828{% else %}#2e7d32{% endif %};">SALDO</div>
-                    <div style="font-size: 10px; font-weight: bold; color: {% if tiene_saldo %}#c62828{% else %}#2e7d32{% endif %};">Bs. {{ saldo|floatformat:2 }}</div>
-                </div>
-            </div>
-            
-            {% if tipo_solicitud != "No especificada" %}
-            <div style="margin-top: 8px; padding: 6px; background-color: #e8f5e9; border-radius: 3px; text-align: center;">
-                <div style="font-size: 8px; color: #2e7d32;">
-                    <strong>Solicitud relacionada:</strong> {{ tipo_solicitud }} - {{ solicitud_numero }}
-                </div>
-            </div>
+            {% if not coincide_descargado %}
+            <tr style="background:#ffebee;">
+                <td colspan="6" style="text-align:center; font-size:4px; color:#c62828;">
+                    ⚠️ Diferencia: Bs.{{ diferencia_descargado|floatformat:2 }}
+                </td>
+            </tr>
             {% endif %}
-        </div>
-        
-        <!-- INFORMACIÓN DE ACTIVIDAD -->
-        <div class="grid-2" style="margin-top: 10px;">
-            <div class="campo">
-                <div class="etiqueta">Lugar Actividad:</div>
-                <div class="valor">{{ lugar_actividad }}</div>
-            </div>
-            
-            <div class="campo">
-                <div class="etiqueta">Lugar Rendición:</div>
-                <div class="valor">{{ lugar_rendicion }}</div>
-            </div>
-        </div>
-        
-        {% if descripcion_actividad and descripcion_actividad != "No especificada" %}
-        <div class="campo">
-            <div class="etiqueta">Descripción Actividad:</div>
-            <div class="valor texto-largo">{{ descripcion_actividad|truncatechars:100 }}</div>
-        </div>
-        {% endif %}
-    </div>
+        </tbody>
+    </table>
+    <div style="font-size:4px; text-align:right;">{{ cantidad_items }} items</div>
+    {% else %}
+    <div style="text-align:center; background:#f5f5f5; padding:3px;">Sin gastos registrados</div>
+    {% endif %}
+</div>
 
-    <!-- DETALLE DE GASTOS RENDIDOS -->
-    <div class="seccion">
-        <div class="seccion-titulo">📋 DETALLE DE GASTOS RENDIDOS</div>
-        
-        {% if tiene_detalle %}
-        <div style="margin-bottom: 8px; font-size: 8px; color: #666; text-align: right;">
-            Total de items: {{ cantidad_items }}
-        </div>
-        
-        <table class="tabla">
-            <thead>
-                <tr>
-                    <th style="width: 8%;">N°</th>
-                    <th style="width: 12%;">Fecha</th>
-                    <th style="width: 12%;">Partida</th>
-                    <th style="width: 18%;">Factura/Recibo</th>
-                    <th style="width: 30%;">Descripción</th>
-                    <th style="width: 15%; text-align: right;">Monto (Bs.)</th>
-                    <th style="width: 15%;">Observaciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for gasto in detalle_fondos %}
-                <tr>
-                    <td style="text-align: center;">{{ gasto.numero }}</td>
-                    <td>{{ gasto.fecha|default:"-" }}</td>
-                    <td>{{ gasto.partida|default:"-" }}</td>
-                    <td>{{ gasto.factura_recibo|default:"-" }}</td>
-                    <td class="texto-largo">{{ gasto.descripcion|default:"-" }}</td>
-                    <td style="text-align: right;">{{ gasto.monto|floatformat:2 }}</td>
-                    <td class="texto-largo">{{ gasto.observaciones|default:"-" }}</td>
-                </tr>
-                {% endfor %}
-                
-                <!-- RESUMEN FINAL -->
-                <tr style="background-color: #f8f9fa; font-weight: bold;">
-                    <td colspan="5" style="text-align: right;">TOTAL DE GASTOS RENDIDOS:</td>
-                    <td style="text-align: right;">Bs. {{ total_calculado|floatformat:2 }}</td>
-                    <td></td>
-                </tr>
-                
-                <tr style="background-color: #fff3e0; font-weight: bold;">
-                    <td colspan="5" style="text-align: right; color: #ef6c00;">MONTO DESCARGADO:</td>
-                    <td style="text-align: right; color: #ef6c00;">Bs. {{ monto_descargado|floatformat:2 }}</td>
-                    <td></td>
-                </tr>
-                
-                {% if not coincide_descargado %}
-                <tr style="background-color: #ffebee;">
-                    <td colspan="5" style="text-align: right; font-style: italic; font-size: 8px; color: #c62828;">DIFERENCIA:</td>
-                    <td style="text-align: right; font-style: italic; font-size: 8px; color: #c62828;">
-                        Bs. {{ diferencia_descargado|floatformat:2 }}
-                    </td>
-                    <td style="font-size: 7px; color: #c62828;">
-                        (No coincide con monto descargado)
-                    </td>
-                </tr>
-                {% endif %}
-            </tbody>
-        </table>
-        {% else %}
-        <div style="text-align: center; padding: 15px; background-color: #f5f5f5; border-radius: 3px; color: #757575; font-size: 9px;">
-            No se han registrado detalles de gastos rendidos
-        </div>
-        {% endif %}
+<!-- INFORMACIÓN DE ACTIVIDAD -->
+<div class="seccion compact-section" style="padding:2px; margin-bottom:2px;">
+    <div class="seccion-titulo">📍 INFORMACIÓN DE ACTIVIDAD</div>
+    <div class="grid-2">
+        <div><span class="etiqueta">Lugar actividad:</span> <span class="valor">{{ lugar_actividad|default:"-" }}</span></div>
+        <div><span class="etiqueta">Lugar rendición:</span> <span class="valor">{{ lugar_rendicion|default:"-" }}</span></div>
     </div>
+    <div><span class="etiqueta">Descripción:</span> <span class="valor">{{ descripcion_actividad|default:"-" }}</span></div>
+</div>
 
-    <!-- VALIDACIONES Y AUTORIZACIONES (4 NIVELES) -->
-    <div class="seccion">
-        <div class="seccion-titulo">✅ VALIDACIONES Y AUTORIZACIONES</div>
-        
-        <div class="grid-4" style="margin-bottom: 15px; gap: 8px;">
-            <!-- Responsable -->
-            <div style="padding: 8px; background-color: {% if validacion_responsable %}#e8f5e9{% else %}#fff3cd{% endif %}; border-radius: 3px; text-align: center;">
-                <div style="font-size: 9px; font-weight: bold; margin-bottom: 3px;">
-                    {% if validacion_responsable %}✅{% else %}⏳{% endif %} Responsable
-                </div>
-                <div style="font-size: 8px;">{{ responsable_nombre }}</div>
-            </div>
-            
-            <!-- Coordinador -->
-            <div style="padding: 8px; background-color: {% if validacion_coordinador %}#e8f5e9{% else %}#fff3cd{% endif %}; border-radius: 3px; text-align: center;">
-                <div style="font-size: 9px; font-weight: bold; margin-bottom: 3px;">
-                    {% if validacion_coordinador %}✅{% else %}⏳{% endif %} Coordinador
-                </div>
-                <div style="font-size: 8px;">{{ coordinador_nombre }}</div>
-            </div>
-            
-            <!-- Contador -->
-            <div style="padding: 8px; background-color: {% if validacion_contador %}#e8f5e9{% else %}#fff3cd{% endif %}; border-radius: 3px; text-align: center;">
-                <div style="font-size: 9px; font-weight: bold; margin-bottom: 3px;">
-                    {% if validacion_contador %}✅{% else %}⏳{% endif %} Contador
-                </div>
-                <div style="font-size: 8px;">{{ contador_nombre }}</div>
-            </div>
-            
-            <!-- Administrador -->
-            <div style="padding: 8px; background-color: {% if validacion_administrador %}#e8f5e9{% else %}#fff3cd{% endif %}; border-radius: 3px; text-align: center;">
-                <div style="font-size: 9px; font-weight: bold; margin-bottom: 3px;">
-                    {% if validacion_administrador %}✅{% else %}⏳{% endif %} Administrador
-                </div>
-                <div style="font-size: 8px;">{{ administrador_nombre }}</div>
-            </div>
+<!-- FIRMAS (5 NIVELES) -->
+<div class="seccion" style="padding:2px;">
+    <div class="seccion-titulo">✍️ FIRMAS Y VALIDACIONES</div>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr; gap:1px; margin-top:2px;">
+        <!-- QUIEN RINDE -->
+        <div class="firma">
+            <div style="font-size:4px; text-align:center; color:#555;">RINDE CUENTAS</div>
+            <div class="valor" style="text-align:center; font-size:4px;">{{ responsable_rendicion.nombre_completo|default:"-"|truncatechars:15 }}</div>
+            <div class="linea-firma" style="height:6px;"></div>
         </div>
         
-        <!-- ÁREAS DE FIRMA (5 FIRMAS - USUARIO QUE RINDE + 4 VALIDACIONES) -->
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 20px;">
-            <!-- Fila 1: Usuario que rinde y Responsable -->
-            <div class="firma-area">
-                <div class="linea-firma"></div>
-                <div class="nombre-firma">{{ responsable_rendicion.nombre_completo }}</div>
-                <div class="cargo-firma">Quien rinde cuentas</div>
+        <!-- RESPONSABLE -->
+        <div class="firma">
+            <div style="font-size:4px; text-align:center; color:#555;">RESPONSABLE</div>
+            <div style="display:flex; align-items:center; gap:1px; justify-content:center;">
+                <span style="font-size:4px;">{% if validacion_responsable %}✅{% else %}⏳{% endif %}</span>
+                <span class="valor" style="font-size:4px;">{{ responsable_nombre|default:"-"|truncatechars:10 }}</span>
             </div>
-            
-            <div class="firma-area">
-                <div class="linea-firma"></div>
-                <div class="nombre-firma">{{ responsable_nombre }}</div>
-                <div class="cargo-firma">Responsable</div>
-            </div>
-            
-            <!-- Fila 2: Coordinador y Contador -->
-            <div class="firma-area">
-                <div class="linea-firma"></div>
-                <div class="nombre-firma">{{ coordinador_nombre }}</div>
-                <div class="cargo-firma">Coordinador</div>
-            </div>
-            
-            <div class="firma-area">
-                <div class="linea-firma"></div>
-                <div class="nombre-firma">{{ contador_nombre }}</div>
-                <div class="cargo-firma">Contador</div>
-            </div>
-            
-            <!-- Fila 3: Administrador (centrado) -->
-            <div class="firma-area" style="grid-column: span 2;">
-                <div class="linea-firma"></div>
-                <div class="nombre-firma">{{ administrador_nombre }}</div>
-                <div class="cargo-firma">Administrador</div>
-            </div>
+            <div class="linea-firma" style="height:6px;"></div>
         </div>
         
-        {% if bloqueo_iconos %}
-        <div style="margin-top: 10px; padding: 5px; background-color: #ffebee; border-radius: 3px; text-align: center; font-size: 7px; color: #c62828;">
-            ⚠️ Esta rendición está bloqueada para edición
+        <!-- COORDINADOR -->
+        <div class="firma">
+            <div style="font-size:4px; text-align:center; color:#555;">COORDINADOR</div>
+            <div style="display:flex; align-items:center; gap:1px; justify-content:center;">
+                <span style="font-size:4px;">{% if validacion_coordinador %}✅{% else %}⏳{% endif %}</span>
+                <span class="valor" style="font-size:4px;">{{ coordinador_nombre|default:"-"|truncatechars:10 }}</span>
+            </div>
+            <div class="linea-firma" style="height:6px;"></div>
         </div>
-        {% endif %}
         
-        {% if tiene_saldo %}
-        <div style="margin-top: 10px; padding: 8px; background-color: #fff3cd; border-radius: 3px; text-align: center; font-size: 8px; color: #856404;">
-            💡 <strong>Importante:</strong> Existe un saldo pendiente de Bs. {{ saldo|floatformat:2 }}
+        <!-- CONTADOR -->
+        <div class="firma">
+            <div style="font-size:4px; text-align:center; color:#555;">CONTADOR</div>
+            <div style="display:flex; align-items:center; gap:1px; justify-content:center;">
+                <span style="font-size:4px;">{% if validacion_contador %}✅{% else %}⏳{% endif %}</span>
+                <span class="valor" style="font-size:4px;">{{ contador_nombre|default:"-"|truncatechars:10 }}</span>
+            </div>
+            <div class="linea-firma" style="height:6px;"></div>
         </div>
-        {% endif %}
         
-        {% if not coincide_descargado %}
-        <div style="margin-top: 10px; padding: 8px; background-color: #ffebee; border-radius: 3px; text-align: center; font-size: 8px; color: #c62828;">
-            ⚠️ <strong>Atención:</strong> La sumatoria de gastos no coincide con el monto descargado
+        <!-- ADMINISTRADOR -->
+        <div class="firma">
+            <div style="font-size:4px; text-align:center; color:#555;">ADMINISTRADOR</div>
+            <div style="display:flex; align-items:center; gap:1px; justify-content:center;">
+                <span style="font-size:4px;">{% if validacion_administrador %}✅{% else %}⏳{% endif %}</span>
+                <span class="valor" style="font-size:4px;">{{ administrador_nombre|default:"-"|truncatechars:10 }}</span>
+            </div>
+            <div class="linea-firma" style="height:6px;"></div>
         </div>
-        {% endif %}
     </div>
+    
+    <!-- ALERTAS -->
+    {% if tiene_saldo %}
+    <div style="margin-top:2px; background:#fff3cd; padding:1px; text-align:center; font-size:4px; color:#856404;">
+        ⚠️ Saldo pendiente: Bs.{{ saldo|floatformat:2 }}
+    </div>
+    {% endif %}
+    
+    {% if bloqueo_iconos %}
+    <div style="margin-top:2px; background:#ffebee; padding:1px; text-align:center; font-size:4px; color:#c62828;">
+        ⚠️ Documento bloqueado
+    </div>
+    {% endif %}
+</div>
+
+<!-- METADATOS PIE DE PÁGINA -->
+<div style="display:flex; justify-content:space-between; font-size:4px; color:#999; margin-top:2px;">
+    <span>{{ tipo_documento }}</span>
+    <span>{{ subtipo_documento }}</span>
+    <span>{{ fecha_emision }}</span>
+</div>
 {% endblock %}
