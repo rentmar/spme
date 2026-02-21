@@ -102,6 +102,7 @@ class ReportesViewSet(viewsets.ViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         
+    @action(detail=False, methods=['get'], url_path='solicitud-fondos-tarea/(?P<pk>[^/.]+)')
     def solicitud_fondos_tarea(self, request, pk=None):
         """
         Generar reporte ESPECÍFICO para solicitud de fondos CON TAREA

@@ -1,3 +1,4 @@
+#pdf_factory
 from .solicitud_fondos_pdf import SolicitudFondosPDFGenerator
 from .solicitud_reembolso_pdf import SolicitudReembolsoPDFGenerator
 from .solicitud_viaje_pdf import SolicitudViajePDFGenerator
