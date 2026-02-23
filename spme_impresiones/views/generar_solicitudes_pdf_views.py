@@ -10,6 +10,7 @@ from spme_monitoreo.models import (
     SolicitudViaje, 
     SolicitudPagoDirecto,
     RendicionCuentas,
+    SolicitudFondosActPei,
 )
 
 from ..services import (
@@ -353,4 +354,43 @@ class ReportesViewSet(viewsets.ViewSet):
                     'tipo_error': type(e).__name__
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )    
+            )  
+
+    # views/generar_solicitudes_pdf_views.py
+    @action(detail=False, methods=['get'], url_path='solicitud-fondos-actividad-pei/(?P<pk>[^/.]+)')
+    def solicitud_fondos_actividad_pei(self, request, pk=None):
+        solicitud = get_object_or_404(SolicitudFondosActPei, pk=pk)
+        if solicitud.tarea:
+            return Response({'error': 'Use endpoint para tareas'}, status=400)
+        return PDFGeneratorFactory.generate_pdf(solicitud)    
+
+    @action(detail=False, methods=['get'], url_path='solicitud-fondos-tarea-pei/(?P<pk>[^/.]+)')
+    def solicitud_fondos_tarea_pei(self, request, pk=None):
+        """
+        Generar reporte de solicitud de fondos para TAREA PEI (con tarea)
+        """
+        try:
+            solicitud = get_object_or_404(SolicitudFondosActPei, pk=pk)
+            
+            # Validar que sea una solicitud de tarea
+            if not solicitud.tarea:
+                return Response(
+                    {
+                        'error': 'Tipo de documento incorrecto',
+                        'message': 'Esta solicitud no tiene una tarea asociada. Use el endpoint para actividades.',
+                        'recomendacion': f'/api/impresiones/solicitud-fondos-actividad-pei/{pk}/'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # USAR EL GENERADOR DIRECTAMENTE (NO la fábrica)
+            from ..services.solicitud_fondos_tarea_pei_pdf import SolicitudFondosTareaPeiPDFGenerator
+            generator = SolicitudFondosTareaPeiPDFGenerator()
+            response = generator.generate(solicitud)
+            return response
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Error al generar reporte: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
