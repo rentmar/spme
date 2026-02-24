@@ -11,6 +11,7 @@ from spme_monitoreo.models import (
     SolicitudPagoDirecto,
     RendicionCuentas,
     SolicitudFondosActPei,
+    SolicitudViajeActPei,
 )
 
 from ..services import (
@@ -394,3 +395,31 @@ class ReportesViewSet(viewsets.ViewSet):
                 {'error': f'Error al generar reporte: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+    @action(detail=False, methods=['get'], url_path='solicitud-viaje-actividad-pei/(?P<pk>[^/.]+)')
+    def solicitud_viaje_actividad_pei(self, request, pk=None):
+        """
+        Generar reporte de solicitud de viaje para ACTIVIDAD PEI
+        """
+        try:
+            solicitud = get_object_or_404(SolicitudViajeActPei, pk=pk)
+            
+            # Validar que sea actividad (sin tarea)
+            if solicitud.tarea:
+                return Response(
+                    {
+                        'error': 'Tipo de documento incorrecto',
+                        'message': 'Esta solicitud tiene una tarea asociada. Use el endpoint para tareas.',
+                        'recomendacion': f'/api/impresiones/solicitud-viaje-tarea-pei/{pk}/'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            response = PDFGeneratorFactory.generate_pdf(solicitud)
+            return response
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Error al generar reporte: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )        
