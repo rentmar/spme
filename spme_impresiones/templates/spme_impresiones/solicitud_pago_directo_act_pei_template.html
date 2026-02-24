@@ -1,0 +1,248 @@
+<!-- templates/spme_impresiones/solicitud_pago_directo_act_pei.html -->
+{% extends "spme_impresiones/base_template.html" %}
+
+{% block content %}
+<style>
+    /* ESTILOS COMPACTOS */
+    .seccion { margin-bottom: 6px !important; }
+    .seccion-titulo { padding: 3px 6px !important; font-size: 8px !important; }
+    .campo { margin-bottom: 2px !important; }
+    .etiqueta { font-size: 7px !important; margin-bottom: 0px !important; }
+    .valor { padding: 2px 4px !important; font-size: 7px !important; min-height: 12px !important; }
+    .grid-3, .grid-2 { gap: 4px !important; }
+    .tabla { margin: 3px 0 !important; }
+    .tabla th { padding: 2px !important; font-size: 7px !important; }
+    .tabla td { padding: 2px !important; font-size: 7px !important; }
+    .firma-area { padding-top: 8px !important; }
+    .linea-firma { width: 80% !important; }
+    .nombre-firma { font-size: 7px !important; margin-top: 1px !important; }
+    .cargo-firma { font-size: 6px !important; }
+    .total-row td { font-size: 8px !important; }
+    .compact-section { padding: 4px !important; margin-bottom: 4px !important; }
+    .forma-pago-detalle { padding: 4px !important; margin-top: 4px !important; }
+</style>
+
+<!-- SECCIÓN 1: INFORMACIÓN DEL SOLICITANTE -->
+<div class="seccion compact-section">
+    <div class="seccion-titulo">👤 INFORMACIÓN DEL SOLICITANTE</div>
+    
+    <div class="grid-3">
+        <div class="campo">
+            <div class="etiqueta">Nombre:</div>
+            <div class="valor">{{ nombre_solicitante|truncatechars:30 }}</div>
+        </div>
+        
+        <div class="campo">
+            <div class="etiqueta">C.I.:</div>
+            <div class="valor">{{ documento_identidad|truncatechars:15 }}</div>
+        </div>
+        
+        <div class="campo">
+            <div class="etiqueta">Cargo:</div>
+            <div class="valor">{{ cargo|truncatechars:20 }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- SECCIÓN 2: INFORMACIÓN DE LA ACTIVIDAD -->
+<div class="seccion compact-section">
+    <div class="seccion-titulo">📅 INFORMACIÓN DE LA ACTIVIDAD</div>
+    
+    <div class="grid-2">
+        <div class="campo">
+            <div class="etiqueta">Código:</div>
+            <div class="valor">{{ codigo_actividad|truncatechars:15 }}</div>
+        </div>
+        
+        <div class="campo">
+            <div class="etiqueta">Actividad:</div>
+            <div class="valor">{{ nombre_actividad|truncatechars:30 }}</div>
+        </div>
+        
+        <div class="campo">
+            <div class="etiqueta">Estado:</div>
+            <div class="valor">{{ estado_actividad|truncatechars:15 }}</div>
+        </div>
+        
+        <div class="campo">
+            <div class="etiqueta">Ejecución:</div>
+            <div class="valor">{{ fecha_ejecucion }}</div>
+        </div>
+    </div>
+    
+    <div class="campo">
+        <div class="etiqueta">Descripción:</div>
+        <div class="valor">{{ descripcion_actividad|default:"No especificada"|truncatechars:70 }}</div>
+    </div>
+    
+    <div class="campo">
+        <div class="etiqueta">Objetivo:</div>
+        <div class="valor">{{ objetivo_actividad|default:"No especificado"|truncatechars:70 }}</div>
+    </div>
+    
+    <div class="campo">
+        <div class="etiqueta">Financiamiento:</div>
+        <div class="valor">
+            {% if fuentes_financiamiento %}
+                {% for fuente in fuentes_financiamiento|slice:":2" %}
+                    {{ fuente.nombre|truncatechars:15 }}: Bs.{{ fuente.monto|floatformat:0 }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            {% else %}
+                No especificado
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- SECCIÓN 3: DETALLE DE GASTOS -->
+<div class="seccion">
+    <div class="seccion-titulo">💰 DETALLE DE GASTOS</div>
+    
+    {% if detalle_gastos %}
+    <table class="tabla" style="font-size: 6px;">
+        <thead>
+            <tr>
+                <th width="8%">N°</th>
+                <th width="15%">PARTIDA</th>
+                <th width="57%">DESCRIPCIÓN</th>
+                <th width="20%">MONTO</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for gasto in detalle_gastos|slice:":8" %}
+            <tr>
+                <td>{{ gasto.indice }}</td>
+                <td>{{ gasto.partida|default:"-" }}</td>
+                <td>{{ gasto.descripcion_gasto|default:"-"|truncatechars:35 }}</td>
+                <td style="text-align: right;">{{ gasto.monto|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+            
+            {% if detalle_gastos|length > 8 %}
+            <tr>
+                <td colspan="4" style="text-align: center; color: #666; font-style: italic;">
+                    ... y {{ detalle_gastos|length|add:"-8" }} más
+                </td>
+            </tr>
+            {% endif %}
+            
+            <tr class="total-row">
+                <td colspan="3" style="text-align: right;">TOTAL:</td>
+                <td style="text-align: right;">Bs. {{ total_monto_solicitado|floatformat:2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+    {% else %}
+    <div style="text-align: center; padding: 5px; color: #999;">No hay gastos registrados</div>
+    {% endif %}
+</div>
+
+<!-- SECCIÓN 4: FORMA DE PAGO -->
+<div class="seccion compact-section">
+    <div class="seccion-titulo">📋 FORMA DE PAGO</div>
+    
+    <div class="grid-2">
+        <div class="campo">
+            <div class="etiqueta">Lugar:</div>
+            <div class="valor">{{ lugar_solicitud|default:"-"|truncatechars:15 }}</div>
+        </div>
+        
+        <div class="campo">
+            <div class="etiqueta">Fecha:</div>
+            <div class="valor">{{ fecha_solicitud }}</div>
+        </div>
+    </div>
+    
+    <div class="campo">
+        <div class="etiqueta">Forma de Pago:</div>
+        <div class="valor" style="font-weight: bold; color: #1976d2;">{{ forma_pago }}</div>
+    </div>
+    
+    <!-- TRANSFERENCIA BANCARIA -->
+    {% if datos_transferencia.mostrar_transferencia %}
+    <div style="background-color: #e3f2fd; padding: 4px; border-radius: 4px; margin-top: 4px;">
+        <div style="font-weight: bold; color: #1565c0; font-size: 7px;">🏦 TRANSFERENCIA BANCARIA:</div>
+        <div style="font-size: 6px;">
+            <div><strong>Nombre:</strong> {{ datos_transferencia.transferencia.nombre_transferencia|default:nombre_solicitante|truncatechars:20 }}</div>
+            <div><strong>C.I.:</strong> {{ datos_transferencia.transferencia.ci_transferencia|default:documento_identidad|truncatechars:12 }}</div>
+            <div><strong>Banco:</strong> {{ datos_transferencia.transferencia.entidad_bancaria|default:"-"|truncatechars:15 }}</div>
+            <div><strong>N° Cuenta:</strong> {{ datos_transferencia.transferencia.numero_cuenta|default:"-"|truncatechars:15 }}</div>
+            <div><strong>Tipo:</strong> {{ datos_transferencia.transferencia.tipo_cuenta|default:"-"|truncatechars:10 }}</div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- PAGO A TERCEROS -->
+    {% if datos_transferencia.mostrar_otros %}
+    <div style="background-color: #fff3e0; padding: 4px; border-radius: 4px; margin-top: 4px;">
+        <div style="font-weight: bold; color: #bf360c; font-size: 7px;">👤 PAGO A SOLICITANTE/TERCEROS:</div>
+        <div style="font-size: 6px;">
+            <div><strong>Nombre:</strong> {{ datos_transferencia.otros.nombre_otros|default:nombre_solicitante|truncatechars:25 }}</div>
+            <div><strong>C.I.:</strong> {{ datos_transferencia.otros.ci_otros|default:documento_identidad|truncatechars:15 }}</div>
+            {% if datos_transferencia.otros.observaciones %}
+            <div><strong>Obs:</strong> {{ datos_transferencia.otros.observaciones|truncatechars:30 }}</div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- PAGO EN EFECTIVO -->
+    {% if datos_transferencia.mostrar_efectivo %}
+    <div style="background-color: #f0f7f0; padding: 4px; border-radius: 4px; margin-top: 4px;">
+        <div style="font-weight: bold; color: #2e7d32; font-size: 7px;">💰 PAGO EN EFECTIVO:</div>
+        <div style="font-size: 6px;">
+            <div>El pago se realizará en efectivo al solicitante.</div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Datos bancarios del solicitante (solo si NO hay transferencia) -->
+    {% if datos_bancarios_solicitante.banco and not datos_transferencia.mostrar_transferencia %}
+    <div style="margin-top: 4px; font-size: 5px; color: #999; border-top: 1px dashed #ccc; padding-top: 2px;">
+        <strong>Datos bancarios del solicitante:</strong> {{ datos_bancarios_solicitante.banco|truncatechars:10 }} - {{ datos_bancarios_solicitante.tipo_cuenta|truncatechars:5 }}: {{ datos_bancarios_solicitante.numero_cuenta|truncatechars:12 }}
+    </div>
+    {% endif %}
+</div>
+
+<!-- SECCIÓN 5: FIRMAS -->
+<div class="seccion">
+    <div class="seccion-titulo">✍️ FIRMAS</div>
+    
+    <div class="grid-3" style="gap: 5px;">
+        <!-- SOLICITANTE -->
+        <div>
+            <div style="font-size: 6px; text-align: center;">SOLICITANTE</div>
+            <div class="firma-area" style="padding-top: 5px;">
+                <div class="linea-firma"></div>
+                <div class="nombre-firma">{{ nombre_solicitante|truncatechars:18 }}</div>
+                <div class="cargo-firma">{{ cargo|truncatechars:15 }}</div>
+            </div>
+        </div>
+        
+        <!-- CONTADOR -->
+        <div>
+            <div style="font-size: 6px; text-align: center;">CONTADOR</div>
+            <div class="firma-area" style="padding-top: 5px;">
+                <div class="linea-firma"></div>
+                <div class="nombre-firma">{{ nombre_contador|default:"Contador"|truncatechars:18 }}</div>
+                <div class="cargo-firma">Contador</div>
+            </div>
+        </div>
+        
+        <!-- COORDINADOR -->
+        <div>
+            <div style="font-size: 6px; text-align: center;">COORDINADOR</div>
+            <div class="firma-area" style="padding-top: 5px;">
+                <div class="linea-firma"></div>
+                <div class="nombre-firma">{{ nombre_coordinador|default:"Coordinador"|truncatechars:18 }}</div>
+                <div class="cargo-firma">Coordinador</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FECHA DE GENERACIÓN -->
+<div style="margin-top: 5px; font-size: 5px; color: #999; text-align: right;">
+    Generado: {{ fecha_generacion }}
+</div>
+{% endblock %}

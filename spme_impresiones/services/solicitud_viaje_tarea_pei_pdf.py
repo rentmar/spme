@@ -64,7 +64,7 @@ class SolicitudViajeTareaPeiPDFGenerator(BasePDFGenerator):
                 # Datos básicos del formulario
                 'numero_formulario': obj.numeroFormulario or f"SV-PEI-T-{obj.id:04d}",
                 'fecha_emision': fecha_solicitud,
-                'tipo_documento': 'SOLICITUD DE VIAJE - TAREA PEI',
+                'tipo_documento': 'SOLICITUD DE VIAJE - SUBACTIVIDAD PEI',
                 'subtipo_documento': 'SV-PEI-T',
                 
                 # Datos del USUARIO (solicitante)
