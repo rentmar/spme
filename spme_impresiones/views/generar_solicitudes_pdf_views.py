@@ -422,4 +422,30 @@ class ReportesViewSet(viewsets.ViewSet):
             return Response(
                 {'error': f'Error al generar reporte: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )        
+            )   
+
+    @action(detail=False, methods=['get'], url_path='solicitud-viaje-tarea-pei/(?P<pk>[^/.]+)')
+    def solicitud_viaje_tarea_pei(self, request, pk=None):
+        try:
+            solicitud = get_object_or_404(SolicitudViajeActPei, pk=pk)
+            
+            if not solicitud.tarea:
+                return Response(
+                    {
+                        'error': 'Tipo de documento incorrecto',
+                        'message': 'Esta solicitud no tiene una tarea asociada.'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Usar el generador específico de tarea
+            from ..services.solicitud_viaje_tarea_pei_pdf import SolicitudViajeTareaPeiPDFGenerator
+            generator = SolicitudViajeTareaPeiPDFGenerator()
+            response = generator.generate(solicitud)
+            return response
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Error al generar reporte: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

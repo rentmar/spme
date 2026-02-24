@@ -12,6 +12,7 @@ from .rendicion_cuentas_tarea_pdf import RendicionCuentasTareaPDFGenerator
 from .solicitud_fondos_act_pei_pdf import SolicitudFondosActPeiPDFGenerator
 from .solicitud_fondos_tarea_pei_pdf import SolicitudFondosTareaPeiPDFGenerator
 from .solicitud_viaje_act_pei_pdf import SolicitudViajeActPeiPDFGenerator
+from .solicitud_viaje_tarea_pei_pdf import SolicitudViajeTareaPeiPDFGenerator
 
 # Importa los otros generadores cuando los crees
 
@@ -34,6 +35,7 @@ class PDFGeneratorFactory:
         'SolicitudFondosActPei': SolicitudFondosActPeiPDFGenerator,
         'SolicitudFondosTareaPei': SolicitudFondosTareaPeiPDFGenerator, 
         'SolicitudViajeActPei': SolicitudViajeActPeiPDFGenerator, 
+        'SolicitudViajeActPeiTarea': SolicitudViajeTareaPeiPDFGenerator,
         # Agrega los otros tipos aquí
     }
     

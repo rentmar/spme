@@ -26,6 +26,7 @@ urlpatterns = [
     path(r'solicitud-fondos-actividad-pei/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_fondos_actividad_pei'}),  name='solicitud_fondos_actividad_pei_pdf' ),
     path(r'solicitud-fondos-tarea-pei/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_fondos_tarea_pei'}), name='solicitud_fondos_tarea_pei_pdf'),
     path(r'solicitud-viaje-actividad-pei/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_viaje_actividad_pei'}), name='solicitud_viaje_actividad_pei_pdf'),
+    path(r'solicitud-viaje-tarea-pei/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_viaje_tarea_pei'}), name='solicitud_viaje_tarea_pei_pdf'),
 
 
 ] 
