@@ -542,4 +542,31 @@ class ReportesViewSet(viewsets.ViewSet):
             return Response(
                 {'error': f'Error al generar reporte: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )        
+            )    
+
+    # views/generar_solicitudes_pdf_views.py
+    @action(detail=False, methods=['get'], url_path='solicitud-reembolso-tarea-pei/(?P<pk>[^/.]+)')
+    def solicitud_reembolso_tarea_pei(self, request, pk=None):
+        """
+        Generar reporte de solicitud de reembolso para TAREA PEI
+        """
+        try:
+            from spme_monitoreo.models import SolicitudReembolsoActPei
+            
+            solicitud = get_object_or_404(SolicitudReembolsoActPei, pk=pk)
+            
+            # Validar que tenga tarea
+            if not solicitud.tarea:
+                return Response(
+                    {
+                        'error': 'Esta solicitud no tiene tarea asociada',
+                        'recomendacion': f'/api-print/solicitud-reembolso-actividad-pei/{pk}/'
+                    },
+                    status=400
+                )
+            
+            response = PDFGeneratorFactory.generate_pdf(solicitud)
+            return response
+            
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)            

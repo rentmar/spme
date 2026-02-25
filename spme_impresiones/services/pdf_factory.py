@@ -1,4 +1,4 @@
-#pdf_factory
+# pdf_factory.py
 from .solicitud_fondos_pdf import SolicitudFondosPDFGenerator
 from .solicitud_reembolso_pdf import SolicitudReembolsoPDFGenerator
 from .solicitud_viaje_pdf import SolicitudViajePDFGenerator
@@ -16,8 +16,7 @@ from .solicitud_viaje_tarea_pei_pdf import SolicitudViajeTareaPeiPDFGenerator
 from .solicitud_pago_directo_act_pei_pdf import SolicitudPagoDirectoActPeiPDFGenerator
 from .solicitud_pago_directo_tarea_pei_pdf import SolicitudPagoDirectoTareaPeiPDFGenerator
 from .solicitud_reembolso_act_pei_pdf import SolicitudReembolsoActPeiPDFGenerator
-
-# Importa los otros generadores cuando los crees
+from .solicitud_reembolso_tarea_pei_pdf import SolicitudReembolsoTareaPeiPDFGenerator
 
 class PDFGeneratorFactory:
     """
@@ -42,9 +41,7 @@ class PDFGeneratorFactory:
         'SolicitudPagoDirectoActPei': SolicitudPagoDirectoActPeiPDFGenerator,
         'SolicitudPagoDirectoTareaPei': SolicitudPagoDirectoTareaPeiPDFGenerator,
         'SolicitudReembolsoActPei': SolicitudReembolsoActPeiPDFGenerator,
-        
-
-        # Agrega los otros tipos aquí
+        'SolicitudReembolsoTareaPei': SolicitudReembolsoTareaPeiPDFGenerator, 
     }
     
     @classmethod
@@ -72,6 +69,13 @@ class PDFGeneratorFactory:
                 return cls.GENERATORS['SolicitudViajeTareaPei']()
             else:
                 return cls.GENERATORS['SolicitudViajeActPei']()
+        
+        # 👇 NUEVO: Caso para Reembolso
+        elif model_name == 'SolicitudReembolsoActPei':
+            if obj.tarea:
+                return cls.GENERATORS['SolicitudReembolsoTareaPei']()
+            else:
+                return cls.GENERATORS['SolicitudReembolsoActPei']()
         
         # Para modelos sin versión actividad/tarea
         if model_name in cls.GENERATORS:
