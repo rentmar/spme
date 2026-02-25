@@ -478,6 +478,31 @@ class ReportesViewSet(viewsets.ViewSet):
                 {'error': f'Error al generar reporte: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )    
+            
 
+    # views/generar_solicitudes_pdf_views.py
 
-
+    @action(detail=False, methods=['get'], url_path='solicitud-pago-directo-tarea-pei/(?P<pk>[^/.]+)')
+    def solicitud_pago_directo_tarea_pei(self, request, pk=None):
+        try:
+            solicitud = get_object_or_404(SolicitudPagoDirectoActPei, pk=pk)
+            
+            print(f"\n>>> VERIFICANDO GENERADOR <<<")
+            print(f"Generador en fábrica: {PDFGeneratorFactory.GENERATORS.get('SolicitudPagoDirectoTareaPei')}")
+            
+            # 👇 AGREGAR ESTAS LÍNEAS
+            print(f"\n>>> ANTES DE GENERATE_PDF <<<")
+            generator = PDFGeneratorFactory.get_generator(solicitud)
+            print(f"Tipo de generador devuelto: {type(generator)}")
+            print(f"Nombre del generador: {generator.__class__.__name__}")
+            print(f"Template que usaría: {generator.template_name}")
+            
+            # Continuar con la generación
+            response = generator.generate(solicitud)  # Usar el generator directamente
+            return response
+            
+        except Exception as e:
+            print(f"ERROR: {e}")
+            import traceback
+            traceback.print_exc()
+            return Response({'error': str(e)}, status=500)

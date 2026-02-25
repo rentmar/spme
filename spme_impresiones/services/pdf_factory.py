@@ -14,6 +14,7 @@ from .solicitud_fondos_tarea_pei_pdf import SolicitudFondosTareaPeiPDFGenerator
 from .solicitud_viaje_act_pei_pdf import SolicitudViajeActPeiPDFGenerator
 from .solicitud_viaje_tarea_pei_pdf import SolicitudViajeTareaPeiPDFGenerator
 from .solicitud_pago_directo_act_pei_pdf import SolicitudPagoDirectoActPeiPDFGenerator
+from .solicitud_pago_directo_tarea_pei_pdf import SolicitudPagoDirectoTareaPeiPDFGenerator
 
 # Importa los otros generadores cuando los crees
 
@@ -38,6 +39,9 @@ class PDFGeneratorFactory:
         'SolicitudViajeActPei': SolicitudViajeActPeiPDFGenerator, 
         'SolicitudViajeActPeiTarea': SolicitudViajeTareaPeiPDFGenerator,
         'SolicitudPagoDirectoActPei': SolicitudPagoDirectoActPeiPDFGenerator,
+        'SolicitudPagoDirectoTareaPei': SolicitudPagoDirectoTareaPeiPDFGenerator,
+        
+
         # Agrega los otros tipos aquí
     }
     
@@ -48,10 +52,30 @@ class PDFGeneratorFactory:
         """
         model_name = obj.__class__.__name__
         
+        # CASOS ESPECIALES: Modelos que tienen versión actividad/tarea
+        if model_name == 'SolicitudPagoDirectoActPei':
+            if obj.tarea:
+                return cls.GENERATORS['SolicitudPagoDirectoTareaPei']()
+            else:
+                return cls.GENERATORS['SolicitudPagoDirectoActPei']()
+        
+        elif model_name == 'SolicitudFondosActPei':
+            if obj.tarea:
+                return cls.GENERATORS['SolicitudFondosTareaPei']()
+            else:
+                return cls.GENERATORS['SolicitudFondosActPei']()
+        
+        elif model_name == 'SolicitudViajeActPei':
+            if obj.tarea:
+                return cls.GENERATORS['SolicitudViajeTareaPei']()
+            else:
+                return cls.GENERATORS['SolicitudViajeActPei']()
+        
+        # Para modelos sin versión actividad/tarea
         if model_name in cls.GENERATORS:
             return cls.GENERATORS[model_name]()
-        else:
-            raise ValueError(f"No hay generador de PDF definido para {model_name}")
+        
+        raise ValueError(f"No hay generador de PDF definido para {model_name}")    
     
     @classmethod
     def generate_pdf(cls, obj):
