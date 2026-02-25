@@ -569,4 +569,57 @@ class ReportesViewSet(viewsets.ViewSet):
             return response
             
         except Exception as e:
-            return Response({'error': str(e)}, status=500)            
+            return Response({'error': str(e)}, status=500)     
+
+    @action(detail=False, methods=['get'], url_path='rendicion-cuentas-actividad-pei/(?P<pk>[^/.]+)')
+    def rendicion_cuentas_actividad_pei(self, request, pk=None):
+        """
+        Generar reporte de rendición de cuentas para ACTIVIDAD PEI
+        """
+        try:
+            from spme_monitoreo.models import RendicionCuentasActPei
+            
+            rendicion = get_object_or_404(RendicionCuentasActPei, pk=pk)
+            
+            # Validar que sea actividad (sin tarea)
+            if rendicion.tarea:
+                return Response(
+                    {
+                        'error': 'Esta rendición tiene tarea asociada',
+                        'recomendacion': f'/api-print/rendicion-cuentas-tarea-pei/{pk}/'
+                    },
+                    status=400
+                )
+            
+            response = PDFGeneratorFactory.generate_pdf(rendicion)
+            return response
+            
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
+
+    @action(detail=False, methods=['get'], url_path='rendicion-cuentas-tarea-pei/(?P<pk>[^/.]+)')
+    def rendicion_cuentas_tarea_pei(self, request, pk=None):
+        """
+        Generar reporte de rendición de cuentas para TAREA PEI
+        """
+        try:
+            from spme_monitoreo.models import RendicionCuentasActPei
+            
+            rendicion = get_object_or_404(RendicionCuentasActPei, pk=pk)
+            
+            # Validar que tenga tarea
+            if not rendicion.tarea:
+                return Response(
+                    {
+                        'error': 'Esta rendición no tiene tarea asociada',
+                        'recomendacion': f'/api-print/rendicion-cuentas-actividad-pei/{pk}/'
+                    },
+                    status=400
+                )
+            
+            response = PDFGeneratorFactory.generate_pdf(rendicion)
+            return response
+            
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)                   

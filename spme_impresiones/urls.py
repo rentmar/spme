@@ -31,6 +31,8 @@ urlpatterns = [
     path(r'solicitud-pago-directo-tarea-pei/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_pago_directo_tarea_pei'}), name='solicitud_pago_directo_tarea_pei_pdf'),
     path(r'solicitud-reembolso-actividad-pei/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_reembolso_actividad_pei'}), name='solicitud_reembolso_actividad_pei_pdf'),
     path(r'solicitud-reembolso-tarea-pei/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_reembolso_tarea_pei'}), name='solicitud_reembolso_tarea_pei_pdf'),
+    path(r'rendicion-cuentas-actividad-pei/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'rendicion_cuentas_actividad_pei'}), name='rendicion_cuentas_actividad_pei_pdf'),
+    path(r'rendicion-cuentas-tarea-pei/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'rendicion_cuentas_tarea_pei'}), name='rendicion_cuentas_tarea_pei_pdf'),
 
  
 ] 
