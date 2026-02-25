@@ -506,3 +506,40 @@ class ReportesViewSet(viewsets.ViewSet):
             import traceback
             traceback.print_exc()
             return Response({'error': str(e)}, status=500)
+
+
+    @action(detail=False, methods=['get'], url_path='solicitud-reembolso-actividad-pei/(?P<pk>[^/.]+)')
+    def solicitud_reembolso_actividad_pei(self, request, pk=None):
+        """
+        Generar reporte de solicitud de reembolso para ACTIVIDAD PEI
+        """
+        try:
+            from spme_monitoreo.models import SolicitudReembolsoActPei
+            
+            solicitud = get_object_or_404(SolicitudReembolsoActPei, pk=pk)
+            
+            # Validar que sea actividad (sin tarea)
+            if solicitud.tarea:
+                return Response(
+                    {
+                        'error': 'Esta solicitud tiene tarea asociada',
+                        'message': 'Use el endpoint para tareas cuando esté implementado',
+                        'solicitud_id': solicitud.id,
+                        'tiene_tarea': True
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            response = PDFGeneratorFactory.generate_pdf(solicitud)
+            return response
+            
+        except SolicitudReembolsoActPei.DoesNotExist:
+            return Response(
+                {'error': f'Solicitud de reembolso con ID {pk} no encontrada'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'Error al generar reporte: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )        

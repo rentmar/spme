@@ -15,6 +15,7 @@ from .solicitud_viaje_act_pei_pdf import SolicitudViajeActPeiPDFGenerator
 from .solicitud_viaje_tarea_pei_pdf import SolicitudViajeTareaPeiPDFGenerator
 from .solicitud_pago_directo_act_pei_pdf import SolicitudPagoDirectoActPeiPDFGenerator
 from .solicitud_pago_directo_tarea_pei_pdf import SolicitudPagoDirectoTareaPeiPDFGenerator
+from .solicitud_reembolso_act_pei_pdf import SolicitudReembolsoActPeiPDFGenerator
 
 # Importa los otros generadores cuando los crees
 
@@ -40,6 +41,7 @@ class PDFGeneratorFactory:
         'SolicitudViajeActPeiTarea': SolicitudViajeTareaPeiPDFGenerator,
         'SolicitudPagoDirectoActPei': SolicitudPagoDirectoActPeiPDFGenerator,
         'SolicitudPagoDirectoTareaPei': SolicitudPagoDirectoTareaPeiPDFGenerator,
+        'SolicitudReembolsoActPei': SolicitudReembolsoActPeiPDFGenerator,
         
 
         # Agrega los otros tipos aquí
