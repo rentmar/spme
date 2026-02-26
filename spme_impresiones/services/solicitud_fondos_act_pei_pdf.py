@@ -50,6 +50,14 @@ class SolicitudFondosActPeiPDFGenerator(BasePDFGenerator):
             
             # Información del lugar
             'lugar_solicitud': obj.lugarSolicitud or "No especificado",
+
+            # Después de obtener el código de actividad (línea 33 aproximadamente)
+            'tipo_actividad': self._get_tipo_actividad(obj),
+
+            # Si quieres información más detallada:
+            'tipo_actividad_info': self._get_tipo_actividad_completo(obj),
+            'tipo_actividad_sigla': self._get_tipo_actividad_sigla(obj),
+            'tipo_actividad_descripcion': self._get_tipo_actividad_descripcion(obj),
             
             # Información de pago
             'forma_pago': obj.formaPago.formaPago if obj.formaPago else "No especificada",
@@ -306,3 +314,128 @@ class SolicitudFondosActPeiPDFGenerator(BasePDFGenerator):
         numero = obj.numeroFormulario or f"SF-ACT-{obj.id:04d}"
         numero_limpio = "".join(c for c in numero if c.isalnum() or c in ['-', '_'])
         return f"Solicitud_Fondos_Actividad_PEI_{numero_limpio}.pdf"
+
+    def _get_tipo_actividad(self, obj):
+        """
+        Obtiene el tipo de actividad formateado para mostrarlo en el PDF.
+        Prioriza el campo 'tipo' (ForeignKey a TipoActividad) si existe,
+        de lo contrario usa el campo 'tipo_actividad' del modelo Actividad.
+        """
+        if not obj.actividad:
+            return "No especificado"
+        
+        actividad = obj.actividad
+        
+        # Mapeo de tipos de actividad (del modelo Actividad.TIPO_ACTIVIDAD)
+        tipos_actividad_map = {
+            'NODEF': 'No definido',
+            'ACAP': 'Actividad de Capacitación',
+            'PRIN': 'Proyecto de Investigación',
+            'AOP': 'Actividad Operativa',
+            'CSNS': 'Campaña de Sensibilización',
+            'PDES': 'Proyecto de Desarrollo',
+            'AINC': 'Actividad de Incidencia',
+            'AART': 'Actividad de Articulación',
+            'OTRO': 'Otro',
+        }
+        
+        # Prioridad 1: Si tiene ForeignKey a TipoActividad
+        if actividad.tipo:
+            tipo_obj = actividad.tipo
+            if tipo_obj.sigla and tipo_obj.tipo_actividad:
+                return f"{tipo_obj.sigla} - {tipo_obj.tipo_actividad}"
+            elif tipo_obj.tipo_actividad:
+                return tipo_obj.tipo_actividad
+            elif tipo_obj.sigla:
+                return tipo_obj.sigla
+        
+        # Prioridad 2: Si tiene campo 'descripcion_tipo_actividad'
+        if actividad.descripcion_tipo_actividad:
+            return actividad.descripcion_tipo_actividad
+        
+        # Prioridad 3: Si tiene campo 'tipo' (choices del modelo)
+        # Nota: El modelo Actividad tiene TIPO_ACTIVIDAD pero no veo un campo 'tipo'
+        # que use esos choices. Si existe un campo llamado 'tipo' que use esos choices,
+        # descomenta las siguientes líneas:
+        """
+        if hasattr(actividad, 'tipo') and actividad.tipo:
+            tipo_choice = actividad.tipo
+            if tipo_choice in tipos_actividad_map:
+                return tipos_actividad_map[tipo_choice]
+            return tipo_choice
+        """
+        
+        # Prioridad 4: Si no hay información específica
+        return "No especificado"
+
+    def _get_tipo_actividad_sigla(self, obj):
+        """
+        Obtiene solo la sigla del tipo de actividad (si está disponible)
+        """
+        if not obj.actividad:
+            return ""
+        
+        actividad = obj.actividad
+        
+        if actividad.tipo and actividad.tipo.sigla:
+            return actividad.tipo.sigla
+        
+        return ""
+
+    def _get_tipo_actividad_descripcion(self, obj):
+        """
+        Obtiene solo la descripción del tipo de actividad
+        """
+        if not obj.actividad:
+            return "No especificado"
+        
+        actividad = obj.actividad
+        
+        if actividad.tipo and actividad.tipo.tipo_actividad:
+            return actividad.tipo.tipo_actividad
+        
+        if actividad.descripcion_tipo_actividad:
+            return actividad.descripcion_tipo_actividad
+        
+        return "No especificado"
+
+    def _get_tipo_actividad_completo(self, obj):
+        """
+        Obtiene información completa del tipo de actividad con formato detallado
+        """
+        if not obj.actividad:
+            return {
+                'sigla': '',
+                'descripcion': 'No especificado',
+                'completo': 'No especificado',
+                'tiene_info': False
+            }
+        
+        actividad = obj.actividad
+        resultado = {
+            'sigla': '',
+            'descripcion': 'No especificado',
+            'completo': 'No especificado',
+            'tiene_info': False
+        }
+        
+        if actividad.tipo:
+            tipo_obj = actividad.tipo
+            resultado['sigla'] = tipo_obj.sigla or ''
+            resultado['descripcion'] = tipo_obj.tipo_actividad or 'No especificado'
+            
+            if resultado['sigla'] and resultado['descripcion']:
+                resultado['completo'] = f"{resultado['sigla']} - {resultado['descripcion']}"
+            elif resultado['descripcion']:
+                resultado['completo'] = resultado['descripcion']
+            elif resultado['sigla']:
+                resultado['completo'] = resultado['sigla']
+            
+            resultado['tiene_info'] = bool(resultado['sigla'] or resultado['descripcion'] != 'No especificado')
+        
+        elif actividad.descripcion_tipo_actividad:
+            resultado['descripcion'] = actividad.descripcion_tipo_actividad
+            resultado['completo'] = actividad.descripcion_tipo_actividad
+            resultado['tiene_info'] = True
+        
+        return resultado    
