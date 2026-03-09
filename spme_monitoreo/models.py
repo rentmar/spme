@@ -496,7 +496,7 @@ class InformeActividad(models.Model):
         verbose_name = 'Informe Actividad'
         verbose_name_plural = 'Informes de Actividad'
 
-
+ 
 #Informe de Actividades - Completo
 class InformeActividadBase(PolymorphicModel):
     numeroInforme = models.CharField(max_length=50, blank=True, null=True)
@@ -509,6 +509,22 @@ class InformeActividadBase(PolymorphicModel):
     comentariosRecomendaciones = models.TextField(blank=True, null=True)
     presupuestoPlanificado = models.DecimalField(max_digits=15, decimal_places=2, verbose_name='Presupuesto planificado', blank=True, null=True)
     presupuestoEjecutado = models.DecimalField(max_digits=15, decimal_places=2, verbose_name='Presupuesto ejecutado', blank=True, null=True)
+
+    #Campos para seguimiento
+    timestamp_registro = models.DateTimeField(
+        auto_now_add=True,  # Se establece automáticamente al crear el registro
+        verbose_name='Fecha y hora de registro',
+        help_text='Fecha y hora en que se creó el registro',
+        null=True,
+        blank=True
+    )
+    timestamp_ultima_modificacion = models.DateTimeField(
+        auto_now=True,  # Se actualiza automáticamente cada vez que se guarda
+        verbose_name='Última modificación',
+        help_text='Fecha y hora de la última modificación',
+        null=True,
+        blank=True
+    )
 
     class Meta:
         verbose_name = 'Informe Base actividada y subactividad principal'
@@ -525,6 +541,7 @@ class InformeActividadPrincipal(InformeActividadBase):
     herramientasArchivos = models.JSONField(blank=True, null=True)  
     mediosArchivos = models.JSONField(blank=True, null=True)  
 
+    #Relacion a la actividad
     actividad = models.ForeignKey(
         Actividad,
         on_delete=models.SET_NULL,
@@ -532,6 +549,61 @@ class InformeActividadPrincipal(InformeActividadBase):
         null=True,
         blank=True
     )
+
+    #Usuario que genera el informe de actividad
+    usuario = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='informe_actividad_creados_usuario',
+        null=True,
+        blank=True
+    )
+
+    #Generar el numero de informe
+    def generar_numero_informe(self):
+        """
+        Generar numero de informes de actividad automatico:
+        INFACT-ID-CODIGO_ACTIVIDAD
+        """
+        if not self.actividad or not self.actividad.codigo:
+            raise ValueError("La actividad debe tener un código para generar el número de informe")
+        
+        # Si ya tiene ID, formatear con 4 dígitos
+        if self.id:
+            id_formateado = f"{self.id:04d}"
+            return f"INFACT-{id_formateado}-{self.actividad.codigo}"
+        else:
+            # Si no tiene ID, usar placeholder
+            return f"INFACT-{{id:04d}}-{self.actividad.codigo}"
+    
+    #Metodo guardado
+    def save(self, *args, **kwargs):
+        # Guardar primero si no tiene ID
+        is_new = self.pk is None
+        
+        if is_new:
+            # Guardar para obtener ID
+            super().save(*args, **kwargs)
+            
+            # Generar número con ID formateado
+            if self.actividad and self.actividad.codigo:
+                id_formateado = f"{self.id:04d}"
+                self.numeroInforme = f"INFACT-{id_formateado}-{self.actividad.codigo}"
+                # Actualizar sin recursión
+                InformeActividadPrincipal.objects.filter(pk=self.pk).update(numeroInforme=self.numeroInforme)
+        else:
+            # Si ya existe, solo actualizar si no tiene número
+            if not self.numeroInforme and self.actividad:
+                id_formateado = f"{self.id:04d}"
+                self.numeroInforme = f"INFACT-{id_formateado}-{self.actividad.codigo}"
+            
+            super().save(*args, **kwargs)
+    
+    class Meta:
+        verbose_name = 'Informe de Actividad Principal'
+        verbose_name_plural = 'Informes de Actividades Principal'
+
+    #metodo str                
     def __str__(self):
         return f"Informe {self.numeroInforme} - {self.actividad.codigo if self.actividad else 'Sin actividad'}"    
 
@@ -543,6 +615,7 @@ class InformeTareaPrincipal(InformeActividadBase):
     tipoActividad = models.CharField(max_length=255, blank=True, null=True)
     desglosePresupuesto = models.JSONField(blank=True, null=True)
 
+    #Tarea relacionada al Informe de tarea
     tarea = models.ForeignKey(
         TareaActividad,
         on_delete=models.SET_NULL,
@@ -551,19 +624,61 @@ class InformeTareaPrincipal(InformeActividadBase):
         blank=True
     )
 
+    #Usuario que genero el informe
+    usuario = models.ForeignKey(
+        Usuario,
+        on_delete=models.SET_NULL,
+        related_name='informes_tarea_creados_usuario',
+        null=True,
+        blank=True,
+    )
+
+    #generar el numero de informe para tareas
+    def generar_numero_informe(self):
+        """
+        Generar numero de informe de tarea automatico:
+        INFSUBACT-ID_FORMATEADO-CODIGO_TAREA
+        """
+        if not self.tarea or not self.tarea.codigo:
+            raise ValueError("La tarea debe tener un código para generar el número de informe")
+        
+        # Si ya tiene ID, formatear 4 dígitos
+        if self.id:
+            id_formateado = f"{self.id:04d}"
+            return f"INFSUBACT-{id_formateado}-{self.tarea.codigo}"
+        else:
+            # Si no tiene ID, usar placeholder
+            return f"INFSUBACT-{{id:04d}}-{self.tarea.codigo}"
+    
+    #Metodo de guardado
+    def save(self, *args, **kwargs):
+        #guardar primero si no tiene ID
+        is_new = self.pk is None
+
+        if is_new:
+            #guardar para obtener el ID
+            super().save(*args, **kwargs)
+            # Generar número con ID formateado
+            if self.tarea and self.tarea.codigo:
+                id_formateado = f"{self.id:04d}"
+                self.numeroInforme = f"INFSUBACT-{id_formateado}-{self.tarea.codigo}"
+                # Actualizar sin recursión
+                InformeTareaPrincipal.objects.filter(pk=self.pk).update(numeroInforme=self.numeroInforme)
+        else:    
+            #Si ya existe, solo actualizar
+            if not self.numeroInforme and self.tarea:
+                id_formateado = f"{self.id:04d}"
+                self.numeroInforme = f"INFSUBACT-{id_formateado}-{self.tarea.codigo}"
+            
+            super().save(*args, **kwargs)
+
+
     class Meta:
-        verbose_name = 'Informe de Tarea Principal'
-        verbose_name_plural = 'Informes de Tareas Principal'
+        verbose_name = 'Informe de Subactividad Principal'
+        verbose_name_plural = 'Informes de Subactividades Principal'
 
     def __str__(self):
         return f"Informe {self.numeroInforme} - {self.tarea.codigo if self.tarea else 'Sin Tarea'}"    
-
-    class Meta:
-        verbose_name = 'Informe de Actividad Principal'
-        verbose_name_plural = 'Informes de actividades Principal'
-
-    def __str__(self):
-        return f"Informe {self.numeroInforme} - {self.actividad.codigo if self.actividad else 'Sin actividad'}"    
 
 
 #Informe Base

@@ -98,6 +98,9 @@ from .monitoreo.views.lista_informe_actividad_completo_views import (
     InformesPorFechaView, 
     ActividadesConResumenInformesView
     )
+from .informeactividadprincipal.views.crear_informe_actividad_principal_views import CrearInformeActividadView
+#Informe de tarea principal
+from .informeactividadprincipal.views.crear_informe_tarea_principal_views import CrearInformeTareaView
 #Solicitude de viaje PEI
 from .monitoreo.views.obtener_solicitudes_viaje_pei_views import filtrar_solicitudes_viaje
 
@@ -311,6 +314,9 @@ urlpatterns =[
     ###############INFORMES###############
     #Actividad-subactividad
     path(r'actividades/<int:actividad_id>/detalle-informes/', ActividadDetalladaView.as_view(), name='actividad-detalle-informes'),
+    #Informes de actividad/subactividad Principal
+    path(r'informe-actividad-principal/crear/', CrearInformeActividadView.as_view(), name="crear_informe_actividad_principal"),
+    path(r'informe-tarea-principal/crear/', CrearInformeTareaView.as_view(), name="crear_informe_tarea_principal"),
 ]
 
 urlpatterns += router.urls
