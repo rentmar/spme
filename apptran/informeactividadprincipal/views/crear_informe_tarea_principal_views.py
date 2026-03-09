@@ -40,10 +40,15 @@ class CrearInformeTareaView(APIView):
         #1.Validar el serializer
         serializer = InformeTareaPrincipalSerializer(data=request.data)
         if not serializer.is_valid():
-            return Response({'errores': serializer.errors}, status=400)
+            return Response({
+                'success': False,
+                'errores': serializer.errors}, 
+                status=400)
         
         #2. Extraer indicadores
-        indicadores = request.data.get('avanceIndicadores', {})
+        indicadores = request.data.get('avanceIndicadores')
+        if indicadores is None:
+            indicadores = {}
         print("\n" + "="*90)
         print("🔍 PROCESO DE VERIFICACIÓN DE INDICADORES (BITÁCORAS PRINCIPALES)")
         print("="*90)
@@ -313,12 +318,14 @@ class CrearInformeTareaView(APIView):
         except Exception as e:
             print(f"\n❌ ERROR - Transacción revertida: {str(e)}")
             return Response({
+                'success': False,
                 'error': 'Error al guardar el informe',
                 'detalle': str(e)
             }, status=500)
 
         #7. Responder
         return Response({
+            'success': True,
             'mensaje': 'Informe de Tarea Principal creado exitosamente',
             'id informe tarea': informe.id,
             'resumen': {
