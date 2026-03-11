@@ -251,6 +251,11 @@ LOGGING = {
     },
 }
 
+# Internationalization
+LANGUAGE_CODE = 'es-es' 
+TIME_ZONE = 'America/La_Paz'
+USE_I18N = True
+USE_TZ = True
 
 # RabbitMQ configuracion
 CELERY_BROKER_URL = 'amqp://admin:admin@localhost:5672//'
