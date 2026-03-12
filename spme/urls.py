@@ -47,6 +47,7 @@ urlpatterns = [
     path('api-ff/', include('spme_fonfosc.urls')),
     #Api para impresiones
     path('api-print/', include('spme_impresiones.urls')),
-
+    #Api para valida
+    path('api-valid/', include('spme_validaciones.urls')),
 ]
 

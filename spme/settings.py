@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'spme_fonfosc',
     'spme_mensajes',
     'spme_impresiones',
+    'spme_validaciones',
     'django_celery_beat',
     'apptran', #Aplicacion de transicion
     'system_config', #Configuracion del sistema
