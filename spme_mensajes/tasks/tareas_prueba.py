@@ -21,3 +21,16 @@ def enviar_correo_prueba_beat():
     print("✅ Correo enviado por Beat")
     
     return "Correo enviado por Beat"
+
+
+@shared_task(name='correo.tarea_beat_prueba')
+def tarea_beat_prueba():
+    """
+    Tarea de prueba para Celery Beat
+    Imprime TAREA BEAT cada 2 minutos
+    """
+    print("="*50)
+    print("🎯 TAREA BEAT - EJECUTADA")
+    print("="*50)
+    
+    return "TAREA BEAT completada"    

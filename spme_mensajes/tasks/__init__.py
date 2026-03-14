@@ -11,6 +11,7 @@ __all__ = [
 
     #Tareas periodicas
     'enviar_correo_prueba_beat', 
+    'tarea_beat_prueba',
     
     # Tareas de mensajes
     'enviar_mensaje_usuario',
