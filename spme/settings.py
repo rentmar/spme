@@ -277,9 +277,13 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 #Credenciales
-EMAIL_HOST_USER = 'MRolqueza@gmail.com'
-EMAIL_HOST_PASSWORD = 'oadt trbi jwck wwab'
-DEFAULT_FROM_EMAIL = 'MRolqueza@gmail.com'
+#EMAIL_HOST_USER = 'MRolqueza@gmail.com'
+#EMAIL_HOST_PASSWORD = 'oadt trbi jwck wwab'
+#DEFAULT_FROM_EMAIL = 'MRolqueza@gmail.com'
+
+EMAIL_HOST_USER = 'spmenotificaciones@gmail.com'
+EMAIL_HOST_PASSWORD = 'peqw tawp vdbr qwzw'
+DEFAULT_FROM_EMAIL = 'spmenotificaciones@gmail.com'
 
 # Configuración adicional para mejor rendimiento
 EMAIL_TIMEOUT = 30

@@ -7,6 +7,8 @@ from spme_monitoreo.models import (
     InformeActividadPrincipal,
     InformeTareaPrincipal
 )
+from spme_actividades.models import Actividad
+from spme_validaciones.models import ValidacionInformeActividad
 from spme_autenticacion.models import Usuario
 from spme_proyectos_reportes.models import (
     # Modelos PRINCIPALES
@@ -18,6 +20,7 @@ from spme_proyectos_reportes.models import (
 from ..serializers.crear_informe_actividad_principal_serializer import InformeActividadPrincipalSerializer
 import json
 from datetime import datetime
+from decimal import Decimal
 
 
 class CrearInformeActividadView(APIView):
@@ -93,13 +96,151 @@ class CrearInformeActividadView(APIView):
                 raise
         
         return count
+    
+    # ============================================
+    # MÉTODO AUXILIAR - Insertar validadores
+    # ============================================
+    def insertar_validadores(self, validadores, informe, usuario_redactor):
+        """
+        Inserta los validadores para el informe de actividad
+        """
+        if not validadores:
+            print("No hay validadores para insertar")
+            return 0
+        
+        print(f"\n   📝 Insertando {len(validadores)} validador(es):")
+        count = 0
+
+        for validador in validadores:
+            try:
+                # Obtener el ID del validador (puede venir como 'id' o 'id_validador')
+                validador_id = validador.get('id')
+                if not validador_id:
+                    print(f"      ❌ Validador sin ID: {validador}")
+                    continue
+
+                #Obtener el objeto usuario del validador
+                try:
+                    usuario_validador_obj = Usuario.objects.get(id=validador_id)
+                except Usuario.DoesNotExist:
+                    print(f"      ❌ Usuario validador con ID {validador_id} no encontrado")
+                    continue
+                # Verificar si ya existe una validación para este usuario en este informe
+                existe = ValidacionInformeActividad.objects.filter(
+                    informe=informe,
+                    usuarioValidador=usuario_validador_obj
+                ).exists()
+
+                if existe:
+                    print(f"      ⚠️ Ya existe validación para {usuario_validador_obj.username}, saltando...")
+                    continue
+
+                # Crear la validación
+                validacion = ValidacionInformeActividad.objects.create(
+                    informe=informe,
+                    usuarioValidador=usuario_validador_obj,
+                    usuarioRedactor=usuario_redactor,
+                    estado=validador.get('estado', 'PENDIENTE'),
+                    comentarios=validador.get('comentarios', 'Nueva Entrada'),
+                    versionDocumento=validador.get('versionDocumento', '1'),
+                )
+                print(f"✅ VALIDADOR CREADO: {validacion.codigoSeguimiento} - {usuario_validador_obj.username}")
+                count += 1
+            except Exception as e:
+                print(f"      ❌ ERROR creando validador: {e}")
+                raise  # Re-lanzar la excepción para que la transacción se revierta        
+        return count
+
+    # ============================================
+    # MÉTODO AUXILIAR - Actualizar actividad
+    # ============================================
+    def actualizar_actividad(self, informe_data):
+        """
+        Actualiza los campos de la actividad basados en el informe
+        Actualiza: totalReportado, totalEjecutado, saldo
+        """
+        # Obtener el ID de la actividad
+        actividad_id = informe_data.get('actividad')
+        if not actividad_id:
+            print("⚠️ No se proporcionó ID de actividad para actualizar")
+            return None
+
+        try:
+            # Buscar la actividad
+            actividad = Actividad.objects.get(id=actividad_id)
+            print(f"\n📌 Actividad encontrada: {actividad.codigo} (ID: {actividad_id})")
+            
+            # Obtener valores del informe
+            #procedencia_fondos = informe_data.get('procedenciaFondos', {})
+            procedencia_fondos = informe_data.get('procedenciaFondos')
+
+            if procedencia_fondos is None or not isinstance(procedencia_fondos, dict):
+                print(f"⚠️ procedenciaFondos no es un diccionario válido: {type(procedencia_fondos)}")
+                procedencia_fondos = {}
+
+            presupuesto_planificado = informe_data.get('presupuestoPlanificado')
+            presupuesto_ejecutado = informe_data.get('presupuestoEjecutado')    
+            
+            
+            print(f"\n📊 Valores extraídos del informe:")
+            print(f"   • Presupuesto Ejecutado: {presupuesto_planificado}")
+            print(f"   • Presupuesto Planificado: {presupuesto_planificado}")
+            
+            # Convertir a Decimal
+            presupuesto_planificado_decimal = Decimal(str(presupuesto_planificado))
+            presupuesto_ejecutado_decimal = Decimal(str(presupuesto_ejecutado))
+            saldo = presupuesto_planificado_decimal - presupuesto_ejecutado_decimal 
+            
+            # Guardar valores anteriores para log
+            total_reportado_anterior = actividad.totalReportado
+            total_ejecutado_anterior = actividad.totalEjecutado
+            saldo_anterior = actividad.saldo
+            
+            # Actualizar la actividad
+            actividad.totalReportado = presupuesto_planificado_decimal
+            actividad.totalEjecutado = presupuesto_ejecutado_decimal
+            actividad.saldo = saldo
+            
+            # Actualizar estado si es necesario (opcional)
+            if actividad.estado == 'PLAN' or actividad.estado == 'EJEC':
+                actividad.estado = 'REP'  # Cambiar a "En Reporte"
+            
+            actividad.save()
+            
+            print(f"\n✅ Actividad actualizada:")
+            print(f"   • totalReportado: {total_reportado_anterior} → {actividad.totalReportado}")
+            print(f"   • totalEjecutado: {total_ejecutado_anterior} → {actividad.totalEjecutado}")
+            print(f"   • saldo: {saldo_anterior} → {actividad.saldo}")
+            print(f"   • estado: {actividad.estado}")
+            
+            return actividad
+            
+        except Actividad.DoesNotExist:
+            print(f"❌ Actividad con ID {actividad_id} no encontrada")
+            raise Exception(f"Actividad con ID {actividad_id} no encontrada")
+        except Exception as e:
+            print(f"❌ Error actualizando actividad: {e}")
+            raise    
+
+
 
     # ============================================
     # MÉTODO PRINCIPAL POST
     # ============================================
     def post(self, request):
+        #Extraer los datos del informe y los validadores del payload
+        informe_data = request.data.get('informeData', {})
+        validadores_data = request.data.get('validadores', {})
+
+        print("\n" + "="*90)
+        print("🔍 RECIBIDA PETICIÓN PARA CREAR INFORME DE ACTIVIDAD")
+        print("="*90)
+        print(f"📦 Total validadores recibidos: {len(validadores_data)}")
+        print(f"INFORME: {informe_data}")
+        print(f"VALIDADORES: {validadores_data}")
+
         #Obtener el usuario
-        usuario_id = request.data.get('usuario')
+        usuario_id = informe_data.get('usuario')
         usuario_obj = None
         #Si hay id de usuario obtener el objeto
         if usuario_id:
@@ -108,10 +249,10 @@ class CrearInformeActividadView(APIView):
             except Usuario.DoesNotExist:
                 print(f"⚠️ Usuario con ID {usuario_id} no encontrado")    
 
-        print(usuario_obj.__dict__)
+        print(f"USUARIO: {usuario_obj.__dict__}")
 
         # 1. Validar serializer
-        serializer = InformeActividadPrincipalSerializer(data=request.data)
+        serializer = InformeActividadPrincipalSerializer(data=informe_data)
         if not serializer.is_valid():
             return Response({
                 'success': False,
@@ -119,7 +260,7 @@ class CrearInformeActividadView(APIView):
                 }, status=400)
         
         # 2. Extraer indicadores
-        indicadores = request.data.get('avanceIndicadores')
+        indicadores = informe_data.get('avanceIndicadores')
         if indicadores is None:
             indicadores = {}
         
@@ -382,6 +523,28 @@ class CrearInformeActividadView(APIView):
                 
                 print(f"\n🎉 INSERCIÓN COMPLETADA: {total_insertados} registros en bitácoras PRINCIPALES")
                 
+                #6.6 INsertar Validadores
+                print("\n" + "="*90)
+                print("🔰 INSERTANDO VALIDADORES")
+                print("="*90)
+
+                total_validadores_insertados = self.insertar_validadores(
+                    validadores_data,
+                    informe,
+                    usuario_obj
+                )
+                print(f"\n🎉 VALIDADORES INSERTADOS: {total_validadores_insertados} de {len(validadores_data)}")
+
+                #6.7 Actualizar Actividad
+                print("\n" + "="*90)
+                print("🔰 ACTUALIZANDO ACTIVIDAD")
+                print("="*90)
+                actividad_actualizada = self.actualizar_actividad(informe_data)
+                if actividad_actualizada:
+                    print(f"\n✅ Actividad actualizada exitosamente")
+
+
+
         except Exception as e:
             print(f"\n❌ ERROR - Transacción revertida: {str(e)}")
             return Response({
@@ -402,6 +565,16 @@ class CrearInformeActividadView(APIView):
                     'literales': total_literal,
                     'numericos': total_numerico,
                     'porcentuales': total_porcentual
+                },
+                'validadores_recibidos': len(validadores_data),
+                'validadores_insertados': total_validadores_insertados,
+                'actividad_actualizada': {
+                    'id': actividad_actualizada.id if actividad_actualizada else None,
+                    'codigo': actividad_actualizada.codigo if actividad_actualizada else None,
+                    'totalReportado': str(actividad_actualizada.totalReportado) if actividad_actualizada and actividad_actualizada.totalReportado else None,
+                    'totalEjecutado': str(actividad_actualizada.totalEjecutado) if actividad_actualizada and actividad_actualizada.totalEjecutado else None,
+                    'saldo': str(actividad_actualizada.saldo) if actividad_actualizada and actividad_actualizada.saldo else None
                 }
             }
         }, status=200)
+        

@@ -87,44 +87,63 @@ class Validacion(PolymorphicModel):
         """
         - Genera código único si es nuevo
         - Actualiza fechaResolucion cuando cambia de pendiente
-        - Registra historial si cambia el estado
+        - Registra historial siempre (creacion y cambio de estado)
         """
-        # Detectar cambio de estado (solo para registros existentes)
-        if self.pk:
+        from .models import HistorialValidacion
+
+        #Detectar si es nuevo o existente
+        is_new = not self.pk
+
+        #Si es nuevo, guardar estado anterior como None
+        if is_new:
+            estado_anterior = None
+        else:
+            # Detectar cambio de estado para existentes
             try:
                 original = Validacion.objects.get(pk=self.pk)
-                estado_cambio = original.estado != self.estado
                 estado_anterior = original.estado
             except Validacion.DoesNotExist:
-                estado_cambio = False
                 estado_anterior = None
-        else:
-            estado_cambio = False
-            estado_anterior = None
         
-        # Generar código si es nuevo
-        is_new = not self.pk
+        #Generar codigo si es nuevo
         if is_new and not self.codigoSeguimiento:
-            self.codigoSeguimiento = self.generar_codigo_unico()
+           self.codigoSeguimiento = self.generar_codigo_unico()
         
         # Actualizar fechaResolucion si cambia de pendiente
         if self.estado != 'PENDIENTE' and not self.fechaResolucion:
             self.fechaResolucion = timezone.now()
-        
+
         # Guardar el registro
         super().save(*args, **kwargs)
-        
-        # Si hubo cambio de estado, registrar en historial
-        if estado_cambio:
-            from .models import HistorialValidacion
+
+        # 👇 REGISTRAR EN HISTORIAL SIEMPRE (creación O cambio)
+        if is_new:
+            # Caso 1: Es una NUEVA validación
             HistorialValidacion.objects.create(
                 validacion=self,
-                usuario=self.usuarioValidador if self.estado != 'PENDIENTE' else self.usuarioRedactor,
+                usuario=self.usuarioRedactor,  # El redactor es quien crea
+                estado_anterior='Nueva Entrada',  # No había estado anterior
+                estado_nuevo=self.estado,  # Casi siempre 'PENDIENTE'
+                versionDocumento=self.versionDocumento,
+                comentario=f"Validación creada - Estado inicial: {self.get_estado_display()}"
+            )
+        elif estado_anterior != self.estado:
+            # Caso 2: Cambió el estado (APROBADO/RECHAZADO)
+            usuario_cambio = self.usuarioValidador if self.estado != 'PENDIENTE' else self.usuarioRedactor
+            HistorialValidacion.objects.create(
+                validacion=self,
+                usuario=usuario_cambio,
                 estado_anterior=estado_anterior,
                 estado_nuevo=self.estado,
                 versionDocumento=self.versionDocumento,
                 comentario=f"Cambio de estado: {estado_anterior} → {self.estado}"
-            )
+            )    
+        
+
+
+
+
+
     
     def __str__(self):
         return f"{self.codigoSeguimiento} - {self.usuarioValidador.username} - {self.estado}"

@@ -35,8 +35,8 @@ def consumir_mensajes_usuarios(self):
         rabbitmq_config = getattr(settings, 'RABBITMQ_CONFIG', {
             'host': 'localhost',
             'port': 5672,
-            'username': 'mark',
-            'password': 'tu_password',
+            'username': 'admin',
+            'password': 'admin',
             'vhost': '/'
         })
         

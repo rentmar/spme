@@ -329,5 +329,5 @@ urlpatterns =[
     #Verificar si hay informes de tareas
     path(r'verificar-informes-tarea-principal/<int:tarea_id>/', verificar_informe_tarea),
 ]
-
+ 
 urlpatterns += router.urls
