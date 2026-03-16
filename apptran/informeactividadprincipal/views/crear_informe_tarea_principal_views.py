@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.db import transaction
 from spme_monitoreo.models import (InformeTareaPrincipal)
+from spme_actividades.models import TareaActividad
+from spme_validaciones.models import ValidacionInformeTarea
 from spme_proyectos_reportes.models import (
     # Modelos PRINCIPALES
     BitacoraPrincipalIndicadorOg,
@@ -27,18 +29,43 @@ class CrearInformeTareaView(APIView):
     #METODO POST
     #=================================
     def post(self, request):
+        #Extraer los datos del informe y sus validadores
+        informe_data = request.data.get('informeData', {})
+        validadores_data = request.data.get('validadores', {})
+
+        print("\n" + "="*90)
+        print("🔍 RECIBIDA PETICIÓN PARA CREAR INFORME DE ACTIVIDAD")
+        print("="*90)
+        print(f"📦 Total validadores recibidos: {len(validadores_data)}")
+        print(f"INFORME: {informe_data}")
+        print(f"VALIDADORES: {validadores_data}")
+
         #Obtener el usuario
-        usuario_id = request.data.get('usuario')
+
+        usuario_id = informe_data.get('usuario')
         usuario_obj = None
         #Si hay id de usuario obtener el objeto
         if usuario_id:
             try:
                 usuario_obj = Usuario.objects.get(id=usuario_id)
             except Usuario.DoesNotExist:
-                print(f"⚠️ Usuario con ID {usuario_id} no encontrado")    
+                print(f"⚠️ Usuario con ID {usuario_id} no encontrado")
+        
+        #obtener la tarea
+        tarea_id = informe_data.get('tarea')
+        tarea_obj = None
+        if tarea_id:
+            try:
+                tarea_obj = TareaActividad.objects.get(id=tarea_id)            
+            except TareaActividad.DoesNotExist:
+                print(f"⚠️ Tarea con ID {tarea_id} no encontrado")
+
+        print("***********************TAREA**********************")   
+        print(tarea_obj.__dict__)     
+        
 
         #1.Validar el serializer
-        serializer = InformeTareaPrincipalSerializer(data=request.data)
+        serializer = InformeTareaPrincipalSerializer(data=informe_data)
         if not serializer.is_valid():
             return Response({
                 'success': False,
@@ -46,9 +73,10 @@ class CrearInformeTareaView(APIView):
                 status=400)
         
         #2. Extraer indicadores
-        indicadores = request.data.get('avanceIndicadores')
+        indicadores = informe_data.get('avanceIndicadores')
         if indicadores is None:
             indicadores = {}
+
         print("\n" + "="*90)
         print("🔍 PROCESO DE VERIFICACIÓN DE INDICADORES (BITÁCORAS PRINCIPALES)")
         print("="*90)
@@ -281,7 +309,7 @@ class CrearInformeTareaView(APIView):
                         usuario_obj
                     )
                 
-                 #6.5 Insertar Indicadores ROE en bitacora principal
+                #6.5 Insertar Indicadores ROE en bitacora principal
                 if clasificacion['indicadorroe']['literal']:
                     total_insertados += self.insertar_bitacora_principal(
                         BitacoraPrincipalIndicadorRoe, 
@@ -315,6 +343,18 @@ class CrearInformeTareaView(APIView):
 
                 print(f"\n🎉 INSERCIÓN COMPLETADA: {total_insertados} registros en bitácoras PRINCIPALES")    
 
+                #6.6 INsertar Validadores
+                print("\n" + "="*90)
+                print("🔰 INSERTANDO VALIDADORES")
+                print("="*90)
+
+                total_validadores_insertados = self.insertar_validadores(
+                    validadores_data,
+                    informe,
+                    usuario_obj
+                )
+                print(f"\n🎉 VALIDADORES INSERTADOS: {total_validadores_insertados} de {len(validadores_data)}")
+
         except Exception as e:
             print(f"\n❌ ERROR - Transacción revertida: {str(e)}")
             return Response({
@@ -322,12 +362,14 @@ class CrearInformeTareaView(APIView):
                 'error': 'Error al guardar el informe',
                 'detalle': str(e)
             }, status=500)
+        
 
         #7. Responder
         return Response({
             'success': True,
             'mensaje': 'Informe de Tarea Principal creado exitosamente',
             'id informe tarea': informe.id,
+            'codigo informe tarea': informe.numeroInforme,
             'resumen': {
                 'total_indicadores': total_general,
                 'insertados': total_insertados,
@@ -336,6 +378,12 @@ class CrearInformeTareaView(APIView):
                     'numericos': total_numerico,
                     'porcentuales': total_porcentual
                 }
+            },
+            'validadores_recibidos': len(validadores_data),
+            'validadores_insertados': total_validadores_insertados,
+            'tarea':{
+                'id': tarea_obj.id,
+                'codigo': tarea_obj.codigo,
             }
         }, status=200)
     
@@ -400,3 +448,60 @@ class CrearInformeTareaView(APIView):
 
 
         return count
+
+    # ============================================
+    # MÉTODO AUXILIAR - Insertar validadores
+    # ============================================
+    def insertar_validadores(self, validadores, informe_tarea, usuario_redactor):
+        """
+        Inserta los validadores para el informe de tarea/subactividad
+        """
+        if not validadores:
+            print("No hay validadores para insertar")
+            return 0
+        
+        print(f"\n   📝 Insertando {len(validadores)} validador(es):")
+        count = 0
+
+        for validador in validadores:
+            try:
+                # Obtener el ID del validador (puede venir como 'id' o 'id_validador')
+                validador_id = validador.get('id')
+                if not validador_id:
+                    print(f"      ❌ Validador sin ID: {validador}")
+                    continue
+
+                #Obtener el usuario validador
+                try: 
+                    usuario_validador_obj = Usuario.objects.get(id=validador_id)
+                except Usuario.DoesNotExist:
+                    print(f"      ❌ Usuario validador con ID {validador_id} no encontrado")
+                    continue
+                #Verificar si existe validacion para este usuario en este informe
+                existe = ValidacionInformeTarea.objects.filter(
+                    informeTarea = informe_tarea,
+                    usuarioValidador = usuario_validador_obj,
+                    ).exists()
+                
+                if existe:
+                    print(f"      ⚠️ Ya existe validación para {usuario_validador_obj.username}, saltando...")
+                    continue
+
+                validacion = ValidacionInformeTarea.objects.create(
+                    informeTarea = informe_tarea,
+                    usuarioValidador = usuario_validador_obj,
+                    usuarioRedactor = usuario_redactor,
+                    estado = validador.get('estado', 'PENDIENTE'),
+                    comentarios = validador.get('comentarios', 'Nueva Entrada'),
+                    versionDocumento=validador.get('versionDocumento', '1'),
+                )
+                print(f"✅ VALIDADOR CREADO: {validacion.codigoSeguimiento} - {usuario_validador_obj.username}")
+                count += 1
+
+            except Exception as e:
+                print(f"      ❌ ERROR creando validador: {e}")
+                raise  # Re-lanzar la excepción para que la transacción se revierta   
+
+        return count     
+
+        
