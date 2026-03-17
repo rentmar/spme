@@ -672,15 +672,6 @@ class InformeTareaPrincipal(InformeActividadBase):
             
             super().save(*args, **kwargs)
 
-
-    class Meta:
-        verbose_name = 'Informe de Subactividad Principal'
-        verbose_name_plural = 'Informes de Subactividades Principal'
-
-    def __str__(self):
-        return f"Informe {self.numeroInforme} - {self.tarea.codigo if self.tarea else 'Sin Tarea'}"    
-
-
 #Informe Base
 class InformeBase(PolymorphicModel):
     numeroInforme = models.CharField(max_length=50, blank=True, null=True)

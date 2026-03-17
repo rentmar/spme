@@ -1,6 +1,5 @@
 # services/notificadores/notificador_email_lotes.py
-# Propósito: Notificaciones por email con procesamiento por lotes
-# NO envía directamente, SOLO encola en la BD para procesamiento posterior
+# Versión corregida para usar el campo 'correo' del modelo Usuario
 
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
@@ -51,25 +50,34 @@ class NotificadorEmailLotes(NotificadorBase):
             EmailEnCola creado o None
         """
         # Verificar si las notificaciones email están activadas
-        if not self.config.notificaciones_email:
+        if not getattr(self.config, 'notificaciones_email', True):
             return None
         
         # Obtener el responsable (destinatario)
         responsable = self._obtener_responsable(tipo_entidad, entidad)
-        if not responsable or not responsable.email:
-            logger.warning(f"⚠️ Sin responsable para {tipo_entidad} {getattr(entidad, 'codigo', '')}")
+        
+        # IMPORTANTE: Usar el campo 'correo' del modelo Usuario
+        email_destino = self._obtener_email_responsable(responsable)
+        
+        if not email_destino:
+            logger.warning(f"⚠️ Sin email para responsable de {tipo_entidad} {getattr(entidad, 'codigo', '')}")
             return None
         
         try:
             # Generar asunto
             asunto = self._generar_asunto(tipo_entidad, evento, entidad)
             
+            # Obtener nombre completo para la plantilla
+            nombre_responsable = self._obtener_nombre_responsable(responsable)
+            
             # Preparar contexto para las plantillas HTML
             contexto_completo = {
                 'entidad': entidad,
                 'responsable': responsable,
+                'nombre_responsable': nombre_responsable,
                 'fecha': timezone.now().strftime('%d/%m/%Y %H:%M'),
                 'dias': contexto.get('dias') if contexto else None,
+                'dias_retraso': contexto.get('dias_retraso') if contexto else None,
                 'site_url': self.site_url,
                 'tipo_entidad': tipo_entidad,
                 'evento': evento,
@@ -83,28 +91,30 @@ class NotificadorEmailLotes(NotificadorBase):
                     contexto_completo
                 )
                 text_content = strip_tags(html_content)
-            except:
+            except Exception as e:
+                logger.warning(f"⚠️ No se pudo renderizar plantilla: {e}")
                 # Si no hay plantilla, usar contenido básico
                 text_content = self._generar_contenido_texto(tipo_entidad, evento, entidad, contexto)
                 html_content = f"<p>{text_content.replace(chr(10), '<br>')}</p>"
             
             # Calcular cuándo debe enviarse según prioridad
-            programado_para = self._calcular_programacion(self.config.prioridad_notificacion)
+            prioridad = getattr(self.config, 'prioridad_notificacion', 3)
+            programado_para = self._calcular_programacion(prioridad)
             
             # Guardar en BD (NO enviar todavía)
             email_cola = EmailEnCola.objects.create(
-                destinatario=responsable.email,
+                destinatario=email_destino,
                 asunto=asunto,
                 cuerpo_html=html_content,
                 cuerpo_texto=text_content,
-                prioridad=self.config.prioridad_notificacion,
+                prioridad=prioridad,
                 tipo_entidad=tipo_entidad,
                 entidad_id=entidad.id,
                 evento=evento,
                 programado_para=programado_para
             )
             
-            logger.info(f"📧 Email ENCOLADO para {responsable.email}: {asunto} (prioridad {self.config.prioridad_notificacion})")
+            logger.info(f"📧 Email ENCOLADO para {email_destino}: {asunto} (prioridad {prioridad})")
             return email_cola
             
         except Exception as e:
@@ -113,7 +123,7 @@ class NotificadorEmailLotes(NotificadorBase):
     
     def _obtener_responsable(self, tipo_entidad, entidad):
         """
-        Obtiene el responsable según el tipo de entidad
+        Obtiene el objeto responsable según el tipo de entidad
         """
         if tipo_entidad == 'actividad':
             return getattr(entidad, 'responsable', None)
@@ -127,6 +137,56 @@ class NotificadorEmailLotes(NotificadorBase):
                 return getattr(entidad.actividad, 'responsable', None)
         return None
     
+    def _obtener_email_responsable(self, responsable):
+        """
+        Obtiene el email del responsable
+        IMPORTANTE: En tu modelo Usuario el campo se llama 'correo', no 'email'
+        """
+        if not responsable:
+            return None
+        
+        # Intentar diferentes nombres de campo para email
+        if hasattr(responsable, 'correo') and responsable.correo:
+            return responsable.correo
+        elif hasattr(responsable, 'email') and responsable.email:
+            return responsable.email
+        elif hasattr(responsable, 'user') and responsable.user:
+            # Si es un proxy, intentar con el usuario relacionado
+            return self._obtener_email_responsable(responsable.user)
+        
+        return None
+    
+    def _obtener_nombre_responsable(self, responsable):
+        """
+        Obtiene el nombre completo del responsable
+        Usa el método get_full_name() del modelo Usuario si existe
+        """
+        if not responsable:
+            return "Usuario"
+        
+        if hasattr(responsable, 'get_full_name'):
+            nombre = responsable.get_full_name()
+            if nombre and nombre.strip():
+                return nombre
+        
+        # Si no hay get_full_name, intentar construir
+        partes = []
+        if hasattr(responsable, 'nombre') and responsable.nombre:
+            partes.append(responsable.nombre)
+        if hasattr(responsable, 'paterno') and responsable.paterno:
+            partes.append(responsable.paterno)
+        if hasattr(responsable, 'materno') and responsable.materno:
+            partes.append(responsable.materno)
+        
+        if partes:
+            return ' '.join(partes)
+        
+        # Último recurso: usar username
+        if hasattr(responsable, 'username'):
+            return responsable.username
+        
+        return "Usuario"
+    
     def _generar_asunto(self, tipo_entidad, evento, entidad):
         """
         Genera el asunto del email
@@ -134,11 +194,12 @@ class NotificadorEmailLotes(NotificadorBase):
         codigo = getattr(entidad, 'codigo', '')
         
         asuntos = {
-            ('actividad', 'reprogramacion'): f"📅 Actividad requiere reprogramación: {codigo}",
-            ('actividad', 'reporte'): f"📋 Reporte requerido: {codigo}",
-            ('actividad', 'inicio'): f"🚀 Actividad iniciada: {codigo}",
+            ('actividad', 'proximo_inicio'): f"⏰ Próximo inicio de actividad: {codigo}",
+            ('actividad', 'inicio_ejecucion'): f"🚀 Actividad iniciada: {codigo}",
             ('actividad', 'retraso'): f"⚠️ Retraso en actividad: {codigo}",
             ('actividad', 'retraso_critico'): f"🔴 RETRASO CRÍTICO: {codigo}",
+            ('actividad', 'reprogramacion'): f"📅 Actividad requiere reprogramación: {codigo}",
+            ('actividad', 'reporte'): f"📋 Reporte requerido: {codigo}",
             ('tarea', 'vencida'): f"⚠️ Tarea vencida: {codigo}",
             ('actividad_pei', 'inicio'): f"🎯 Actividad PEI iniciada: {codigo}",
             ('actividad_pei', 'retraso'): f"⚠️ Retraso en actividad PEI: {codigo}",
@@ -155,16 +216,23 @@ class NotificadorEmailLotes(NotificadorBase):
         nombre = getattr(entidad, 'nombreCorto', getattr(entidad, 'titulo', ''))
         codigo = getattr(entidad, 'codigo', '')
         dias = contexto.get('dias') if contexto else None
+        dias_retraso = contexto.get('dias_retraso') if contexto else dias
         
-        if evento == 'reprogramacion':
+        if evento == 'proximo_inicio':
+            return (f"La actividad {nombre} ({codigo}) comenzará en {dias} días. "
+                   f"Por favor, prepare los recursos necesarios.")
+        elif evento == 'inicio_ejecucion':
+            if dias_retraso:
+                return (f"La actividad {nombre} ({codigo}) ha iniciado su ejecución "
+                       f"con {dias_retraso} días de retraso, pero tiene solicitudes activas.")
+            return f"La actividad {nombre} ({codigo}) ha iniciado su ejecución."
+        elif evento == 'reprogramacion':
             return (f"La actividad {nombre} ({codigo}) ha sido reprogramada "
                    f"automáticamente por retraso de {dias} días.")
         elif evento == 'reporte':
             return f"La actividad {nombre} ({codigo}) requiere la presentación de un informe."
         elif evento == 'vencida':
             return f"La tarea {nombre} ({codigo}) está vencida por {dias} días."
-        elif evento == 'inicio':
-            return f"La actividad {nombre} ({codigo}) ha iniciado su ejecución."
         elif evento == 'retraso':
             return f"La actividad {nombre} ({codigo}) tiene un retraso de {dias} días."
         elif evento == 'retraso_critico':
