@@ -19,8 +19,12 @@ class DetalleDestinoFondosSerializer(serializers.Serializer):
         allow_null=True, 
         default=None
     )
-    # fecha = serializers.DateField(required=False, allow_null=True, default=None)
-    # partida = serializers.CharField(required=False, allow_blank=True, allow_null=True, default=None)
+    fuente = serializers.CharField(
+        required=False, 
+        allow_blank=True, 
+        allow_null=True, 
+        default=None
+    )
     factura_recibo = serializers.CharField(required=False, allow_blank=True, default="")
     descripcion = serializers.CharField(required=False, allow_blank=True, default="")
     monto = serializers.CharField(required=False, allow_null=True, default=0)
