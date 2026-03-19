@@ -114,9 +114,9 @@ class InformeActividadPDFGenerator(BasePDFGenerator):
             'comentarios_recomendaciones': self._obtener_comentarios(obj),
         }
         
-        # Procesar campos JSON
+        # Procesar campos JSON con manejo de null
         context['contribucion_proyecto'] = self._procesar_contribucion_proyecto(obj.contribucionProyecto)
-        context['avance_indicadores'] = self._procesar_avance_indicadores(obj.avanceIndicadores)
+        context['avance_indicadores'] = self._procesar_avance_indicadores(obj.avanceIndicadores)  # Con manejo de null
         context['informacion_cuantitativa'] = self._procesar_informacion_cuantitativa(obj.informacionCuantitativa)
         context['herramientas_evaluacion'] = self._procesar_herramientas_evaluacion(obj.herramientasEvaluacion)
         
@@ -124,7 +124,7 @@ class InformeActividadPDFGenerator(BasePDFGenerator):
         context['procedencia_fondos'] = self._procesar_procedencia_fondos(obj.procedenciaFondos)
         
         # Procesar archivos
-        context['medios_verificacion'] = self._procesar_medios_verificacion(obj.mediosVerificacion)
+        context['medios_verificacion'] = obj.mediosVerificacion or ''
         context['archivos_cuantitativos'] = self._procesar_archivos(obj.archivosCuantitativos, 'cuantitativos')
         context['herramientas_archivos'] = self._procesar_archivos(obj.herramientasArchivos, 'herramientas')
         context['medios_archivos'] = self._procesar_archivos(obj.mediosArchivos, 'medios')
@@ -151,10 +151,22 @@ class InformeActividadPDFGenerator(BasePDFGenerator):
                 else:
                     fuente['porcentaje_ejecucion'] = 0
         
-        # Indicadores de visualización
+        # Extraer validaciones de info cuantitativa para controlar visibilidad de subsecciones
+        info_cuantitativa = context['informacion_cuantitativa']
+        validaciones_cuant = info_cuantitativa.get('validaciones', {}) if info_cuantitativa else {}
+        
+        # Crear banderas individuales para cada subsección basadas en validaciones
+        context['mostrar_seccion_cuantitativa'] = bool(info_cuantitativa)
+        context['mostrar_subseccion_genero'] = validaciones_cuant.get('genero', False) and info_cuantitativa.get('genero')
+        context['mostrar_subseccion_edades'] = validaciones_cuant.get('edades', False) and info_cuantitativa.get('edades')
+        context['mostrar_subseccion_discapacidad'] = validaciones_cuant.get('discapacidad', False) and info_cuantitativa.get('discapacidad')
+        context['mostrar_subseccion_ocupaciones'] = validaciones_cuant.get('ocupaciones', False) and info_cuantitativa.get('ocupaciones')
+        context['mostrar_subseccion_localidades'] = validaciones_cuant.get('localidades', False) and info_cuantitativa.get('localidades')
+        context['mostrar_subseccion_organizaciones'] = validaciones_cuant.get('organizaciones', False) and info_cuantitativa.get('organizaciones')
+        
+        # Indicadores de visualización para otras secciones
         context['mostrar_seccion_contribucion'] = bool(context['contribucion_proyecto'])
         context['mostrar_seccion_indicadores'] = bool(context['avance_indicadores'])
-        context['mostrar_seccion_cuantitativa'] = bool(context['informacion_cuantitativa'])
         context['mostrar_seccion_herramientas'] = bool(context['herramientas_evaluacion'])
         context['mostrar_seccion_archivos'] = bool(context['archivos_cuantitativos'] or context['herramientas_archivos'] or context['medios_archivos'])
         context['mostrar_seccion_comentarios'] = bool(context['comentarios_recomendaciones'] and context['comentarios_recomendaciones'] != 'Sin comentarios')
@@ -276,8 +288,12 @@ class InformeActividadPDFGenerator(BasePDFGenerator):
         return items
     
     def _procesar_avance_indicadores(self, avance):
-        """Procesa el avance de indicadores del JSON"""
-        if not avance:
+        """
+        Procesa el avance de indicadores del JSON
+        Maneja casos donde avance puede ser None
+        """
+        # Si es None, retornar lista vacía
+        if avance is None:
             return []
         
         indicadores = []
@@ -312,12 +328,20 @@ class InformeActividadPDFGenerator(BasePDFGenerator):
         return indicadores
     
     def _procesar_informacion_cuantitativa(self, info):
-        """Procesa la información cuantitativa del JSON"""
-        if not info:
+        """
+        Procesa la información cuantitativa del JSON
+        Maneja casos donde info puede ser None
+        Extrae las validaciones para controlar qué secciones mostrar
+        """
+        # Si es None, retornar diccionario vacío
+        if info is None:
             return {}
         
         try:
             if isinstance(info, dict):
+                # Extraer validaciones (controlan qué secciones se muestran)
+                validaciones = info.get('validaciones', {})
+                
                 return {
                     'total_participantes': info.get('totalParticipantes', 0),
                     'genero': info.get('genero', {}),
@@ -327,6 +351,9 @@ class InformeActividadPDFGenerator(BasePDFGenerator):
                     'localidades': info.get('localidades', {}),
                     'organizaciones': info.get('organizaciones', {}),
                     'estadisticas': info.get('estadisticas', {}),
+                    'validaciones': validaciones,
+                    'seccion_habilitada': info.get('seccionHabilitada', False),
+                    'estado': info.get('estado', ''),
                 }
         except Exception as e:
             logger.error(f"Error procesando info cuantitativa: {e}")
@@ -355,20 +382,21 @@ class InformeActividadPDFGenerator(BasePDFGenerator):
         
         return items
     
-    def _procesar_medios_verificacion(self, medios):
+    def _procesar_medios_verificacion(self, obj):
         """Procesa los medios de verificación del texto"""
-        if not medios:
-            return []
+        return obj.mediosVerificacion or 'Sin comentarios'
+        # if not medios:
+        #     return []
         
-        items = []
-        try:
-            if isinstance(medios, str):
-                lineas = medios.split('\n')
-                items = [{'descripcion': linea.strip()} for linea in lineas if linea.strip()]
-        except Exception as e:
-            logger.error(f"Error procesando medios verificación: {e}")
+        # items = []
+        # try:
+        #     if isinstance(medios, str):
+        #         lineas = medios.split('\n')
+        #         items = [{'descripcion': linea.strip()} for linea in lineas if linea.strip()]
+        # except Exception as e:
+        #     logger.error(f"Error procesando medios verificación: {e}")
         
-        return items
+        # return items
     
     def _procesar_archivos(self, archivos, tipo):
         """Procesa los archivos del JSON"""

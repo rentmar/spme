@@ -2,93 +2,243 @@
 
 {% block content %}
 <style>
+    /* Estilos generales para mejorar la disposición de página */
+    @page {
+        size: A4;
+        margin: 1.5cm 1cm 1.5cm 1cm;
+        
+        @top-left {
+            content: "{{ subtipo_documento|default:"F-IA-01" }}";
+            font-size: 8px;
+            color: #666;
+        }
+        
+        @top-right {
+            content: "Página " counter(page);
+            font-size: 8px;
+            color: #666;
+        }
+        
+        @bottom-center {
+            content: "Sistema de Gestión de Proyectos - SPME | Generado: {{ fecha_generacion }}";
+            font-size: 7px;
+            color: #999;
+        }
+    }
+    
+    /* Mejoras en espaciado */
+    body {
+        font-family: 'Arial', sans-serif;
+        font-size: 9px;
+        line-height: 1.4;
+        color: #333;
+    }
+    
+    .seccion {
+        margin-bottom: 15px;
+        page-break-inside: avoid;
+    }
+    
+    .seccion-titulo {
+        background-color: #1976d2;
+        color: white;
+        padding: 6px 10px;
+        font-size: 10px;
+        font-weight: bold;
+        border-radius: 4px 4px 0 0;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .campo {
+        margin-bottom: 8px;
+    }
+    
+    .etiqueta {
+        font-weight: bold;
+        color: #555;
+        margin-bottom: 2px;
+        font-size: 8px;
+        text-transform: uppercase;
+    }
+    
+    .valor {
+        background-color: #f8f9fa;
+        padding: 6px 8px;
+        border-radius: 3px;
+        border: 1px solid #e0e0e0;
+        min-height: 22px;
+        font-size: 9px;
+    }
+    
+    /* Grids mejorados */
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    
+    /* Tablas más compactas */
+    .tabla {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 8px 0;
+        font-size: 8px;
+    }
+    
+    .tabla th {
+        background-color: #1976d2;
+        color: white;
+        padding: 5px 4px;
+        text-align: left;
+        font-weight: bold;
+        border: 1px solid #1565c0;
+    }
+    
+    .tabla td {
+        padding: 4px;
+        border: 1px solid #ddd;
+    }
+    
+    /* Tarjetas para validadores más compactas */
+    .validador-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        padding: 6px;
+        margin-bottom: 6px;
+        background-color: #fafafa;
+    }
+    
+    .validador-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 3px;
+    }
+    
+    .validador-nombre { font-weight: bold; font-size: 8px; }
+    .validador-cargo { color: #666; font-size: 8px; }
+    .validador-detalle { font-size: 7px; color: #777; margin-top: 2px; }
+    
+    /* Barra de progreso */
+    .progress-bar {
+        background-color: #e9ecef;
+        border-radius: 8px;
+        padding: 1px;
+        width: 100%;
+    }
+    .progress-bar-fill {
+        background-color: #1976d2;
+        color: white;
+        border-radius: 8px;
+        padding: 2px 0;
+        text-align: center;
+        font-size: 7px;
+    }
+    
+    /* Estados de color */
+    .estado-exitoso { color: #28a745; font-weight: bold; }
+    .estado-pendiente { color: #ffc107; font-weight: bold; }
+    .estado-critico { color: #dc3545; font-weight: bold; }
+    .estado-info { color: #17a2b8; font-weight: bold; }
+    
+    /* Badges */
     .estado-badge {
         display: inline-block;
-        padding: 3px 8px;
-        border-radius: 12px;
-        font-size: 7px;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-size: 6px;
         font-weight: bold;
         text-transform: uppercase;
     }
     .estado-pendiente { background-color: #ffc107; color: #333; }
     .estado-aprobado { background-color: #28a745; color: white; }
     .estado-rechazado { background-color: #dc3545; color: white; }
-    .validador-card {
-        border: 1px solid #e0e0e0;
-        border-radius: 4px;
-        padding: 8px;
-        margin-bottom: 8px;
-        background-color: #fafafa;
+    
+    /* Firmas */
+    .firmas {
+        display: grid;
+        gap: 15px;
+        margin: 15px 0 10px 0;
     }
-    .validador-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 5px;
+    
+    .firma-area {
+        text-align: center;
+        padding-top: 15px;
     }
-    .validador-nombre { font-weight: bold; font-size: 9px; }
-    .validador-cargo { color: #666; font-size: 8px; }
-    .validador-detalle { font-size: 7px; color: #777; margin-top: 3px; }
+    
+    .linea-firma {
+        width: 80%;
+        margin: 0 auto 3px auto;
+        border-top: 1px solid #333;
+        padding-top: 2px;
+    }
+    
+    .nombre-firma {
+        font-weight: bold;
+        font-size: 8px;
+    }
+    
+    .cargo-firma {
+        font-size: 7px;
+        color: #666;
+    }
+    
+    .fecha-firma {
+        font-size: 6px;
+        color: #999;
+    }
+    
+    /* Resumen de validaciones */
     .resumen-validaciones {
         display: flex;
-        gap: 10px;
-        margin-bottom: 15px;
+        gap: 8px;
+        margin-bottom: 12px;
     }
+    
     .resumen-item {
         flex: 1;
         text-align: center;
-        padding: 8px;
+        padding: 6px;
         border-radius: 4px;
         background-color: #f8f9fa;
     }
-    .resumen-numero { font-size: 16px; font-weight: bold; }
-    .resumen-etiqueta { font-size: 7px; color: #666; text-transform: uppercase; }
-    .contribucion-item {
-        border-left: 3px solid #1976d2;
-        padding: 8px;
-        margin-bottom: 8px;
-        background-color: #f0f7ff;
-    }
-    .indicador-item {
-        border-bottom: 1px solid #eee;
-        padding: 5px 0;
-    }
-    .progress-bar {
-        background-color: #e9ecef;
-        border-radius: 10px;
-        padding: 2px;
-        width: 100%;
-    }
-    .progress-bar-fill {
-        background-color: #1976d2;
-        color: white;
-        border-radius: 10px;
-        padding: 2px 0;
-        text-align: center;
-        font-size: 7px;
+    
+    .resumen-numero { font-size: 14px; font-weight: bold; }
+    .resumen-etiqueta { font-size: 6px; color: #666; text-transform: uppercase; }
+    
+    /* Utilidades */
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+    .texto-largo { line-height: 1.3; word-wrap: break-word; }
+    .compact-section { 
+        background-color: #f8f9fa; 
+        padding: 10px; 
+        border-radius: 4px; 
+        margin-bottom: 12px;
+        border: 1px solid #e0e0e0;
     }
 </style>
 
-<!-- SECCIÓN 1: INFORMACIÓN GENERAL -->
+<!-- SECCIÓN 1: INFORMACIÓN GENERAL (SIN No. y Fecha) -->
 <div class="seccion compact-section">
     <div class="seccion-titulo">📋 INFORMACIÓN GENERAL DEL INFORME PRINCIPAL</div>
     <div class="grid-3">
         <div class="campo">
-            <div class="etiqueta">N° de Informe Principal:</div>
+            <div class="etiqueta">N° DE INFORME PRINCIPAL:</div>
             <div class="valor"><strong>{{ numero_informe }}</strong></div>
         </div>
         <div class="campo">
-            <div class="etiqueta">Fecha de Ejecución:</div>
+            <div class="etiqueta">FECHA DE EJECUCIÓN:</div>
             <div class="valor">{{ fecha_ejecucion }}</div>
         </div>
         <div class="campo">
-            <div class="etiqueta">Tipo de Reporte:</div>
+            <div class="etiqueta">TIPO DE REPORTE:</div>
             <div class="valor">{{ reporte_tipo }}</div>
         </div>
     </div>
     <div class="grid-2" style="margin-top: 10px;">
         <div class="campo">
-            <div class="etiqueta">✍️ Redactor Principal:</div>
+            <div class="etiqueta">✍️ REDACTOR PRINCIPAL:</div>
             <div class="valor">
                 <span style="font-weight: bold;">{{ redactor_nombre }}</span>
                 {% if redactor_cargo %} - {{ redactor_cargo }}{% endif %}
@@ -96,7 +246,7 @@
             </div>
         </div>
         <div class="campo">
-            <div class="etiqueta">📅 Fecha de Generación:</div>
+            <div class="etiqueta">📅 FECHA DE GENERACIÓN:</div>
             <div class="valor">{{ fecha_generacion }}</div>
         </div>
     </div>
@@ -107,47 +257,49 @@
     <div class="seccion-titulo">🎯 INFORMACIÓN DE LA ACTIVIDAD PRINCIPAL</div>
     <div class="grid-3">
         <div class="campo">
-            <div class="etiqueta">Código:</div>
+            <div class="etiqueta">CÓDIGO:</div>
             <div class="valor"><strong>{{ codigo_actividad }}</strong></div>
         </div>
         <div class="campo">
-            <div class="etiqueta">Nombre:</div>
+            <div class="etiqueta">NOMBRE:</div>
             <div class="valor texto-largo">{{ nombre_actividad }}</div>
         </div>
         <div class="campo">
-            <div class="etiqueta">Tipo:</div>
+            <div class="etiqueta">TIPO:</div>
             <div class="valor">{{ tipo_actividad }}</div>
         </div>
     </div>
     <div class="grid-2">
         <div class="campo">
-            <div class="etiqueta">Estado:</div>
-            <div class="valor">{{ estado_actividad }}</div>
+            <div class="etiqueta">ESTADO:</div>
+            <div class="valor {% if estado_actividad == 'Finalizado' %}estado-exitoso{% elif estado_actividad == 'En Ejecución' %}estado-info{% elif estado_actividad == 'Retraso' %}estado-critico{% endif %}">
+                {{ estado_actividad }}
+            </div>
         </div>
         <div class="campo">
-            <div class="etiqueta">Fecha Programada:</div>
+            <div class="etiqueta">FECHA PROGRAMADA:</div>
             <div class="valor">{{ fecha_programada }}</div>
         </div>
     </div>
     <div class="campo">
-        <div class="etiqueta">Objetivo de la Actividad Principal:</div>
+        <div class="etiqueta">OBJETIVO DE LA ACTIVIDAD PRINCIPAL:</div>
         <div class="valor texto-largo">{{ objetivo_actividad }}</div>
     </div>
     <div class="campo">
-        <div class="etiqueta">Descripción de la Actividad Principal:</div>
+        <div class="etiqueta">DESCRIPCIÓN DE LA ACTIVIDAD PRINCIPAL:</div>
         <div class="valor texto-largo">{{ descripcion_actividad }}</div>
     </div>
     <div class="campo">
-        <div class="etiqueta">Informe del Objetivo Principal:</div>
+        <div class="etiqueta">INFORME DEL OBJETIVO PRINCIPAL:</div>
         <div class="valor texto-largo">{{ informe_objetivo }}</div>
     </div>
     <div class="grid-3">
         <div class="campo">
-            <div class="etiqueta">Responsable:</div>
+            <div class="etiqueta">RESPONSABLE:</div>
             <div class="valor">{{ responsable_nombre }}</div>
         </div>
         <div class="campo">
-            <div class="etiqueta">Cargo:</div>
+            <div class="etiqueta">CARGO:</div>
             <div class="valor">{{ responsable_cargo }}</div>
         </div>
         <div class="campo">
@@ -162,7 +314,7 @@
 <div class="seccion">
     <div class="seccion-titulo">🌟 CONTRIBUCIÓN AL PROYECTO PRINCIPAL</div>
     {% for item in contribucion_proyecto %}
-    <div class="contribucion-item">
+    <div class="contribucion-item" style="border-left: 3px solid #1976d2; padding: 8px; margin-bottom: 8px; background-color: #f0f7ff;">
         <div style="font-weight: bold; font-size: 8px; color: #1976d2;">{{ item.tipo|upper }}</div>
         <div style="font-size: 8px; margin-top: 3px;"><strong>Código:</strong> {{ item.codigo }}</div>
         <div style="font-size: 8px;"><strong>Descripción:</strong> {{ item.descripcion }}</div>
@@ -176,17 +328,26 @@
 {% if mostrar_seccion_indicadores and avance_indicadores %}
 <div class="seccion">
     <div class="seccion-titulo">📊 AVANCE DE INDICADORES PRINCIPALES</div>
-    {% for indicador in avance_indicadores %}
-    <div class="indicador-item">
-        <div style="display: flex; justify-content: space-between;">
-            <span style="font-weight: bold; font-size: 8px;">{{ indicador.tipo|upper }}</span>
-            <span style="font-size: 7px; color: #666;">{{ indicador.fecha }}</span>
-        </div>
-        <div style="font-size: 8px;"><strong>Valor:</strong> {{ indicador.valor }}</div>
-        <div style="font-size: 8px;"><strong>Observaciones:</strong> {{ indicador.observaciones }}</div>
-        <div style="font-size: 7px; color: #999;">Registrado por: {{ indicador.registrado_por }}</div>
-    </div>
-    {% endfor %}
+    <table class="tabla">
+        <thead>
+            <tr>
+                <th>TIPO</th>
+                <th>VALOR</th>
+                <th>FECHA</th>
+                <th>OBSERVACIONES</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for indicador in avance_indicadores %}
+            <tr>
+                <td>{{ indicador.tipo|upper }}</td>
+                <td>{{ indicador.valor }}</td>
+                <td>{{ indicador.fecha }}</td>
+                <td>{{ indicador.observaciones }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endif %}
 
@@ -195,37 +356,179 @@
 <div class="seccion">
     <div class="seccion-titulo">📈 INFORMACIÓN CUANTITATIVA PRINCIPAL</div>
     <div class="compact-section">
+        
+        <!-- Total Participantes -->
         <div class="grid-2">
             <div class="campo">
-                <div class="etiqueta">Total Participantes:</div>
-                <div class="valor" style="font-size: 10px; font-weight: bold;">{{ informacion_cuantitativa.total_participantes }}</div>
+                <div class="etiqueta">TOTAL PARTICIPANTES:</div>
+                <div class="valor" style="font-size: 11px; font-weight: bold; text-align: center;">{{ informacion_cuantitativa.total_participantes }}</div>
             </div>
         </div>
         
-        {% if informacion_cuantitativa.genero %}
-        <div style="margin-top: 10px;">
-            <div class="etiqueta">Género:</div>
-            <div class="grid-4" style="margin-top: 5px;">
+        <!-- GÉNERO -->
+        {% if mostrar_subseccion_genero and informacion_cuantitativa.genero %}
+        <div style="margin-top: 12px;">
+            <div class="etiqueta" style="background-color: #e3f2fd; padding: 3px 5px; border-radius: 3px;">GÉNERO</div>
+            <div class="grid-4" style="margin-top: 6px;">
                 <div><strong>Varones:</strong> {{ informacion_cuantitativa.genero.varones|default:"0" }}</div>
                 <div><strong>Mujeres:</strong> {{ informacion_cuantitativa.genero.mujeres|default:"0" }}</div>
                 <div><strong>Otro:</strong> {{ informacion_cuantitativa.genero.otro|default:"0" }}</div>
                 <div><strong>PND:</strong> {{ informacion_cuantitativa.genero.pnd|default:"0" }}</div>
             </div>
+            {% if informacion_cuantitativa.genero.suma %}
+            <div style="font-size: 7px; color: #666; margin-top: 3px; text-align: right;">Suma: {{ informacion_cuantitativa.genero.suma }}</div>
+            {% endif %}
         </div>
         {% endif %}
         
-        {% if informacion_cuantitativa.edades %}
-        <div style="margin-top: 10px;">
-            <div class="etiqueta">Rangos de Edad:</div>
-            <div class="grid-3" style="margin-top: 5px;">
+        <!-- EDADES -->
+        {% if mostrar_subseccion_edades and informacion_cuantitativa.edades %}
+        <div style="margin-top: 12px;">
+            <div class="etiqueta" style="background-color: #e3f2fd; padding: 3px 5px; border-radius: 3px;">RANGOS DE EDAD</div>
+            <div class="grid-3" style="margin-top: 6px;">
                 <div><strong>0-11 años:</strong> {{ informacion_cuantitativa.edades.edad_0_11|default:"0" }}</div>
                 <div><strong>12-17 años:</strong> {{ informacion_cuantitativa.edades.edad_12_17|default:"0" }}</div>
                 <div><strong>18-29 años:</strong> {{ informacion_cuantitativa.edades.edad_18_29|default:"0" }}</div>
                 <div><strong>30-59 años:</strong> {{ informacion_cuantitativa.edades.edad_30_59|default:"0" }}</div>
                 <div><strong>60+ años:</strong> {{ informacion_cuantitativa.edades.edad_60_adelante|default:"0" }}</div>
             </div>
+            {% if informacion_cuantitativa.edades.suma %}
+            <div style="font-size: 7px; color: #666; margin-top: 3px; text-align: right;">Suma: {{ informacion_cuantitativa.edades.suma }}</div>
+            {% endif %}
         </div>
         {% endif %}
+        
+        <!-- DISCAPACIDAD -->
+        {% if mostrar_subseccion_discapacidad and informacion_cuantitativa.discapacidad %}
+        <div style="margin-top: 12px;">
+            <div class="etiqueta" style="background-color: #e3f2fd; padding: 3px 5px; border-radius: 3px;">DISCAPACIDAD</div>
+            <div style="margin-top: 6px;">
+                <div><strong>Total personas con discapacidad:</strong> {{ informacion_cuantitativa.discapacidad.total|default:"0" }}</div>
+                {% if informacion_cuantitativa.discapacidad.tipos %}
+                <table class="tabla" style="margin-top: 6px;">
+                    <thead>
+                        <tr>
+                            <th>Tipo de Discapacidad</th>
+                            <th>Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tipo in informacion_cuantitativa.discapacidad.tipos %}
+                        <tr>
+                            <td>{{ tipo.tipo }}</td>
+                            <td class="text-center">{{ tipo.cantidad }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+                {% if informacion_cuantitativa.discapacidad.necesidades %}
+                <div style="margin-top: 5px; font-size: 7px;"><strong>Necesidades:</strong> {{ informacion_cuantitativa.discapacidad.necesidades }}</div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- OCUPACIONES -->
+        {% if mostrar_subseccion_ocupaciones and informacion_cuantitativa.ocupaciones %}
+        <div style="margin-top: 12px;">
+            <div class="etiqueta" style="background-color: #e3f2fd; padding: 3px 5px; border-radius: 3px;">OCUPACIONES</div>
+            {% if informacion_cuantitativa.ocupaciones.datos %}
+            <table class="tabla" style="margin-top: 6px;">
+                <thead>
+                    <tr>
+                        <th>Ocupación</th>
+                        <th>Cantidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in informacion_cuantitativa.ocupaciones.datos %}
+                    <tr>
+                        <td>{{ item.nombre }}</td>
+                        <td class="text-center">{{ item.cantidad }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+            {% if informacion_cuantitativa.ocupaciones.suma %}
+            <div style="font-size: 7px; color: #666; margin-top: 3px; text-align: right;">Suma: {{ informacion_cuantitativa.ocupaciones.suma }}</div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <!-- LOCALIDADES -->
+        {% if mostrar_subseccion_localidades and informacion_cuantitativa.localidades %}
+        <div style="margin-top: 12px;">
+            <div class="etiqueta" style="background-color: #e3f2fd; padding: 3px 5px; border-radius: 3px;">LOCALIDADES</div>
+            {% if informacion_cuantitativa.localidades.datos %}
+            <table class="tabla" style="margin-top: 6px;">
+                <thead>
+                    <tr>
+                        <th>Departamento</th>
+                        <th>Municipio</th>
+                        <th>Localidad</th>
+                        <th>Cantidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in informacion_cuantitativa.localidades.datos %}
+                    <tr>
+                        <td>{{ item.departamento }}</td>
+                        <td>{{ item.municipio }}</td>
+                        <td>{{ item.localidad }}</td>
+                        <td class="text-center">{{ item.cantidad }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+            {% if informacion_cuantitativa.localidades.suma %}
+            <div style="font-size: 7px; color: #666; margin-top: 3px; text-align: right;">Suma: {{ informacion_cuantitativa.localidades.suma }}</div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <!-- ORGANIZACIONES -->
+        {% if mostrar_subseccion_organizaciones and informacion_cuantitativa.organizaciones %}
+        <div style="margin-top: 12px;">
+            <div class="etiqueta" style="background-color: #e3f2fd; padding: 3px 5px; border-radius: 3px;">ORGANIZACIONES</div>
+            {% if informacion_cuantitativa.organizaciones.datos %}
+            <table class="tabla" style="margin-top: 6px;">
+                <thead>
+                    <tr>
+                        <th>Organización</th>
+                        <th>Cantidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in informacion_cuantitativa.organizaciones.datos %}
+                    <tr>
+                        <td>{{ item.nombre }}</td>
+                        <td class="text-center">{{ item.cantidad }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+            {% if informacion_cuantitativa.organizaciones.suma %}
+            <div style="font-size: 7px; color: #666; margin-top: 3px; text-align: right;">Suma: {{ informacion_cuantitativa.organizaciones.suma }}</div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <!-- ESTADÍSTICAS -->
+        {% if informacion_cuantitativa.estadisticas %}
+        <div style="margin-top: 12px; font-size: 7px; color: #666; border-top: 1px dashed #ccc; padding-top: 8px;">
+            <div class="etiqueta">ESTADÍSTICAS</div>
+            <div class="grid-3" style="margin-top: 5px;">
+                <div><strong>Suma Total:</strong> {{ informacion_cuantitativa.estadisticas.sumaTotal|default:"0" }}</div>
+                <div><strong>Archivos:</strong> {{ informacion_cuantitativa.estadisticas.archivosTotal|default:"0" }}</div>
+                <div><strong>Organizaciones:</strong> {{ informacion_cuantitativa.estadisticas.organizacionesTotal|default:"0" }}</div>
+            </div>
+        </div>
+        {% endif %}
+        
     </div>
 </div>
 {% endif %}
@@ -235,15 +538,15 @@
     <div class="seccion-titulo">💰 EJECUCIÓN PRESUPUESTARIA PRINCIPAL</div>
     <div class="grid-3">
         <div class="campo">
-            <div class="etiqueta">Presupuesto Planificado:</div>
+            <div class="etiqueta">PRESUPUESTO PLANIFICADO:</div>
             <div class="valor">Bs. {{ presupuesto_planificado|floatformat:2 }}</div>
         </div>
         <div class="campo">
-            <div class="etiqueta">Presupuesto Ejecutado:</div>
+            <div class="etiqueta">PRESUPUESTO EJECUTADO:</div>
             <div class="valor">Bs. {{ presupuesto_ejecutado|floatformat:2 }}</div>
         </div>
         <div class="campo">
-            <div class="etiqueta">% de Ejecución:</div>
+            <div class="etiqueta">% DE EJECUCIÓN:</div>
             <div class="valor {% if porcentaje_ejecucion >= 80 %}estado-exitoso{% elif porcentaje_ejecucion >= 50 %}estado-pendiente{% else %}estado-critico{% endif %}">
                 {{ porcentaje_ejecucion }}%
             </div>
@@ -252,16 +555,16 @@
     
     <!-- PROCEDENCIA DE FONDOS -->
     {% if mostrar_seccion_fondos %}
-    <div style="margin-top: 15px;">
-        <div class="etiqueta" style="font-size: 9px;">PROCEDENCIA DE FONDOS PRINCIPAL:</div>
+    <div style="margin-top: 12px;">
+        <div class="etiqueta" style="font-size: 8px;">PROCEDENCIA DE FONDOS PRINCIPAL:</div>
         <div class="tabla-container">
             <table class="tabla" style="margin-top: 5px;">
                 <thead>
                     <tr>
-                        <th width="40%">FUENTE</th>
-                        <th width="20%">PLANIFICADO (Bs.)</th>
-                        <th width="20%">EJECUTADO (Bs.)</th>
-                        <th width="20%">EJECUCIÓN</th>
+                        <th>FUENTE</th>
+                        <th>PLANIFICADO</th>
+                        <th>EJECUTADO</th>
+                        <th>EJECUCIÓN</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -270,12 +573,12 @@
                         <td>
                             {{ fuente.nombre }}
                             {% if not fuente.es_existente %}
-                                <span style="color: #ff9800; font-size: 7px;">(Manual)</span>
+                                <span style="color: #ff9800;">(M)</span>
                             {% endif %}
                         </td>
-                        <td class="text-right">{{ fuente.monto_planificado|floatformat:2 }}</td>
-                        <td class="text-right">{{ fuente.monto_ejecutado|floatformat:2 }}</td>
-                        <td class="text-center">
+                        <td class="text-right">Bs. {{ fuente.monto_planificado|floatformat:2 }}</td>
+                        <td class="text-right">Bs. {{ fuente.monto_ejecutado|floatformat:2 }}</td>
+                        <td class="text-center" style="width: 80px;">
                             {% if fuente.monto_planificado > 0 %}
                                 <div class="progress-bar">
                                     <div class="progress-bar-fill" style="width: {{ fuente.porcentaje_ejecucion }}%;">
@@ -283,15 +586,13 @@
                                     </div>
                                 </div>
                             {% else %}
-                                <span>0%</span>
+                                0%
                             {% endif %}
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" style="text-align: center; padding: 10px; color: #999;">
-                            No hay fuentes de financiamiento registradas
-                        </td>
+                        <td colspan="4" style="text-align: center; color: #999;">Sin fuentes de financiamiento</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -299,8 +600,8 @@
                 <tfoot>
                     <tr style="background-color: #e3f2fd; font-weight: bold;">
                         <td>TOTALES</td>
-                        <td class="text-right">{{ total_fondos_planificado|floatformat:2 }}</td>
-                        <td class="text-right">{{ total_fondos_ejecutado|floatformat:2 }}</td>
+                        <td class="text-right">Bs. {{ total_fondos_planificado|floatformat:2 }}</td>
+                        <td class="text-right">Bs. {{ total_fondos_ejecutado|floatformat:2 }}</td>
                         <td class="text-center">{{ porcentaje_ejecucion_fondos }}%</td>
                     </tr>
                 </tfoot>
@@ -315,8 +616,8 @@
     </div>
     {% endif %}
     
-    <div class="campo" style="margin-top: 15px;">
-        <div class="etiqueta">Observaciones de Presupuesto:</div>
+    <div class="campo" style="margin-top: 12px;">
+        <div class="etiqueta">OBSERVACIONES DE PRESUPUESTO:</div>
         <div class="valor">{{ observaciones_presupuesto }}</div>
     </div>
 </div>
@@ -325,12 +626,22 @@
 {% if mostrar_seccion_herramientas and herramientas_evaluacion %}
 <div class="seccion">
     <div class="seccion-titulo">🔧 HERRAMIENTAS DE EVALUACIÓN PRINCIPALES</div>
-    {% for herramienta in herramientas_evaluacion %}
-    <div class="contribucion-item" style="border-left-color: #ff9800;">
-        <div style="font-size: 8px;"><strong>Descripción:</strong> {{ herramienta.descripcion }}</div>
-        <div style="font-size: 8px; margin-top: 3px;"><strong>Resultado:</strong> {{ herramienta.resultado }}</div>
-    </div>
-    {% endfor %}
+    <table class="tabla">
+        <thead>
+            <tr>
+                <th>DESCRIPCIÓN</th>
+                <th>RESULTADO</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for herramienta in herramientas_evaluacion %}
+            <tr>
+                <td>{{ herramienta.descripcion }}</td>
+                <td>{{ herramienta.resultado }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endif %}
 
@@ -338,11 +649,7 @@
 {% if medios_verificacion %}
 <div class="seccion">
     <div class="seccion-titulo">📎 MEDIOS DE VERIFICACIÓN PRINCIPALES</div>
-    <ul style="margin: 5px 0; padding-left: 20px;">
-        {% for medio in medios_verificacion %}
-        <li class="texto-largo">{{ medio.descripcion }}</li>
-        {% endfor %}
-    </ul>
+    <div class="valor texto-largo">{{ medios_verificacion }}</div>
 </div>
 {% endif %}
 
@@ -383,7 +690,7 @@
         <div class="validador-header">
             <div>
                 <span class="validador-nombre">{{ validador.nombre }}</span>
-                <span class="validador-cargo"> - {{ validador.cargo }}</span>
+                <span class="validador-cargo">({{ validador.cargo }})</span>
             </div>
             <span class="estado-badge 
                 {% if validador.estado == 'PENDIENTE' %}estado-pendiente
@@ -394,21 +701,15 @@
             </span>
         </div>
         <div class="validador-detalle">
-            <strong>CI:</strong> {{ validador.ci }} | 
-            <strong>Código:</strong> {{ validador.codigo_seguimiento }} | 
-            <strong>Asignación:</strong> {{ validador.fecha_asignacion }}
-            {% if validador.fecha_resolucion != 'Pendiente' %}
-            | <strong>Resolución:</strong> {{ validador.fecha_resolucion }}
-            {% endif %}
+            <span><strong>CI:</strong> {{ validador.ci }}</span>
+            <span style="margin-left: 10px;"><strong>Código:</strong> {{ validador.codigo_seguimiento }}</span>
+            <span style="margin-left: 10px;"><strong>Asignación:</strong> {{ validador.fecha_asignacion }}</span>
         </div>
         {% if validador.comentarios != 'Sin comentarios' %}
-        <div style="margin-top: 5px; font-size: 7px; background-color: #fff; padding: 4px; border-radius: 2px;">
+        <div style="margin-top: 4px; font-size: 7px; background-color: #fff; padding: 4px; border-radius: 2px;">
             <strong>Comentarios:</strong> {{ validador.comentarios }}
         </div>
         {% endif %}
-        <div style="margin-top: 5px; font-size: 6px; color: #999;">
-            <strong>Versión:</strong> {{ validador.version_documento }}
-        </div>
     </div>
     {% endfor %}
 </div>
@@ -442,23 +743,23 @@
 </div>
 
 <!-- SECCIÓN 12: METADATOS -->
-<div class="seccion compact-section">
-    <div class="seccion-titulo" style="background-color: #6c757d;">⚙️ METADATOS</div>
+<div class="seccion compact-section" style="background-color: #f8f9fa;">
+    <div class="seccion-titulo" style="background-color: #6c757d;">⚙️ METADATOS DEL SISTEMA</div>
     <div class="grid-2">
         <div class="campo">
-            <div class="etiqueta">Fecha de Registro:</div>
+            <div class="etiqueta">FECHA DE REGISTRO:</div>
             <div class="valor">{{ fecha_registro }}</div>
         </div>
         <div class="campo">
-            <div class="etiqueta">Última Modificación:</div>
+            <div class="etiqueta">ÚLTIMA MODIFICACIÓN:</div>
             <div class="valor">{{ ultima_modificacion }}</div>
         </div>
     </div>
 </div>
 
 <!-- NOTA AL PIE -->
-<div style="margin-top: 15px; padding: 8px; background-color: #f0f7ff; border-left: 4px solid #1976d2; font-size: 7px; color: #555;">
+<div style="margin-top: 10px; padding: 5px; background-color: #f0f7ff; border-left: 3px solid #1976d2; font-size: 6px; color: #555;">
     <strong>Nota:</strong> Este informe ha sido generado automáticamente por el Sistema de Gestión de Proyectos - SPME.
-    Las validaciones mostradas corresponden a los registros en el sistema.
+    Las validaciones mostradas corresponden a los registros en el sistema. Código: {{ numero_informe }}
 </div>
 {% endblock %}
