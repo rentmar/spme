@@ -43,6 +43,30 @@
     }
     .resumen-numero { font-size: 16px; font-weight: bold; }
     .resumen-etiqueta { font-size: 7px; color: #666; text-transform: uppercase; }
+    .contribucion-item {
+        border-left: 3px solid #1976d2;
+        padding: 8px;
+        margin-bottom: 8px;
+        background-color: #f0f7ff;
+    }
+    .indicador-item {
+        border-bottom: 1px solid #eee;
+        padding: 5px 0;
+    }
+    .progress-bar {
+        background-color: #e9ecef;
+        border-radius: 10px;
+        padding: 2px;
+        width: 100%;
+    }
+    .progress-bar-fill {
+        background-color: #1976d2;
+        color: white;
+        border-radius: 10px;
+        padding: 2px 0;
+        text-align: center;
+        font-size: 7px;
+    }
 </style>
 
 <!-- SECCIÓN 1: INFORMACIÓN GENERAL -->
@@ -134,83 +158,75 @@
 </div>
 
 <!-- SECCIÓN 3: CONTRIBUCIÓN AL PROYECTO -->
-{% if mostrar_seccion_contribucion %}
+{% if mostrar_seccion_contribucion and contribucion_proyecto %}
 <div class="seccion">
     <div class="seccion-titulo">🌟 CONTRIBUCIÓN AL PROYECTO PRINCIPAL</div>
-    <table class="tabla">
-        <thead>
-            <tr>
-                <th>DESCRIPCIÓN</th>
-                <th>IMPACTO</th>
-                <th>NIVEL</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in contribucion_proyecto %}
-            <tr>
-                <td>{{ item.descripcion }}</td>
-                <td class="text-center">{{ item.impacto }}</td>
-                <td class="text-center">{{ item.nivel }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    {% for item in contribucion_proyecto %}
+    <div class="contribucion-item">
+        <div style="font-weight: bold; font-size: 8px; color: #1976d2;">{{ item.tipo|upper }}</div>
+        <div style="font-size: 8px; margin-top: 3px;"><strong>Código:</strong> {{ item.codigo }}</div>
+        <div style="font-size: 8px;"><strong>Descripción:</strong> {{ item.descripcion }}</div>
+        <div style="font-size: 8px;"><strong>Contribución:</strong> {{ item.contribucion }}</div>
+    </div>
+    {% endfor %}
 </div>
 {% endif %}
 
 <!-- SECCIÓN 4: AVANCE DE INDICADORES -->
-{% if mostrar_seccion_indicadores %}
+{% if mostrar_seccion_indicadores and avance_indicadores %}
 <div class="seccion">
     <div class="seccion-titulo">📊 AVANCE DE INDICADORES PRINCIPALES</div>
-    <table class="tabla">
-        <thead>
-            <tr>
-                <th>INDICADOR</th>
-                <th>VALOR ESPERADO</th>
-                <th>VALOR ALCANZADO</th>
-                <th>% AVANCE</th>
-                <th>OBSERVACIONES</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for indicador in avance_indicadores %}
-            <tr>
-                <td>{{ indicador.nombre }}</td>
-                <td class="text-center">{{ indicador.valor_esperado }}</td>
-                <td class="text-center">{{ indicador.valor_alcanzado }}</td>
-                <td class="text-center">{{ indicador.porcentaje }}%</td>
-                <td>{{ indicador.observaciones }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    {% for indicador in avance_indicadores %}
+    <div class="indicador-item">
+        <div style="display: flex; justify-content: space-between;">
+            <span style="font-weight: bold; font-size: 8px;">{{ indicador.tipo|upper }}</span>
+            <span style="font-size: 7px; color: #666;">{{ indicador.fecha }}</span>
+        </div>
+        <div style="font-size: 8px;"><strong>Valor:</strong> {{ indicador.valor }}</div>
+        <div style="font-size: 8px;"><strong>Observaciones:</strong> {{ indicador.observaciones }}</div>
+        <div style="font-size: 7px; color: #999;">Registrado por: {{ indicador.registrado_por }}</div>
+    </div>
+    {% endfor %}
 </div>
 {% endif %}
 
 <!-- SECCIÓN 5: INFORMACIÓN CUANTITATIVA -->
-{% if mostrar_seccion_cuantitativa %}
+{% if mostrar_seccion_cuantitativa and informacion_cuantitativa %}
 <div class="seccion">
     <div class="seccion-titulo">📈 INFORMACIÓN CUANTITATIVA PRINCIPAL</div>
-    <table class="tabla">
-        <thead>
-            <tr>
-                <th>INDICADOR</th>
-                <th>VALOR</th>
-                <th>UNIDAD</th>
-                <th>PERIODO</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in informacion_cuantitativa %}
-            <tr>
-                <td>{{ item.indicador }}</td>
-                <td class="text-center">{{ item.valor }}</td>
-                <td class="text-center">{{ item.unidad }}</td>
-                <td class="text-center">{{ item.periodo }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="compact-section">
+        <div class="grid-2">
+            <div class="campo">
+                <div class="etiqueta">Total Participantes:</div>
+                <div class="valor" style="font-size: 10px; font-weight: bold;">{{ informacion_cuantitativa.total_participantes }}</div>
+            </div>
+        </div>
+        
+        {% if informacion_cuantitativa.genero %}
+        <div style="margin-top: 10px;">
+            <div class="etiqueta">Género:</div>
+            <div class="grid-4" style="margin-top: 5px;">
+                <div><strong>Varones:</strong> {{ informacion_cuantitativa.genero.varones|default:"0" }}</div>
+                <div><strong>Mujeres:</strong> {{ informacion_cuantitativa.genero.mujeres|default:"0" }}</div>
+                <div><strong>Otro:</strong> {{ informacion_cuantitativa.genero.otro|default:"0" }}</div>
+                <div><strong>PND:</strong> {{ informacion_cuantitativa.genero.pnd|default:"0" }}</div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if informacion_cuantitativa.edades %}
+        <div style="margin-top: 10px;">
+            <div class="etiqueta">Rangos de Edad:</div>
+            <div class="grid-3" style="margin-top: 5px;">
+                <div><strong>0-11 años:</strong> {{ informacion_cuantitativa.edades.edad_0_11|default:"0" }}</div>
+                <div><strong>12-17 años:</strong> {{ informacion_cuantitativa.edades.edad_12_17|default:"0" }}</div>
+                <div><strong>18-29 años:</strong> {{ informacion_cuantitativa.edades.edad_18_29|default:"0" }}</div>
+                <div><strong>30-59 años:</strong> {{ informacion_cuantitativa.edades.edad_30_59|default:"0" }}</div>
+                <div><strong>60+ años:</strong> {{ informacion_cuantitativa.edades.edad_60_adelante|default:"0" }}</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
 </div>
 {% endif %}
 
@@ -228,64 +244,93 @@
         </div>
         <div class="campo">
             <div class="etiqueta">% de Ejecución:</div>
-            <div class="valor">{{ porcentaje_ejecucion }}%</div>
+            <div class="valor {% if porcentaje_ejecucion >= 80 %}estado-exitoso{% elif porcentaje_ejecucion >= 50 %}estado-pendiente{% else %}estado-critico{% endif %}">
+                {{ porcentaje_ejecucion }}%
+            </div>
         </div>
     </div>
     
+    <!-- PROCEDENCIA DE FONDOS -->
     {% if mostrar_seccion_fondos %}
     <div style="margin-top: 15px;">
-        <div class="etiqueta">PROCEDENCIA DE FONDOS:</div>
-        <table class="tabla">
-            <thead>
-                <tr>
-                    <th>FUENTE</th>
-                    <th>MONTO (Bs.)</th>
-                    <th>%</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for fuente in procedencia_fondos %}
-                <tr>
-                    <td>{{ fuente.nombre }}</td>
-                    <td class="text-right">{{ fuente.monto|floatformat:2 }}</td>
-                    <td class="text-center">{{ fuente.porcentaje }}%</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="etiqueta" style="font-size: 9px;">PROCEDENCIA DE FONDOS PRINCIPAL:</div>
+        <div class="tabla-container">
+            <table class="tabla" style="margin-top: 5px;">
+                <thead>
+                    <tr>
+                        <th width="40%">FUENTE</th>
+                        <th width="20%">PLANIFICADO (Bs.)</th>
+                        <th width="20%">EJECUTADO (Bs.)</th>
+                        <th width="20%">EJECUCIÓN</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fuente in procedencia_fondos %}
+                    <tr>
+                        <td>
+                            {{ fuente.nombre }}
+                            {% if not fuente.es_existente %}
+                                <span style="color: #ff9800; font-size: 7px;">(Manual)</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-right">{{ fuente.monto_planificado|floatformat:2 }}</td>
+                        <td class="text-right">{{ fuente.monto_ejecutado|floatformat:2 }}</td>
+                        <td class="text-center">
+                            {% if fuente.monto_planificado > 0 %}
+                                <div class="progress-bar">
+                                    <div class="progress-bar-fill" style="width: {{ fuente.porcentaje_ejecucion }}%;">
+                                        {{ fuente.porcentaje_ejecucion }}%
+                                    </div>
+                                </div>
+                            {% else %}
+                                <span>0%</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 10px; color: #999;">
+                            No hay fuentes de financiamiento registradas
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                {% if total_fondos_planificado > 0 %}
+                <tfoot>
+                    <tr style="background-color: #e3f2fd; font-weight: bold;">
+                        <td>TOTALES</td>
+                        <td class="text-right">{{ total_fondos_planificado|floatformat:2 }}</td>
+                        <td class="text-right">{{ total_fondos_ejecutado|floatformat:2 }}</td>
+                        <td class="text-center">{{ porcentaje_ejecucion_fondos }}%</td>
+                    </tr>
+                </tfoot>
+                {% endif %}
+            </table>
+        </div>
+        {% if observaciones_fondos %}
+        <div style="margin-top: 5px; font-size: 7px; color: #666;">
+            <strong>Observaciones:</strong> {{ observaciones_fondos }}
+        </div>
+        {% endif %}
     </div>
     {% endif %}
     
     <div class="campo" style="margin-top: 15px;">
-        <div class="etiqueta">Observaciones:</div>
+        <div class="etiqueta">Observaciones de Presupuesto:</div>
         <div class="valor">{{ observaciones_presupuesto }}</div>
     </div>
 </div>
 
 <!-- SECCIÓN 7: HERRAMIENTAS DE EVALUACIÓN -->
-{% if mostrar_seccion_herramientas %}
+{% if mostrar_seccion_herramientas and herramientas_evaluacion %}
 <div class="seccion">
     <div class="seccion-titulo">🔧 HERRAMIENTAS DE EVALUACIÓN PRINCIPALES</div>
-    <table class="tabla">
-        <thead>
-            <tr>
-                <th>HERRAMIENTA</th>
-                <th>DESCRIPCIÓN</th>
-                <th>FECHA</th>
-                <th>RESULTADOS</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for herramienta in herramientas_evaluacion %}
-            <tr>
-                <td>{{ herramienta.nombre }}</td>
-                <td>{{ herramienta.descripcion }}</td>
-                <td class="text-center">{{ herramienta.fecha_aplicacion }}</td>
-                <td>{{ herramienta.resultados }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    {% for herramienta in herramientas_evaluacion %}
+    <div class="contribucion-item" style="border-left-color: #ff9800;">
+        <div style="font-size: 8px;"><strong>Descripción:</strong> {{ herramienta.descripcion }}</div>
+        <div style="font-size: 8px; margin-top: 3px;"><strong>Resultado:</strong> {{ herramienta.resultado }}</div>
+    </div>
+    {% endfor %}
 </div>
 {% endif %}
 
@@ -310,7 +355,7 @@
 {% endif %}
 
 <!-- SECCIÓN 10: VALIDACIONES -->
-{% if mostrar_seccion_validaciones %}
+{% if mostrar_seccion_validaciones and validadores %}
 <div class="seccion">
     <div class="seccion-titulo">✅ VALIDACIONES DEL INFORME PRINCIPAL</div>
     
@@ -340,11 +385,16 @@
                 <span class="validador-nombre">{{ validador.nombre }}</span>
                 <span class="validador-cargo"> - {{ validador.cargo }}</span>
             </div>
-            <span class="estado-badge estado-{{ validador.estado|lower }}">{{ validador.estado_display }}</span>
+            <span class="estado-badge 
+                {% if validador.estado == 'PENDIENTE' %}estado-pendiente
+                {% elif validador.estado == 'APROBADO' %}estado-aprobado
+                {% elif validador.estado == 'RECHAZADO' %}estado-rechazado
+                {% endif %}">
+                {{ validador.estado_display }}
+            </span>
         </div>
         <div class="validador-detalle">
             <strong>CI:</strong> {{ validador.ci }} | 
-            <strong>Tipo:</strong> {{ validador.tipo }} | 
             <strong>Código:</strong> {{ validador.codigo_seguimiento }} | 
             <strong>Asignación:</strong> {{ validador.fecha_asignacion }}
             {% if validador.fecha_resolucion != 'Pendiente' %}
@@ -352,8 +402,13 @@
             {% endif %}
         </div>
         {% if validador.comentarios != 'Sin comentarios' %}
-        <div style="margin-top: 5px; font-size: 7px;">{{ validador.comentarios }}</div>
+        <div style="margin-top: 5px; font-size: 7px; background-color: #fff; padding: 4px; border-radius: 2px;">
+            <strong>Comentarios:</strong> {{ validador.comentarios }}
+        </div>
         {% endif %}
+        <div style="margin-top: 5px; font-size: 6px; color: #999;">
+            <strong>Versión:</strong> {{ validador.version_documento }}
+        </div>
     </div>
     {% endfor %}
 </div>
@@ -367,12 +422,20 @@
             <div class="linea-firma"></div>
             <div class="nombre-firma">{{ redactor_nombre }}</div>
             <div class="cargo-firma">Redactor Principal</div>
+            <div class="fecha-firma">Fecha: {{ fecha_registro|default:"_________________" }}</div>
         </div>
         {% for validador in validadores %}
         <div class="firma-area">
             <div class="linea-firma"></div>
             <div class="nombre-firma">{{ validador.nombre }}</div>
-            <div class="cargo-firma">{{ validador.tipo }}</div>
+            <div class="cargo-firma">{{ validador.cargo }}</div>
+            <div class="fecha-firma">
+                {% if validador.estado == 'APROBADO' %}
+                    Fecha: {{ validador.fecha_resolucion }}
+                {% else %}
+                    Fecha: _________________
+                {% endif %}
+            </div>
         </div>
         {% endfor %}
     </div>
@@ -391,5 +454,11 @@
             <div class="valor">{{ ultima_modificacion }}</div>
         </div>
     </div>
+</div>
+
+<!-- NOTA AL PIE -->
+<div style="margin-top: 15px; padding: 8px; background-color: #f0f7ff; border-left: 4px solid #1976d2; font-size: 7px; color: #555;">
+    <strong>Nota:</strong> Este informe ha sido generado automáticamente por el Sistema de Gestión de Proyectos - SPME.
+    Las validaciones mostradas corresponden a los registros en el sistema.
 </div>
 {% endblock %}

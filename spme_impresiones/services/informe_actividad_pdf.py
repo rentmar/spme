@@ -44,7 +44,6 @@ class InformeActividadPDFGenerator(BasePDFGenerator):
         if not self._es_instancia_valida(obj):
             raise ValueError("El objeto debe ser una instancia de InformeActividadPrincipal")
         
-        # ===== CONSULTA CORREGIDA =====
         # Obtener todas las validaciones asociadas a este informe
         validaciones = list(
             ValidacionInformeActividad.objects.filter(
@@ -57,11 +56,10 @@ class InformeActividadPDFGenerator(BasePDFGenerator):
         
         logger.info(f"Se encontraron {len(validaciones)} validaciones para el informe {obj.id}")
         
-        # ===== OBTENER REDACTOR =====
+        # Obtener redactor (es el mismo para todas las validaciones)
         redactor = None
         if validaciones:
             redactor = validaciones[0].usuarioRedactor
-            logger.info(f"Redactor encontrado: {redactor}")
         
         # Información básica del informe
         context = {
@@ -121,6 +119,8 @@ class InformeActividadPDFGenerator(BasePDFGenerator):
         context['avance_indicadores'] = self._procesar_avance_indicadores(obj.avanceIndicadores)
         context['informacion_cuantitativa'] = self._procesar_informacion_cuantitativa(obj.informacionCuantitativa)
         context['herramientas_evaluacion'] = self._procesar_herramientas_evaluacion(obj.herramientasEvaluacion)
+        
+        # Procesar procedencia de fondos (maneja null)
         context['procedencia_fondos'] = self._procesar_procedencia_fondos(obj.procedenciaFondos)
         
         # Procesar archivos
@@ -129,12 +129,33 @@ class InformeActividadPDFGenerator(BasePDFGenerator):
         context['herramientas_archivos'] = self._procesar_archivos(obj.herramientasArchivos, 'herramientas')
         context['medios_archivos'] = self._procesar_archivos(obj.mediosArchivos, 'medios')
         
+        # Añadir totales de fondos al contexto (si existen)
+        if hasattr(self, 'total_planificado') and self.total_planificado > 0:
+            context['total_fondos_planificado'] = self.total_planificado
+            context['total_fondos_ejecutado'] = self.total_ejecutado
+            context['porcentaje_ejecucion_fondos'] = self.porcentaje_ejecucion
+            context['observaciones_fondos'] = self.observaciones_fondos
+            context['mostrar_seccion_fondos'] = True
+        else:
+            context['total_fondos_planificado'] = 0
+            context['total_fondos_ejecutado'] = 0
+            context['porcentaje_ejecucion_fondos'] = '0'
+            context['observaciones_fondos'] = ''
+            context['mostrar_seccion_fondos'] = bool(context['procedencia_fondos'])
+        
+        # Calcular porcentajes para cada fuente de fondos (para evitar filtro div en template)
+        if context['procedencia_fondos']:
+            for fuente in context['procedencia_fondos']:
+                if fuente['monto_planificado'] > 0:
+                    fuente['porcentaje_ejecucion'] = round((fuente['monto_ejecutado'] / fuente['monto_planificado']) * 100, 1)
+                else:
+                    fuente['porcentaje_ejecucion'] = 0
+        
         # Indicadores de visualización
         context['mostrar_seccion_contribucion'] = bool(context['contribucion_proyecto'])
         context['mostrar_seccion_indicadores'] = bool(context['avance_indicadores'])
         context['mostrar_seccion_cuantitativa'] = bool(context['informacion_cuantitativa'])
         context['mostrar_seccion_herramientas'] = bool(context['herramientas_evaluacion'])
-        context['mostrar_seccion_fondos'] = bool(context['procedencia_fondos'])
         context['mostrar_seccion_archivos'] = bool(context['archivos_cuantitativos'] or context['herramientas_archivos'] or context['medios_archivos'])
         context['mostrar_seccion_comentarios'] = bool(context['comentarios_recomendaciones'] and context['comentarios_recomendaciones'] != 'Sin comentarios')
         context['mostrar_seccion_validaciones'] = bool(validaciones)
@@ -158,9 +179,9 @@ class InformeActividadPDFGenerator(BasePDFGenerator):
                 
                 validadores.append({
                     'nombre': nombre_completo,
-                    'cargo': cargo_real,              # ← CARGO REAL del usuario
-                    'ci': ci_real,                     # ← CI REAL del usuario
-                    'tipo': cargo_real,                # ← TIPO = CARGO REAL (o puedes poner un valor fijo)
+                    'cargo': cargo_real,
+                    'ci': ci_real,
+                    'tipo': cargo_real,
                     'estado': validacion.estado,
                     'estado_display': self._get_estado_display(validacion.estado),
                     'codigo_seguimiento': validacion.codigoSeguimiento,
@@ -171,6 +192,201 @@ class InformeActividadPDFGenerator(BasePDFGenerator):
                 })
         
         return validadores
+    
+    def _procesar_procedencia_fondos(self, fondos):
+        """
+        Procesa la procedencia de fondos del JSON
+        Maneja casos donde fondos puede ser None, dict o list
+        """
+        # Si es None, retornar lista vacía
+        if fondos is None:
+            return []
+        
+        items = []
+        
+        try:
+            # Si es diccionario (nuevo formato)
+            if isinstance(fondos, dict):
+                # Extraer fondos completos
+                fondos_completos = fondos.get('fondosCompletos', [])
+                if isinstance(fondos_completos, list):
+                    for item in fondos_completos:
+                        if isinstance(item, dict):
+                            items.append({
+                                'nombre': item.get('nombre', 'Sin nombre'),
+                                'monto_planificado': float(item.get('monto', 0)),
+                                'monto_ejecutado': float(item.get('montoEjecutado', 0)),
+                                'es_existente': item.get('esExistente', False),
+                                'verificado': item.get('verificado', False),
+                            })
+                
+                # Guardar totales
+                self.total_planificado = float(fondos.get('totalPlanificado', 0))
+                self.total_ejecutado = float(fondos.get('totalEjecutado', 0))
+                self.porcentaje_ejecucion = fondos.get('porcentajeEjecucion', '0')
+                self.observaciones_fondos = fondos.get('observaciones', '')
+            
+            # Si es lista (formato antiguo)
+            elif isinstance(fondos, list):
+                for item in fondos:
+                    if isinstance(item, dict):
+                        monto = float(item.get('monto', 0))
+                        items.append({
+                            'nombre': item.get('nombre', 'Sin nombre'),
+                            'monto_planificado': monto,
+                            'monto_ejecutado': monto,
+                            'es_existente': True,
+                            'verificado': True,
+                        })
+                
+                # Calcular totales para lista
+                if items:
+                    self.total_planificado = sum(i['monto_planificado'] for i in items)
+                    self.total_ejecutado = self.total_planificado
+                    self.porcentaje_ejecucion = '100'
+                    self.observaciones_fondos = ''
+                        
+        except Exception as e:
+            logger.error(f"Error procesando fondos: {e}")
+            return []
+        
+        return items
+    
+    def _procesar_contribucion_proyecto(self, contribucion):
+        """Procesa la contribución al proyecto del JSON"""
+        if not contribucion:
+            return []
+        
+        items = []
+        try:
+            if isinstance(contribucion, dict):
+                cabecera = contribucion.get('caberaContribucion', {})
+                for key, value in cabecera.items():
+                    if isinstance(value, dict) and 'data' in value:
+                        data = value.get('data', {})
+                        items.append({
+                            'tipo': key,
+                            'codigo': data.get('codigo', ''),
+                            'descripcion': data.get('descripcion', ''),
+                            'contribucion': data.get('contribucion', ''),
+                        })
+        except Exception as e:
+            logger.error(f"Error procesando contribución: {e}")
+        
+        return items
+    
+    def _procesar_avance_indicadores(self, avance):
+        """Procesa el avance de indicadores del JSON"""
+        if not avance:
+            return []
+        
+        indicadores = []
+        try:
+            if isinstance(avance, dict):
+                metadatos = avance.get('metadatos', {})
+                for tipo in ['indicadorog', 'indicadoroe', 'indicadorrog', 'indicadorroe']:
+                    items = avance.get(tipo, [])
+                    if isinstance(items, list):
+                        for item in items:
+                            if isinstance(item, dict):
+                                # Determinar el valor según el tipo de dato
+                                valor = ''
+                                if item.get('valor_numerico'):
+                                    valor = str(item.get('valor_numerico'))
+                                elif item.get('valor_literal'):
+                                    valor = item.get('valor_literal')
+                                elif item.get('valor_porcentual'):
+                                    valor = f"{item.get('valor_porcentual')}%"
+                                
+                                indicadores.append({
+                                    'tipo': tipo,
+                                    'nombre': f"{tipo} - {item.get('id_indicador', '')}",
+                                    'fecha': self._formatear_fecha(item.get('fecha_registro')),
+                                    'valor': valor,
+                                    'observaciones': item.get('observaciones', '-'),
+                                    'registrado_por': item.get('registrado_por', ''),
+                                })
+        except Exception as e:
+            logger.error(f"Error procesando avance indicadores: {e}")
+        
+        return indicadores
+    
+    def _procesar_informacion_cuantitativa(self, info):
+        """Procesa la información cuantitativa del JSON"""
+        if not info:
+            return {}
+        
+        try:
+            if isinstance(info, dict):
+                return {
+                    'total_participantes': info.get('totalParticipantes', 0),
+                    'genero': info.get('genero', {}),
+                    'edades': info.get('edades', {}),
+                    'discapacidad': info.get('discapacidad', {}),
+                    'ocupaciones': info.get('ocupaciones', {}),
+                    'localidades': info.get('localidades', {}),
+                    'organizaciones': info.get('organizaciones', {}),
+                    'estadisticas': info.get('estadisticas', {}),
+                }
+        except Exception as e:
+            logger.error(f"Error procesando info cuantitativa: {e}")
+        
+        return {}
+    
+    def _procesar_herramientas_evaluacion(self, herramientas):
+        """Procesa las herramientas de evaluación del JSON"""
+        if not herramientas:
+            return []
+        
+        items = []
+        try:
+            if isinstance(herramientas, dict):
+                datos_completos = herramientas.get('datosCompletos', {})
+                herramientas_list = datos_completos.get('herramientas', [])
+                if isinstance(herramientas_list, list):
+                    for item in herramientas_list:
+                        if isinstance(item, dict):
+                            items.append({
+                                'descripcion': item.get('descripcion', ''),
+                                'resultado': item.get('resultado', ''),
+                            })
+        except Exception as e:
+            logger.error(f"Error procesando herramientas: {e}")
+        
+        return items
+    
+    def _procesar_medios_verificacion(self, medios):
+        """Procesa los medios de verificación del texto"""
+        if not medios:
+            return []
+        
+        items = []
+        try:
+            if isinstance(medios, str):
+                lineas = medios.split('\n')
+                items = [{'descripcion': linea.strip()} for linea in lineas if linea.strip()]
+        except Exception as e:
+            logger.error(f"Error procesando medios verificación: {e}")
+        
+        return items
+    
+    def _procesar_archivos(self, archivos, tipo):
+        """Procesa los archivos del JSON"""
+        if not archivos:
+            return []
+        
+        items = []
+        try:
+            if isinstance(archivos, list):
+                for item in archivos:
+                    if isinstance(item, dict):
+                        items.append({
+                            'nombre': item.get('nombre', 'Archivo sin nombre'),
+                        })
+        except Exception as e:
+            logger.error(f"Error procesando archivos: {e}")
+        
+        return items
     
     def _es_instancia_valida(self, obj):
         """Verifica si el objeto es una instancia válida"""
@@ -304,195 +520,3 @@ class InformeActividadPDFGenerator(BasePDFGenerator):
         if planificado and planificado > 0 and ejecutado:
             return round((ejecutado / planificado) * 100, 2)
         return 0
-    
-    def _procesar_contribucion_proyecto(self, contribucion):
-        if not contribucion:
-            return []
-        
-        items = []
-        try:
-            if isinstance(contribucion, list):
-                for item in contribucion:
-                    if isinstance(item, dict):
-                        items.append({
-                            'descripcion': item.get('descripcion', 'Sin descripción'),
-                            'impacto': item.get('impacto', 'No especificado'),
-                            'nivel': item.get('nivel', 'Medio'),
-                        })
-            elif isinstance(contribucion, dict):
-                items.append({
-                    'descripcion': contribucion.get('descripcion', 'Sin descripción'),
-                    'impacto': contribucion.get('impacto', 'No especificado'),
-                    'nivel': contribucion.get('nivel', 'Medio'),
-                })
-        except Exception as e:
-            logger.error(f"Error procesando contribución: {e}")
-        
-        return items
-    
-    def _procesar_avance_indicadores(self, avance):
-        if not avance:
-            return []
-        
-        indicadores = []
-        try:
-            if isinstance(avance, list):
-                for item in avance:
-                    if isinstance(item, dict):
-                        indicadores.append({
-                            'nombre': item.get('nombre', 'Sin nombre'),
-                            'valor_esperado': item.get('valorEsperado', 'No especificado'),
-                            'valor_alcanzado': item.get('valorAlcanzado', 'No especificado'),
-                            'porcentaje': float(item.get('porcentaje', 0)),
-                            'observaciones': item.get('observaciones', '-'),
-                        })
-            elif isinstance(avance, dict):
-                indicadores.append({
-                    'nombre': avance.get('nombre', 'Sin nombre'),
-                    'valor_esperado': avance.get('valorEsperado', 'No especificado'),
-                    'valor_alcanzado': avance.get('valorAlcanzado', 'No especificado'),
-                    'porcentaje': float(avance.get('porcentaje', 0)),
-                    'observaciones': avance.get('observaciones', '-'),
-                })
-        except Exception as e:
-            logger.error(f"Error procesando avance indicadores: {e}")
-        
-        return indicadores
-    
-    def _procesar_informacion_cuantitativa(self, info):
-        if not info:
-            return []
-        
-        items = []
-        try:
-            if isinstance(info, list):
-                for item in info:
-                    if isinstance(item, dict):
-                        items.append({
-                            'indicador': item.get('indicador', 'Sin indicador'),
-                            'valor': item.get('valor', 'No especificado'),
-                            'unidad': item.get('unidad', 'unidades'),
-                            'periodo': item.get('periodo', 'No especificado'),
-                        })
-            elif isinstance(info, dict):
-                items.append({
-                    'indicador': info.get('indicador', 'Sin indicador'),
-                    'valor': info.get('valor', 'No especificado'),
-                    'unidad': info.get('unidad', 'unidades'),
-                    'periodo': info.get('periodo', 'No especificado'),
-                })
-        except Exception as e:
-            logger.error(f"Error procesando info cuantitativa: {e}")
-        
-        return items
-    
-    def _procesar_herramientas_evaluacion(self, herramientas):
-        if not herramientas:
-            return []
-        
-        items = []
-        try:
-            if isinstance(herramientas, list):
-                for item in herramientas:
-                    if isinstance(item, dict):
-                        items.append({
-                            'nombre': item.get('nombre', 'Sin nombre'),
-                            'descripcion': item.get('descripcion', 'Sin descripción'),
-                            'fecha_aplicacion': item.get('fechaAplicacion', 'No especificada'),
-                            'resultados': item.get('resultados', 'No especificados'),
-                        })
-            elif isinstance(herramientas, dict):
-                items.append({
-                    'nombre': herramientas.get('nombre', 'Sin nombre'),
-                    'descripcion': herramientas.get('descripcion', 'Sin descripción'),
-                    'fecha_aplicacion': herramientas.get('fechaAplicacion', 'No especificada'),
-                    'resultados': herramientas.get('resultados', 'No especificados'),
-                })
-        except Exception as e:
-            logger.error(f"Error procesando herramientas: {e}")
-        
-        return items
-    
-    def _procesar_procedencia_fondos(self, fondos):
-        if not fondos:
-            return []
-        
-        items = []
-        total = 0
-        
-        try:
-            if isinstance(fondos, list):
-                for item in fondos:
-                    if isinstance(item, dict):
-                        monto = float(item.get('monto', 0))
-                        items.append({
-                            'nombre': item.get('nombre', 'Sin nombre'),
-                            'monto': monto,
-                        })
-                        total += monto
-            elif isinstance(fondos, dict):
-                monto = float(fondos.get('monto', 0))
-                items.append({
-                    'nombre': fondos.get('nombre', 'Sin nombre'),
-                    'monto': monto,
-                })
-                total = monto
-            
-            if total > 0:
-                for item in items:
-                    item['porcentaje'] = round((item['monto'] / total) * 100, 2)
-            else:
-                for item in items:
-                    item['porcentaje'] = 0
-                    
-        except Exception as e:
-            logger.error(f"Error procesando fondos: {e}")
-        
-        return items
-    
-    def _procesar_medios_verificacion(self, medios):
-        if not medios:
-            return []
-        
-        items = []
-        try:
-            if isinstance(medios, str):
-                lineas = medios.split('\n')
-                items = [{'descripcion': linea.strip()} for linea in lineas if linea.strip()]
-            elif isinstance(medios, list):
-                for medio in medios:
-                    if isinstance(medio, str):
-                        items.append({'descripcion': medio})
-                    elif isinstance(medio, dict):
-                        items.append({'descripcion': medio.get('descripcion', 'Medio de verificación')})
-        except Exception as e:
-            logger.error(f"Error procesando medios verificación: {e}")
-        
-        return items
-    
-    def _procesar_archivos(self, archivos, tipo):
-        if not archivos:
-            return []
-        
-        items = []
-        try:
-            if isinstance(archivos, list):
-                for item in archivos:
-                    if isinstance(item, dict):
-                        items.append({
-                            'nombre': item.get('nombre', 'Archivo sin nombre'),
-                            'tipo': item.get('tipo', tipo),
-                            'tamano': item.get('tamano', 'N/A'),
-                            'fecha': item.get('fecha', 'No especificada'),
-                        })
-                    elif isinstance(item, str):
-                        items.append({
-                            'nombre': item,
-                            'tipo': tipo,
-                            'tamano': 'N/A',
-                            'fecha': 'No especificada',
-                        })
-        except Exception as e:
-            logger.error(f"Error procesando archivos: {e}")
-        
-        return items
