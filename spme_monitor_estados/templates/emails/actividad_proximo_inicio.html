@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #4CAF50; color: white; padding: 10px; text-align: center; }
+        .content { padding: 20px; background-color: #f9f9f9; }
+        .footer { font-size: 12px; text-align: center; color: #777; margin-top: 20px; }
+        .button { 
+            display: inline-block; padding: 10px 20px; 
+            background-color: #4CAF50; color: white; 
+            text-decoration: none; border-radius: 5px;
+        }
+        .info { background-color: #e7f3fe; border-left: 4px solid #2196F3; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>⏰ Próximo inicio de actividad</h2>
+        </div>
+        
+        <div class="content">
+            <p>Hola {{ responsable.get_full_name|default:responsable.email }},</p>
+            
+            <div class="info">
+                <p><strong>Actividad:</strong> {{ entidad.codigo }} - {{ entidad.nombreCorto }}</p>
+                <p><strong>Fecha de inicio programada:</strong> {{ entidad.fecha_inicio|date:"d/m/Y" }}</p>
+                <p><strong>Días restantes:</strong> {{ dias }} días</p>
+            </div>
+            
+            <p>La actividad está próxima a iniciar. Por favor, asegúrate de tener todo listo para su ejecución.</p>
+            
+            <p>
+                <a href="{{ site_url }}/actividades/{{ entidad.id }}" class="button">
+                    Ver actividad
+                </a>
+            </p>
+            
+            <p>Este es un mensaje automático del sistema.</p>
+        </div>
+        
+        <div class="footer">
+            <p>© {% now "Y" %} Sistema de Monitoreo - SPME</p>
+            <p>No responder a este correo</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -14,29 +14,29 @@ logger = logging.getLogger(__name__)
 # ============================================================================
 # CONSUMIDOR RABBITMQ - MENSAJES_USUARIOS
 # ============================================================================
-
 @shared_task(
     bind=True,
     name='mensajes.consumir_cola_usuarios',
     queue='mensajes_usuarios',
-    #priority=5,
-    routing_key='mensaje.usuario.*'
 )
 def consumir_mensajes_usuarios(self):
     """
     Tarea para consumir mensajes de la cola 'mensajes_usuarios'
+    Procesa hasta 10 mensajes y termina (NO es infinita)
     """
     task_id = self.request.id
+    MAX_MENSAJES = 10
+    procesados = 0
     
     try:
-        logger.info(f"[{task_id}] Iniciando consumidor de mensajes de usuarios")
+        logger.info(f"[{task_id}] Iniciando consumo de mensajes de usuarios")
         
         # Configuración de RabbitMQ
         rabbitmq_config = getattr(settings, 'RABBITMQ_CONFIG', {
             'host': 'localhost',
             'port': 5672,
-            'username': 'mark',
-            'password': 'tu_password',
+            'username': 'admin',
+            'password': 'admin',
             'vhost': '/'
         })
         
@@ -55,21 +55,31 @@ def consumir_mensajes_usuarios(self):
             blocked_connection_timeout=300
         )
         
-        # Conectar y consumir
+        # Conectar
         connection = pika.BlockingConnection(parameters)
         channel = connection.channel()
         
-        # Configurar QoS
-        channel.basic_qos(prefetch_count=10)
-        
-        def callback(ch, method, properties, body):
-            """Callback para procesar cada mensaje"""
+        # ============================================================
+        # PROCESAR HASTA MAX_MENSAJES (NO USAR start_consuming)
+        # ============================================================
+        for intento in range(MAX_MENSAJES):
+            # Obtener un mensaje (NO bloqueante)
+            method, properties, body = channel.basic_get(
+                queue='mensajes_usuarios', 
+                auto_ack=False
+            )
+            
+            # Si no hay más mensajes, salir del ciclo
+            if not method:
+                logger.info(f"[{task_id}] No hay más mensajes en la cola")
+                break
+            
             try:
                 # Decodificar mensaje
                 mensaje_data = json.loads(body.decode('utf-8'))
                 routing_key = method.routing_key
                 
-                logger.info(f"[{task_id}] Procesando mensaje: {routing_key}")
+                logger.info(f"[{task_id}] Procesando mensaje {procesados + 1}: {routing_key}")
                 
                 # Procesar según el tipo de mensaje
                 if routing_key == 'mensaje.usuario.privado':
@@ -83,29 +93,29 @@ def consumir_mensajes_usuarios(self):
                 else:
                     logger.warning(f"[{task_id}] Routing key no reconocido: {routing_key}")
                 
-                # Ack del mensaje
-                ch.basic_ack(delivery_tag=method.delivery_tag)
+                # Ack del mensaje (confirmar procesamiento)
+                channel.basic_ack(delivery_tag=method.delivery_tag)
+                procesados += 1
                 
-                logger.debug(f"[{task_id}] Mensaje procesado y ack enviado")
+                logger.debug(f"[{task_id}] Mensaje {procesados} procesado y ack enviado")
                 
             except json.JSONDecodeError as e:
                 logger.error(f"[{task_id}] Error decodificando JSON: {str(e)}")
-                ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
+                channel.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
             except Exception as e:
                 logger.error(f"[{task_id}] Error procesando mensaje: {str(e)}")
-                ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
+                channel.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
         
-        # Configurar consumo
-        channel.basic_consume(
-            queue='mensajes_usuarios',
-            on_message_callback=callback,
-            auto_ack=False
-        )
+        # Cerrar conexión
+        connection.close()
         
-        logger.info(f"[{task_id}] Consumidor listo. Esperando mensajes...")
+        logger.info(f"[{task_id}] Procesamiento completado. Mensajes procesados: {procesados}")
         
-        # Iniciar consumo
-        channel.start_consuming()
+        return {
+            'success': True,
+            'mensajes_procesados': procesados,
+            'quedan_mensajes': method is not None  # True si se alcanzó el límite pero hay más
+        }
         
     except pika.exceptions.AMQPConnectionError as e:
         logger.error(f"[{task_id}] Error de conexión RabbitMQ: {str(e)}")

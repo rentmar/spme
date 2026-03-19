@@ -1,0 +1,210 @@
+{% extends "spme_impresiones/base_template.html" %}
+
+{% block content %}
+    <!-- SECCIÓN 1: INFORMACIÓN DEL SOLICITANTE -->
+    <div class="seccion" style="margin-bottom: 6px;">
+        <div class="seccion-titulo" style="padding: 4px 6px;">👤 INFORMACIÓN DEL SOLICITANTE</div>
+        
+        <div class="grid-3" style="gap: 6px;">
+            <div class="campo">
+                <div class="etiqueta">Nombre:</div>
+                <div class="valor" style="padding: 3px;">{{ nombre_solicitante|default:"-" }}</div>
+            </div>
+            <div class="campo">
+                <div class="etiqueta">C.I.:</div>
+                <div class="valor" style="padding: 3px;">{{ documento_identidad|default:"-" }}</div>
+            </div>
+            <div class="campo">
+                <div class="etiqueta">Cargo:</div>
+                <div class="valor" style="padding: 3px;">{{ cargo|default:"-" }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SECCIÓN 2: INFORMACIÓN DE LA ACTIVIDAD PEI -->
+    <div class="seccion" style="margin-bottom: 6px;">
+        <div class="seccion-titulo" style="padding: 4px 6px;">📅 INFORMACIÓN DE LA ACTIVIDAD PEI</div>
+        
+        <div class="grid-3" style="gap: 6px;">
+            <div class="campo">
+                <div class="etiqueta">Código:</div>
+                <div class="valor" style="padding: 3px;">{{ codigo_actividad|default:"-" }}</div>
+            </div>
+            <div class="campo">
+                <div class="etiqueta">Tipo:</div>
+                <div class="valor" style="padding: 3px;">{{ tipo_actividad|default:"-" }}</div>
+            </div>
+            <div class="campo">
+                <div class="etiqueta">Estado:</div>
+                <div class="valor" style="padding: 3px;">{{ estado_actividad|default:"-" }}</div>
+            </div>
+        </div>
+        
+        <div class="campo" style="margin-bottom: 3px;">
+            <div class="etiqueta">Nombre:</div>
+            <div class="valor texto-largo" style="padding: 3px;">{{ nombre_actividad|default:"-" }}</div>
+        </div>
+        
+        <div class="grid-2" style="gap: 6px; margin-bottom: 3px;">
+            <div class="campo">
+                <div class="etiqueta">Responsable:</div>
+                <div class="valor" style="padding: 3px;">{{ responsable_actividad|default:"No asignado" }}</div>
+            </div>
+            <div class="campo">
+                <div class="etiqueta">Fecha Prog.:</div>
+                <div class="valor" style="padding: 3px;">{{ fecha_programada|default:"-" }}</div>
+            </div>
+        </div>
+        
+        <div class="campo" style="margin-bottom: 3px;">
+            <div class="etiqueta">Fecha Ejecución:</div>
+            <div class="valor" style="padding: 3px;">{{ fecha_ejecucion|default:"-" }}</div>
+        </div>
+        
+        <div class="campo" style="margin-bottom: 3px;">
+            <div class="etiqueta">Descripción:</div>
+            <div class="valor texto-largo" style="padding: 3px; font-size: 8px;">{{ descripcion_actividad|default:"-" }}</div>
+        </div>
+        
+        <div class="campo" style="margin-bottom: 3px;">
+            <div class="etiqueta">Objetivo:</div>
+            <div class="valor texto-largo" style="padding: 3px; font-size: 8px;">{{ objetivo_actividad|default:"-" }}</div>
+        </div>
+    </div>
+    
+    <!-- SECCIÓN 3: DETALLE DE GASTOS SOLICITADOS (compacta) -->
+    <div class="seccion" style="margin-bottom: 6px;">
+        <div class="seccion-titulo" style="padding: 4px 6px;">📝 GASTOS SOLICITADOS</div>
+        
+        <table class="tabla" style="font-size: 7.5px; margin: 0;">
+            <thead>
+                <tr>
+                    <th width="5%">#</th>
+                    <th width="15%">PARTIDA</th>
+                    <th width="40%">DESCRIPCIÓN</th>
+                    <th width="20%">MONTO</th>
+                    <th width="20%">OBS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for gasto in detalle_gastos %}
+                <tr>
+                    <td style="padding: 3px; text-align: center;">{{ gasto.indice|default:forloop.counter }}</td>
+                    <td style="padding: 3px;">{{ gasto.partida|default:"-" }}</td>
+                    <td style="padding: 3px;" class="texto-largo">{{ gasto.descripcion_gasto|default:"-" }}</td>
+                    <td style="padding: 3px; text-align: right;">{{ gasto.monto|floatformat:2 }}</td>
+                    <td style="padding: 3px;">{{ gasto.observaciones|default:"-" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="padding: 8px; text-align: center;">Sin gastos registrados</td>
+                </tr>
+                {% endfor %}
+                
+                {% if detalle_gastos %}
+                <tr class="total-row">
+                    <td colspan="3" style="text-align: right; padding: 3px;"><strong>TOTAL:</strong></td>
+                    <td style="text-align: right; padding: 3px;"><strong>Bs. {{ total_monto_solicitado|floatformat:2 }}</strong></td>
+                    <td style="padding: 3px;"></td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+        
+        <div style="display: flex; justify-content: space-between; font-size: 7px; color: #666; margin-top: 2px;">
+            <span>Items: {{ detalle_gastos|length }}</span>
+            <span>N° Form: {{ numero_formulario|default:"-" }}</span>
+        </div>
+    </div>
+    
+    <!-- SECCIÓN 4: INFORMACIÓN DE PAGO (compacta) -->
+    <div class="seccion" style="margin-bottom: 6px;">
+        <div class="seccion-titulo" style="padding: 4px 6px;">💳 FORMA DE PAGO</div>
+        
+        <div class="grid-2" style="gap: 6px;">
+            <div class="campo">
+                <div class="etiqueta">Forma:</div>
+                <div class="valor" style="padding: 3px;">{{ forma_pago|default:"-" }}</div>
+            </div>
+            <div class="campo">
+                <div class="etiqueta">Lugar:</div>
+                <div class="valor" style="padding: 3px;">{{ lugar_solicitud|default:"-" }}</div>
+            </div>
+        </div>
+        
+        <!-- DATOS DE TRANSFERENCIA -->
+        <!-- DATOS DE TRANSFERENCIA BANCARIA -->
+        {% if datos_transferencia.mostrar_transferencia %}
+        <div class="forma-pago-detalle mostrar-transferencia" style="margin-top: 5px;">
+            <div class="etiqueta" style="color: #1976d2; margin-bottom: 5px;">📊 DATOS DE TRANSFERENCIA BANCARIA:</div>
+            
+            <div class="grid-2" style="gap: 5px;">
+                <div class="campo">
+                    <div class="etiqueta">Nombre:</div>
+                    <div class="valor texto-largo">
+                        {{ datos_transferencia.transferencia.nombre_transferencia|default:"-" }}
+                    </div>
+                </div>
+                
+                <div class="campo">
+                    <div class="etiqueta">C.I.:</div>
+                    <div class="valor">{{ datos_transferencia.transferencia.ci_transferencia|default:"-" }}</div>
+                </div>
+                
+                <div class="campo">
+                    <div class="etiqueta">Banco/Entidad:</div>
+                    <div class="valor">{{ datos_transferencia.transferencia.entidad_bancaria|default:"-" }}</div>
+                </div>
+                
+                <div class="campo">
+                    <div class="etiqueta">Tipo de Cuenta:</div>
+                    <div class="valor">{{ datos_transferencia.transferencia.tipo_cuenta|default:"-" }}</div>
+                </div>
+                
+                <div class="campo" style="grid-column: span 2;">
+                    <div class="etiqueta">Número de Cuenta:</div>
+                    <div class="valor">{{ datos_transferencia.transferencia.numero_cuenta|default:"-" }}</div>
+                </div>
+            </div>
+        </div>
+        {% elif datos_transferencia.mostrar_otros %}
+        <div style="margin-top: 5px; padding: 5px; background: #f0f7ff; border-radius: 3px; font-size: 7.5px;">
+            <strong style="color:#1976d2;">PAGO A SOLICITANTE/TERCEROS:</strong><br>
+            {{ datos_transferencia.otros.nombre_otros|default:"" }} - CI: {{ datos_transferencia.otros.ci_otros|default:"-" }}
+        </div>
+        {% else %}
+        <div style="margin-top: 3px; font-style: italic; font-size: 8px;">Pago en efectivo al solicitante</div>
+        {% endif %}
+    </div>
+    
+    <!-- SECCIÓN 5: FIRMAS Y VALIDACIONES (compacta) -->
+    <div class="seccion">
+        <div class="seccion-titulo" style="padding: 4px 6px;">✍️ FIRMAS Y VALIDACIONES</div>
+        
+        <div class="grid-3" style="gap: 10px;">
+            <!-- SOLICITANTE -->
+            <div style="text-align: center;">
+                <div style="font-size: 7px; color: #666; margin-bottom: 2px;">Solicitante: {{ nombre_solicitante|default:"" }}</div>
+                <div style="border-top: 1px solid #333; width: 90%; margin: 0 auto 3px;"></div>
+                <div style="font-size: 7px; font-weight: bold;">{{ nombre_solicitante|default:"____________________" }}</div>
+                <div style="font-size: 6px; color: #666;">{{ cargo|default:"Solicitante" }}</div>
+            </div>
+            
+            <!-- CONTADOR -->
+            <div style="text-align: center;">
+                <div style="font-size: 7px; color: #666; margin-bottom: 2px;">Contador: {{ nombre_contador|default:"" }}</div>
+                <div style="border-top: 1px solid #333; width: 90%; margin: 0 auto 3px;"></div>
+                <div style="font-size: 7px; font-weight: bold;">{{ nombre_contador|default:"____________________" }}</div>
+                <div style="font-size: 6px; color: #666;">Contador(a)</div>
+            </div>
+            
+            <!-- COORDINADOR -->
+            <div style="text-align: center;">
+                <div style="font-size: 7px; color: #666; margin-bottom: 2px;">Coordinador: {{ nombre_coordinador|default:"" }}</div>
+                <div style="border-top: 1px solid #333; width: 90%; margin: 0 auto 3px;"></div>
+                <div style="font-size: 7px; font-weight: bold;">{{ nombre_coordinador|default:"____________________" }}</div>
+                <div style="font-size: 6px; color: #666;">Coordinador/Dirección</div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

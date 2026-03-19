@@ -27,10 +27,12 @@ from django.contrib import admin
 from django.utils.safestring import mark_safe
 from .models import SolicitudPagoDirecto
 import json
-
+from django.utils import timezone
+from django.urls import reverse
 from polymorphic.admin import PolymorphicParentModelAdmin, PolymorphicChildModelAdmin
-
-
+from django.contrib.admin import ModelAdmin
+from .models import InformeActividadPrincipal
+from .models import InformeTareaPrincipal
 
 #Formas de pago
 admin.site.register(FormaPago)
@@ -40,134 +42,202 @@ admin.site.register(FormaPago)
 #admin.site.register(SolicitudReembolsoActPei)
 #admin.site.register(SolicitudViajeActPei)
 #admin.site.register(SolicitudPagoDirectoActPei)
-
+import json
 from django.contrib import admin
-from polymorphic.admin import PolymorphicParentModelAdmin, PolymorphicChildModelAdmin
+from django.utils.html import format_html
+from django.urls import reverse
+from .models import (
+    InformeActividadBase,
+    InformeActividadPrincipal,
+    InformeTareaPrincipal
+)
 
-from django.contrib import admin
-from django.contrib.admin import ModelAdmin
 
+@admin.register(InformeActividadBase)
+class InformeActividadBaseAdmin(admin.ModelAdmin):
+    """
+    Admin para InformeActividadBase - Muestra todos los campos
+    """
+    list_display = [
+        'id',
+        'numeroInforme',
+        'fechaEjecucion',
+        'presupuestoPlanificado',
+        'presupuestoEjecutado',
+        'timestamp_registro',
+    ]
+    
+    list_display_links = ['id', 'numeroInforme']
+    
+    search_fields = ['numeroInforme', 'comentariosRecomendaciones']
+    
+    list_filter = ['fechaEjecucion', 'timestamp_registro']
+    
+    # Campos de solo lectura (importante para campos auto_now_add)
+    readonly_fields = ['timestamp_registro', 'timestamp_ultima_modificacion']
+    
+    fieldsets = [
+        ('INFORMACIÓN BÁSICA', {
+            'fields': ['numeroInforme', 'fechaEjecucion']
+        }),
+        ('PRESUPUESTO', {
+            'fields': [('presupuestoPlanificado', 'presupuestoEjecutado')]
+        }),
+        ('CONTENIDO', {
+            'fields': [
+                'contribucionProyecto',
+                'avanceIndicadores',
+                'informacionCuantitativa',
+                'herramientasEvaluacion',
+                'mediosVerificacion',
+                'comentariosRecomendaciones',
+            ]
+        }),
+        ('METADATOS', {
+            'fields': ['timestamp_registro', 'timestamp_ultima_modificacion'],
+            'classes': ['collapse']
+        }),
+    ]
 
-from django.contrib import admin
-from .models import InformeActividadPrincipal
-
-
-from django.contrib import admin
-from .models import InformeActividadPrincipal
 
 @admin.register(InformeActividadPrincipal)
 class InformeActividadPrincipalAdmin(admin.ModelAdmin):
-    # Verifica qué campos existen realmente en tu modelo base
-    # Puedes inspeccionar los campos con: print([f.name for f in InformeActividadPrincipal._meta.fields])
-    
+    """
+    Admin para InformeActividadPrincipal - Muestra todos los campos
+    """
     list_display = [
         'id',
         'numeroInforme',
-        'actividad_id',  # Método personalizado
-        'actividad_codigo',  # Método personalizado
+        'actividad',
+        'fechaEjecucion',
         'tipoActividad',
-        # Solo incluir campos que realmente existan
+        'presupuestoPlanificado',
+        'presupuestoEjecutado',
+        'timestamp_registro',
+        'usuario',
     ]
     
-    search_fields = [
-        'numeroInforme',
-        'tipoActividad',
-        'actividad__codigo',
+    list_display_links = ['id', 'numeroInforme']
+    
+    search_fields = ['numeroInforme', 'objetivoActividad', 'tipoActividad']
+    
+    list_filter = ['fechaEjecucion', 'tipoActividad', 'actividad']
+    
+    raw_id_fields = ['actividad']
+    
+    # Campos de solo lectura
+    readonly_fields = ['timestamp_registro', 'timestamp_ultima_modificacion']
+    
+    fieldsets = [
+        ('INFORMACIÓN BÁSICA', {
+            'fields': [
+                'numeroInforme',
+                'actividad',
+                'fechaEjecucion',
+                ('tipoActividad', 'reporteTipo'),
+            ]
+        }),
+        ('OBJETIVOS', {
+            'fields': ['objetivoActividad', 'informeObjetivoActividad']
+        }),
+        ('PRESUPUESTO', {
+            'fields': [
+                ('presupuestoPlanificado', 'presupuestoEjecutado'),
+                'procedenciaFondos',
+                'observacionesPresupuesto',
+            ]
+        }),
+        ('CONTENIDO BASE', {
+            'fields': [
+                'contribucionProyecto',
+                'avanceIndicadores',
+                'informacionCuantitativa',
+                'herramientasEvaluacion',
+                'mediosVerificacion',
+                'comentariosRecomendaciones',
+            ]
+        }),
+        ('ARCHIVOS', {
+            'fields': [
+                'archivosCuantitativos',
+                'herramientasArchivos',
+                'mediosArchivos',
+            ],
+            'classes': ['collapse']
+        }),
+        ('METADATOS', {
+            'fields': ['timestamp_registro', 'timestamp_ultima_modificacion'],
+            'classes': ['collapse']
+        }),
+        ('REDACTOR', {
+            'fields': ['usuario'],
+            'classes': ['collapse']
+        }),
     ]
-    
-    list_filter = [
-        'tipoActividad',
-        # Solo incluir campos que existan para filtrar
-    ]
-    
-    # Método para mostrar ID de actividad
-    def actividad_id(self, obj):
-        return obj.actividad.id if obj.actividad else None
-    actividad_id.short_description = 'ID Actividad'
-    actividad_id.admin_order_field = 'actividad__id'
-    
-    # Método para mostrar código de actividad
-    def actividad_codigo(self, obj):
-        return obj.actividad.codigo if obj.actividad else 'Sin actividad'
-    actividad_codigo.short_description = 'Código Actividad'
-    actividad_codigo.admin_order_field = 'actividad__codigo'
 
-
-from django.contrib import admin
-from .models import InformeTareaPrincipal
 
 @admin.register(InformeTareaPrincipal)
 class InformeTareaPrincipalAdmin(admin.ModelAdmin):
-    # Campos a mostrar en la lista
+    """
+    Admin para InformeTareaPrincipal - Muestra todos los campos
+    """
     list_display = [
         'id',
         'numeroInforme',
-        'tarea_id',  # Método personalizado para ID de tarea
-        'tarea_codigo',  # Método personalizado para código
+        'tarea',
+        'fechaEjecucion',
         'tipoActividad',
+        'presupuestoPlanificado',
+        'presupuestoEjecutado',
+        'timestamp_registro',
+        'usuario',
     ]
     
-    # Campos para búsqueda
-    search_fields = [
-        'numeroInforme',
-        'tipoActividad',
-        'tarea__codigo',  # Buscar por código de tarea
-        'objetivoTarea',
-    ]
+    list_display_links = ['id', 'numeroInforme']
     
-    # Filtros laterales
-    list_filter = [
-        'tipoActividad',
-    ]
+    search_fields = ['numeroInforme', 'objetivoTarea', 'tipoActividad']
     
-    # Campos de solo lectura en el formulario de edición
-    readonly_fields = [
-        'tarea_info_display',  # Método personalizado para mostrar info de tarea
-    ]
+    list_filter = ['fechaEjecucion', 'tipoActividad', 'tarea']
     
-    # Campos a mostrar en el formulario de edición
-    fieldsets = (
-        ('Información General', {
-            'fields': (
+    raw_id_fields = ['tarea']
+    
+    # Campos de solo lectura
+    readonly_fields = ['timestamp_registro', 'timestamp_ultima_modificacion']
+    
+    fieldsets = [
+        ('INFORMACIÓN BÁSICA', {
+            'fields': [
                 'numeroInforme',
-                'tarea_info_display',
                 'tarea',
+                'fechaEjecucion',
                 'tipoActividad',
-            )
+                'usuario',
+            ]
         }),
-        ('Contenido del Informe', {
-            'fields': (
-                'objetivoTarea',
-                'informeObjetivoTarea',
-            )
+        ('OBJETIVOS', {
+            'fields': ['objetivoTarea', 'informeObjetivoTarea']
         }),
-        ('Presupuesto', {
-            'fields': (
+        ('PRESUPUESTO', {
+            'fields': [
+                ('presupuestoPlanificado', 'presupuestoEjecutado'),
                 'desglosePresupuesto',
-            ),
-            'classes': ('collapse',),  # Sección colapsable
+            ]
         }),
-    )
-    
-    # Método para mostrar información de la tarea en el formulario
-    def tarea_info_display(self, obj):
-        if obj.tarea:
-            return f"ID: {obj.tarea.id} | Código: {obj.tarea.codigo}"
-        return "Sin tarea asignada"
-    tarea_info_display.short_description = 'Información de Tarea'
-    
-    # Método para mostrar el ID de la tarea en la lista
-    def tarea_id(self, obj):
-        return obj.tarea.id if obj.tarea else None
-    tarea_id.short_description = 'ID Tarea'
-    tarea_id.admin_order_field = 'tarea__id'  # Permite ordenar por ID
-    
-    # Método para mostrar el código de la tarea en la lista
-    def tarea_codigo(self, obj):
-        return obj.tarea.codigo if obj.tarea else 'Sin tarea'
-    tarea_codigo.short_description = 'Código Tarea'
-    tarea_codigo.admin_order_field = 'tarea__codigo'  # Permite ordenar por código
-
+        ('CONTENIDO BASE', {
+            'fields': [
+                'contribucionProyecto',
+                'avanceIndicadores',
+                'informacionCuantitativa',
+                'herramientasEvaluacion',
+                'mediosVerificacion',
+                'comentariosRecomendaciones',
+            ]
+        }),
+        ('METADATOS', {
+            'fields': ['timestamp_registro', 'timestamp_ultima_modificacion'],
+            'classes': ['collapse']
+        }),
+    ]
 
 @admin.register(SolicitudFondosActPei)
 class SolicitudFondosActPeiAdmin(admin.ModelAdmin):

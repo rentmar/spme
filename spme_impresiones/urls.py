@@ -23,6 +23,18 @@ urlpatterns = [
     path(r'solicitud-viaje-tarea/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_viaje_tarea'}), name='solicitud_viaje_tarea_pdf'),
     path(r'solicitud-pago-directo-tarea/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_pago_directo_tarea'}), name='solicitud_pago_directo_tarea_pdf'),
     path(r'rendicion-cuentas-tareas/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'rendicion_cuentas_tarea'}), name='rendicion_cuentas_tareas_pdf'),
+    #PEI
+    path(r'solicitud-fondos-actividad-pei/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_fondos_actividad_pei'}),  name='solicitud_fondos_actividad_pei_pdf' ),
+    path(r'solicitud-fondos-tarea-pei/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_fondos_tarea_pei'}), name='solicitud_fondos_tarea_pei_pdf'),
+    path(r'solicitud-viaje-actividad-pei/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_viaje_actividad_pei'}), name='solicitud_viaje_actividad_pei_pdf'),
+    path(r'solicitud-viaje-tarea-pei/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_viaje_tarea_pei'}), name='solicitud_viaje_tarea_pei_pdf'),
+    path(r'solicitud-pago-directo-actividad-pei/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_pago_directo_actividad_pei'}), name='solicitud_pago_directo_actividad_pei_pdf'),
+    path(r'solicitud-pago-directo-tarea-pei/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_pago_directo_tarea_pei'}), name='solicitud_pago_directo_tarea_pei_pdf'),
+    path(r'solicitud-reembolso-actividad-pei/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_reembolso_actividad_pei'}), name='solicitud_reembolso_actividad_pei_pdf'),
+    path(r'solicitud-reembolso-tarea-pei/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'solicitud_reembolso_tarea_pei'}), name='solicitud_reembolso_tarea_pei_pdf'),
+    path(r'rendicion-cuentas-actividad-pei/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'rendicion_cuentas_actividad_pei'}), name='rendicion_cuentas_actividad_pei_pdf'),
+    path(r'rendicion-cuentas-tarea-pei/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'rendicion_cuentas_tarea_pei'}), name='rendicion_cuentas_tarea_pei_pdf'),
+    path(r'informe-actividad-principal/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'informe_actividad_principal'}), name='informe_actividad_principal_pdf'),
 
 ] 
 

@@ -58,6 +58,8 @@ INSTALLED_APPS = [
     'spme_fonfosc',
     'spme_mensajes',
     'spme_impresiones',
+    'spme_validaciones',
+    'spme_monitor_estados',
     'django_celery_beat',
     'apptran', #Aplicacion de transicion
     'system_config', #Configuracion del sistema
@@ -109,7 +111,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'spme_db',
         'USER': 'root',
-        'PASSWORD': '123',  #'rootpass123',
+        'PASSWORD': 'rootpass123',  #'rootpass123',
         'HOST': '127.0.0.1',
         'PORT': '3306',
         'OPTIONS': {
@@ -251,6 +253,11 @@ LOGGING = {
     },
 }
 
+# Internationalization
+LANGUAGE_CODE = 'es-es' 
+TIME_ZONE = 'America/La_Paz'
+USE_I18N = True
+USE_TZ = True
 
 # RabbitMQ configuracion
 CELERY_BROKER_URL = 'amqp://admin:admin@localhost:5672//'
@@ -271,9 +278,13 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 #Credenciales
-EMAIL_HOST_USER = 'MRolqueza@gmail.com'
-EMAIL_HOST_PASSWORD = 'oadt trbi jwck wwab'
-DEFAULT_FROM_EMAIL = 'MRolqueza@gmail.com'
+#EMAIL_HOST_USER = 'MRolqueza@gmail.com'
+#EMAIL_HOST_PASSWORD = 'oadt trbi jwck wwab'
+#DEFAULT_FROM_EMAIL = 'MRolqueza@gmail.com'
+
+EMAIL_HOST_USER = 'spmenotificaciones@gmail.com'
+EMAIL_HOST_PASSWORD = 'peqw tawp vdbr qwzw'
+DEFAULT_FROM_EMAIL = 'spmenotificaciones@gmail.com'
 
 # Configuración adicional para mejor rendimiento
 EMAIL_TIMEOUT = 30

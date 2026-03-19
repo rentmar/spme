@@ -10,6 +10,9 @@ from spme_monitoreo.models import (
     SolicitudViaje, 
     SolicitudPagoDirecto,
     RendicionCuentas,
+    SolicitudFondosActPei,
+    SolicitudViajeActPei,
+    SolicitudPagoDirectoActPei,
 )
 
 from ..services import (
@@ -102,6 +105,7 @@ class ReportesViewSet(viewsets.ViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         
+    @action(detail=False, methods=['get'], url_path='solicitud-fondos-tarea/(?P<pk>[^/.]+)')
     def solicitud_fondos_tarea(self, request, pk=None):
         """
         Generar reporte ESPECÍFICO para solicitud de fondos CON TAREA
@@ -352,4 +356,343 @@ class ReportesViewSet(viewsets.ViewSet):
                     'tipo_error': type(e).__name__
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )  
+
+    # views/generar_solicitudes_pdf_views.py
+    @action(detail=False, methods=['get'], url_path='solicitud-fondos-actividad-pei/(?P<pk>[^/.]+)')
+    def solicitud_fondos_actividad_pei(self, request, pk=None):
+        solicitud = get_object_or_404(SolicitudFondosActPei, pk=pk)
+        if solicitud.tarea:
+            return Response({'error': 'Use endpoint para tareas'}, status=400)
+        return PDFGeneratorFactory.generate_pdf(solicitud)    
+
+    @action(detail=False, methods=['get'], url_path='solicitud-fondos-tarea-pei/(?P<pk>[^/.]+)')
+    def solicitud_fondos_tarea_pei(self, request, pk=None):
+        """
+        Generar reporte de solicitud de fondos para TAREA PEI (con tarea)
+        """
+        try:
+            solicitud = get_object_or_404(SolicitudFondosActPei, pk=pk)
+            
+            # Validar que sea una solicitud de tarea
+            if not solicitud.tarea:
+                return Response(
+                    {
+                        'error': 'Tipo de documento incorrecto',
+                        'message': 'Esta solicitud no tiene una tarea asociada. Use el endpoint para actividades.',
+                        'recomendacion': f'/api/impresiones/solicitud-fondos-actividad-pei/{pk}/'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # USAR EL GENERADOR DIRECTAMENTE (NO la fábrica)
+            from ..services.solicitud_fondos_tarea_pei_pdf import SolicitudFondosTareaPeiPDFGenerator
+            generator = SolicitudFondosTareaPeiPDFGenerator()
+            response = generator.generate(solicitud)
+            return response
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Error al generar reporte: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=False, methods=['get'], url_path='solicitud-viaje-actividad-pei/(?P<pk>[^/.]+)')
+    def solicitud_viaje_actividad_pei(self, request, pk=None):
+        """
+        Generar reporte de solicitud de viaje para ACTIVIDAD PEI
+        """
+        try:
+            solicitud = get_object_or_404(SolicitudViajeActPei, pk=pk)
+            
+            # Validar que sea actividad (sin tarea)
+            if solicitud.tarea:
+                return Response(
+                    {
+                        'error': 'Tipo de documento incorrecto',
+                        'message': 'Esta solicitud tiene una tarea asociada. Use el endpoint para tareas.',
+                        'recomendacion': f'/api/impresiones/solicitud-viaje-tarea-pei/{pk}/'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            response = PDFGeneratorFactory.generate_pdf(solicitud)
+            return response
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Error al generar reporte: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )   
+
+    @action(detail=False, methods=['get'], url_path='solicitud-viaje-tarea-pei/(?P<pk>[^/.]+)')
+    def solicitud_viaje_tarea_pei(self, request, pk=None):
+        try:
+            solicitud = get_object_or_404(SolicitudViajeActPei, pk=pk)
+            
+            if not solicitud.tarea:
+                return Response(
+                    {
+                        'error': 'Tipo de documento incorrecto',
+                        'message': 'Esta solicitud no tiene una tarea asociada.'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Usar el generador específico de tarea
+            from ..services.solicitud_viaje_tarea_pei_pdf import SolicitudViajeTareaPeiPDFGenerator
+            generator = SolicitudViajeTareaPeiPDFGenerator()
+            response = generator.generate(solicitud)
+            return response
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Error al generar reporte: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['get'], url_path='solicitud-pago-directo-actividad-pei/(?P<pk>[^/.]+)')
+    def solicitud_pago_directo_actividad_pei(self, request, pk=None):
+        """
+        Generar reporte de solicitud de pago directo para ACTIVIDAD PEI
+        """
+        try:
+            solicitud = get_object_or_404(SolicitudPagoDirectoActPei, pk=pk)
+            
+            # Validar que sea actividad (sin tarea)
+            if solicitud.tarea:
+                return Response(
+                    {
+                        'error': 'Tipo de documento incorrecto',
+                        'message': 'Esta solicitud tiene una tarea asociada. Use el endpoint para tareas.',
+                        'recomendacion': f'/api/impresiones/solicitud-pago-directo-tarea-pei/{pk}/'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            response = PDFGeneratorFactory.generate_pdf(solicitud)
+            return response
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Error al generar reporte: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )    
+            
+
+    # views/generar_solicitudes_pdf_views.py
+
+    @action(detail=False, methods=['get'], url_path='solicitud-pago-directo-tarea-pei/(?P<pk>[^/.]+)')
+    def solicitud_pago_directo_tarea_pei(self, request, pk=None):
+        try:
+            solicitud = get_object_or_404(SolicitudPagoDirectoActPei, pk=pk)
+            
+            print(f"\n>>> VERIFICANDO GENERADOR <<<")
+            print(f"Generador en fábrica: {PDFGeneratorFactory.GENERATORS.get('SolicitudPagoDirectoTareaPei')}")
+            
+            # 👇 AGREGAR ESTAS LÍNEAS
+            print(f"\n>>> ANTES DE GENERATE_PDF <<<")
+            generator = PDFGeneratorFactory.get_generator(solicitud)
+            print(f"Tipo de generador devuelto: {type(generator)}")
+            print(f"Nombre del generador: {generator.__class__.__name__}")
+            print(f"Template que usaría: {generator.template_name}")
+            
+            # Continuar con la generación
+            response = generator.generate(solicitud)  # Usar el generator directamente
+            return response
+            
+        except Exception as e:
+            print(f"ERROR: {e}")
+            import traceback
+            traceback.print_exc()
+            return Response({'error': str(e)}, status=500)
+
+
+    @action(detail=False, methods=['get'], url_path='solicitud-reembolso-actividad-pei/(?P<pk>[^/.]+)')
+    def solicitud_reembolso_actividad_pei(self, request, pk=None):
+        """
+        Generar reporte de solicitud de reembolso para ACTIVIDAD PEI
+        """
+        try:
+            from spme_monitoreo.models import SolicitudReembolsoActPei
+            
+            solicitud = get_object_or_404(SolicitudReembolsoActPei, pk=pk)
+            
+            # Validar que sea actividad (sin tarea)
+            if solicitud.tarea:
+                return Response(
+                    {
+                        'error': 'Esta solicitud tiene tarea asociada',
+                        'message': 'Use el endpoint para tareas cuando esté implementado',
+                        'solicitud_id': solicitud.id,
+                        'tiene_tarea': True
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            response = PDFGeneratorFactory.generate_pdf(solicitud)
+            return response
+            
+        except SolicitudReembolsoActPei.DoesNotExist:
+            return Response(
+                {'error': f'Solicitud de reembolso con ID {pk} no encontrada'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'Error al generar reporte: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )    
+
+    # views/generar_solicitudes_pdf_views.py
+    @action(detail=False, methods=['get'], url_path='solicitud-reembolso-tarea-pei/(?P<pk>[^/.]+)')
+    def solicitud_reembolso_tarea_pei(self, request, pk=None):
+        """
+        Generar reporte de solicitud de reembolso para TAREA PEI
+        """
+        try:
+            from spme_monitoreo.models import SolicitudReembolsoActPei
+            
+            solicitud = get_object_or_404(SolicitudReembolsoActPei, pk=pk)
+            
+            # Validar que tenga tarea
+            if not solicitud.tarea:
+                return Response(
+                    {
+                        'error': 'Esta solicitud no tiene tarea asociada',
+                        'recomendacion': f'/api-print/solicitud-reembolso-actividad-pei/{pk}/'
+                    },
+                    status=400
+                )
+            
+            response = PDFGeneratorFactory.generate_pdf(solicitud)
+            return response
+            
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)     
+
+    @action(detail=False, methods=['get'], url_path='rendicion-cuentas-actividad-pei/(?P<pk>[^/.]+)')
+    def rendicion_cuentas_actividad_pei(self, request, pk=None):
+        """
+        Generar reporte de rendición de cuentas para ACTIVIDAD PEI
+        """
+        try:
+            from spme_monitoreo.models import RendicionCuentasActPei
+            
+            rendicion = get_object_or_404(RendicionCuentasActPei, pk=pk)
+            
+            # Validar que sea actividad (sin tarea)
+            if rendicion.tarea:
+                return Response(
+                    {
+                        'error': 'Esta rendición tiene tarea asociada',
+                        'recomendacion': f'/api-print/rendicion-cuentas-tarea-pei/{pk}/'
+                    },
+                    status=400
+                )
+            
+            response = PDFGeneratorFactory.generate_pdf(rendicion)
+            return response
+            
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
+
+    @action(detail=False, methods=['get'], url_path='rendicion-cuentas-tarea-pei/(?P<pk>[^/.]+)')
+    def rendicion_cuentas_tarea_pei(self, request, pk=None):
+        """
+        Generar reporte de rendición de cuentas para TAREA PEI
+        """
+        try:
+            from spme_monitoreo.models import RendicionCuentasActPei
+            
+            rendicion = get_object_or_404(RendicionCuentasActPei, pk=pk)
+            
+            # Validar que tenga tarea
+            if not rendicion.tarea:
+                return Response(
+                    {
+                        'error': 'Esta rendición no tiene tarea asociada',
+                        'recomendacion': f'/api-print/rendicion-cuentas-actividad-pei/{pk}/'
+                    },
+                    status=400
+                )
+            
+            response = PDFGeneratorFactory.generate_pdf(rendicion)
+            return response
+            
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)     
+
+
+    @action(detail=False, methods=['get'], url_path='informe-actividad-principal/(?P<pk>[^/.]+)')
+    def informe_actividad_principal(self, request, pk=None):
+        """
+        Generar reporte de Informe de Actividad Principal
+        Incluye todas las validaciones asociadas del modelo ValidacionInformeActividad
+        """
+        try:
+            from spme_monitoreo.models import InformeActividadPrincipal
+            
+            # Validar ID
+            try:
+                informe_id = int(pk)
+            except ValueError:
+                return Response(
+                    {
+                        'error': 'ID inválido',
+                        'message': f'El ID "{pk}" no es un número válido',
+                        'codigo': 'INVALID_ID'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Obtener informe con relaciones precargadas
+            informe = get_object_or_404(
+                InformeActividadPrincipal.objects.select_related(
+                    'actividad',
+                    'actividad__responsable',
+                    'usuario'
+                ).prefetch_related(
+                    'validaciones',
+                    'validaciones__usuarioValidador'
+                ),
+                pk=informe_id
+            )
+            
+            # Logging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"Generando PDF para informe {informe_id}")
+            
+            # Generar PDF
+            response = PDFGeneratorFactory.generate_pdf(informe)
+            return response
+            
+        except ImportError as e:
+            return Response(
+                {
+                    'error': 'Error de configuración',
+                    'message': 'No se pudo acceder al modelo de Informe de Actividad',
+                    'detalle': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        except InformeActividadPrincipal.DoesNotExist:
+            return Response(
+                {
+                    'error': 'Informe no encontrado',
+                    'message': f'No existe un Informe de Actividad Principal con ID {pk}'
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            import logging
+            logging.error(f"Error generando PDF: {e}", exc_info=True)
+            return Response(
+                {
+                    'error': 'Error interno del servidor',
+                    'message': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )              
