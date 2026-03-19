@@ -19,6 +19,7 @@ from .solicitud_reembolso_act_pei_pdf import SolicitudReembolsoActPeiPDFGenerato
 from .solicitud_reembolso_tarea_pei_pdf import SolicitudReembolsoTareaPeiPDFGenerator
 from .rendicion_cuentas_act_pei_pdf import RendicionCuentasActPeiPDFGenerator
 from .rendicion_cuentas_tarea_pei_pdf import RendicionCuentasTareaPeiPDFGenerator
+from .informe_actividad_pdf import InformeActividadPDFGenerator
 
 class PDFGeneratorFactory:
     """
@@ -46,6 +47,7 @@ class PDFGeneratorFactory:
         'SolicitudReembolsoTareaPei': SolicitudReembolsoTareaPeiPDFGenerator, 
         'RendicionCuentasActPei': RendicionCuentasActPeiPDFGenerator,
         'RendicionCuentasTareaPei': RendicionCuentasTareaPeiPDFGenerator,
+        'InformeActividadPrincipal': InformeActividadPDFGenerator,
     }
     
     @classmethod

@@ -622,4 +622,77 @@ class ReportesViewSet(viewsets.ViewSet):
             return response
             
         except Exception as e:
-            return Response({'error': str(e)}, status=500)                   
+            return Response({'error': str(e)}, status=500)     
+
+
+    @action(detail=False, methods=['get'], url_path='informe-actividad-principal/(?P<pk>[^/.]+)')
+    def informe_actividad_principal(self, request, pk=None):
+        """
+        Generar reporte de Informe de Actividad Principal
+        Incluye todas las validaciones asociadas del modelo ValidacionInformeActividad
+        """
+        try:
+            from spme_monitoreo.models import InformeActividadPrincipal
+            
+            # Validar ID
+            try:
+                informe_id = int(pk)
+            except ValueError:
+                return Response(
+                    {
+                        'error': 'ID inválido',
+                        'message': f'El ID "{pk}" no es un número válido',
+                        'codigo': 'INVALID_ID'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Obtener informe con relaciones precargadas
+            informe = get_object_or_404(
+                InformeActividadPrincipal.objects.select_related(
+                    'actividad',
+                    'actividad__responsable',
+                    'usuario'
+                ).prefetch_related(
+                    'validaciones',
+                    'validaciones__usuarioValidador'
+                ),
+                pk=informe_id
+            )
+            
+            # Logging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"Generando PDF para informe {informe_id}")
+            
+            # Generar PDF
+            response = PDFGeneratorFactory.generate_pdf(informe)
+            return response
+            
+        except ImportError as e:
+            return Response(
+                {
+                    'error': 'Error de configuración',
+                    'message': 'No se pudo acceder al modelo de Informe de Actividad',
+                    'detalle': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        except InformeActividadPrincipal.DoesNotExist:
+            return Response(
+                {
+                    'error': 'Informe no encontrado',
+                    'message': f'No existe un Informe de Actividad Principal con ID {pk}'
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            import logging
+            logging.error(f"Error generando PDF: {e}", exc_info=True)
+            return Response(
+                {
+                    'error': 'Error interno del servidor',
+                    'message': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )              

@@ -12,6 +12,7 @@ from .solicitud_pago_directo_tarea_pdf import SolicitudPagoDirectoTareaPDFGenera
 from .rendicion_cuentas_tarea_pdf import RendicionCuentasTareaPDFGenerator
 from .solicitud_fondos_act_pei_pdf import SolicitudFondosActPeiPDFGenerator
 from .solicitud_fondos_tarea_pei_pdf import SolicitudFondosTareaPeiPDFGenerator
+from .informe_actividad_pdf import InformeActividadPDFGenerator
 
 # Para uso directo
 PDFGeneratorService = PDFGeneratorFactory

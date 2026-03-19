@@ -1,0 +1,395 @@
+{% extends "spme_impresiones/base_template.html" %}
+
+{% block content %}
+<style>
+    .estado-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 7px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    .estado-pendiente { background-color: #ffc107; color: #333; }
+    .estado-aprobado { background-color: #28a745; color: white; }
+    .estado-rechazado { background-color: #dc3545; color: white; }
+    .validador-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        padding: 8px;
+        margin-bottom: 8px;
+        background-color: #fafafa;
+    }
+    .validador-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+    .validador-nombre { font-weight: bold; font-size: 9px; }
+    .validador-cargo { color: #666; font-size: 8px; }
+    .validador-detalle { font-size: 7px; color: #777; margin-top: 3px; }
+    .resumen-validaciones {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    .resumen-item {
+        flex: 1;
+        text-align: center;
+        padding: 8px;
+        border-radius: 4px;
+        background-color: #f8f9fa;
+    }
+    .resumen-numero { font-size: 16px; font-weight: bold; }
+    .resumen-etiqueta { font-size: 7px; color: #666; text-transform: uppercase; }
+</style>
+
+<!-- SECCIÓN 1: INFORMACIÓN GENERAL -->
+<div class="seccion compact-section">
+    <div class="seccion-titulo">📋 INFORMACIÓN GENERAL DEL INFORME PRINCIPAL</div>
+    <div class="grid-3">
+        <div class="campo">
+            <div class="etiqueta">N° de Informe Principal:</div>
+            <div class="valor"><strong>{{ numero_informe }}</strong></div>
+        </div>
+        <div class="campo">
+            <div class="etiqueta">Fecha de Ejecución:</div>
+            <div class="valor">{{ fecha_ejecucion }}</div>
+        </div>
+        <div class="campo">
+            <div class="etiqueta">Tipo de Reporte:</div>
+            <div class="valor">{{ reporte_tipo }}</div>
+        </div>
+    </div>
+    <div class="grid-2" style="margin-top: 10px;">
+        <div class="campo">
+            <div class="etiqueta">✍️ Redactor Principal:</div>
+            <div class="valor">
+                <span style="font-weight: bold;">{{ redactor_nombre }}</span>
+                {% if redactor_cargo %} - {{ redactor_cargo }}{% endif %}
+                <br><span style="font-size: 7px;">CI: {{ redactor_ci|default:"N/A" }}</span>
+            </div>
+        </div>
+        <div class="campo">
+            <div class="etiqueta">📅 Fecha de Generación:</div>
+            <div class="valor">{{ fecha_generacion }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- SECCIÓN 2: INFORMACIÓN DE LA ACTIVIDAD -->
+<div class="seccion compact-section">
+    <div class="seccion-titulo">🎯 INFORMACIÓN DE LA ACTIVIDAD PRINCIPAL</div>
+    <div class="grid-3">
+        <div class="campo">
+            <div class="etiqueta">Código:</div>
+            <div class="valor"><strong>{{ codigo_actividad }}</strong></div>
+        </div>
+        <div class="campo">
+            <div class="etiqueta">Nombre:</div>
+            <div class="valor texto-largo">{{ nombre_actividad }}</div>
+        </div>
+        <div class="campo">
+            <div class="etiqueta">Tipo:</div>
+            <div class="valor">{{ tipo_actividad }}</div>
+        </div>
+    </div>
+    <div class="grid-2">
+        <div class="campo">
+            <div class="etiqueta">Estado:</div>
+            <div class="valor">{{ estado_actividad }}</div>
+        </div>
+        <div class="campo">
+            <div class="etiqueta">Fecha Programada:</div>
+            <div class="valor">{{ fecha_programada }}</div>
+        </div>
+    </div>
+    <div class="campo">
+        <div class="etiqueta">Objetivo de la Actividad Principal:</div>
+        <div class="valor texto-largo">{{ objetivo_actividad }}</div>
+    </div>
+    <div class="campo">
+        <div class="etiqueta">Descripción de la Actividad Principal:</div>
+        <div class="valor texto-largo">{{ descripcion_actividad }}</div>
+    </div>
+    <div class="campo">
+        <div class="etiqueta">Informe del Objetivo Principal:</div>
+        <div class="valor texto-largo">{{ informe_objetivo }}</div>
+    </div>
+    <div class="grid-3">
+        <div class="campo">
+            <div class="etiqueta">Responsable:</div>
+            <div class="valor">{{ responsable_nombre }}</div>
+        </div>
+        <div class="campo">
+            <div class="etiqueta">Cargo:</div>
+            <div class="valor">{{ responsable_cargo }}</div>
+        </div>
+        <div class="campo">
+            <div class="etiqueta">CI:</div>
+            <div class="valor">{{ responsable_ci }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- SECCIÓN 3: CONTRIBUCIÓN AL PROYECTO -->
+{% if mostrar_seccion_contribucion %}
+<div class="seccion">
+    <div class="seccion-titulo">🌟 CONTRIBUCIÓN AL PROYECTO PRINCIPAL</div>
+    <table class="tabla">
+        <thead>
+            <tr>
+                <th>DESCRIPCIÓN</th>
+                <th>IMPACTO</th>
+                <th>NIVEL</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in contribucion_proyecto %}
+            <tr>
+                <td>{{ item.descripcion }}</td>
+                <td class="text-center">{{ item.impacto }}</td>
+                <td class="text-center">{{ item.nivel }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- SECCIÓN 4: AVANCE DE INDICADORES -->
+{% if mostrar_seccion_indicadores %}
+<div class="seccion">
+    <div class="seccion-titulo">📊 AVANCE DE INDICADORES PRINCIPALES</div>
+    <table class="tabla">
+        <thead>
+            <tr>
+                <th>INDICADOR</th>
+                <th>VALOR ESPERADO</th>
+                <th>VALOR ALCANZADO</th>
+                <th>% AVANCE</th>
+                <th>OBSERVACIONES</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for indicador in avance_indicadores %}
+            <tr>
+                <td>{{ indicador.nombre }}</td>
+                <td class="text-center">{{ indicador.valor_esperado }}</td>
+                <td class="text-center">{{ indicador.valor_alcanzado }}</td>
+                <td class="text-center">{{ indicador.porcentaje }}%</td>
+                <td>{{ indicador.observaciones }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- SECCIÓN 5: INFORMACIÓN CUANTITATIVA -->
+{% if mostrar_seccion_cuantitativa %}
+<div class="seccion">
+    <div class="seccion-titulo">📈 INFORMACIÓN CUANTITATIVA PRINCIPAL</div>
+    <table class="tabla">
+        <thead>
+            <tr>
+                <th>INDICADOR</th>
+                <th>VALOR</th>
+                <th>UNIDAD</th>
+                <th>PERIODO</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in informacion_cuantitativa %}
+            <tr>
+                <td>{{ item.indicador }}</td>
+                <td class="text-center">{{ item.valor }}</td>
+                <td class="text-center">{{ item.unidad }}</td>
+                <td class="text-center">{{ item.periodo }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- SECCIÓN 6: PRESUPUESTO -->
+<div class="seccion compact-section">
+    <div class="seccion-titulo">💰 EJECUCIÓN PRESUPUESTARIA PRINCIPAL</div>
+    <div class="grid-3">
+        <div class="campo">
+            <div class="etiqueta">Presupuesto Planificado:</div>
+            <div class="valor">Bs. {{ presupuesto_planificado|floatformat:2 }}</div>
+        </div>
+        <div class="campo">
+            <div class="etiqueta">Presupuesto Ejecutado:</div>
+            <div class="valor">Bs. {{ presupuesto_ejecutado|floatformat:2 }}</div>
+        </div>
+        <div class="campo">
+            <div class="etiqueta">% de Ejecución:</div>
+            <div class="valor">{{ porcentaje_ejecucion }}%</div>
+        </div>
+    </div>
+    
+    {% if mostrar_seccion_fondos %}
+    <div style="margin-top: 15px;">
+        <div class="etiqueta">PROCEDENCIA DE FONDOS:</div>
+        <table class="tabla">
+            <thead>
+                <tr>
+                    <th>FUENTE</th>
+                    <th>MONTO (Bs.)</th>
+                    <th>%</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fuente in procedencia_fondos %}
+                <tr>
+                    <td>{{ fuente.nombre }}</td>
+                    <td class="text-right">{{ fuente.monto|floatformat:2 }}</td>
+                    <td class="text-center">{{ fuente.porcentaje }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    
+    <div class="campo" style="margin-top: 15px;">
+        <div class="etiqueta">Observaciones:</div>
+        <div class="valor">{{ observaciones_presupuesto }}</div>
+    </div>
+</div>
+
+<!-- SECCIÓN 7: HERRAMIENTAS DE EVALUACIÓN -->
+{% if mostrar_seccion_herramientas %}
+<div class="seccion">
+    <div class="seccion-titulo">🔧 HERRAMIENTAS DE EVALUACIÓN PRINCIPALES</div>
+    <table class="tabla">
+        <thead>
+            <tr>
+                <th>HERRAMIENTA</th>
+                <th>DESCRIPCIÓN</th>
+                <th>FECHA</th>
+                <th>RESULTADOS</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for herramienta in herramientas_evaluacion %}
+            <tr>
+                <td>{{ herramienta.nombre }}</td>
+                <td>{{ herramienta.descripcion }}</td>
+                <td class="text-center">{{ herramienta.fecha_aplicacion }}</td>
+                <td>{{ herramienta.resultados }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- SECCIÓN 8: MEDIOS DE VERIFICACIÓN -->
+{% if medios_verificacion %}
+<div class="seccion">
+    <div class="seccion-titulo">📎 MEDIOS DE VERIFICACIÓN PRINCIPALES</div>
+    <ul style="margin: 5px 0; padding-left: 20px;">
+        {% for medio in medios_verificacion %}
+        <li class="texto-largo">{{ medio.descripcion }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<!-- SECCIÓN 9: COMENTARIOS -->
+{% if mostrar_seccion_comentarios %}
+<div class="seccion compact-section">
+    <div class="seccion-titulo">💬 COMENTARIOS Y RECOMENDACIONES PRINCIPALES</div>
+    <div class="valor texto-largo">{{ comentarios_recomendaciones }}</div>
+</div>
+{% endif %}
+
+<!-- SECCIÓN 10: VALIDACIONES -->
+{% if mostrar_seccion_validaciones %}
+<div class="seccion">
+    <div class="seccion-titulo">✅ VALIDACIONES DEL INFORME PRINCIPAL</div>
+    
+    <div class="resumen-validaciones">
+        <div class="resumen-item">
+            <div class="resumen-numero">{{ total_validaciones }}</div>
+            <div class="resumen-etiqueta">TOTAL</div>
+        </div>
+        <div class="resumen-item">
+            <div class="resumen-numero" style="color: #ffc107;">{{ validaciones_pendientes }}</div>
+            <div class="resumen-etiqueta">PENDIENTES</div>
+        </div>
+        <div class="resumen-item">
+            <div class="resumen-numero" style="color: #28a745;">{{ validaciones_aprobadas }}</div>
+            <div class="resumen-etiqueta">APROBADAS</div>
+        </div>
+        <div class="resumen-item">
+            <div class="resumen-numero" style="color: #dc3545;">{{ validaciones_rechazadas }}</div>
+            <div class="resumen-etiqueta">RECHAZADAS</div>
+        </div>
+    </div>
+    
+    {% for validador in validadores %}
+    <div class="validador-card">
+        <div class="validador-header">
+            <div>
+                <span class="validador-nombre">{{ validador.nombre }}</span>
+                <span class="validador-cargo"> - {{ validador.cargo }}</span>
+            </div>
+            <span class="estado-badge estado-{{ validador.estado|lower }}">{{ validador.estado_display }}</span>
+        </div>
+        <div class="validador-detalle">
+            <strong>CI:</strong> {{ validador.ci }} | 
+            <strong>Tipo:</strong> {{ validador.tipo }} | 
+            <strong>Código:</strong> {{ validador.codigo_seguimiento }} | 
+            <strong>Asignación:</strong> {{ validador.fecha_asignacion }}
+            {% if validador.fecha_resolucion != 'Pendiente' %}
+            | <strong>Resolución:</strong> {{ validador.fecha_resolucion }}
+            {% endif %}
+        </div>
+        {% if validador.comentarios != 'Sin comentarios' %}
+        <div style="margin-top: 5px; font-size: 7px;">{{ validador.comentarios }}</div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- SECCIÓN 11: FIRMAS -->
+<div class="seccion">
+    <div class="seccion-titulo">✍️ FIRMAS Y APROBACIONES PRINCIPALES</div>
+    <div class="firmas" style="grid-template-columns: repeat({{ validadores|length|add:1 }}, 1fr);">
+        <div class="firma-area">
+            <div class="linea-firma"></div>
+            <div class="nombre-firma">{{ redactor_nombre }}</div>
+            <div class="cargo-firma">Redactor Principal</div>
+        </div>
+        {% for validador in validadores %}
+        <div class="firma-area">
+            <div class="linea-firma"></div>
+            <div class="nombre-firma">{{ validador.nombre }}</div>
+            <div class="cargo-firma">{{ validador.tipo }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- SECCIÓN 12: METADATOS -->
+<div class="seccion compact-section">
+    <div class="seccion-titulo" style="background-color: #6c757d;">⚙️ METADATOS</div>
+    <div class="grid-2">
+        <div class="campo">
+            <div class="etiqueta">Fecha de Registro:</div>
+            <div class="valor">{{ fecha_registro }}</div>
+        </div>
+        <div class="campo">
+            <div class="etiqueta">Última Modificación:</div>
+            <div class="valor">{{ ultima_modificacion }}</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
