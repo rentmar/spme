@@ -695,4 +695,68 @@ class ReportesViewSet(viewsets.ViewSet):
                     'message': str(e)
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )              
+            )  
+
+    @action(detail=False, methods=['get'], url_path='informe-tarea-principal/(?P<pk>[^/.]+)')
+    def informe_tarea_principal(self, request, pk=None):
+        """
+        Generar reporte de Informe de Tarea Principal
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        try:
+            from spme_monitoreo.models import InformeTareaPrincipal
+            
+            # Validar ID
+            try:
+                informe_id = int(pk)
+            except ValueError:
+                return Response(
+                    {
+                        'error': 'ID inválido',
+                        'message': f'El ID "{pk}" no es un número válido'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            logger.info(f"Buscando informe de tarea con ID: {informe_id}")
+            
+            # CORRECCIÓN: Solo relaciones que existen
+            informe = get_object_or_404(
+                InformeTareaPrincipal.objects.select_related(
+                    'tarea',
+                    'tarea__actividad',  # Para acceder a la actividad
+                    'usuario'             # Usuario que creó el informe
+                ).prefetch_related(
+                    'validaciones',
+                    'validaciones__usuarioValidador'
+                ),
+                pk=informe_id
+            )
+            
+            logger.info(f"Informe de tarea encontrado: {informe.numeroInforme}")
+            
+            # Generar PDF
+            response = PDFGeneratorFactory.generate_pdf(informe)
+            logger.info(f"PDF generado exitosamente")
+            
+            return response
+            
+        except ImportError as e:
+            logger.error(f"Error de importación: {e}")
+            return Response(
+                {'error': 'Error de configuración', 'message': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        except InformeTareaPrincipal.DoesNotExist:
+            return Response(
+                {'error': f'Informe de tarea no encontrado con ID {pk}'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            logger.error(f"Error generando PDF: {e}", exc_info=True)
+            return Response(
+                {'error': 'Error interno', 'message': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

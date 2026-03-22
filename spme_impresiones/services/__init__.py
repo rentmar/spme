@@ -13,6 +13,7 @@ from .rendicion_cuentas_tarea_pdf import RendicionCuentasTareaPDFGenerator
 from .solicitud_fondos_act_pei_pdf import SolicitudFondosActPeiPDFGenerator
 from .solicitud_fondos_tarea_pei_pdf import SolicitudFondosTareaPeiPDFGenerator
 from .informe_actividad_pdf import InformeActividadPDFGenerator
+from .informe_tarea_pdf import InformeTareaPDFGenerator
 
 # Para uso directo
 PDFGeneratorService = PDFGeneratorFactory

@@ -178,6 +178,7 @@ router.register(r'informe-actividad-principal-crud', InformeActividadPrincipalCr
 #Actividades PEI
 router.register(r'actividades-pei', ActividadPeiViewModel, basename='actividades_pei')
 router.register(r'actividades-pei-principal', ActividadPeiPrincipalViewSet, basename='actividades_pei_principal')
+#Actividades de Proyecto
 
 urlpatterns =[
     #PEI
