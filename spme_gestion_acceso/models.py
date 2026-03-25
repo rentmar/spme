@@ -6,6 +6,7 @@ from .constants import NivelesAcceso
 from django.utils.timezone import now
 
 
+
 # ======================================
 # Usuario ↔ Instancia Gestora
 # ======================================

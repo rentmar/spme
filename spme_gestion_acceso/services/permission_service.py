@@ -70,11 +70,13 @@ class PermissionService:
         ).first()
         
         if permiso_especifico:
+            #Verificar si no expiro
             if permiso_especifico.fecha_expiracion and permiso_especifico.fecha_expiracion < timezone.now():
+                #Ha Expirado
                 resultado = (False, self.SIN_ACCESO)
                 cache.set(cache_key, {'acceso': False, 'nivel': self.SIN_ACCESO}, self.cache_timeout)
                 return resultado
-                
+
             resultado = (True, permiso_especifico.tipo_acceso)
             cache.set(cache_key, {'acceso': True, 'nivel': permiso_especifico.tipo_acceso}, self.cache_timeout)
             return resultado
@@ -91,7 +93,8 @@ class PermissionService:
             
         if nivel_minimo is None:
             nivel_minimo = self.LECTURA
-            
+
+        #Proyectos por instancia gestora    
         instancias_usuario = self.obtener_instancias_gestoras_usuario(usuario)
         instancias_con_nivel_suficiente = [
             ui.instancia_gestora_id for ui in instancias_usuario 
@@ -101,14 +104,24 @@ class PermissionService:
         proyectos_por_instancia = Proyecto.objects.filter(
             instancia_gestora__in=instancias_con_nivel_suficiente
         ).prefetch_related('instancia_gestora').distinct()
+
+        # 2. Proyectos por permisos especificos
+        from django.utils import timezone
         
+        #Obtener permisos activos con nivel suficiente
         permisos_activos = PermisoProyectoEspecifico.objects.filter(
-            usuario=usuario, activo=True, tipo_acceso__gte=nivel_minimo
-        ).exclude(
-            models.Q(fecha_expiracion__lt=timezone.now()) |
-            models.Q(fecha_expiracion__isnull=False)
+            usuario=usuario, 
+            activo=True, 
+            tipo_acceso__gte=nivel_minimo
         )
-        
+
+        #Excluir permisos que ya expiraron
+        # NO excluir todos los que tienen fecha (fecha_expiracion__isnull=False)
+        permisos_activos = permisos_activos.exclude(
+            fecha_expiracion__lt=timezone.now() 
+        )
+        # Los permisos con fecha_expiracion=None (sin fecha) se incluyen automáticamente
+        # Los permisos con fecha futura (fecha_expiracion > now) también se incluyen
         proyectos_por_permiso = Proyecto.objects.filter(
             permisos_usuarios_especificos__in=permisos_activos
         ).prefetch_related('instancia_gestora').distinct()

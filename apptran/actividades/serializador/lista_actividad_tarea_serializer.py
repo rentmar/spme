@@ -29,6 +29,7 @@ class ActividadConTareasSerializer(serializers.ModelSerializer):
             'id', 'codigo', 'nombreCorto', 'descripcion', 'estado', 'estado_display',
             'fecha_programada', 'fecha_inicio', 'fecha_cierre', 'presupuesto',
             'presupuestoGlobal', 'totalReportado', 'totalEjecutado', 'saldo',
-            'gradoEjecucion', 'responsable', 'responsable_info', 'tareas', 'estaInactiva'
+            'gradoEjecucion', 'responsable', 'responsable_info', 'tareas', 'estaInactiva', 
+            'proyecto',
         ]
         #depth = 1

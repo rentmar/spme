@@ -9,7 +9,7 @@ from ..services import PermissionService
 from spme_estructuracion_proyecto.models import Proyecto
 from spme_autenticacion.models import Usuario  # Asegúrate de importar tu modelo de Usuario
 from ..constants import NivelesAcceso
-
+ 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
 def obtener_permisos_usuario(request):
