@@ -8,6 +8,7 @@ __all__ = [
     'enviar_correo_prueba_sistema',
     'enviar_correo_solicitud_pendiente',
     'enviar_correo_solicitud_aprobada',
+    'enviar_correo_solicitud_rechazada',
 
     #Tareas periodicas
     'enviar_correo_prueba_beat', 

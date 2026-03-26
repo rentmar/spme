@@ -1,0 +1,153 @@
+{% extends "correos/base_correo.html" %}
+
+{% block title %}Solicitud Rechazada - SPME{% endblock %}
+
+{% block header_title %}
+    Solicitud Rechazada
+    <span class="badge badge-rechazado">RECHAZADA</span>
+{% endblock %}
+
+{% block header_subtitle %}Tu solicitud ha sido revisada{% endblock %}
+
+{% block content %}
+    <div class="alert alert-danger">
+        <strong>⚠️ Importante</strong><br>
+        Tu solicitud <strong>{{ solicitud_codigo }}</strong> ha sido <strong>rechazada</strong>.
+    </div>
+
+    <div class="email-message">
+        <p>Hola <strong>{{ nombre_solicitante }}</strong>,</p>
+        
+        <p>Lamentamos informarte que tu solicitud <strong>"{{ titulo_solicitud }}"</strong> 
+        ha sido <strong>rechazada</strong> por <strong>{{ nombre_revisor }}</strong>.</p>
+        
+        <p>El equipo de revisión ha evaluado tu solicitud y determinado que no cumple 
+        con los requisitos necesarios en este momento.</p>
+    </div>
+
+    <div class="email-details">
+        <h3 style="margin-top: 0; color: #721c24;">📋 Detalles del Rechazo</h3>
+        
+        <div class="detail-item">
+            <div class="detail-label">Código de solicitud:</div>
+            <div><strong>{{ solicitud_codigo }}</strong></div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">Título:</div>
+            <div>{{ titulo_solicitud }}</div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">Revisada por:</div>
+            <div>{{ nombre_revisor }}</div>
+        </div>
+        
+        <div class="detail-item">
+            <div class="detail-label">Fecha de revisión:</div>
+            <div>{{ fecha_revision|date:"d/m/Y H:i" }}</div>
+        </div>
+        
+        {% if motivo_rechazo %}
+        <div class="detail-item" style="flex-direction: column;">
+            <div class="detail-label" style="color: #dc3545;">Motivo del rechazo:</div>
+            <div style="margin-top: 5px; background-color: #f8f9fa; padding: 10px; border-radius: 4px; border-left: 4px solid #dc3545;">
+                {{ motivo_rechazo|linebreaks }}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if observaciones %}
+        <div class="detail-item" style="flex-direction: column;">
+            <div class="detail-label">Observaciones adicionales:</div>
+            <div style="margin-top: 5px; background-color: #f8f9fa; padding: 10px; border-radius: 4px;">
+                {{ observaciones|linebreaks }}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if sugerencias %}
+        <div class="detail-item" style="flex-direction: column;">
+            <div class="detail-label">💡 Sugerencias para mejorar:</div>
+            <div style="margin-top: 5px; background-color: #fff3cd; padding: 10px; border-radius: 4px; border-left: 4px solid #ffc107;">
+                {{ sugerencias|linebreaks }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <p>Para ver los detalles completos de la revisión:</p>
+        <a href="{{ url_detalles }}" class="email-button" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">
+            📄 Ir al formulario
+        </a>
+        
+        {% if url_reintentar %}
+        <p style="margin-top: 20px;">Puedes corregir los aspectos señalados y enviar una nueva solicitud:</p>
+        <a href="{{ url_reintentar }}" class="email-button" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);">
+            🔄 Reintentar Solicitud
+        </a>
+        {% endif %}
+        
+        {% if url_contacto_soporte %}
+        <p style="margin-top: 20px;">¿Necesitas más información?</p>
+        <a href="{{ url_contacto_soporte }}" class="email-button" style="background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);">
+            📧 Contactar Soporte
+        </a>
+        {% endif %}
+    </div>
+
+    <div style="margin-top: 30px; padding: 20px; background-color: #f8d7da; border-radius: 6px; border-left: 4px solid #dc3545;">
+        <h4 style="margin-top: 0; color: #721c24;">📋 Resumen de la revisión</h4>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #f5c6cb;"><strong>Estado actual:</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #f5c6cb;">
+                    <span style="color: #dc3545;">❌ Rechazado</span>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #f5c6cb;"><strong>Motivo principal:</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #f5c6cb;">
+                    {{ motivo_principal|default:"No cumple con los requisitos establecidos" }}
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #f5c6cb;"><strong>Puedes reintentar:</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #f5c6cb;">
+                    {% if puede_reintentar %}
+                        <span style="color: #28a745;">✅ Sí, corregir y enviar nuevamente</span>
+                    {% else %}
+                        <span style="color: #dc3545;">⏰ Debes esperar {{ tiempo_espera|default:"30" }} días</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% if fecha_reintento %}
+            <tr>
+                <td style="padding: 8px;"><strong>Fecha sugerida para reintentar:</strong></td>
+                <td style="padding: 8px;">
+                    📅 {{ fecha_reintento|date:"d/m/Y" }}
+                </td>
+            </tr>
+            {% endif %}
+        </table>
+    </div>
+
+    {% if puntos_mejora %}
+    <div style="margin-top: 25px; padding: 20px; background-color: #e7f3ff; border-radius: 6px;">
+        <h4 style="margin-top: 0; color: #004085;">🎯 Puntos a mejorar</h4>
+        <ul style="margin-bottom: 0;">
+            {% for punto in puntos_mejora %}
+            <li style="margin-bottom: 8px;">{{ punto }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div style="margin-top: 25px; text-align: center; color: #6c757d;">
+        <p style="font-size: 14px;">
+            Revisa los comentarios, realiza las mejoras sugeridas 
+            y vuelve a intentarlo.
+        </p>
+    </div>
+{% endblock %}

@@ -1,5 +1,6 @@
 """
 Servicio para los tres tipos específicos de correos
+spme/spme_mensajes/services/correos_especificos_service.py
 """
 import logging
 from django.utils import timezone
@@ -7,6 +8,7 @@ from ..tasks.correos_especificos import (
     enviar_correo_prueba_sistema,
     enviar_correo_solicitud_pendiente,
     enviar_correo_solicitud_aprobada,
+    enviar_correo_solicitud_rechazada,
 )
 
 logger = logging.getLogger(__name__)
@@ -280,4 +282,56 @@ class CorreosEspecificosService:
                 'success': False,
                 'error': str(e),
                 'resultados': []
+            }
+    
+    # En services/correos_especificos_service.py
+    @staticmethod
+    def notificar_solicitud_rechazada(emails_destinatarios, datos_rechazo, contexto_adicional=None):
+        """
+        Notifica el rechazo de una solicitud
+        
+        Args:
+            emails_destinatarios (str o list): Email(s) de destinatarios
+            datos_rechazo (dict): Datos del rechazo
+            contexto_adicional (dict): Contexto adicional
+        
+        Returns:
+            dict: Resultado con task_id
+        """
+        try:
+            logger.info(f"Programando notificación de solicitud rechazada")
+            
+            # Validar datos requeridos
+            if not datos_rechazo.get('codigo'):
+                raise ValueError("Se requiere código de solicitud")
+            
+            if not datos_rechazo.get('titulo'):
+                raise ValueError("Se requiere título de solicitud")
+            
+            if not datos_rechazo.get('solicitante_nombre'):
+                raise ValueError("Se requiere nombre del solicitante")
+            
+            # Enviar al task correspondiente
+            task = enviar_correo_solicitud_rechazada.delay(
+                destinatario=emails_destinatarios,
+                datos_rechazo=datos_rechazo,
+                contexto_adicional=contexto_adicional
+            )
+            
+            logger.info(f"✅ Notificación de solicitud rechazada programada: {task.id}")
+            
+            return {
+                'success': True,
+                'task_id': task.id,
+                'solicitud_codigo': datos_rechazo.get('codigo'),
+                'tipo': 'solicitud_rechazada',
+                'timestamp': timezone.now().isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"❌ Error programando notificación rechazo: {str(e)}")
+            return {
+                'success': False,
+                'error': str(e),
+                'solicitud_codigo': datos_rechazo.get('codigo', 'N/A')
             }

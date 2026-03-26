@@ -1,5 +1,6 @@
 """
 Vistas específicas para probar los tres tipos de correos
+spme/spme_mensajes/views/views_correos_especificos.py
 """
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -254,3 +255,99 @@ def prueba_correo_nuevo_mensaje(request):
             'success': False,
             'error': str(e)
         }, status=500)
+
+
+#Email de rechazo
+# En views/views_correos_especificos.py
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def correo_rechazo(request):
+    """
+    Endpoint para informar el rechazo de una solicitud
+    POST /api/mensajes/correos/solicitud-rechazada/
+    
+    Body:
+    {
+        "emails": ["solicitante@example.com", "interesado@example.com"],
+        "datos_rechazo": {
+            "codigo": "SOL-2024-001",
+            "titulo": "Solicitud de prueba",
+            "solicitante_nombre": "Juan Pérez",
+            "aprobador_nombre": "María González",
+            "motivo_rechazo": "No cumple con los requisitos",
+            "observaciones": "Falta documentación",
+            "sugerencias": "Revisar el manual",
+            "url_detalles": "http://localhost:8000/solicitudes/1",
+            "url_reintentar": "http://localhost:8000/solicitudes/1/reintentar",
+            "puede_reintentar": true,
+            "tiempo_espera": 15,
+            "puntos_mejora": ["Documentación", "Presupuesto"]
+        }
+    }
+    """
+    try:
+        # Capturar la información enviada
+        data = request.data
+        print("📨 Datos recibidos para rechazo:", data)
+
+        # Validar campo emails
+        if not data.get('emails'):
+            return Response({
+                'success': False,
+                'error': 'El campo emails es requerido'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validar campo datos_rechazo
+        if not data.get('datos_rechazo'):
+            return Response({
+                'success': False,
+                'error': 'El campo datos_rechazo es requerido'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        datos_rechazo = data['datos_rechazo']
+        
+        # Validar campos requeridos dentro de datos_rechazo
+        campos_requeridos = ['codigo', 'titulo', 'solicitante_nombre']
+        campos_faltantes = [campo for campo in campos_requeridos if not datos_rechazo.get(campo)]
+        
+        if campos_faltantes:
+            return Response({
+                'success': False,
+                'error': f'Campos requeridos faltantes en datos_rechazo: {", ".join(campos_faltantes)}'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Agregar valores por defecto si no existen
+        if not datos_rechazo.get('fecha_revision'):
+            datos_rechazo['fecha_revision'] = timezone.now()
+        
+        if not datos_rechazo.get('aprobador_nombre'):
+            datos_rechazo['aprobador_nombre'] = 'Sistema'
+        
+        # Llamar al servicio
+        resultado = CorreosEspecificosService.notificar_solicitud_rechazada(
+            emails_destinatarios=data['emails'],
+            datos_rechazo=datos_rechazo,
+            contexto_adicional=data.get('contexto_adicional', {})
+        )
+        
+        if resultado['success']:
+            return Response({
+                'success': True,
+                'message': 'Notificación de solicitud rechazada programada',
+                'task_id': resultado['task_id'],
+                'solicitud_codigo': resultado['solicitud_codigo'],
+                'tipo': 'solicitud_rechazada'
+            }, status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response({
+                'success': False,
+                'error': resultado.get('error')
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    except Exception as e:
+        print(f"❌ Error en correo_rechazo: {str(e)}")
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

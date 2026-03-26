@@ -1,5 +1,6 @@
 """
 Tareas específicas para los tres tipos de correos solicitados
+spme/spme_mensajes/tasks/correos_especificos.py
 """
 from celery import shared_task
 import logging
@@ -415,4 +416,150 @@ def enviar_correo_generico(destinatario, asunto_template, cuerpo_template, conte
         
     except Exception as e:
         logger.error(f"❌ Error enviando correo a {destinatario}: {str(e)}")
-        raise    
+        raise   
+
+
+
+# ============================================================================
+# 4. CORREO DE SOLICITUD RECHAZADA
+# ============================================================================
+
+@shared_task(
+    bind=True,
+    name="correo.enviar_solicitud_rechazada",
+    queue='correo',
+    priority=9,
+    routing_key='notificacion.correo.solicitud.rechazada'  # Corregido
+)
+def enviar_correo_solicitud_rechazada(self, destinatario, datos_rechazo, contexto_adicional=None):
+    """
+    Envía correo de solicitud rechazada
+    
+    Args:
+        destinatario (str o list): Email(s) del solicitante y otros interesados
+        datos_rechazo (dict): Datos del rechazo
+        contexto_adicional (dict): Contexto adicional para la plantilla
+    
+    Returns:
+        dict: Resultado del envío
+    """
+    task_id = self.request.id
+    
+    try:
+        # Convertir a lista si es un solo email
+        if isinstance(destinatario, str):
+            destinatarios = [destinatario]
+        else:
+            destinatarios = destinatario
+        
+        logger.info(f"[{task_id}] Enviando notificación de solicitud rechazada a {len(destinatarios)} destinatarios")
+        
+        # 1. Preparar contexto base
+        contexto_base = {
+            'app_url': getattr(settings, 'APP_URL', 'http://localhost:8000'),
+            'support_url': getattr(settings, 'SUPPORT_URL', 'mailto:soporte@spme.com'),
+            'privacy_url': getattr(settings, 'PRIVACY_URL', '#'),
+            'referencia_id': datos_rechazo.get('solicitud_codigo', f"REC-{task_id[:8].upper()}"),
+        }
+        
+        resultados = []
+        
+        # 2. Enviar a cada destinatario
+        for destinatario_email in destinatarios:
+            try:
+                # 3. Preparar contexto específico
+                contexto = contexto_base.copy()
+                contexto.update({
+                    'nombre_solicitante': datos_rechazo.get('solicitante_nombre', 'Solicitante'),
+                    'email': destinatario_email,
+                    'task_id': task_id,
+                    'fecha_envio': timezone.now(),
+                    
+                    # Datos del rechazo
+                    'solicitud_codigo': datos_rechazo.get('codigo', 'N/A'),
+                    'titulo_solicitud': datos_rechazo.get('titulo', 'Solicitud sin título'),
+                    'nombre_revisor': datos_rechazo.get('aprobador_nombre', 'Revisor'),
+                    'fecha_revision': datos_rechazo.get('fecha_revision', timezone.now()),
+                    'motivo_rechazo': datos_rechazo.get('motivo_rechazo', ''),
+                    'observaciones': datos_rechazo.get('observaciones', ''),
+                    'sugerencias': datos_rechazo.get('sugerencias', ''),
+                    'url_detalles': datos_rechazo.get('url_detalles', contexto_base['app_url']),
+                    'url_reintentar': datos_rechazo.get('url_reintentar'),
+                    'url_contacto_soporte': datos_rechazo.get('url_contacto_soporte', contexto_base['support_url']),
+                    'motivo_principal': datos_rechazo.get('motivo_principal'),
+                    'puede_reintentar': datos_rechazo.get('puede_reintentar', True),
+                    'tiempo_espera': datos_rechazo.get('tiempo_espera', 30),
+                    'fecha_reintento': datos_rechazo.get('fecha_reintento'),
+                    'puntos_mejora': datos_rechazo.get('puntos_mejora', []),
+                })
+                
+                # Agregar contexto adicional si se proporciona
+                if contexto_adicional:
+                    contexto.update(contexto_adicional)
+                
+                # 4. Renderizar plantilla HTML
+                html_content = render_to_string('correos/solicitud_rechazada.html', contexto)
+                text_content = strip_tags(html_content)
+                
+                # 5. Preparar asunto
+                asunto = f"❌ Solicitud Rechazada: {contexto['solicitud_codigo']} - {contexto['titulo_solicitud'][:50]}..."
+                if len(contexto['titulo_solicitud']) > 50:
+                    asunto = f"❌ Solicitud Rechazada: {contexto['solicitud_codigo']} - {contexto['titulo_solicitud'][:50]}..."
+                
+                # 6. Enviar correo
+                from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@spme.com')
+                
+                email = EmailMultiAlternatives(
+                    subject=asunto,
+                    body=text_content,
+                    from_email=from_email,
+                    to=[destinatario_email],
+                )
+                email.attach_alternative(html_content, "text/html")
+                email.send()
+                
+                logger.debug(f"[{task_id}] ✓ Notificación de rechazo enviada a {destinatario_email}")
+                
+                resultados.append({
+                    'destinatario': destinatario_email,
+                    'estado': 'enviado',
+                    'error': None
+                })
+                
+            except Exception as e:
+                error_msg = f"Error con destinatario {destinatario_email}: {str(e)}"
+                logger.warning(f"[{task_id}] ⚠️ {error_msg}")
+                
+                resultados.append({
+                    'destinatario': destinatario_email,
+                    'estado': 'error',
+                    'error': str(e)
+                })
+        
+        # 7. Calcular estadísticas
+        enviados = sum(1 for r in resultados if r['estado'] == 'enviado')
+        errores = sum(1 for r in resultados if r['estado'] == 'error')
+        
+        logger.info(f"[{task_id}] ✅ Notificaciones de solicitud rechazada: {enviados} enviados, {errores} errores")
+        
+        return {
+            'success': True,
+            'task_id': task_id,
+            'total_destinatarios': len(destinatarios),
+            'enviados': enviados,
+            'errores': errores,
+            'resultados': resultados,
+            'solicitud_codigo': datos_rechazo.get('codigo'),
+            'tipo': 'solicitud_rechazada',
+            'timestamp': timezone.now().isoformat()
+        }
+        
+    except Exception as e:
+        error_msg = f"Error en envío de solicitud rechazada: {str(e)}"
+        logger.error(f"[{task_id}] ❌ {error_msg}")
+        return {
+            'success': False,
+            'task_id': task_id,
+            'error': error_msg,
+            'tipo': 'solicitud_rechazada'
+        }
