@@ -50,7 +50,7 @@ class SolicitudFondosActPeiSimpleSerializer(serializers.ModelSerializer):
             'actividad_pei_info',
             'tarea_pei_info',
             'detalleDestinoFondos',
-            'datos_forma_pago'
+            'datos_forma_pago',
         ]
     
     def get_solicitante(self, obj):

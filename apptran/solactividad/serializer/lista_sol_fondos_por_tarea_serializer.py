@@ -28,7 +28,8 @@ class SolicitudFondosSerializer(serializers.ModelSerializer):
             'fechaRealizacionActividad',
             'bloquearIconosSolFondos',
             'actividad',
-            'tarea'
+            'tarea',
+            'detalleDestinoFondos',
         ]
     
     def get_solicitante(self, obj):

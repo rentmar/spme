@@ -33,7 +33,8 @@ class SolicitudFondosSimpleSerializer(serializers.ModelSerializer):
             'fechaRealizacionActividad',
             'bloquearIconosSolFondos',
             'actividad',
-            'tarea'  # Incluimos para verificar que sea null
+            'tarea',  # Incluimos para verificar que sea null
+            'detalleDestinoFondos',
         ]
     
     def get_solicitante(self, obj):

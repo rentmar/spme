@@ -496,7 +496,7 @@ class InformeActividad(models.Model):
         verbose_name = 'Informe Actividad'
         verbose_name_plural = 'Informes de Actividad'
 
- 
+
 #Informe de Actividades - Completo
 class InformeActividadBase(PolymorphicModel):
     numeroInforme = models.CharField(max_length=50, blank=True, null=True)
@@ -1416,7 +1416,5 @@ class InformeTareaPrincipalPei(InformeActividadBase):
 
     def __str__(self):
         return f"Informe {self.numeroInforme} - {self.tarea.codigo if self.tarea else 'Sin Tarea'}"    
-
-
 
 
