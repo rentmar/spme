@@ -427,7 +427,7 @@ class RendicionCuentas(models.Model):
         on_delete=models.SET_NULL,
         related_name='usuario_rendicion',
         null=True,
-        blank=True,
+        blank=True, 
     )
     #Solicitud
     solicitudFondos = models.ForeignKey(
@@ -1418,3 +1418,7 @@ class InformeTareaPrincipalPei(InformeActividadBase):
         return f"Informe {self.numeroInforme} - {self.tarea.codigo if self.tarea else 'Sin Tarea'}"    
 
 
+
+
+#Importar los modelos para vinculaciones
+from .modelos_vinculaciones import VinculacionSolicitudInforme

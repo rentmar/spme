@@ -1,5 +1,6 @@
 # spme_validaciones/views.py
 from rest_framework import viewsets, status
+from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -20,6 +21,7 @@ from ..serializers.validaciones_informes_actividad_subac_serializers import (
     HistorialValidacionSerializer,
     EstadoValidacionSerializer
 )
+from spme_monitoreo.models import InformeActividadPrincipal, InformeTareaPrincipal
 
 # -------------------------------------------------------------------
 # VIEWSET PARA VALIDACIONES
@@ -565,3 +567,246 @@ class ResetearValidacionesViewSet(viewsets.ViewSet):
             'documento_numero': getattr(documento, 'numeroInforme', ''),
             'nueva_version': nueva_version
         })
+
+
+class EstadoValidacionInformeAPIView(APIView):
+    """
+    Endpoint para verificar el estado de validación de un informe de actividad
+    
+    GET /api/informe-actividad/{informe_id}/estado-validacion/
+    
+    Respuesta:
+    {
+        "informe_id": 1,
+        "informe_numero": "IA-2026-001",
+        "estado": "APROBADO",  # APROBADO, RECHAZADO, PENDIENTE, SIN_VALIDACIONES
+        "estado_texto": "Aprobado",  # Texto amigable
+        "mensaje": "El informe ha sido aprobado por todos los validadores",
+        "detalle": {
+            "total_validadores": 2,
+            "aprobados": 2,
+            "rechazados": 0,
+            "pendientes": 0
+        },
+        "validaciones": [
+            {
+                "validador": "Juan Pérez",
+                "estado": "APROBADO",
+                "comentarios": "Todo correcto",
+                "fecha_resolucion": "2026-03-29T10:30:00Z"
+            }
+        ]
+    }
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, informe_id):
+        """
+        Obtener el estado de validación de un informe de actividad
+        """
+        #Obtener el informe
+        informe = get_object_or_404(InformeActividadPrincipal, id=informe_id)
+        # Obtener todas las validaciones del informe
+        validaciones = ValidacionInformeActividad.objects.filter(
+            informe=informe
+        ).select_related('usuarioValidador')
+
+        total = validaciones.count()
+
+        # Si no hay validaciones asignadas
+        if total == 0:
+            return Response({
+                'informe_id': informe.id,
+                'informe_numero': informe.numeroInforme,
+                'estado': 'SIN_VALIDACIONES',
+                'estado_texto': 'Sin validaciones asignadas',
+                'mensaje': 'No hay validadores asignados para este informe',
+                'detalle': {
+                    'total_validadores': 0,
+                    'aprobados': 0,
+                    'rechazados': 0,
+                    'pendientes': 0
+                },
+                'validaciones': []
+            })
+        
+        # Contar estados
+        aprobados = validaciones.filter(estado='APROBADO').count()
+        rechazados = validaciones.filter(estado='RECHAZADO').count()
+        pendientes = validaciones.filter(estado='PENDIENTE').count()
+
+        # Determinar estado consolidado
+        if rechazados > 0:
+            estado = 'RECHAZADO'
+            mensaje = f'El informe ha sido rechazado por {rechazados} validador(es)'
+        elif pendientes > 0:
+            estado = 'PENDIENTE'
+            mensaje = f'El informe está pendiente de validación por {pendientes} validador(es)'
+        elif aprobados == total:
+            estado = 'APROBADO'
+            mensaje = 'El informe ha sido aprobado por todos los validadores'
+        else:
+            estado = 'PARCIAL'
+            mensaje = f'El informe tiene {aprobados} aprobaciones de {total} validadores'
+        
+        # Mapeo de estados a texto amigable
+        estados_texto = {
+            'APROBADO': 'Aprobado',
+            'RECHAZADO': 'Rechazado',
+            'PENDIENTE': 'Pendiente',
+            'PARCIAL': 'Validación parcial',
+            'SIN_VALIDACIONES': 'Sin validaciones asignadas'
+        }
+
+        # Preparar lista de validaciones
+        validaciones_list = []
+        for v in validaciones:
+            validaciones_list.append({
+                'validador_id': v.usuarioValidador.id,
+                'validador': v.usuarioValidador.get_full_name() or v.usuarioValidador.username,
+                'estado': v.estado,
+                'estado_texto': v.get_estado_display(),
+                'comentarios': v.comentarios,
+                'fecha_asignacion': v.fechaAsignacion,
+                'fecha_resolucion': v.fechaResolucion,
+                'version_documento': v.versionDocumento
+            })
+
+        # Construir respuesta
+        return Response({
+            'informe_id': informe.id,
+            'informe_numero': informe.numeroInforme,
+            'estado': estado,
+            'estado_texto': estados_texto.get(estado, estado),
+            'mensaje': mensaje,
+            'detalle': {
+                'total_validadores': total,
+                'aprobados': aprobados,
+                'rechazados': rechazados,
+                'pendientes': pendientes
+            },
+            'validaciones': validaciones_list
+        }, status=status.HTTP_200_OK)
+
+
+class EstadoValidacionInformeTareaAPIView(APIView):
+    """
+    Endpoint para verificar el estado de validación de un informe de tarea
+    
+    GET /api/informe-tarea/{informe_id}/estado-validacion/
+    
+    Respuesta:
+    {
+        "informe_id": 1,
+        "informe_numero": "IT-2026-001",
+        "estado": "APROBADO",  # APROBADO, RECHAZADO, PENDIENTE, SIN_VALIDACIONES
+        "estado_texto": "Aprobado",
+        "mensaje": "El informe ha sido aprobado por todos los validadores",
+        "detalle": {
+            "total_validadores": 2,
+            "aprobados": 2,
+            "rechazados": 0,
+            "pendientes": 0
+        },
+        "validaciones": [
+            {
+                "validador": "María López",
+                "estado": "APROBADO",
+                "comentarios": "Trabajo excelente",
+                "fecha_resolucion": "2026-03-29T11:45:00Z"
+            }
+        ]
+    }
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, informe_id):
+        """
+        Obtener el estado de validación de un informe de tarea
+        """
+        # Obtener el informe de tarea
+        informe = get_object_or_404(InformeTareaPrincipal, id=informe_id)
+
+        # Obtener todas las validaciones del informe
+        validaciones = ValidacionInformeTarea.objects.filter(
+            informeTarea=informe
+        ).select_related('usuarioValidador')
+
+        total = validaciones.count()
+
+        # Si no hay validaciones asignadas
+        if total == 0:
+            return Response({
+                'informe_id': informe.id,
+                'informe_numero': informe.numeroInforme,
+                'tipo_informe': 'TAREA',
+                'estado': 'SIN_VALIDACIONES',
+                'estado_texto': 'Sin validaciones asignadas',
+                'mensaje': 'No hay validadores asignados para este informe de tarea',
+                'detalle': {
+                    'total_validadores': 0,
+                    'aprobados': 0,
+                    'rechazados': 0,
+                    'pendientes': 0
+                },
+                'validaciones': []
+            })
+        
+        # Contar estados
+        aprobados = validaciones.filter(estado='APROBADO').count()
+        rechazados = validaciones.filter(estado='RECHAZADO').count()
+        pendientes = validaciones.filter(estado='PENDIENTE').count()
+
+        # Determinar estado consolidado
+        if rechazados > 0:
+            estado = 'RECHAZADO'
+            mensaje = f'El informe de tarea ha sido rechazado por {rechazados} validador(es)'
+        elif pendientes > 0:
+            estado = 'PENDIENTE'
+            mensaje = f'El informe de tarea está pendiente de validación por {pendientes} validador(es)'
+        elif aprobados == total:
+            estado = 'APROBADO'
+            mensaje = 'El informe de tarea ha sido aprobado por todos los validadores'
+        else:
+            estado = 'PARCIAL'
+            mensaje = f'El informe de tarea tiene {aprobados} aprobaciones de {total} validadores'
+        
+        # Mapeo de estados a texto amigable
+        estados_texto = {
+            'APROBADO': 'Aprobado',
+            'RECHAZADO': 'Rechazado',
+            'PENDIENTE': 'Pendiente',
+            'PARCIAL': 'Validación parcial',
+            'SIN_VALIDACIONES': 'Sin validaciones asignadas'
+        }
+
+        # Preparar lista de validaciones
+        validaciones_list = []
+        for v in validaciones:
+            validaciones_list.append({
+                'validador_id': v.usuarioValidador.id,
+                'validador': v.usuarioValidador.get_full_name() or v.usuarioValidador.username,
+                'estado': v.estado,
+                'estado_texto': v.get_estado_display(),
+                'comentarios': v.comentarios,
+                'fecha_asignacion': v.fechaAsignacion,
+                'fecha_resolucion': v.fechaResolucion,
+                'version_documento': v.versionDocumento
+            })
+
+        # Construir respuesta
+        return Response({
+            'informe_id': informe.id,
+            'informe_numero': informe.numeroInforme,
+            'tipo_informe': 'TAREA',
+            'estado': estado,
+            'estado_texto': estados_texto.get(estado, estado),
+            'mensaje': mensaje,
+            'detalle': {
+                'total_validadores': total,
+                'aprobados': aprobados,
+                'rechazados': rechazados,
+                'pendientes': pendientes
+            },
+            'validaciones': validaciones_list
+        }, status=status.HTTP_200_OK)

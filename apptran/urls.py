@@ -108,6 +108,11 @@ from .informeactividadprincipal.views.listar_informes_por_idTarea_views import v
 from .informeactividadprincipal.views.crear_informe_tarea_principal_views import CrearInformeTareaView
 #Solicitude de viaje PEI
 from .monitoreo.views.obtener_solicitudes_viaje_pei_views import filtrar_solicitudes_viaje
+#Rendicion de cuentas
+from .solrendicioncuentas.views.rendicion_cuentas_mas_solicitudes_views import RendicionConSolicitudesDetailView
+
+#Vinculacion sol de viaje a informe de actividad
+from .informeactividadprincipal.views.vincular_solicitudes_viaje_a_informe_actividad_views import VinculacionInformeViewSet
 
 #PEI
 router = DefaultRouter()
@@ -179,6 +184,8 @@ router.register(r'informe-actividad-principal-crud', InformeActividadPrincipalCr
 router.register(r'actividades-pei', ActividadPeiViewModel, basename='actividades_pei')
 router.register(r'actividades-pei-principal', ActividadPeiPrincipalViewSet, basename='actividades_pei_principal')
 #Actividades de Proyecto
+#Vinculacion de sol de viaje a informe de actividad
+router.register(r'vinculacion-sv-iap', VinculacionInformeViewSet, basename='vinculacion_soldeviajes_infactividadprin')
 
 urlpatterns =[
     #PEI
@@ -329,6 +336,9 @@ urlpatterns =[
     path(r'verificar-informes-actividad-principal/<int:actividad_id>/', verificar_informe_actividad ),
     #Verificar si hay informes de tareas
     path(r'verificar-informes-tarea-principal/<int:tarea_id>/', verificar_informe_tarea),
+    #Rendicion con solicitudes relacionadas
+    path(r'rendicion-con-solicitudes/<int:pk>/', RendicionConSolicitudesDetailView.as_view(), name='rendicion-con-solicitudes-detalle'),
+
 ]
  
 urlpatterns += router.urls

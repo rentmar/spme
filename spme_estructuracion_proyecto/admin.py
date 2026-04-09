@@ -1,12 +1,12 @@
 from django.contrib import admin
 from .models import *
 from django.utils.html import format_html
-
+ 
 
 # Register your models here.
 admin.site.register(InstanciaGestora)
 admin.site.register(ProcedenciaFondos)
-admin.site.register(DiagramaEstructura)
+#admin.site.register(DiagramaEstructura)
 #admin.site.register(Proyecto)
 admin.site.register(IndicadorProyecto)
 #admin.site.register(IndicadorObjetivoGeneral)
@@ -832,3 +832,86 @@ class IndicadorResultadoObjEspecificoAdmin(admin.ModelAdmin):
     
     # Botones de guardado arriba
     save_on_top = True
+
+
+from django.contrib import admin
+from .models import ResultadoOG, ResultadoOE
+
+@admin.register(ResultadoOG)
+class ResultadoOGAdmin(admin.ModelAdmin):
+    list_display = ['id', 'codigo', 'descripcion_corta', 'objetivo_general']
+    list_filter = ['objetivo_general']
+    search_fields = ['codigo', 'descripcion']
+    list_editable = ['codigo']
+    list_per_page = 20
+    
+    fieldsets = (
+        ('Información del Resultado', {
+            'fields': ('codigo', 'descripcion', 'objetivo_general')
+        }),
+        ('Gestión de Riesgos', {
+            'fields': ('supuestos', 'riesgos'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def descripcion_corta(self, obj):
+        return obj.descripcion[:50] + '...' if len(obj.descripcion) > 50 else obj.descripcion
+    descripcion_corta.short_description = 'Descripción (resumen)'
+
+
+@admin.register(ResultadoOE)
+class ResultadoOEAdmin(admin.ModelAdmin):
+    list_display = ['id', 'codigo', 'descripcion_corta', 'objetivo_especifico']
+    list_filter = ['objetivo_especifico']
+    search_fields = ['codigo', 'descripcion']
+    list_editable = ['codigo']
+    list_per_page = 20
+    
+    fieldsets = (
+        ('Información del Resultado', {
+            'fields': ('codigo', 'descripcion', 'objetivo_especifico')
+        }),
+        ('Gestión de Riesgos', {
+            'fields': ('supuestos', 'riesgos'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def descripcion_corta(self, obj):
+        return obj.descripcion[:50] + '...' if len(obj.descripcion) > 50 else obj.descripcion
+    descripcion_corta.short_description = 'Descripción (resumen)'
+
+from django.contrib import admin
+from .models import DiagramaEstructura
+
+@admin.register(DiagramaEstructura)
+class DiagramaEstructuraAdmin(admin.ModelAdmin):
+    list_display = ['id', 'codigoProyecto', 'mostrar_id_proyecto', 'proyecto', 'sincronizado', 'creado']
+    list_filter = ['sincronizado', 'creado', 'actualizado']
+    search_fields = ['codigoProyecto', 'proyecto__titulo']
+    list_editable = ['sincronizado']
+    readonly_fields = ['creado', 'actualizado']
+    list_per_page = 20
+    
+    def mostrar_id_proyecto(self, obj):
+        if obj.proyecto:
+            return obj.proyecto.id
+        return "-"
+    mostrar_id_proyecto.short_description = 'ID Proyecto'
+    mostrar_id_proyecto.admin_order_field = 'proyecto__id'  # Permite ordenar por ID
+    
+    fieldsets = (
+        ('Información Básica', {
+            'fields': ('codigoProyecto', 'proyecto', 'sincronizado')
+        }),
+        ('Estructura del Diagrama', {
+            'fields': ('nodos', 'conexiones'),
+            'classes': ('wide',),
+            'description': 'Formato JSON para nodos y conexiones del diagrama'
+        }),
+        ('Auditoría', {
+            'fields': ('creado', 'actualizado'),
+            'classes': ('collapse',)
+        }),
+    )

@@ -21,6 +21,9 @@ from .models import (
     InformeTareaPrincipal,
     InformeActividadBase
 )
+
+from .modelos_vinculaciones import VinculacionSolicitudInforme
+
 from django.utils.html import format_html
 
 from django.contrib import admin
@@ -1241,3 +1244,102 @@ class SolicitudViajeAdmin(admin.ModelAdmin):
             'actividad',
             'tarea'
         )
+    
+
+# spme_monitoreo/admin.py
+from django.contrib import admin
+from .modelos_vinculaciones import VinculacionSolicitudInforme
+
+
+@admin.register(VinculacionSolicitudInforme)
+class VinculacionSolicitudInformeAdmin(admin.ModelAdmin):
+    """
+    Configuración simple del panel de administración para vinculaciones.
+    """
+    
+    # Campos visibles en la lista
+    list_display = [
+        'id',
+        'solicitud',
+        'informe',
+        'activa',
+        'fecha_vinculacion',
+        'usuario_vinculo'
+    ]
+    
+    # Filtros laterales
+    list_filter = [
+        'activa',
+        'fecha_vinculacion',
+        'usuario_vinculo'
+    ]
+    
+    # Campos de búsqueda
+    search_fields = [
+        'solicitud__numeroFormulario',
+        'solicitud__evento',
+        'informe__numeroInforme',
+        'usuario_vinculo__username',
+        'observaciones'
+    ]
+    
+    # Campos de solo lectura
+    readonly_fields = ['fecha_vinculacion']
+    
+    # Organización del formulario
+    fieldsets = (
+        ('Vinculación', {
+            'fields': ('solicitud', 'informe', 'activa', 'observaciones')
+        }),
+        ('Auditoría', {
+            'fields': ('fecha_vinculacion', 'usuario_vinculo'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    # Acciones personalizadas
+    actions = ['activar_seleccionadas', 'desactivar_seleccionadas']
+    
+    # Paginación
+    list_per_page = 20
+    
+    # Orden por defecto
+    ordering = ['-fecha_vinculacion']
+    
+    # ==================== ACCIONES ====================
+    
+    def activar_seleccionadas(self, request, queryset):
+        """Activar vinculaciones seleccionadas"""
+        count = 0
+        for vinculacion in queryset:
+            if not vinculacion.activa:
+                vinculacion.activa = True
+                vinculacion.save()
+                count += 1
+        self.message_user(request, f'{count} vinculaciones activadas.')
+    activar_seleccionadas.short_description = 'Activar vinculaciones seleccionadas'
+    
+    def desactivar_seleccionadas(self, request, queryset):
+        """Desactivar vinculaciones seleccionadas"""
+        count = 0
+        for vinculacion in queryset:
+            if vinculacion.activa:
+                vinculacion.activa = False
+                vinculacion.save()
+                count += 1
+        self.message_user(request, f'{count} vinculaciones desactivadas.')
+    desactivar_seleccionadas.short_description = 'Desactivar vinculaciones seleccionadas'
+    
+    # ==================== MÉTODOS ====================
+    
+    def save_model(self, request, obj, form, change):
+        """Al crear, asignar usuario actual"""
+        if not change:
+            obj.usuario_vinculo = request.user
+        super().save_model(request, obj, form, change)
+    
+    def get_queryset(self, request):
+        """Optimizar consultas"""
+        return super().get_queryset(request).select_related(
+            'solicitud', 'informe', 'usuario_vinculo'
+        )    

@@ -36,7 +36,6 @@ urlpatterns = [
     path(r'rendicion-cuentas-tarea-pei/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'rendicion_cuentas_tarea_pei'}), name='rendicion_cuentas_tarea_pei_pdf'),
     path(r'informe-actividad-principal/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'informe_actividad_principal'}), name='informe_actividad_principal_pdf'),
     path(r'informe-tarea-principal/<int:pk>/pdf/', ReportesViewSet.as_view({'get': 'informe_tarea_principal'}), name='informe_tarea_principal_pdf'),
-
 ] 
 
 urlpatterns += router.urls
