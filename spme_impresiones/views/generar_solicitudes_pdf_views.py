@@ -13,6 +13,7 @@ from spme_monitoreo.models import (
     SolicitudFondosActPei,
     SolicitudViajeActPei,
     SolicitudPagoDirectoActPei,
+    TareaActividad,
 )
 
 from ..services import (
@@ -758,5 +759,25 @@ class ReportesViewSet(viewsets.ViewSet):
             logger.error(f"Error generando PDF: {e}", exc_info=True)
             return Response(
                 {'error': 'Error interno', 'message': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+    @action(detail=False, methods=['get'], url_path='tarea-actividad/(?P<pk>[^/.]+)')
+    def tarea_actividad(self, request, pk=None):
+        """
+        Generar reporte PDF para TareaActividad (modelo independiente)
+        """
+        try:
+            tarea = get_object_or_404(TareaActividad, pk=pk)
+            response = PDFGeneratorFactory.generate_pdf(tarea)
+            return response        
+        except TareaActividad.DoesNotExist:
+            return Response(
+                {'error': f'TareaActividad con ID {pk} no encontrada'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {'error': f'Error al generar PDF: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

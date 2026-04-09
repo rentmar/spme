@@ -21,6 +21,7 @@ from .rendicion_cuentas_act_pei_pdf import RendicionCuentasActPeiPDFGenerator
 from .rendicion_cuentas_tarea_pei_pdf import RendicionCuentasTareaPeiPDFGenerator
 from .informe_actividad_pdf import InformeActividadPDFGenerator
 from .informe_tarea_pdf import InformeTareaPDFGenerator
+from .tarea_actividad_pdf import TareaActividadPDFGenerator
 
 class PDFGeneratorFactory:
     """
@@ -50,6 +51,7 @@ class PDFGeneratorFactory:
         'RendicionCuentasTareaPei': RendicionCuentasTareaPeiPDFGenerator,
         'InformeActividadPrincipal': InformeActividadPDFGenerator,
         'InformeTareaPrincipal': InformeTareaPDFGenerator, 
+        'TareaActividad': TareaActividadPDFGenerator,
     }
     
     @classmethod
