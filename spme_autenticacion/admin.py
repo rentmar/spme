@@ -6,13 +6,42 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django import forms
 from .models import Usuario
 
+#Definir los cargos
+CARGOS_PREDEFINIDOS = [
+    ('', '--------- Seleccione un cargo ---------'),
+    ('admin', 'admin - Usuario Administrador del sistema'),
+    ('coordinador', 'coordinador'),
+    ('tecnico', 'tecnico'),
+    ('contable', 'contable'),
+    ('dir-administrativo', 'dir-administrativo direccion administrativa'),
+]
+
+
 # Formularios personalizados para validación
 class UsuarioCreacionForm(UserCreationForm):
+    cargo = forms.ChoiceField(
+        choices=CARGOS_PREDEFINIDOS,
+        required=False,
+        label='Cargo',
+        widget=forms.Select(attrs={
+            'class': 'custom-select',
+            'style': 'width: 100%;',
+        })
+    )
     class Meta:
         model = Usuario
         fields = ('username', 'nombre', 'paterno', 'materno', 'ci', 'correo', 'cargo', 'permisos')
 
 class UsuarioCambioForm(UserChangeForm):
+    cargo = forms.ChoiceField(
+        choices=CARGOS_PREDEFINIDOS,
+        required=False,
+        label='Cargo',
+        widget=forms.Select(attrs={
+            'class': 'custom-select',
+            'style': 'width: 100%;',
+        })
+    )
     class Meta:
         model = Usuario
         fields = '__all__'
