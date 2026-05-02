@@ -10,7 +10,8 @@ from django.core.exceptions import ValidationError
 from spme_monitoreo.modelos_vinculaciones import VinculacionSolicitudInforme
 from spme_monitoreo.models import (
     SolicitudViaje, 
-    InformeActividadPrincipal
+    InformeActividadPrincipal,
+    TareaActividad,
     )
 
 from ..serializers.vincular_solicitudes_viaje_a_informe_actividad_serializer import (
@@ -57,9 +58,15 @@ class VinculacionInformeViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(solicitud_id=solicitud_id)
         
         # Filtro por estado activo
+        # activa = self.request.query_params.get('activa')
+        # if activa is not None:
+        #     queryset = queryset.filter(activa=activa.lower() == 'true')
         activa = self.request.query_params.get('activa')
         if activa is not None:
-            queryset = queryset.filter(activa=activa.lower() == 'true')
+            if activa.lower() == 'true':
+                queryset = queryset.filter(activa=True)
+            elif activa.lower() == 'false':
+                queryset = queryset.filter(activa=False)
         
         # Filtro por usuario
         usuario_id = self.request.query_params.get('usuario_id')
@@ -131,7 +138,12 @@ class VinculacionInformeViewSet(viewsets.ModelViewSet):
             validacionResponsable=True
         ).exclude(
             id__in=solicitudes_vinculadas  # Regla R1: Sin vinculación activa
-        )
+        ).select_related(
+            'actividad',      # ← Agregar
+            'tarea',          # ← Agregar
+            #'responsable',    # ← Agregar (opcional)
+            #'coordinador'     # ← Agregar (opcional)
+        ).order_by('-fechaSolicitud')
 
         #Filtro: por tipo de ralacion (actividad/tarea)
         if(tipo_solicitud) == 'solo_actividad':
@@ -205,6 +217,16 @@ class VinculacionInformeViewSet(viewsets.ModelViewSet):
         solicitud_id = validator.validated_data['solicitud_id']
         informe_id = validator.validated_data['informe_id']
         observaciones = validator.validated_data.get('observaciones', '')
+
+        #Verificar duplicados
+        if VinculacionSolicitudInforme.objects.filter(
+            solicitud_id=solicitud_id,
+            activa=True
+        ).exists:
+            return Response(
+                {'error': 'Esta solicitud ya tiene una vinculación activa'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         # Obtener objetos
         solicitud = get_object_or_404(SolicitudViaje, id=solicitud_id)
@@ -314,7 +336,8 @@ class VinculacionInformeViewSet(viewsets.ModelViewSet):
             'historial': serializer.data
         })
     
-    @action(detail=False, methods=['get'], url_path='por-informe/(?P<informe_id>[^/.]+)')
+    # @action(detail=False, methods=['get'], url_path='por-informe/(?P<informe_id>[^/.]+)')
+    @action(detail=False, methods=['get'], url_path='por-informe/(?P<informe_id>[0-9]+)')
     def por_informe(self, request, informe_id=None):
         """
         Obtener todas las vinculaciones de un informe específico.

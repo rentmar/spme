@@ -49,5 +49,7 @@ urlpatterns = [
     path('api-print/', include('spme_impresiones.urls')),
     #Api para valida
     path('api-valid/', include('spme_validaciones.urls')),
+    #Api Reportes pei
+    path('api-peirep/', include('spme_pei_reportes.urls')),
 ]
 
