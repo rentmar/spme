@@ -1,0 +1,36 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<p>Hola <strong>{{ entidad.responsable.get_full_name|default:entidad.responsable.nombre }}</strong>,</p>
+
+<div class="warning-box">
+    <p><strong>👁️ Informe con observaciones</strong></p>
+    <p>El informe de <strong>{{ tipo }}</strong> ha sido revisado y tiene <strong>observaciones pendientes</strong> por parte de <strong>{{ validador.get_full_name|default:validador.nombre }}</strong>.</p>
+    
+    <table class="info-table">
+        <tr>
+            <td>Código:</td>
+            <td><strong>{{ entidad.codigo }}</strong></td>
+        </tr>
+        <tr>
+            <td>Nombre:</td>
+            <td>{{ entidad.nombreCorto|default:entidad.titulo }}</td>
+        </tr>
+        <tr>
+            <td>Fecha de revisión:</td>
+            <td>{{ fecha|date:"d/m/Y H:i" }}</td>
+        </tr>
+    </table>
+    
+    <p><strong>📝 Observaciones del validador:</strong></p>
+    <p style="background: white; padding: 10px; border-radius: 5px; margin-top: 10px;">{{ observaciones|linebreaks }}</p>
+</div>
+
+<p>Por favor, realice las correcciones solicitadas y vuelva a enviar el informe.</p>
+
+<div style="text-align: center;">
+    <a href="{{ enlace_actividad }}" class="button">✏️ Corregir y Reenviar</a>
+</div>
+
+<p>Una vez realizadas las correcciones, el informe será revisado nuevamente.</p>
+{% endblock %}

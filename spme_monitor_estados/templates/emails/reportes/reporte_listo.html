@@ -1,0 +1,49 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<p>Hola <strong>{{ usuario.nombre }} {{ usuario.paterno|default:'' }}</strong>,</p>
+
+<div class="success-box">
+    <p><strong>📄 ¡Tu reporte está listo!</strong></p>
+    <p>El reporte que solicitaste ha sido generado exitosamente.</p>
+    
+    <table class="info-table">
+        <tr>
+            <td>Nombre del reporte:</td>
+            <td><strong>{{ reporte_nombre }}</strong></td>
+        </tr>
+        <tr>
+            <td>Formato:</td>
+            <td>{{ formato }}</td>
+        </tr>
+        <tr>
+            <td>Fecha de generación:</td>
+            <td>{{ fecha|date:"d/m/Y H:i" }}</td>
+        </tr>
+        <tr>
+            <td>Tamaño aproximado:</td>
+            <td>{{ tamano|default:"Desconocido" }}</td>
+        </tr>
+        <tr>
+            <td>Validez del enlace:</td>
+            <td>{{ validez_dias|default:7 }} días  
+        </tr>
+    </table>
+</div>
+
+<div style="text-align: center;">
+    <a href="{{ enlace_descarga }}" class="button">📥 Descargar Reporte</a>
+</div>
+
+<div class="warning-box">
+    <p><strong>⚠️ Importante:</strong></p>
+    <ul>
+        <li>El enlace de descarga expirará en {{ validez_dias|default:7 }} días</li>
+        <li>El reporte contiene información confidencial</li>
+        <li>No compartas este enlace con personas no autorizadas</li>
+        <li>Máximo {{ limite_descargas|default:5 }} descargas permitidas</li>
+    </ul>
+</div>
+
+<p>Si tienes problemas para descargar, contacta al administrador.</p>
+{% endblock %}

@@ -300,7 +300,7 @@ def procesar_actividades(config):
     Versión 2.1 - Reglas CRD y PLAN con emails
     """
 
-     # ===== LOGS DE VERIFICACIÓN =====
+    #===== LOGS DE VERIFICACIÓN =====
     print("🔴🔴🔴 DEPURACIÓN: procesar_actividades() SÍ se está ejecutando 🔴🔴🔴")
     logger.info("🔴🔴🔴 DEPURACIÓN: procesar_actividades() SÍ se está ejecutando 🔴🔴🔴")
     print(f"📌 Config recibida: {config}")

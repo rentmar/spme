@@ -1,0 +1,45 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<p>Hola <strong>Administrador</strong>,</p>
+
+<div class="error-box">
+    <p><strong>🔥 Error crítico del sistema</strong></p>
+    <p>Se ha detectado un error en el sistema que requiere atención inmediata.</p>
+    
+    <table class="info-table">
+        <tr>
+            <td>Tipo de error:</td>
+            <td><code>{{ error|truncatechars:100 }}</code></td>
+        </tr>
+        <tr>
+            <td>Fecha y hora:</td>
+            <td>{{ fecha_error|date:"d/m/Y H:i:s" }}</td>
+        </tr>
+        <tr>
+            <td>Contexto:</td>
+            <td>{{ contexto|truncatechars:200 }}</td>
+        </tr>
+        <tr>
+            :Módulo:</td>
+            <td>{{ modulo|default:"No especificado" }}</td>
+        </tr>
+    </table>
+</div>
+
+{% if traceback %}
+<div class="info-box">
+    <p><strong>📋 Traceback:</strong></p>
+    <pre style="background: #f4f4f4; padding: 10px; overflow-x: auto; font-size: 11px;">{{ traceback|truncatechars:500 }}</pre>
+</div>
+{% endif %}
+
+<p>Por favor, revise los logs del sistema para más detalles.</p>
+
+<div style="text-align: center;">
+    <a href="{{ enlace_logs }}" class="button">🔍 Revisar Logs</a>
+    <a href="{{ enlace_reintentar }}" class="button button-ver">🔄 Reintentar Operación</a>
+</div>
+
+<p>Si el error persiste, contacte al equipo de desarrollo.</p>
+{% endblock %}

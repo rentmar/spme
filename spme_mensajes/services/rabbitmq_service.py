@@ -1,3 +1,4 @@
+# services/rabbitmq_service.py
 import json
 import logging
 import pika

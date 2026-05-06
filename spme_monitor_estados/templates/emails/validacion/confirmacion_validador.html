@@ -1,0 +1,37 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<p>Hola <strong>{{ validador.get_full_name|default:validador.username }}</strong>,</p>
+
+<div class="info-box">
+    <p><strong>✅ Acción registrada</strong></p>
+    <p>Ha <strong>{{ accion_texto }}</strong> el informe de {{ tipo }}:</p>
+    
+    <table class="info-table">
+        <tr>
+            <td>Código:</td>
+            <td><strong>{{ entidad.codigo }}</strong></td>
+        </tr>
+        <tr>
+            <td>Nombre:</td>
+            <td>{{ entidad.nombreCorto|default:entidad.titulo }}</td>
+        </tr>
+        <tr>
+            <td>Responsable:</td>
+            <td>{{ entidad.responsable.get_full_name|default:entidad.responsable.nombre|default:'No asignado' }}</td>
+        </tr>
+        <tr>
+            <td>Fecha:</td>
+            <td>{{ fecha|date:"d/m/Y H:i" }}</td>
+        </tr>
+    </table>
+</div>
+
+<div style="text-align: center;">
+    <a href="{{ enlace_ver_detalle }}" class="button">🔍 Ver Informe</a>
+</div>
+
+<p>El responsable ha sido notificado de esta acción.</p>
+
+<p>Gracias por su colaboración.</p>
+{% endblock %}

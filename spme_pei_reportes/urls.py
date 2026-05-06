@@ -5,6 +5,7 @@ from .views.objetivo_report_view import objetivo_report_word
 from .views.factor_report_view import factor_report_word
 from .views.indicador_report_view import indicador_report_word
 from .views.reporte_encadenado_view import reporte_encadenado_word
+from .views.pei_arbol_view import pei_arbol_json
 
 app_name = 'spme_pei_reportes'
 
@@ -15,4 +16,5 @@ urlpatterns = [
     path(r'factor/<int:factor_id>/word/', factor_report_word, name='factor-report-word'),
     path(r'indicador/<int:indicador_id>/word/', indicador_report_word, name='indicador-report-word'),
     path(r'encadenado/<str:tipo>/<int:elemento_id>/word/', reporte_encadenado_word, name='reporte-encadenado-word'),
+    path(r'arbol/<str:tipo>/<int:elemento_id>/json/', pei_arbol_json, name='pei-arbol-json'),
 ]

@@ -1,3 +1,4 @@
+# serializers/eliminar_mensajes_serializer.py
 from rest_framework import serializers
 from ..models import MensajeUsuario
 

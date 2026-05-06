@@ -1,4 +1,5 @@
 #serializers.py
+# serializers/mensaje_automatico_sistema_serializer.py
 from rest_framework import serializers
 from spme_autenticacion.models import Usuario
 from spme_mensajes.models import MensajeUsuario

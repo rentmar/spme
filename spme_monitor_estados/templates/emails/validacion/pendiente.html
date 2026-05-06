@@ -1,0 +1,54 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<p>Hola <strong>{{ validador.get_full_name|default:validador.username }}</strong>,</p>
+
+<div class="info-box">
+    <p><strong>📝 Nuevo informe pendiente de revisión</strong></p>
+    
+    <table class="info-table">
+        <tr>
+            <td>Tipo:</td>
+            <td>{{ tipo|title }}</td>
+        </tr>
+        <tr>
+            <td>Código:</td>
+            <td><strong>{{ entidad.codigo }}</strong></td>
+        </tr>
+        <tr>
+            <td>Nombre:</td>
+            <td>{{ entidad.nombreCorto|default:entidad.titulo }}</td>
+        </tr>
+        <tr>
+            <td>Responsable:</td>
+            <td>{{ entidad.responsable.get_full_name|default:entidad.responsable.nombre|default:'No asignado' }}</td>
+        </tr>
+        <tr>
+            <td>Fecha de creación:</td>
+            <td>{{ informe.fecha_creacion|date:"d/m/Y H:i" }}</td>
+        </tr>
+    </table>
+</div>
+
+<p>Seleccione una acción:</p>
+
+<div class="botones-accion">
+    {% if enlace_aprobacion %}
+    <a href="{{ enlace_aprobacion }}" class="button button-aprobar">✅ Aprobar Informe</a>
+    {% endif %}
+    
+    {% if enlace_rechazo %}
+    <a href="{{ enlace_rechazo }}" class="button button-rechazar">❌ Rechazar Informe</a>
+    {% endif %}
+    
+    {% if enlace_observacion %}
+    <a href="{{ enlace_observacion }}" class="button button-observar">👁️ Hacer Observaciones</a>
+    {% endif %}
+</div>
+
+<div style="text-align: center;">
+    <a href="{{ enlace_ver_detalle }}" class="button button-ver">🔍 Ver Detalle Completo</a>
+</div>
+
+<p>Gracias por su colaboración.</p>
+{% endblock %}

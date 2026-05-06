@@ -1,0 +1,44 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<p>Hola <strong>{{ usuario.nombre }} {{ usuario.paterno|default:'' }}</strong>,</p>
+
+<div class="warning-box">
+    <p><strong>💻 Nuevo inicio de sesión detectado</strong></p>
+    <p>Se ha iniciado sesión en su cuenta desde un nuevo dispositivo.</p>
+    
+    <table class="info-table">
+        <tr>
+            <td>Dispositivo:</td>
+            <td>{{ dispositivo|default:"Desconocido" }}</td>
+        </tr>
+        <tr>
+            <td>Dirección IP:</td>
+            <td>{{ ip_address|default:"Desconocida" }}</td>
+        </tr>
+        {% if ubicacion %}
+        <tr>
+            <td>Ubicación aproximada:</td>
+            <td>{{ ubicacion }}</td>
+        </tr>
+        {% endif %}
+        <tr>
+            <td>Fecha y hora:</td>
+            <td>{{ fecha_login|date:"d/m/Y H:i" }}</td>
+        </tr>
+    </table>
+</div>
+
+<div class="success-box">
+    <p><strong>✅ ¿Fue usted?</strong></p>
+    <p>Si reconoce este inicio de sesión, no necesita hacer nada.</p>
+</div>
+
+<div class="error-box">
+    <p><strong>❌ ¿No fue usted?</strong></p>
+    <p>Si no reconoce esta actividad, su cuenta puede estar comprometida.</p>
+    <p><a href="{{ enlace_cambio_password }}" class="button button-rechazar">🔒 Cambiar Contraseña Ahora</a></p>
+</div>
+
+<p>Por su seguridad, le recomendamos cambiar su contraseña periódicamente.</p>
+{% endblock %}

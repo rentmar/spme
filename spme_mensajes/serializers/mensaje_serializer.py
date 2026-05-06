@@ -1,3 +1,4 @@
+#serializers/mensaje_serializer.py
 """
 Serializers para el sistema de mensajería interna
 """

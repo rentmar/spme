@@ -1,0 +1,48 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<p>Hola <strong>{{ tarea.responsable.get_full_name|default:tarea.responsable.nombre }}</strong>,</p>
+
+<div class="success-box">
+    <p><strong>📋 Nueva tarea asignada</strong></p>
+    <p>Se te ha asignado una nueva tarea:</p>
+    
+    <table class="info-table">
+        <tr>
+            <td>Código:</td>
+            <td><strong>{{ tarea.codigo }}</strong></td>
+        </tr>
+        <tr>
+            <td>Título:</td>
+            <td>{{ tarea.titulo }}</td>
+        </tr>
+        <tr>
+            <td>Asignada por:</td>
+            <td>{{ asignador.get_full_name|default:asignador.nombre }}</td>
+        </tr>
+        <tr>
+            <td>Fecha límite:</td>
+            <td>{{ tarea.fecha_limite|date:"d/m/Y" }}</td>
+        </tr>
+        <tr>
+            <td>Prioridad:</td>
+            <td>{{ tarea.get_prioridad_display|default:"Media" }}</td>
+        </tr>
+        <tr>
+            <td>Actividad asociada:</td>
+            <td>{{ tarea.actividad.codigo|default:"No aplica" }}</td>
+        </tr>
+    </table>
+    
+    {% if mensaje %}
+    <p><strong>📝 Mensaje del asignador:</strong></p>
+    <p style="background: white; padding: 10px; border-radius: 5px;">{{ mensaje|linebreaks }}</p>
+    {% endif %}
+</div>
+
+<div style="text-align: center;">
+    <a href="{{ enlace_tarea }}" class="button">✅ Ver y Completar Tarea</a>
+</div>
+
+<p>Por favor, confirma la recepción de esta tarea a la brevedad.</p>
+{% endblock %}

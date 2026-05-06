@@ -1,0 +1,53 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<p>Hola <strong>{{ usuario.nombre }} {{ usuario.paterno|default:'' }}</strong>,</p>
+
+<div class="info-box">
+    <p><strong>📅 Resumen Semanal - Semana {{ semana }}</strong></p>
+    <p>Este es tu resumen de actividades y tareas pendientes:</p>
+</div>
+
+{% if actividades_pendientes %}
+<div class="warning-box">
+    <p><strong>📋 Actividades Pendientes ({{ total_actividades }})</strong></p>
+    <ul>
+        {% for actividad in actividades_pendientes|slice:":5" %}
+        <li><strong>{{ actividad.codigo }}</strong> - {{ actividad.nombreCorto }}</li>
+        {% endfor %}
+        {% if total_actividades > 5 %}
+        <li>... y {{ total_actividades|add:"-5" }} más</li>
+        {% endif %}
+    </ul>
+    <a href="{{ enlace_actividades }}">Ver todas las actividades →</a>
+</div>
+{% endif %}
+
+{% if tareas_pendientes %}
+<div class="warning-box">
+    <p><strong>✅ Tareas Pendientes ({{ total_tareas }})</strong></p>
+    <ul>
+        {% for tarea in tareas_pendientes|slice:":5" %}
+        <li><strong>{{ tarea.codigo }}</strong> - {{ tarea.titulo }}</li>
+        {% endfor %}
+        {% if total_tareas > 5 %}
+        <li>... y {{ total_tareas|add:"-5" }} más</li>
+        {% endif %}
+    </ul>
+    <a href="{{ enlace_tareas }}">Ver todas las tareas →</a>
+</div>
+{% endif %}
+
+{% if not actividades_pendientes and not tareas_pendientes %}
+<div class="success-box">
+    <p><strong>🎉 ¡Excelente trabajo!</strong></p>
+    <p>No tienes actividades ni tareas pendientes esta semana.</p>
+</div>
+{% endif %}
+
+<div style="text-align: center;">
+    <a href="{{ enlace_dashboard }}" class="button">📊 Ir al Dashboard</a>
+</div>
+
+<p>Mantente al día con tus responsabilidades. ¡Buen trabajo!</p>
+{% endblock %}

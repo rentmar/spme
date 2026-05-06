@@ -1,0 +1,45 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<div class="info-box">
+    <p><strong>🔧 Mantenimiento programado del sistema</strong></p>
+    <p>El sistema {{ nombre_sistema }} estará en mantenimiento por mejoras.</p>
+    
+    <table class="info-table">
+        <tr>
+            <td>📅 Fecha de inicio:</td>
+            <td><strong>{{ fecha_inicio|date:"d/m/Y H:i" }}</strong></td>
+        </tr>
+        <tr>
+            <td>⏰ Fecha de fin:</td>
+            <td><strong>{{ fecha_fin|date:"d/m/Y H:i" }}</strong></td>
+        </tr>
+        <tr>
+            <td>⚙️ Motivo:</td>
+            <td>{{ razon }}</td>
+        </tr>
+        <tr>
+            <td>⏱️ Duración estimada:</td>
+            <td>{{ duracion_estimada|default:"2 horas" }}</td>
+        </tr>
+    </table>
+</div>
+
+<div class="warning-box">
+    <p><strong>⚠️ Durante el mantenimiento:</strong></p>
+    <ul>
+        <li>El sistema no estará disponible</li>
+        <li>No se perderán datos</li>
+        <li>Los procesos programados se ejecutarán al finalizar</li>
+        <li>Las notificaciones se enviarán después del mantenimiento</li>
+    </ul>
+</div>
+
+<p>Disculpe las molestias. Estamos trabajando para mejorar su experiencia.</p>
+
+<div style="text-align: center;">
+    <a href="{{ enlace_estado }}" class="button">📊 Ver Estado del Sistema</a>
+</div>
+
+<p>Para más información, visite nuestra página de estado.</p>
+{% endblock %}

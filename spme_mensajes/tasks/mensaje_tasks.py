@@ -1,4 +1,5 @@
 #Tareas Celery para procesamiento de mensajes de usuarios
+# tasks/mensaje_tasks.py
 from celery import shared_task
 import logging
 import json

@@ -1,0 +1,54 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<p>Hola <strong>{{ usuario.nombre }} {{ usuario.paterno|default:'' }}</strong>,</p>
+
+<div class="info-box">
+    <p><strong>📊 Resumen Mensual - {{ mes }}</strong></p>
+    <p>Estadísticas de tu actividad en el sistema:</p>
+    
+    <table class="info-table">
+        <tr>
+            <td>Actividades completadas:</td>
+            <td><strong>{{ estadisticas.actividades_completadas|default:0 }}</strong></td>
+        </tr>
+        <tr>
+            <td>Tareas completadas:</td>
+            <td><strong>{{ estadisticas.tareas_completadas|default:0 }}</strong></td>
+        </tr>
+        <tr>
+            <td>Informes presentados:</td>
+            <td><strong>{{ estadisticas.informes_presentados|default:0 }}</strong></td>
+        </tr>
+        <tr>
+            <td>Validaciones realizadas:</td>
+            <td><strong>{{ estadisticas.validaciones_realizadas|default:0 }}</strong></td>
+        </tr>
+        <tr>
+            <td>Horas de trabajo registradas:</td>
+            <td><strong>{{ estadisticas.horas_trabajadas|default:0 }}</strong></td>
+        </tr>
+        <tr>
+            <td>Actividades en progreso:</td>
+            <td><strong>{{ estadisticas.actividades_en_progreso|default:0 }}</strong></td>
+        </tr>
+    </table>
+</div>
+
+{% if estadisticas.logros %}
+<div class="success-box">
+    <p><strong>🏆 Logros del mes:</strong></p>
+    <ul>
+        {% for logro in estadisticas.logros %}
+        <li>{{ logro }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<div style="text-align: center;">
+    <a href="{{ enlace_reporte }}" class="button">📈 Ver Reporte Detallado</a>
+</div>
+
+<p>¡Sigue así! Cada mes mejoras tu rendimiento.</p>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<p>Hola <strong>{{ tarea.responsable.get_full_name|default:tarea.responsable.nombre }}</strong>,</p>
+
+<div class="warning-box">
+    <p><strong>⏰ ¡Tarea por vencer!</strong></p>
+    <p>La siguiente tarea está próxima a su fecha límite:</p>
+    
+    <table class="info-table">
+        <tr>
+            <td>Código:</td>
+            <td><strong>{{ tarea.codigo }}</strong></td>
+        </tr>
+        <tr>
+            <td>Título:</td>
+            <td>{{ tarea.titulo }}</td>
+        </tr>
+        <tr>
+            <td>Fecha límite:</td>
+            <td><strong>{{ tarea.fecha_limite|date:"d/m/Y" }}</strong></td>
+        </tr>
+        <tr>
+            <td>Días restantes:</td>
+            <td><span style="color: #ff9800; font-weight: bold;">{{ dias_restantes }} días</span></td>
+        </tr>
+        <tr>
+            <td>Estado actual:</td>
+            <td>{{ tarea.get_estado_display }}</td>
+        </tr>
+    </table>
+</div>
+
+<p>Por favor, tome acciones para completar esta tarea antes de la fecha límite.</p>
+
+<div style="text-align: center;">
+    <a href="{{ enlace_tarea }}" class="button">📋 Ver Tarea</a>
+</div>
+
+<p>Si ya completó la tarea, marque el informe correspondiente.</p>
+{% endblock %}

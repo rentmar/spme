@@ -37,6 +37,7 @@ from django.contrib.admin import ModelAdmin
 from .models import InformeActividadPrincipal
 from .models import InformeTareaPrincipal
 
+
 #Formas de pago
 admin.site.register(FormaPago)
 #SOLICITUDES DEL PEI
@@ -1343,3 +1344,6 @@ class VinculacionSolicitudInformeAdmin(admin.ModelAdmin):
         return super().get_queryset(request).select_related(
             'solicitud', 'informe', 'usuario_vinculo'
         )    
+    
+
+

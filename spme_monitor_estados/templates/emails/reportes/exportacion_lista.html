@@ -1,0 +1,47 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<p>Hola <strong>{{ usuario.nombre }} {{ usuario.paterno|default:'' }}</strong>,</p>
+
+<div class="success-box">
+    <p><strong>💾 ¡Exportación completada!</strong></p>
+    <p>La exportación de datos que solicitaste está lista para descargar.</p>
+    
+    <table class="info-table">
+        <tr>
+            <td>Nombre de exportación:</td>
+            <td><strong>{{ exportacion_nombre }}</strong></td>
+        </tr>
+        <tr>
+            <td>Fecha de exportación:</td>
+            <td>{{ fecha|date:"d/m/Y H:i" }}</td>
+        </tr>
+        <tr>
+            <td>Registros exportados:</td>
+            <td>{{ registros|default:"Todos" }}</td>
+        </tr>
+        <tr>
+            <td>Formato:</td>
+            <td>{{ formato|default:"CSV/Excel" }}</td>
+        </tr>
+        <tr>
+            <td>Validez del enlace:</td>
+            <td>{{ validez_dias|default:7 }} días  
+        </tr>
+    </table>
+</div>
+
+<div style="text-align: center;">
+    <a href="{{ enlace_descarga }}" class="button">💾 Descargar Exportación</a>
+</div>
+
+<p>El archivo está disponible en formato {{ formato|default:"CSV/Excel" }} para su análisis.</p>
+
+<div class="warning-box">
+    <p><strong>⚠️ Nota de seguridad:</strong></p>
+    <p>Esta exportación contiene datos sensibles. Guárdala en un lugar seguro y elimínala después de usarla.</p>
+    <p>No compartas este enlace con personas no autorizadas.</p>
+</div>
+
+<p>¿Necesitas una exportación con diferentes filtros? <a href="{{ enlace_nueva_exportacion }}">Solicitar nueva exportación</a></p>
+{% endblock %}

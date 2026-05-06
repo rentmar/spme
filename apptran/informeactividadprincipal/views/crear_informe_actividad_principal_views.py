@@ -577,4 +577,4 @@ class CrearInformeActividadView(APIView):
                 }
             }
         }, status=200)
-        
+         

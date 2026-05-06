@@ -1,4 +1,5 @@
 # serializers.py
+#serializers/mensajes_papelera_serializer.py
 from rest_framework import serializers
 from ..models import MensajeUsuario
 from django.contrib.auth import get_user_model

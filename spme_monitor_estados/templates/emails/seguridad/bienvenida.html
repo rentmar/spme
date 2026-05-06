@@ -1,0 +1,44 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<p>¡Hola <strong>{{ usuario.nombre }} {{ usuario.paterno|default:'' }}</strong>!</p>
+
+<div class="success-box">
+    <p><strong>🎉 ¡Bienvenido a {{ nombre_sistema }}!</strong></p>
+    <p>Su cuenta ha sido creada exitosamente.</p>
+    
+    <table class="info-table">
+        <tr>
+            <td>Usuario:</td>
+            <td><strong>{{ usuario.username|default:usuario.email }}</strong></td>
+        </tr>
+        <tr>
+            <td>Email:</td>
+            <td>{{ usuario.correo|default:usuario.email }}</td>
+        </tr>
+        <tr>
+            <td>Rol:</td>
+            <td>{{ usuario.get_rol_display|default:"Usuario" }}</td>
+        </tr>
+    </table>
+    
+    {% if password_temporal %}
+    <p><strong>🔑 Contraseña temporal:</strong> <code style="background: #f4f4f4; padding: 5px;">{{ password_temporal }}</code></p>
+    <p>⚠️ Por seguridad, cambie su contraseña en el primer inicio de sesión.</p>
+    {% endif %}
+</div>
+
+<div style="text-align: center;">
+    <a href="{{ enlace_login }}" class="button">🔐 Iniciar Sesión</a>
+</div>
+
+<p>Con su cuenta podrá:</p>
+<ul>
+    <li>📋 Gestionar actividades y tareas</li>
+    <li>📊 Generar reportes</li>
+    <li>📝 Presentar informes</li>
+    <li>✅ Validar documentos</li>
+</ul>
+
+<p>Si tiene problemas para acceder, contacte al administrador del sistema.</p>
+{% endblock %}

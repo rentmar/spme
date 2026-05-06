@@ -6,7 +6,6 @@ from ..models import (
     InformeActividadPrincipal
     )
 
-
 class VinculacionSolicitudInforme(models.Model):
     """
     Vinculación entre solicitudes de viaje e informes de actividad.
@@ -51,7 +50,7 @@ class VinculacionSolicitudInforme(models.Model):
         blank=True,
         related_name='vinculaciones_realizadas',
         verbose_name='Usuario que vinculo el documento'
-    )
+    ) 
 
     #Bandera de registro activo
     activa = models.BooleanField(
@@ -64,6 +63,11 @@ class VinculacionSolicitudInforme(models.Model):
         blank=True,
         null=True,
         verbose_name='Observaciones'
+    )
+
+    datos_completos_vinculacion = models.JSONField(
+        default=dict,
+        verbose_name='Datos Completos de la vinculacion'
     )
 
     class Meta:

@@ -1,0 +1,38 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<p>Hola <strong>{{ responsable.get_full_name|default:responsable.nombre }}</strong>,</p>
+
+<div class="info-box">
+    <p><strong>💬 Nuevo comentario en {{ tipo_entidad|default:'entidad' }}</strong></p>
+    
+    <table class="info-table">
+        <tr>
+            <td>Entidad:</td>
+            <td><strong>{{ entidad.codigo }} - {{ entidad.nombreCorto|default:entidad.titulo }}</strong></td>
+        </tr>
+        <tr>
+            <td>Autor:</td>
+            <td>{{ autor.get_full_name|default:autor.nombre }}</td>
+        </tr>
+        <tr>
+            <td>Fecha:</td>
+            <td>{{ fecha_comentario|date:"d/m/Y H:i" }}</td>
+        </tr>
+    </table>
+    
+    <p><strong>💬 Comentario:</strong></p>
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px;">
+        {{ comentario|linebreaks }}
+    </div>
+</div>
+
+<div style="text-align: center;">
+    <a href="{{ enlace_responder }}" class="button">💬 Responder Comentario</a>
+</div>
+
+<p>Puedes responder directamente desde el sistema.</p>
+
+<hr>
+<p style="font-size: 12px; color: #888;">Este es un resumen del comentario. Para ver el hilo completo, haz clic en el botón.</p>
+{% endblock %}

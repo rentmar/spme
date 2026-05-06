@@ -1422,3 +1422,25 @@ class InformeTareaPrincipalPei(InformeActividadBase):
 
 #Importar los modelos para vinculaciones
 from .modelos_vinculaciones import VinculacionSolicitudInforme
+
+
+#########################################################################################
+############################ Importar los modelos para vinculaciones ####################
+#########################################################################################
+
+from auditlog.registry import auditlog
+
+#Registrar Informe actividad principal
+auditlog.register(
+    InformeActividadPrincipal,
+    exclude_fields=[
+        'timestamp_ultima_modificacion',
+        'timestamp_registro',
+    ]
+)
+
+#Registrar las vinculaciones 
+auditlog.register(
+    VinculacionSolicitudInforme,
+    exclude_fields=['fecha_vinculacion']
+)

@@ -1,4 +1,5 @@
 # en views.py o api/views.py
+# spme/spme_mensajes/views/mensaje_automatico_sistema_views.py
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView

@@ -1,0 +1,42 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<p>Hola <strong>{{ actividad.responsable.get_full_name|default:actividad.responsable.nombre }}</strong>,</p>
+
+<div class="warning-box">
+    <p><strong>💤 Actividad inactiva</strong></p>
+    <p>La siguiente actividad lleva mucho tiempo sin actualizaciones:</p>
+    
+    <table class="info-table">
+        <tr>
+            <td>Código:</td>
+            <td><strong>{{ actividad.codigo }}</strong></td>
+        </tr>
+        <tr>
+            <td>Nombre:</td>
+            <td>{{ actividad.nombreCorto }}</td>
+        </tr>
+        <tr>
+            <td>Estado actual:</td>
+            <td>{{ actividad.get_estado_display }}</td>
+        </tr>
+        <tr>
+            <td>Días sin actividad:</td>
+            <td><span style="color: #ff9800; font-weight: bold;">{{ dias_inactiva }} días</span></td>
+        </tr>
+        <tr>
+            <td>Última actualización:</td>
+            <td>{{ actividad.fecha_actualizacion|date:"d/m/Y"|default:"No registrada" }}</td>
+        </td>
+    </table>
+</div>
+
+<p>Se recomienda actualizar el estado de esta actividad o generar un informe de avance.</p>
+
+<div style="text-align: center;">
+    <a href="{{ enlace_actividad }}" class="button">🔍 Ver Actividad</a>
+    <a href="{{ enlace_informe }}" class="button button-ver">📝 Generar Informe</a>
+</div>
+
+<p>Si la actividad está finalizada, por favor cambie su estado a "Finalizada".</p>
+{% endblock %}
