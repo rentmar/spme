@@ -243,7 +243,7 @@ class ProyectoPlanificacionSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'codigo', 'titulo', 'descripcion',
             'fecha_creacion', 'fecha_inicio', 'fecha_finalizacion',
-            'presupuesto', 'estado', 'creado_por', 'pei', 'instancia_gestora'
+            'presupuesto', 'estado', 'creado_por', 'pei', 'instancia_gestora', 'esta_habilitado',
         ]
 
 #Proyecto - estructura -serializador

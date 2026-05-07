@@ -29,11 +29,13 @@ class ProyectoAdmin(admin.ModelAdmin):
     - Estado y fechas
     """
 
+
     # Campos que se mostrarán en la lista
     list_display = (
         'id',
         'codigo',
         'titulo',
+        'esta_habilitado',
         'creado_por',    # mostrar nombre en lugar de CharField plano
         'propietario',       # FK a Usuario
         'get_instancias',    # mostrar todas las IGs relacionadas
@@ -43,13 +45,16 @@ class ProyectoAdmin(admin.ModelAdmin):
     )
 
     # Filtros laterales
-    list_filter = ('estado', 'instancia_gestora', 'propietario')
+    list_filter = ('estado', 'esta_habilitado', 'instancia_gestora', 'propietario')
 
     # Búsqueda por campos clave
     search_fields = ('codigo', 'titulo', 'creado_por', 'propietario__username')
 
     # Campos que se pueden editar directamente desde la lista
-    list_editable = ('estado', 'propietario',)
+    list_editable = ('estado', 'esta_habilitado', 'propietario',)
+
+    save_on_top = True
+
 
     # Orden por defecto
     ordering = ('-fecha_creacion',)
@@ -60,12 +65,33 @@ class ProyectoAdmin(admin.ModelAdmin):
     # Muestra de campos ManyToMany
     filter_horizontal = ('instancia_gestora', 'procedencia_fondos')
 
+    #Acciones personalizadas
+    actions = ['habilitar_proyectos', 'deshabilitar_proyectos']
+
     def get_instancias(self, obj):
         """
         Muestra las Instancias Gestoras asociadas como lista
         """
         return ", ".join([ig.__str__() for ig in obj.instancia_gestora.all()])
     get_instancias.short_description = "Instancia(s) Gestora(s)"
+
+    @admin.action(description="✅ Habilitar proyectos seleccionados")
+    def habilitar_proyectos(self, request, queryset):
+        """Acción para habilitar proyectos"""
+        actualizados = queryset.update(esta_habilitado=True)
+        self.message_user(
+            request,
+            f"✅ {actualizados} proyecto(s) habilitado(s) exitosamente."
+        )
+    
+    @admin.action(description="❌ Deshabilitar proyectos seleccionados")
+    def deshabilitar_proyectos(self, request, queryset):
+        """Acción para deshabilitar proyectos"""
+        actualizados = queryset.update(esta_habilitado=False)
+        self.message_user(
+            request,
+            f"❌ {actualizados} proyecto(s) deshabilitado(s) exitosamente."
+        )
 
 
 @admin.register(ObjetivoGeneralProyecto)
@@ -90,6 +116,7 @@ class ObjetivoGeneralProyectoAdmin(admin.ModelAdmin):
         'proyecto__codigo',
         'proyecto__nombre',
         'proyecto__id',  # Permite buscar por ID del proyecto
+        'propietario__username',
     ]
     
     # Filtros en la barra lateral

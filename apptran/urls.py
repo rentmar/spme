@@ -79,6 +79,7 @@ from .actividadespei.views.lista_pei_actividades_views import pei_detalle_activi
 from .actividadespei.views.actividades_tareas_pei_views import ActividadPeiConTareasListView
 #Proyecto
 from .viewdiagramaporidproyecto import DiagramaPorProyectoView
+from .proyectos.views.lista_proyectos_habilitados_views import ProyectoHabilitadoViewSet
 #Informe de actividad
 from .monitoreo.views.crear_informe_actividad_views import InformeActividadView
 from .actividades.views.informe_act_principal_crud_view import InformeActividadPrincipalCrudView
@@ -129,6 +130,7 @@ router.register(r'tareas-actividad-pei', TareaActividadPeiViewSet, basename='tar
 
 #PROYECTOS
 router.register(r'proyectos', ProyectoViewModel, basename='proyectos')
+router.register(r'proyectos-habilitados', ProyectoHabilitadoViewSet, basename='proyectos_habilitados' )
 #Proyectos - Diagrama
 router.register(r'diagramas', DiagramaEstructuraView, basename='diagrama_proyecto')
 #Proyectos - Objetivo General
@@ -236,7 +238,7 @@ urlpatterns =[
     path(r'proyectos/<int:proyecto_id>/resultados-og/count/', count_resultados_og, name='count-resultados-og'),
     path(r'proyectos/<int:proyecto_id>/column-stats/', ColumnVisibilityStatsView.as_view(), name='column-stats'),
     path(r'proyectos/diagrama/<int:proyecto_id>/', DiagramaPorProyectoView.as_view(), name='diagrama-de-un.proyecto'),
-    path(r'test/', test_endpoint, name='test-endpoint'),   
+    path(r'test/', test_endpoint, name='test-endpoint'),
     #Actividades y planificacion
     path(r'actividades/proyecto/<int:proyecto_id>/', actividades_por_proyecto, name='actividades_por_proyecto'), 
     path(r'actividades/pei/<int:pei_id>/', actividades_por_pei_planificacion , name="actividades_por_pei_planificacion"),

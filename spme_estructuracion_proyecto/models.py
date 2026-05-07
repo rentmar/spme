@@ -5,7 +5,7 @@ from spme_programas.models import Programa
 from spme_autenticacion.models import Usuario
 
 
-
+ 
 
 ############### PROYECTOS #######################
 
@@ -59,6 +59,13 @@ class Proyecto(models.Model):
 
     #Estados
     estado = models.CharField(max_length=2, choices=ESTADO_OPCIONES, default='ES')
+
+    #Proyecto activo
+    esta_habilitado = models.BooleanField(
+        default=True,
+        verbose_name="Proyecto habilitado",
+        help_text="Indica si el proyecto esta habilitado para trabajo",
+    )
     
     #Responsable
     instancia_gestora = models.ManyToManyField(InstanciaGestora, related_name='proyectos')
