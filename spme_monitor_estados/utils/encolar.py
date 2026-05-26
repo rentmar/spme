@@ -1,3 +1,4 @@
+#spme_monitor_estados/utils/encolar.py
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.utils import timezone

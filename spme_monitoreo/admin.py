@@ -1255,7 +1255,7 @@ from .modelos_vinculaciones import VinculacionSolicitudInforme
 @admin.register(VinculacionSolicitudInforme)
 class VinculacionSolicitudInformeAdmin(admin.ModelAdmin):
     """
-    Configuración simple del panel de administración para vinculaciones.
+    Configuración del panel de administración para vinculaciones.
     """
     
     # Campos visibles en la lista
@@ -1285,14 +1285,27 @@ class VinculacionSolicitudInformeAdmin(admin.ModelAdmin):
     ]
     
     # Campos de solo lectura
-    readonly_fields = ['fecha_vinculacion']
+    readonly_fields = [
+        'fecha_vinculacion',
+        'datos_completos_vinculacion',  # Solo lectura en el admin
+    ]
     
     # Organización del formulario
     fieldsets = (
-        ('Vinculación', {
-            'fields': ('solicitud', 'informe', 'activa', 'observaciones')
+        ('Información Principal', {
+            'fields': ('solicitud', 'informe', 'activa'),
+            'description': 'Seleccione la solicitud y el informe a vincular'
         }),
-        ('Auditoría', {
+        ('Información Adicional', {
+            'fields': ('observaciones',),  # Solo aquí, no duplicado
+            'classes': ('wide',)
+        }),
+        ('Datos de Vinculación', {
+            'fields': ('datos_completos_vinculacion',),
+            'classes': ('collapse',),
+            'description': 'Información detallada de la vinculación (generada automáticamente)'
+        }),
+        ('Información de Auditoría', {
             'fields': ('fecha_vinculacion', 'usuario_vinculo'),
             'classes': ('collapse',)
         }),
@@ -1309,6 +1322,7 @@ class VinculacionSolicitudInformeAdmin(admin.ModelAdmin):
     
     # ==================== ACCIONES ====================
     
+    @admin.action(description='✅ Activar vinculaciones seleccionadas')
     def activar_seleccionadas(self, request, queryset):
         """Activar vinculaciones seleccionadas"""
         count = 0
@@ -1318,8 +1332,8 @@ class VinculacionSolicitudInformeAdmin(admin.ModelAdmin):
                 vinculacion.save()
                 count += 1
         self.message_user(request, f'{count} vinculaciones activadas.')
-    activar_seleccionadas.short_description = 'Activar vinculaciones seleccionadas'
     
+    @admin.action(description='❌ Desactivar vinculaciones seleccionadas')
     def desactivar_seleccionadas(self, request, queryset):
         """Desactivar vinculaciones seleccionadas"""
         count = 0
@@ -1329,7 +1343,6 @@ class VinculacionSolicitudInformeAdmin(admin.ModelAdmin):
                 vinculacion.save()
                 count += 1
         self.message_user(request, f'{count} vinculaciones desactivadas.')
-    desactivar_seleccionadas.short_description = 'Desactivar vinculaciones seleccionadas'
     
     # ==================== MÉTODOS ====================
     
@@ -1343,7 +1356,4 @@ class VinculacionSolicitudInformeAdmin(admin.ModelAdmin):
         """Optimizar consultas"""
         return super().get_queryset(request).select_related(
             'solicitud', 'informe', 'usuario_vinculo'
-        )    
-    
-
-
+        )
