@@ -12,7 +12,7 @@ from spme_proyectos_reportes.services.indicadores import (
     BitacoraOgService,
     BitacoraOeService,
     BitacoraRogService,
-    BitacoraRoeService,
+    BitacoraRoeService, 
 )
 #Servicio - Validacion Informe Actividad Principal
 from spme_validaciones.services.validacion_informe_actividad_service import ValidacionInformeActividadService
@@ -22,10 +22,12 @@ from spme_monitoreo.services.vinculacion_solicitud_viaje_informe_service import 
 from spme_mensajes.services.notificacion_service import crear_mensajes_validacion_informe
 ######################### NOTIFICACIONES EMAIL ###########################
 #Sistema de encolado de emails
-from spme_monitor_estados import encolar_validacion_pendiente
+from spme_monitor_estados.utils.encolar import encolar_validacion_pendiente
 ######################### SERIALIZER ###########################
 #Serializer - Informe Actividad Principal 
 from ..serializers.crear_informe_actividad_principal_v2_serializer import InformeActividadPrincipalSerializer
+######################### Modelos ###########################
+from spme_monitoreo.models import Actividad
 
 
 logger = logging.getLogger(__name__)
@@ -82,7 +84,7 @@ class InformeActividadPrincipalV2(APIView):
 
         try:
             with transaction.atomic():
-                #1. Crear el informe de actividad principal
+                #1. Crear el informe de actividad principal y cargar la actividad a la que pertenece
                 informe_creado = InformaActividadPrincipalService.crear(serializer.validated_data)
                 logger.info(f"✅ Informe creado: {informe_creado.numeroInforme}")
 
@@ -103,7 +105,7 @@ class InformeActividadPrincipalV2(APIView):
                     BitacoraOeService.crear_actividad(informe_creado, item)
                     bitacoras_indicador_oe += 1
 
-                 # Indicador ROG
+                # Indicador ROG
                 for item in avance.get('indicadorrog', []):
                     BitacoraRogService.crear_actividad(informe_creado, item)
                     bitacoras_indicador_rog += 1
@@ -130,13 +132,22 @@ class InformeActividadPrincipalV2(APIView):
                 )
 
                 #4. Enviar emails a validadores
-                emails_encolados, emails_fallidos = self._enviar_emails_validadores(
-                    request, informe_creado, validadores_creados
-                )
-                logger.info(f"📧 Emails encolados: {emails_encolados} | Fallidos: {emails_fallidos}")
+                emails_encolados = 0
+                site_url = request.build_absolute_uri('/').rstrip('/')
 
+                for validacion in validadores_creados:
+                    validador = validacion.usuarioValidador
+                    email = encolar_validacion_pendiente(
+                        informe=informe_creado,
+                        tipo='actividad',
+                        validador=validador,
+                        enlace_ver_detalle=f"{site_url}/validar/actividad/{informe_creado.id}",
+                        site_url=site_url
+                    )                    
+                    emails_encolados += 1 
 
-
+                logger.info(f"📧 Emails encolados: {emails_encolados}")
+                
                 #5. Procesar vinculacionSolViajes (solo si hay datos)
                 vinculaciones_creadas = 0
                 if tiene_vinculacion_sol_viajes:
@@ -166,7 +177,6 @@ class InformeActividadPrincipalV2(APIView):
                             "mensajes_enviados": mensajes_creados,
                             "mensajes_errores": mensajes_errores,
                             "emails_encolados": emails_encolados,
-                            "emails_fallidos": emails_fallidos,
                         }
                     },
                     status=status.HTTP_201_CREATED

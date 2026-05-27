@@ -71,7 +71,8 @@ def encolar_email(
         return email
     except Exception as e:
         logger.error(f"❌ Error: {e}")
-        return None
+        raise
+        #return None
 
 
 # ============================================================
@@ -80,8 +81,15 @@ def encolar_email(
 
 def encolar_validacion_pendiente(informe, tipo, validador, enlace_aprobacion=None, enlace_rechazo=None, enlace_observacion=None, enlace_ver_detalle=None, site_url=None):
     """Notifica al validador que hay un informe pendiente."""
+    from spme_actividades.models import Actividad, TareaActividad
     site_url = site_url or 'http://localhost:8000'
-    entidad = informe.actividad if tipo == 'actividad' else informe.tarea
+
+    #Cargar el objeto real
+    if tipo == 'actividad':
+        entidad = informe.actividad if hasattr(informe.actividad, 'codigo') else Actividad.objects.get(id=informe.actividad)
+    else:
+        entidad = informe.tarea if hasattr(informe.tarea, 'codigo') else TareaActividad.objects.get(id=informe.tarea)
+    
     if not enlace_ver_detalle:
         enlace_ver_detalle = f"{site_url}/ver/{tipo}/{entidad.id}"
     
@@ -92,6 +100,7 @@ def encolar_validacion_pendiente(informe, tipo, validador, enlace_aprobacion=Non
         'site_url': site_url, 'fecha': timezone.now(), 'icono': '📝',
         'titulo': 'Validación Pendiente', 'color': '#4CAF50'
     }
+
     return encolar_email(
         destinatario=validador.correo if hasattr(validador, 'correo') else validador.email,
         asunto=f"📝 {tipo.title()} pendiente de validación - {entidad.codigo}",
