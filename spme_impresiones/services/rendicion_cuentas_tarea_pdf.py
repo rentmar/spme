@@ -108,6 +108,35 @@ class RendicionCuentasTareaPDFGenerator(BasePDFGenerator):
                         except ValueError:
                             fecha_item = fecha_item  # Mantener como está
                     
+                    partida = (
+                        item.get('partida_sf') or 
+                        item.get('partida') or 
+                        item.get('codigo') or 
+                        ''
+                    )
+                    
+                    fuente = (
+                        item.get('fuente') or 
+                        item.get('fuente_financiamiento') or 
+                        item.get('fuente_fin') or 
+                        item.get('origen') or 
+                        'No especificada'
+                    )
+
+                    factura_recibo = (
+                        item.get('factura_recibo') or 
+                        item.get('factura') or 
+                        item.get('recibo') or 
+                        ''
+                    )
+
+                    descripcion = (
+                        item.get('descripcion') or 
+                        item.get('concepto') or 
+                        item.get('descripcionGasto') or 
+                        ''
+                    )
+                    
                     monto = float(item.get('monto', 0))
                     total_calculado += monto
                     
@@ -115,6 +144,7 @@ class RendicionCuentasTareaPDFGenerator(BasePDFGenerator):
                         'numero': index,
                         'fecha': fecha_item,
                         'partida': item.get('partida', ''),
+                        'fuente': str(fuente),
                         'factura_recibo': item.get('factura_recibo', ''),
                         'descripcion': item.get('descripcion', ''),
                         'monto': monto,

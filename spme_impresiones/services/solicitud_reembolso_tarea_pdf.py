@@ -227,6 +227,28 @@ class SolicitudReembolsoTareaPDFGenerator(BasePDFGenerator):
                         except:
                             pass
                     
+                    partida = (
+                        item.get('partida_sf') or 
+                        item.get('partida') or 
+                        item.get('codigo') or 
+                        ''
+                    )
+
+                    fuente = (
+                        item.get('fuente') or 
+                        item.get('fuente_financiamiento') or 
+                        item.get('fuente_fin') or 
+                        item.get('origen') or 
+                        'No especificada'
+                    )
+
+                    factura_recibo = (
+                        item.get('factura_recibo') or 
+                        item.get('factura') or 
+                        item.get('recibo') or 
+                        ''
+                    )
+                
                     monto = float(item.get('monto', 0))
                     total_calculado += monto
                     
@@ -234,6 +256,7 @@ class SolicitudReembolsoTareaPDFGenerator(BasePDFGenerator):
                         'numero': index,
                         'fecha': fecha_item,
                         'partida': item.get('partida', ''),
+                        'fuente': fuente,  
                         'factura_recibo': item.get('factura_recibo', ''),
                         'concepto': item.get('concepto', '') or item.get('descripcion', ''),
                         'monto': monto,

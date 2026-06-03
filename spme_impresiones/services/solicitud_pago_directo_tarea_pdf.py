@@ -230,9 +230,25 @@ class SolicitudPagoDirectoTareaPDFGenerator(BasePDFGenerator):
                         except:
                             pass
                     
+                    partida = (
+                        item.get('partida_sf') or 
+                        item.get('partida') or 
+                        item.get('codigo') or 
+                        ''
+                    )
+
+                    fuente = (
+                        item.get('fuente') or 
+                        item.get('fuente_financiamiento') or 
+                        item.get('fuente_fin') or 
+                        item.get('origen') or 
+                        'No especificada'
+                    )
+                    
                     detalle_fondos.append({
                         'numero': index,
                         'partida_sf': item.get('partida_sf', ''),
+                        'fuente': str(fuente),    
                         'concepto': item.get('concepto', '') or item.get('descripcion', ''),
                         'monto': monto,
                         'factura_recibo': item.get('factura_recibo', ''),
