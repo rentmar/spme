@@ -149,7 +149,7 @@ class SolicitudFondosPDFGenerator(BasePDFGenerator):
     def _procesar_detalle_gastos(self, obj):
         """
         Procesa el detalle de gastos del JSON.
-        Formato esperado: {"items": [{"partida_sf": "...", "concepto": "...", "monto": ...}]}
+        Formato esperado: {"items": [{"partida_sf": "...", "fuente": "...", "concepto": "...", "monto": ...}]}
         
         Retorna: (lista_de_gastos, total_calculado)
         """
@@ -200,6 +200,14 @@ class SolicitudFondosPDFGenerator(BasePDFGenerator):
                     item.get('codigo') or 
                     f"{index + 1}"
                 )
+
+                fuente = (
+                    item.get('fuente') or 
+                    item.get('fuente_financiamiento') or 
+                    item.get('fuente_fin') or 
+                    item.get('origen') or 
+                    'No especificada'
+                )
                 
                 concepto = (
                     item.get('concepto') or 
@@ -236,6 +244,7 @@ class SolicitudFondosPDFGenerator(BasePDFGenerator):
                 detalle_gastos.append({
                     'indice': index + 1,
                     'partida': str(partida),
+                    'fuente': str(fuente),
                     'descripcion_gasto': str(concepto),
                     'monto': monto,
                     'observaciones': str(observaciones),

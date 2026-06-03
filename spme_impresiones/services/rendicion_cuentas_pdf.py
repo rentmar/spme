@@ -186,6 +186,14 @@ class RendicionCuentasPDFGenerator(BasePDFGenerator):
         try:
             # Obtener valores con claves alternativas
             partida = item.get('partida') or item.get('partidaPresupuestaria') or item.get('partidaCodigo') or '-'
+
+            fuente = (
+                item.get('fuente') or 
+                item.get('fuente_financiamiento') or 
+                item.get('fuente_fin') or 
+                item.get('origen') or 
+                'No especificada'
+            )
             
             descripcion = item.get('descripcionGasto') or item.get('descripcion') or item.get('concepto') or '-'
             
@@ -211,6 +219,7 @@ class RendicionCuentasPDFGenerator(BasePDFGenerator):
             
             gasto = {
                 'partida': partida,
+                'fuente': fuente,   
                 'descripcion_gasto': descripcion,
                 'fecha_gasto': fecha_gasto,
                 'factura_recibo': factura_recibo,  # CAMBIADO de numero_comprobante a factura_recibo

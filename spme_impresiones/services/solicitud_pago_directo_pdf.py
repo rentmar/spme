@@ -178,6 +178,15 @@ class SolicitudPagoDirectoPDFGenerator(BasePDFGenerator):
             for index, item in enumerate(items_list):
                 if isinstance(item, dict):
                     partida = item.get('partida_sf') or item.get('partida') or f"{index + 1}"
+                    
+                    fuente = (
+                        item.get('fuente') or 
+                        item.get('fuente_financiamiento') or 
+                        item.get('fuente_fin') or 
+                        item.get('origen') or 
+                        'No especificada'
+                    )
+                
                     concepto = item.get('concepto') or item.get('descripcion') or f"Item {index + 1}"
                     
                     monto_raw = item.get('monto') or item.get('valor') or 0
@@ -190,6 +199,7 @@ class SolicitudPagoDirectoPDFGenerator(BasePDFGenerator):
                     detalle_gastos.append({
                         'indice': index + 1,
                         'partida': str(partida),
+                        'fuente': fuente,
                         'descripcion_gasto': str(concepto),
                         'monto': monto,
                     })

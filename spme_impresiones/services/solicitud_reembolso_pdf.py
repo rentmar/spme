@@ -171,6 +171,15 @@ class SolicitudReembolsoPDFGenerator(BasePDFGenerator):
                             fecha_gasto = item['fecha']
                     
                     partida = item.get('partida') or item.get('partida_sf') or f"{index + 1}"
+                    
+                    fuente = (
+                        item.get('fuente') or 
+                        item.get('fuente_financiamiento') or 
+                        item.get('fuente_fin') or 
+                        item.get('origen') or 
+                        'No especificada'
+                    )
+
                     factura_recibo = item.get('factura_recibo') or item.get('factura') or item.get('recibo') or '-'
                     concepto = item.get('concepto') or item.get('descripcion') or f"Gasto {index + 1}"
                     
@@ -185,6 +194,7 @@ class SolicitudReembolsoPDFGenerator(BasePDFGenerator):
                         'indice': index + 1,
                         'fecha': fecha_gasto,
                         'partida': str(partida),
+                        'fuente': str(fuente),  
                         'factura_recibo': str(factura_recibo),
                         'concepto': str(concepto),
                         'monto': monto,

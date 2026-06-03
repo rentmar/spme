@@ -73,11 +73,12 @@
         <table class="tabla tabla-gastos">
             <thead>
                 <tr>
-                    <th>N°</th>
-                    <th>PARTIDA</th>
-                    <th>DESCRIPCIÓN</th>
-                    <th>MONTO (Bs.)</th>
-                    <th>OBSERVACIONES</th>
+                    <th style="width: 5%;">N°</th>
+                    <th style="width: 12%;">PARTIDA</th>
+                    <th style="width: 12%;">FUENTE</th>
+                    <th style="width: 41%;">DESCRIPCIÓN</th>
+                    <th style="width: 18%; text-align: right;">MONTO (Bs.)</th>
+                    <th style="width: 12%;">OBS.</th>
                 </tr>
             </thead>
             <tbody>
@@ -85,6 +86,7 @@
                 <tr>
                     <td>{{ gasto.indice|default:forloop.counter }}</td>
                     <td>{{ gasto.partida|default:"-" }}</td>
+                    <td>{{ gasto.fuente|default:"-" }}</td>
                     <td class="texto-largo">{{ gasto.descripcion_gasto|truncatechars:40|default:"-" }}</td>
                     <td style="text-align: right;">{{ gasto.monto|floatformat:2 }}</td>
                     <td>{{ gasto.observaciones|truncatechars:20|default:"-" }}</td>
@@ -98,7 +100,7 @@
                 {% endfor %}
                 
                 <tr class="total-row">
-                    <td colspan="3" style="text-align: right; font-weight: bold;">TOTAL SOLICITADO:</td>
+                    <td colspan="4" style="text-align: right; font-weight: bold;">TOTAL SOLICITADO:</td>
                     <td style="text-align: right; font-weight: bold; font-size: 9px;">
                         Bs. {{ total_monto_solicitado|floatformat:2 }}
                     </td>
@@ -218,43 +220,55 @@
         <div class="grid-3">
             <!-- SOLICITANTE -->
             <div>
-                <div class="campo">
+                <!-- <div class="campo">
                     <div class="etiqueta">Solicitante:</div>
                     <div class="valor">{{ nombre_solicitante|truncatechars:25 }}</div>
-                </div>
+                </div> -->
                 
                 <div class="firma-area" style="padding-top: 20px;">
                     <div class="linea-firma" style="width: 90%;"></div>
-                    <div class="nombre-firma">{{ nombre_solicitante|truncatechars:20 }}</div>
-                    <div class="cargo-firma">{{ cargo|truncatechars:15|default:"Solicitante" }}</div>
+                    <div class="nombre-firma" style="font-size: 12px; font-weight: bold; margin-top: 4px;">
+                        {{ nombre_solicitante }}
+                    </div>
+                    <div class="cargo-firma" style="font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">
+                        {{ cargo|default:"Solicitante" }}
+                    </div>
                 </div>
             </div>
             
             <!-- CONTADOR -->
             <div>
-                <div class="campo">
+                <!-- <div class="campo">
                     <div class="etiqueta">Contador:</div>
-                    <div class="valor">{{ nombre_contador|default:"No asignado"|truncatechars:25 }}</div>
-                </div>
+                    <div class="valor">{{ nombre_contador|default:"No asignado" }}</div>
+                </div> -->
                 
                 <div class="firma-area" style="padding-top: 20px;">
                     <div class="linea-firma" style="width: 90%;"></div>
-                    <div class="nombre-firma">{{ nombre_contador|default:"____________________"|truncatechars:20 }}</div>
-                    <div class="cargo-firma">Contador</div>
+                    <div class="nombre-firma" style="font-size: 12px; font-weight: bold; margin-top: 4px;">
+                        {{ nombre_contador|default:"____________________" }}
+                    </div>
+                    <div class="cargo-firma" style="font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">
+                        Contador
+                    </div>
                 </div>
             </div>
             
             <!-- COORDINADOR -->
             <div>
-                <div class="campo">
+                <!-- <div class="campo">
                     <div class="etiqueta">Coordinador:</div>
-                    <div class="valor">{{ nombre_coordinador|default:"No asignado"|truncatechars:25 }}</div>
-                </div>
+                    <div class="valor">{{ nombre_coordinador|default:"No asignado" }}</div>
+                </div> -->
                 
                 <div class="firma-area" style="padding-top: 20px;">
                     <div class="linea-firma" style="width: 90%;"></div>
-                    <div class="nombre-firma">{{ nombre_coordinador|default:"____________________"|truncatechars:20 }}</div>
-                    <div class="cargo-firma">Coordinador/Dirección</div>
+                    <div class="nombre-firma" style="font-size: 12px; font-weight: bold; margin-top: 4px;">
+                        {{ nombre_coordinador|default:"____________________" }}
+                    </div>
+                    <div class="cargo-firma" style="font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">
+                        Coordinador/Dirección
+                    </div>
                 </div>
             </div>
         </div>

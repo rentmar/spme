@@ -95,6 +95,7 @@ class SolicitudFondosTareaPDFGenerator(BasePDFGenerator):
                                 detalle_gastos.append({
                                     'numero': idx,
                                     'partida': item.get('partida_sf', f'Partida {idx}'),
+                                    'fuente': item.get('fuente', 'No especificada'),  
                                     'descripcion_gasto': item.get('concepto', 'Sin descripción'),
                                     'monto': monto,
                                     'observaciones': item.get('observaciones', '')
@@ -109,6 +110,7 @@ class SolicitudFondosTareaPDFGenerator(BasePDFGenerator):
                             detalle_gastos.append({
                                 'numero': idx,
                                 'partida': item.get('partida', item.get('partida_sf', item.get('Partida', f'Partida {idx}'))),
+                                'fuente': item.get('fuente', item.get('fuente_financiamiento', 'No especificada')),  # ← CORREGIDO
                                 'descripcion_gasto': item.get('descripcionGasto', item.get('concepto', item.get('Concepto', 'Sin descripción'))),
                                 'monto': monto,
                                 'observaciones': item.get('observaciones', item.get('Observaciones', ''))
@@ -119,6 +121,7 @@ class SolicitudFondosTareaPDFGenerator(BasePDFGenerator):
                 detalle_gastos.append({
                     'numero': 1,
                     'partida': 'Error',
+                    'fuente': 'Error', 
                     'descripcion_gasto': f'Error procesando datos: {str(e)}',
                     'monto': 0,
                     'observaciones': 'Formato inválido'

@@ -171,7 +171,7 @@ class SolicitudViajePDFGenerator(BasePDFGenerator):
     def _procesar_detalle_gastos(self, obj):
         """
         Procesa el detalle de gastos del viaje
-        Formato esperado: {"items": [{"partida": "...", "concepto": "...", "monto": ...}]}
+        Formato esperado: {"items": [{"partida": "...", "fuente": "...", "concepto": "...", "monto": ...}]}
         """
         detalle_gastos = []
         total_gastos = 0.0
@@ -220,6 +220,15 @@ class SolicitudViajePDFGenerator(BasePDFGenerator):
                 
                 # Extraer campos - según tu JSON
                 partida = item.get('partida', '')
+                
+                #Fuente de finaciamiento
+                fuente = (
+                    item.get('fuente') or 
+                    item.get('fuente_financiamiento') or 
+                    item.get('fuente_fin') or 
+                    item.get('origen') or 
+                    'No especificada'
+                )      
                 concepto = item.get('concepto') or item.get('descripcion') or f"Item {index + 1}"
                 
                 # Extraer monto
@@ -234,6 +243,7 @@ class SolicitudViajePDFGenerator(BasePDFGenerator):
                 detalle_gastos.append({
                     'indice': index + 1,
                     'partida': partida,
+                    'fuente': fuente,
                     'concepto': concepto,
                     'monto': monto,
                 })

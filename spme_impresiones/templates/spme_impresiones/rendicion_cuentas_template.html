@@ -2,245 +2,473 @@
 
 {% block content %}
 <style>
-    /* ESTILOS COMPACTOS PARA UNA SOLA PÁGINA */
-    .seccion { margin-bottom: 6px !important; }
-    .seccion-titulo { padding: 3px 6px !important; font-size: 8px !important; margin-bottom: 4px !important; }
-    .campo { margin-bottom: 2px !important; }
-    .etiqueta { font-size: 7px !important; margin-bottom: 0px !important; }
-    .valor { padding: 2px 4px !important; font-size: 7px !important; min-height: 12px !important; }
-    .grid-3, .grid-2 { gap: 4px !important; }
+    /* Estilos para Rendición de Cuentas - LEGIBLES */
+    .solicitud-header {
+        background: linear-gradient(to right, #1976d2, #2196f3);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        text-align: center;
+    }
     
-    /* Tabla de gastos - SIN TRUNCAR */
+    .solicitud-titulo {
+        font-size: 11px;
+        font-weight: bold;
+    }
+    
+    .info-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        padding: 8px;
+        margin-bottom: 8px;
+        background: #fafafa;
+    }
+    
+    .info-card-titulo {
+        font-size: 9px;
+        font-weight: bold;
+        padding: 4px 8px;
+        border-radius: 3px;
+        margin-bottom: 8px;
+        color: white;
+    }
+    
+    .campo-fila {
+        margin-bottom: 5px;
+    }
+    
+    .etiqueta-card {
+        font-size: 8px;
+        font-weight: bold;
+        color: #555;
+        display: inline-block;
+        min-width: 70px;
+    }
+    
+    .valor-card {
+        font-size: 9px;
+        background: #f8f9fa;
+        padding: 2px 6px;
+        border-radius: 2px;
+        border: 1px solid #e0e0e0;
+    }
+    
+    .badge-estado {
+        font-size: 9px;
+        padding: 3px 8px;
+        border-radius: 3px;
+        color: white;
+        font-weight: bold;
+        display: inline-block;
+    }
+    
+    .badge-origen {
+        background: #e3f2fd;
+        padding: 3px 8px;
+        border-radius: 3px;
+        font-size: 8px;
+        display: inline-block;
+    }
+    
+    .resumen-card {
+        background: #e3f2fd;
+        border: 1px solid #1976d2;
+        border-radius: 4px;
+        padding: 8px;
+        margin-bottom: 8px;
+    }
+    
+    .resumen-grid {
+        width: 100%;
+    }
+    
+    .resumen-grid td {
+        width: 33.33%;
+        text-align: center;
+        padding: 4px;
+    }
+    
+    .resumen-etiqueta {
+        font-size: 8px;
+        color: #666;
+    }
+    
+    .resumen-valor {
+        font-size: 11px;
+        font-weight: bold;
+    }
+    
     .tabla-gastos {
         width: 100%;
         border-collapse: collapse;
-        margin: 4px 0;
-        font-size: 7px;
-        table-layout: fixed; /* Para controlar anchos */
-    }
-    
-    .tabla-gastos th,
-    .tabla-gastos td {
-        border: 1px solid #ddd;
-        padding: 3px 4px;
-        text-align: left;
-        vertical-align: top;
-        word-wrap: break-word; /* Para que el texto largo se rompa */
-        white-space: normal; /* Permite múltiples líneas */
+        font-size: 8px;
+        margin: 6px 0;
     }
     
     .tabla-gastos th {
-        background-color: #1976d2;
+        background: #1976d2;
         color: white;
+        padding: 4px 3px;
+        font-size: 8px;
         font-weight: bold;
-        font-size: 7px;
+        text-align: left;
+        border: 1px solid #1565c0;
+    }
+    
+    .tabla-gastos td {
+        padding: 3px;
+        border: 1px solid #ddd;
+        font-size: 8px;
+        vertical-align: top;
+        word-wrap: break-word;
     }
     
     .tabla-gastos tr:nth-child(even) {
         background-color: #f8f9fa;
     }
     
-    /* Anchos de columna específicos */
-    .col-fecha { width: 12%; }
-    .col-partida { width: 10%; }
-    .col-factura { width: 15%; }
-    .col-descripcion { width: 43%; }
-    .col-monto { width: 15%; }
-    
     .total-row {
-        background-color: #e3f2fd !important;
+        background: #e3f2fd !important;
         font-weight: bold;
-        border-top: 2px solid #1976d2 !important;
     }
     
-    .compact-section { padding: 4px !important; margin-bottom: 4px !important; }
+    .firma-grid {
+        width: 100%;
+        margin-top: 10px;
+    }
     
-    /* Resumen financiero compacto */
-    .resumen-item {
-        flex: 1;
+    .firma-grid td {
+        width: 25%;
         text-align: center;
-        padding: 3px;
-        border-radius: 3px;
+        padding: 0 6px;
+        vertical-align: bottom;
     }
     
-    .firma-item {
-        flex: 1;
-        border: 1px solid #ddd;
-        padding: 4px;
-        border-radius: 3px;
+    .firma-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        padding: 6px;
         text-align: center;
-        font-size: 6px;
     }
     
-    .linea-firma {
+    .firma-card-ok {
+        background: #f8fdf8;
+        border-color: #c8e6c9;
+    }
+    
+    .firma-card-pendiente {
+        background: #fff8f8;
+        border-color: #ffcdd2;
+    }
+    
+    .firma-nombre-persona {
+        font-size: 10px;
+        font-weight: bold;
+        margin-bottom: 2px;
+    }
+    
+    .firma-info {
+        font-size: 8px;
+        color: #1976d2;
+        margin-bottom: 2px;
+    }
+    
+    .firma-linea {
         border-top: 1px solid #333;
         width: 80%;
-        margin: 5px auto 2px;
+        margin: 12px auto 0 auto;
+        padding-top: 3px;
     }
     
-    @media print {
-        body { font-size: 7px !important; }
-        .tabla-gastos td { font-size: 6.5px !important; }
+    .firma-cargo-etiqueta {
+        font-size: 7px;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .alerta-saldo {
+        padding: 6px 8px;
+        margin-top: 8px;
+        font-size: 8px;
+        border-radius: 3px;
+    }
+    
+    .alerta-favor {
+        background: #e8f5e9;
+        border-left: 3px solid #2e7d32;
+    }
+    
+    .alerta-debito {
+        background: #ffebee;
+        border-left: 3px solid #d32f2f;
+    }
+    
+    .alerta-cuadrado {
+        background: #e3f2fd;
+        border-left: 3px solid #1976d2;
+    }
+    
+    .texto-centrado {
+        text-align: center;
+        color: #999;
+        font-style: italic;
+        padding: 8px;
     }
 </style>
 
-<!-- SECCIÓN 1: INFORMACIÓN BÁSICA -->
-<div class="seccion compact-section">
-    <div class="seccion-titulo">📋 INFORMACIÓN DE RENDICIÓN</div>
+<!-- ENCABEZADO -->
+<div class="solicitud-header">
+    <div class="solicitud-titulo">RENDICIÓN DE CUENTAS</div>
+</div>
+
+<!-- SECCIÓN 1: INFORMACIÓN GENERAL -->
+<div class="info-card">
+    <div class="info-card-titulo" style="background: #1976d2;">INFORMACIÓN GENERAL</div>
     
-    <div style="display: flex; justify-content: space-between; gap: 5px;">
-        <div style="flex: 1;"><span class="etiqueta">N° Formulario:</span> <span class="valor" style="display: inline-block; padding: 2px 4px;">{{ numero_formulario }}</span></div>
-        <div style="flex: 1;"><span class="etiqueta">Cpte. Diario:</span> <span class="valor" style="display: inline-block; padding: 2px 4px;">{{ cpte_diario|default:"-" }}</span></div>
-        <div style="flex: 1;"><span class="etiqueta">Estado:</span> <span class="valor" style="display: inline-block; padding: 2px 4px; color: {{ estado_color }};">● {{ estado }}</span></div>
-    </div>
+    <table style="width: 100%; margin-bottom: 5px;">
+        <tr>
+            <td style="width: 25%;">
+                <div class="campo-fila">
+                    <span class="etiqueta-card">N° Formulario:</span>
+                    <span class="valor-card">{{ numero_formulario|default:"-" }}</span>
+                </div>
+            </td>
+            <td style="width: 25%;">
+                <div class="campo-fila">
+                    <span class="etiqueta-card">Cpte. Diario:</span>
+                    <span class="valor-card">{{ cpte_diario|default:"-" }}</span>
+                </div>
+            </td>
+            <td style="width: 25%;">
+                <div class="campo-fila">
+                    <span class="etiqueta-card">F. Rendición:</span>
+                    <span class="valor-card">{{ fecha_rendicion|default:"-" }}</span>
+                </div>
+            </td>
+            <td style="width: 25%;">
+                <!-- <div class="campo-fila">
+                    <span class="etiqueta-card">Estado:</span>
+                    <span class="badge-estado" style="background: {{ estado_color|default:'#666' }};">
+                        {{ estado|default:"PENDIENTE" }}
+                    </span>
+                </div> -->
+            </td>
+        </tr>
+    </table>
 </div>
 
 <!-- SECCIÓN 2: RESPONSABLE -->
-<div class="seccion compact-section">
-    <div class="seccion-titulo">👤 RESPONSABLE DE RENDICIÓN</div>
+<div class="info-card">
+    <div class="info-card-titulo" style="background: #ff9800;">RESPONSABLE DE RENDICIÓN</div>
     
-    <div style="display: flex; justify-content: space-between; gap: 5px;">
-        <div style="flex: 2;"><span class="etiqueta">Nombre:</span> <span class="valor" style="display: inline-block; padding: 2px 4px;">{{ nombre_solicitante }}</span></div>
-        <div style="flex: 1;"><span class="etiqueta">C.I.:</span> <span class="valor" style="display: inline-block; padding: 2px 4px;">{{ documento_identidad|default:"-" }}</span></div>
-        <div style="flex: 1;"><span class="etiqueta">Cargo:</span> <span class="valor" style="display: inline-block; padding: 2px 4px;">{{ cargo|default:"-" }}</span></div>
-    </div>
+    <table style="width: 100%;">
+        <tr>
+            <td style="width: 50%;">
+                <div class="campo-fila">
+                    <span class="etiqueta-card">Nombre:</span>
+                    <span class="valor-card">{{ nombre_solicitante|default:"-" }}</span>
+                </div>
+            </td>
+            <td style="width: 25%;">
+                <div class="campo-fila">
+                    <span class="etiqueta-card">C.I.:</span>
+                    <span class="valor-card">{{ documento_identidad|default:"-" }}</span>
+                </div>
+            </td>
+            <td style="width: 25%;">
+                <div class="campo-fila">
+                    <span class="etiqueta-card">Cargo:</span>
+                    <span class="valor-card">{{ cargo|default:"-" }}</span>
+                </div>
+            </td>
+        </tr>
+    </table>
 </div>
 
 <!-- SECCIÓN 3: ACTIVIDAD Y ORIGEN -->
-<div class="seccion compact-section">
-    <div class="seccion-titulo">📅 ACTIVIDAD</div>
+<div class="info-card">
+    <div class="info-card-titulo" style="background: #9c27b0;">ACTIVIDAD Y ORIGEN</div>
     
-    <div style="display: flex; justify-content: space-between; gap: 5px; margin-bottom: 2px;">
-        <div style="flex: 2;"><span class="etiqueta">Actividad:</span> <span class="valor" style="display: inline-block; padding: 2px 4px;">{{ nombre_actividad|default:"-" }}</span></div>
-        <div style="flex: 1;"><span class="etiqueta">Código:</span> <span class="valor" style="display: inline-block; padding: 2px 4px;">{{ codigo_actividad|default:"-" }}</span></div>
-    </div>
+    <table style="width: 100%; margin-bottom: 5px;">
+        <tr>
+            <td style="width: 50%;">
+                <div class="campo-fila">
+                    <span class="etiqueta-card">Actividad:</span>
+                    <span class="valor-card">{{ nombre_actividad|default:"-" }}</span>
+                </div>
+            </td>
+            <td style="width: 25%;">
+                <div class="campo-fila">
+                    <span class="etiqueta-card">Código:</span>
+                    <span class="valor-card">{{ codigo_actividad|default:"-" }}</span>
+                </div>
+            </td>
+            <td style="width: 25%;">
+                <div class="campo-fila">
+                    <span class="etiqueta-card">F. Actividad:</span>
+                    <span class="valor-card">{{ fecha_actividad|default:"-" }}</span>
+                </div>
+            </td>
+        </tr>
+    </table>
     
     {% if tipo_solicitud_origen != "No aplica" %}
-    <div style="margin-bottom: 2px;">
-        <span class="etiqueta">Origen:</span>
-        <span style="background-color: #e3f2fd; padding: 2px 6px; border-radius: 2px; font-size: 7px; display: inline-block;">
+    <div class="campo-fila">
+        <span class="etiqueta-card">Origen:</span>
+        <span class="badge-origen">
             <strong>{{ tipo_solicitud_origen }}</strong> - N° {{ solicitud_origen_numero }}
         </span>
     </div>
     {% endif %}
     
-    <div style="display: flex; justify-content: space-between; gap: 5px;">
-        <div><span class="etiqueta">F.Actividad:</span> <span class="valor" style="display: inline-block; padding: 2px 4px;">{{ fecha_actividad|default:"-" }}</span></div>
-        <div><span class="etiqueta">F.Rendición:</span> <span class="valor" style="display: inline-block; padding: 2px 4px;">{{ fecha_rendicion|default:"-" }}</span></div>
-        <div><span class="etiqueta">F.Desembolso:</span> <span class="valor" style="display: inline-block; padding: 2px 4px;">{{ fecha_desembolso|default:"-" }}</span></div>
-    </div>
+    <table style="width: 100%;">
+        <tr>
+            <td style="width: 50%;">
+                <div class="campo-fila">
+                    <span class="etiqueta-card">F. Desembolso:</span>
+                    <span class="valor-card">{{ fecha_desembolso|default:"-" }}</span>
+                </div>
+            </td>
+            <td style="width: 50%;">
+                <div class="campo-fila">
+                    <span class="etiqueta-card">Lugar:</span>
+                    <span class="valor-card">{{ lugar_actividad|default:"-" }}</span>
+                </div>
+            </td>
+        </tr>
+    </table>
 </div>
 
 <!-- SECCIÓN 4: RESUMEN FINANCIERO -->
-<div class="seccion">
-    <div class="seccion-titulo">💰 RESUMEN FINANCIERO</div>
+<div class="resumen-card">
+    <div class="info-card-titulo" style="background: #2e7d32; margin-bottom: 8px;">RESUMEN FINANCIERO</div>
     
-    <div style="display: flex; gap: 4px;">
-        <div class="resumen-item" style="background-color: #e3f2fd;">
-            <div style="font-size: 6px;">ASIGNADO</div>
-            <div style="font-size: 8px; font-weight: bold; color: #1976d2;">{{ monto_asignado|floatformat:2 }}</div>
-        </div>
-        <div class="resumen-item" style="background-color: #e8f5e9;">
-            <div style="font-size: 6px;">RENDIDO</div>
-            <div style="font-size: 8px; font-weight: bold; color: #2e7d32;">{{ monto_descargado|floatformat:2 }}</div>
-        </div>
-        <div class="resumen-item" style="background-color: {% if tiene_saldo_favor %}#f1f8e9{% elif tiene_saldo_debito %}#ffebee{% else %}#f5f5f5{% endif %};">
-            <div style="font-size: 6px;">
-                {% if tiene_saldo_favor %}A FAVOR{% elif tiene_saldo_debito %}PENDIENTE{% else %}SALDO{% endif %}
-            </div>
-            <div style="font-size: 8px; font-weight: bold; color: {% if tiene_saldo_favor %}#2e7d32{% elif tiene_saldo_debito %}#d32f2f{% else %}#666{% endif %};">{{ saldo|floatformat:2 }}</div>
-        </div>
-    </div>
+    <table class="resumen-grid">
+        <tr>
+            <td>
+                <div class="resumen-etiqueta">MONTO ASIGNADO</div>
+                <div class="resumen-valor" style="color: #1976d2;">Bs. {{ monto_asignado|floatformat:2 }}</div>
+            </td>
+            <td>
+                <div class="resumen-etiqueta">MONTO RENDIDO</div>
+                <div class="resumen-valor" style="color: #2e7d32;">Bs. {{ monto_descargado|floatformat:2 }}</div>
+            </td>
+            <td>
+                <div class="resumen-etiqueta">
+                    {% if tiene_saldo_favor %}SALDO A FAVOR{% elif tiene_saldo_debito %}SALDO PENDIENTE{% else %}SALDO{% endif %}
+                </div>
+                <div class="resumen-valor" style="color: {% if tiene_saldo_favor %}#2e7d32{% elif tiene_saldo_debito %}#d32f2f{% else %}#666{% endif %};">
+                    Bs. {{ saldo|floatformat:2 }}
+                </div>
+            </td>
+        </tr>
+    </table>
 </div>
 
-<!-- SECCIÓN 5: DETALLE DE GASTOS - CON LAS COLUMNAS EXACTAS Y SIN TRUNCAR -->
+<!-- SECCIÓN 5: DETALLE DE GASTOS -->
 <div class="seccion">
-    <div class="seccion-titulo">🧾 DETALLE DE GASTOS</div>
+    <div class="seccion-titulo">DETALLE DE GASTOS</div>
     
     {% if tiene_gastos %}
     <table class="tabla-gastos">
         <thead>
             <tr>
-                <th class="col-fecha">FECHA</th>
-                <th class="col-partida">PARTIDA</th>
-                <th class="col-factura">FACTURA/RECIBO</th>
-                <th class="col-descripcion">DESCRIPCIÓN DEL GASTO</th>
-                <th class="col-monto">MONTO</th>
+                <th style="width: 3%;">#</th>
+                <th style="width: 11%;">FECHA</th>
+                <th style="width: 9%;">PARTIDA</th>
+                <th style="width: 9%;">FUENTE</th>
+                <th style="width: 13%;">FACTURA</th>
+                <th style="width: 32%;">DESCRIPCIÓN</th>
+                <th style="width: 11%;">PROVEEDOR</th>
+                <th style="width: 12%; text-align: right;">MONTO (Bs.)</th>
             </tr>
         </thead>
         <tbody>
             {% for gasto in detalle_gastos %}
             <tr>
+                <td style="text-align: center;">{{ forloop.counter }}</td>
                 <td>{{ gasto.fecha_gasto_formateada|default:"-" }}</td>
                 <td>{{ gasto.partida|default:"-" }}</td>
+                <td>{{ gasto.fuente|default:"-" }}</td>
                 <td>{{ gasto.factura_recibo|default:"-" }}</td>
                 <td>{{ gasto.descripcion_gasto|default:"-" }}</td>
-                <td style="text-align: right;">Bs. {{ gasto.monto|floatformat:2 }}</td>
+                <td>{{ gasto.proveedor|default:"-" }}</td>
+                <td style="text-align: right;">{{ gasto.monto|floatformat:2 }}</td>
             </tr>
             {% endfor %}
             
-            <!-- Total -->
             <tr class="total-row">
-                <td colspan="4" style="text-align: right; font-weight: bold;">TOTAL GASTOS JUSTIFICADOS:</td>
-                <td style="text-align: right; font-weight: bold;">Bs. {{ monto_descargado|floatformat:2 }}</td>
+                <td colspan="7" style="text-align: right; font-weight: bold;">TOTAL GASTOS JUSTIFICADOS:</td>
+                <td style="text-align: right; font-weight: bold; font-size: 9px;">
+                    Bs. {{ monto_descargado|floatformat:2 }}
+                </td>
             </tr>
         </tbody>
     </table>
     
-    <div style="margin-top: 2px; font-size: 6px; color: #666; text-align: right;">
+    <div style="font-size: 8px; text-align: right; color: #666; margin-top: 2px;">
         Total de {{ cantidad_gastos }} comprobante{{ cantidad_gastos|pluralize:"s" }}
     </div>
     {% else %}
-    <div style="text-align: center; padding: 10px; background-color: #f5f5f5; border-radius: 3px;">
-        <span style="color: #999; font-style: italic; font-size: 7px;">No se han registrado gastos en esta rendición</span>
-    </div>
+    <div class="texto-centrado">No se registraron gastos para esta rendición</div>
     {% endif %}
 </div>
 
-<!-- SECCIÓN 6: FIRMAS Y VALIDACIONES (COMPACTAS) -->
-<div class="seccion">
-    <div class="seccion-titulo">✅ FIRMAS Y VALIDACIONES</div>
+<!-- SECCIÓN 6: FIRMAS Y VALIDACIONES -->
+<div class="firma-seccion">
+    <div class="seccion-titulo">FIRMAS Y VALIDACIONES</div>
     
-    <div style="display: flex; gap: 4px; margin-bottom: 5px;">
-        <!-- Coordinador -->
-        <div class="firma-item" style="background-color: {% if validacion_coordinador %}#f8fdf8{% else %}#fff8f8{% endif %};">
-            <div style="font-size: 6px; font-weight: bold;">COORDINADOR</div>
-            <div style="font-size: 9px; font-weight: bold; color: {% if validacion_coordinador %}#2e7d32{% else %}#d32f2f{% endif %};">{% if validacion_coordinador %}✓{% else %}✗{% endif %}</div>
-            <div style="font-size: 6px;">{{ nombre_coordinador|default:"No asignado"|truncatechars:15 }}</div>
-            <div class="linea-firma"></div>
-            <div style="font-size: 5px; color: #666;">Firma</div>
-        </div>
-        
-        <!-- Contador -->
-        <div class="firma-item" style="background-color: {% if validacion_contador %}#f8fdf8{% else %}#fff8f8{% endif %};">
-            <div style="font-size: 6px; font-weight: bold;">CONTADOR</div>
-            <div style="font-size: 9px; font-weight: bold; color: {% if validacion_contador %}#2e7d32{% else %}#d32f2f{% endif %};">{% if validacion_contador %}✓{% else %}✗{% endif %}</div>
-            <div style="font-size: 6px;">{{ nombre_contador|default:"No asignado"|truncatechars:15 }}</div>
-            <div class="linea-firma"></div>
-            <div style="font-size: 5px; color: #666;">Firma</div>
-        </div>
-        
-        <!-- Administrador -->
-        <div class="firma-item" style="background-color: {% if validacion_administrador %}#f8fdf8{% else %}#fff8f8{% endif %};">
-            <div style="font-size: 6px; font-weight: bold;">ADMINISTRADOR</div>
-            <div style="font-size: 9px; font-weight: bold; color: {% if validacion_administrador %}#2e7d32{% else %}#d32f2f{% endif %};">{% if validacion_administrador %}✓{% else %}✗{% endif %}</div>
-            <div style="font-size: 6px;">{{ nombre_administrador|default:"No asignado"|truncatechars:15 }}</div>
-            <div class="linea-firma"></div>
-            <div style="font-size: 5px; color: #666;">Firma</div>
-        </div>
-        
-        <!-- Responsable -->
-        <div class="firma-item" style="background-color: #f5f5f5;">
-            <div style="font-size: 6px; font-weight: bold;">RESPONSABLE</div>
-            <div style="font-size: 9px; font-weight: bold; color: #1976d2;">✓</div>
-            <div style="font-size: 6px;">{{ nombre_solicitante|truncatechars:15 }}</div>
-            <div class="linea-firma"></div>
-            <div style="font-size: 5px; color: #666;">Firma</div>
-        </div>
-    </div>
+    <table class="firma-grid">
+        <tr>
+            <td>
+                <div class="firma-card {% if validacion_coordinador %}firma-card-ok{% else %}firma-card-pendiente{% endif %}">
+                    <div style="font-size: 8px; font-weight: bold; margin-bottom: 3px;">COORDINADOR</div>
+                    <div style="font-size: 12px; font-weight: bold; color: {% if validacion_coordinador %}#2e7d32{% else %}#d32f2f{% endif %};">
+                        {% if validacion_coordinador %}✓{% else %}✗{% endif %}
+                    </div>
+                    <div class="firma-nombre-persona" style="font-size: 9px;">{{ nombre_coordinador|default:"_________________" }}</div>
+                    <div class="firma-linea"></div>
+                    <div class="firma-cargo-etiqueta">Firma</div>
+                </div>
+            </td>
+            <td>
+                <div class="firma-card {% if validacion_contador %}firma-card-ok{% else %}firma-card-pendiente{% endif %}">
+                    <div style="font-size: 8px; font-weight: bold; margin-bottom: 3px;">CONTADOR</div>
+                    <div style="font-size: 12px; font-weight: bold; color: {% if validacion_contador %}#2e7d32{% else %}#d32f2f{% endif %};">
+                        {% if validacion_contador %}✓{% else %}✗{% endif %}
+                    </div>
+                    <div class="firma-nombre-persona" style="font-size: 9px;">{{ nombre_contador|default:"_________________" }}</div>
+                    <div class="firma-linea"></div>
+                    <div class="firma-cargo-etiqueta">Firma</div>
+                </div>
+            </td>
+            <td>
+                <div class="firma-card {% if validacion_administrador %}firma-card-ok{% else %}firma-card-pendiente{% endif %}">
+                    <div style="font-size: 8px; font-weight: bold; margin-bottom: 3px;">ADMINISTRADOR</div>
+                    <div style="font-size: 12px; font-weight: bold; color: {% if validacion_administrador %}#2e7d32{% else %}#d32f2f{% endif %};">
+                        {% if validacion_administrador %}✓{% else %}✗{% endif %}
+                    </div>
+                    <div class="firma-nombre-persona" style="font-size: 9px;">{{ nombre_administrador|default:"_________________" }}</div>
+                    <div class="firma-linea"></div>
+                    <div class="firma-cargo-etiqueta">Firma</div>
+                </div>
+            </td>
+            <td>
+                <div class="firma-card">
+                    <div style="font-size: 8px; font-weight: bold; margin-bottom: 3px;">RESPONSABLE</div>
+                    <div style="font-size: 12px; font-weight: bold; color: #1976d2;">✓</div>
+                    <div class="firma-nombre-persona" style="font-size: 9px;">{{ nombre_solicitante|default:"_________________" }}</div>
+                    <div class="firma-linea"></div>
+                    <div class="firma-cargo-etiqueta">Firma</div>
+                </div>
+            </td>
+        </tr>
+    </table>
     
-    <!-- Observación final compacta -->
-    <div style="margin-top: 3px; padding: 4px; background-color: #f5f5f5; border-left: 3px solid {% if tiene_saldo_favor %}#2e7d32{% elif tiene_saldo_debito %}#d32f2f{% else %}#1976d2{% endif %}; font-size: 6px;">
+    <!-- Alerta de saldo -->
+    <div class="alerta-saldo {% if tiene_saldo_favor %}alerta-favor{% elif tiene_saldo_debito %}alerta-debito{% else %}alerta-cuadrado{% endif %}">
         {% if tiene_saldo_favor %}
         <strong>SALDO A FAVOR:</strong> Bs. {{ saldo|floatformat:2 }} - Devolver a caja.
         {% elif tiene_saldo_debito %}
@@ -250,8 +478,9 @@
         {% endif %}
         
         {% if es_completo %}
-        <span style="color: #2e7d32; font-weight: bold;">✓ APROBADA</span>
+        <span style="color: #2e7d32; font-weight: bold; margin-left: 10px;">✓ APROBADA</span>
         {% endif %}
     </div>
 </div>
+
 {% endblock %}
