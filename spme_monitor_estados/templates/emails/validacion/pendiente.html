@@ -21,7 +21,13 @@
         </tr>
         <tr>
             <td>Responsable:</td>
-            <td>{{ entidad.responsable.get_full_name|default:entidad.responsable.nombre|default:'No asignado' }}</td>
+            <td>
+                {% if entidad.responsable %}
+                    {{ entidad.responsable.get_full_name|default:entidad.responsable.nombre|default:'No asignado' }}
+                {% else %}
+                    No asignado
+                {% endif %}                
+            </td>
         </tr>
         <tr>
             <td>Fecha de creación:</td>

@@ -1422,6 +1422,7 @@ class InformeTareaPrincipalPei(InformeActividadBase):
 
 #Importar los modelos para vinculaciones
 from .modelos_vinculaciones import VinculacionSolicitudInforme
+from .modelos_vinculaciones.vinculacion_solicitud_informe_tarea import VinculacionSolicitudInformeTarea
 
 
 #########################################################################################

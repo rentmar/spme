@@ -1250,6 +1250,7 @@ class SolicitudViajeAdmin(admin.ModelAdmin):
 # spme_monitoreo/admin.py
 from django.contrib import admin
 from .modelos_vinculaciones import VinculacionSolicitudInforme
+from .modelos_vinculaciones import VinculacionSolicitudInformeTarea
 
 
 @admin.register(VinculacionSolicitudInforme)
@@ -1320,6 +1321,109 @@ class VinculacionSolicitudInformeAdmin(admin.ModelAdmin):
     # Orden por defecto
     ordering = ['-fecha_vinculacion']
     
+    # ==================== ACCIONES ====================
+    
+    @admin.action(description='✅ Activar vinculaciones seleccionadas')
+    def activar_seleccionadas(self, request, queryset):
+        """Activar vinculaciones seleccionadas"""
+        count = 0
+        for vinculacion in queryset:
+            if not vinculacion.activa:
+                vinculacion.activa = True
+                vinculacion.save()
+                count += 1
+        self.message_user(request, f'{count} vinculaciones activadas.')
+    
+    @admin.action(description='❌ Desactivar vinculaciones seleccionadas')
+    def desactivar_seleccionadas(self, request, queryset):
+        """Desactivar vinculaciones seleccionadas"""
+        count = 0
+        for vinculacion in queryset:
+            if vinculacion.activa:
+                vinculacion.activa = False
+                vinculacion.save()
+                count += 1
+        self.message_user(request, f'{count} vinculaciones desactivadas.')
+    
+    # ==================== MÉTODOS ====================
+    
+    def save_model(self, request, obj, form, change):
+        """Al crear, asignar usuario actual"""
+        if not change:
+            obj.usuario_vinculo = request.user
+        super().save_model(request, obj, form, change)
+    
+    def get_queryset(self, request):
+        """Optimizar consultas"""
+        return super().get_queryset(request).select_related(
+            'solicitud', 'informe', 'usuario_vinculo'
+        )
+
+@admin.register(VinculacionSolicitudInformeTarea)
+class VinculacionSolicitudInformeTareaAdmin(admin.ModelAdmin):
+    """
+    Configuracion del panel de administracion para vinculaciones
+    """
+    #Campos visibles en la lista
+    list_display = [
+        'id',
+        'solicitud',
+        'informe',
+        'activa',
+        'fecha_vinculacion',
+        'usuario_vinculo'
+    ]
+    # Filtros laterales
+    list_filter = [
+        'activa',
+        'fecha_vinculacion',
+        'usuario_vinculo'
+    ]
+
+    # Campos de búsqueda
+    search_fields = [
+        'solicitud__numeroFormulario',
+        'solicitud__evento',
+        'informe__numeroInforme',
+        'usuario_vinculo__username',
+        'observaciones'
+    ]
+
+    # Campos de solo lectura
+    readonly_fields = [
+        'fecha_vinculacion',
+        'datos_completos_vinculacion',  # Solo lectura en el admin
+    ]
+    # Organización del formulario
+    fieldsets = (
+        ('Información Principal', {
+            'fields': ('solicitud', 'informe', 'activa'),
+            'description': 'Seleccione la solicitud y el informe a vincular'
+        }),
+        ('Información Adicional', {
+            'fields': ('observaciones',),  # Solo aquí, no duplicado
+            'classes': ('wide',)
+        }),
+        ('Datos de Vinculación', {
+            'fields': ('datos_completos_vinculacion',),
+            'classes': ('collapse',),
+            'description': 'Información detallada de la vinculación (generada automáticamente)'
+        }),
+        ('Información de Auditoría', {
+            'fields': ('fecha_vinculacion', 'usuario_vinculo'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    # Acciones personalizadas
+    actions = ['activar_seleccionadas', 'desactivar_seleccionadas']
+    
+    # Paginación
+    list_per_page = 20
+    
+    # Orden por defecto
+    ordering = ['-fecha_vinculacion']
+
     # ==================== ACCIONES ====================
     
     @admin.action(description='✅ Activar vinculaciones seleccionadas')

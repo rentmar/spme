@@ -115,6 +115,7 @@ from .solrendicioncuentas.views.rendicion_cuentas_mas_solicitudes_views import R
 #Vinculacion sol de viaje a informe de actividad
 from .informeactividadprincipal.views.vincular_solicitudes_viaje_a_informe_actividad_views import VinculacionInformeViewSet
 from .informeactividadprincipal.views.crear_informe_actividad_principal_v2_views import InformeActividadPrincipalV2
+from .informeactividadprincipal.views.crear_informe_tarea_principal_v2_views import InformeSubactividadPrincipalV2
 
 #PEI
 router = DefaultRouter()
@@ -344,7 +345,9 @@ urlpatterns =[
     #Informe de Actividad (POST, GET, PUT),
     #Procesa Datos del informe de actividad, Validadores (notificaciones), Vinculacion Sol de viajes (notificaciones)
     path(r'informe-actividad-principal/v2/', InformeActividadPrincipalV2.as_view(), name='informe-actividad-principal-v2'),
-
+    #Informe de Tarea(subactividad) POST, GET, PUT
+    #Procesa Datos del informe de tarea, validadores(notificaciones), vinculacion Sol de viajes (notificaciones)
+    path(r'informe-subactividad-principal/v2/', InformeSubactividadPrincipalV2.as_view(), name='informe-subactividad-principal-v2'),
 ]
  
 urlpatterns += router.urls
