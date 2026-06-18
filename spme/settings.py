@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'spme_validaciones',
     'spme_monitor_estados',
     'spme_pei_reportes',
+    'spme_presupuesto',
     'django_celery_beat',
     'apptran', #Aplicacion de transicion
     'system_config', #Configuracion del sistema
