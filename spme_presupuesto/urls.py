@@ -25,6 +25,8 @@ urlpatterns = [
     path(r'validar/actividad/<int:actividad_id>/', ValidarActividadView.as_view(), name='validar_actividad'),
     path(r'validar/proyecto/<int:proyecto_id>/', ValidarProyectoView.as_view(), name='validar_proyecto'),
     path(r'validar/tarea/<int:tarea_id>/', ValidarTareaView.as_view(),name='validar_tarea'),
+    ############################ Ejecucion #################################
+    
 
 
 
