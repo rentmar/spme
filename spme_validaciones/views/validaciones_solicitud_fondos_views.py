@@ -148,33 +148,93 @@ class ResetearValidacionesSolicitudFondosViewSet(viewsets.ViewSet):
     def create(self, request, solicitud_id=None):
         return Response({'msg':'reset Sol de FOndos'})
     
-
+# ===================================================================
+# ESTADO DE VALIDACIÓN
+# ===================================================================
 class EstadoValidacionSolicitudFondosAPIView(APIView):
     """
-    GET /api/solicitud-fondos/{id}/estado-validacion/
+    GET /api/solicitud-fondos/{solicitud_id}/estado-validacion/
     """
-    def get(self, request, solicitud_id):
-        return Response({'msg':'Estado validacion Sol de FOndos'})
+    permission_classes = [IsAuthenticated]
     
+    def get(self, request, solicitud_id):
+        solicitud = get_object_or_404(SolicitudFondos, id=solicitud_id)
+        estadisticas = repo.obtener_estadisticas_por_solicitud(solicitud_id)
 
+        #Tipo de solicitud
+        if solicitud.actividad_id and not solicitud.tarea_id:
+            tipo = 'ACTIVIDAD'
+        elif solicitud.actividad_id and solicitud.tarea_id:
+            tipo = 'TAREA'
+        else:
+            tipo = 'GENERAL'
+
+        return Response({
+            'solicitud_id': solicitud.id,
+            'solicitud_codigo': solicitud.numeroFormulario or f"SF-{solicitud.id}",
+            'monto': str(solicitud.montoSolicitado),
+            'tipo_solicitud': tipo,
+            **estadisticas
+        }, status=status.HTTP_200_OK)
+    
+# ===================================================================
+# HISTORIAL
+# ===================================================================
 class HistorialValidacionSolicitudFondosAPIView(APIView):
     """
-    GET /api/solicitud-fondos/{id}/historial/
+    GET /api/solicitud-fondos/{solicitud_id}/historial/
     """
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     
     def get(self, request, solicitud_id):
-        return Response({'msg':'Historial validacion Sol de FOndos'})
+        solicitud = get_object_or_404(SolicitudFondos, id=solicitud_id)
 
+        from ..models import HistorialValidacion
+        historial = HistorialValidacion.objects.filter(
+            validacion__validacionsolicitudfondos__solicitud=solicitud
+        ).select_related('usuario', 'validacion__validacionsolicitudfondos').order_by('-fechaCambio')
+
+        serializer = HistorialValidacionSerializer(historial, many=True)
+
+        return Response({
+            'count': len(serializer.data),
+            'results': serializer.data
+        }, status=status.HTTP_200_OK)
+
+# ===================================================================
+# MIS VALIDACIONES PENDIENTES 
+# Solicitud de Fondos
+# ===================================================================
 class MisValidacionesPendientesSolicitudFondosAPIView(APIView):
     """
     GET /api/solicitud-fondos/mis-pendientes/
+    Return: Todas las validaciones para solicitud de fondo pendientes
     """
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        return Response({'msg':'Mis validaciones pendientes Sol de Fondos'})
-    
+        validaciones = repo.obtener_por_validador_con_solicitud(request.user.id)
+        pendientes = [v for v in validaciones if v.estado == 'PENDIENTE']
+
+        data = []
+        
+        for v in pendientes:
+            data.append({
+                'validacion_id': v.id,
+                'codigo_seguimiento': v.codigoSeguimiento,
+                'estado': v.estado,
+                'fecha_asignacion': v.fechaAsignacion,
+                'solicitud_id': v.solicitud.id,
+                'solicitud_codigo': v.solicitud.numeroFormulario or f"SF-{v.solicitud.id}",
+                'solicitud_monto': str(v.solicitud.montoSolicitado),
+                'solicitante_nombre': v.usuarioRedactor.get_full_name() if v.usuarioRedactor else 'N/A',
+                'tipo_solicitud': v.tipo_solicitud,
+            })
+        
+        return Response({
+            'count': len(data),
+            'results': data
+        }, status=status.HTTP_200_OK)
 
 
 

@@ -354,7 +354,17 @@ class HistorialValidacion(models.Model):
         ]
     
     def __str__(self):
-        tipo = "Actividad" if hasattr(self.validacion, 'informe') else "Tarea"
-        return f"{tipo} - {self.validacion.codigoSeguimiento} - {self.estado_anterior}→{self.estado_nuevo}"
+        if hasattr(self.validacion, 'informe'):
+            tipo = "Actividad"
+        elif hasattr(self.validacion, 'informeTarea'):
+            tipo = "Tarea"
+        elif hasattr(self.validacion, 'solicitud'):
+            tipo = "Solicitud Fondos"
+        else:
+            tipo = "Desconocido"
+        return f"{tipo} - {self.validacion.codigoSeguimiento} - {self.estado_anterior}→{self.estado_nuevo}"   
+    # def __str__(self):
+    #     tipo = "Actividad" if hasattr(self.validacion, 'informe') else "Tarea"
+    #     return f"{tipo} - {self.validacion.codigoSeguimiento} - {self.estado_anterior}→{self.estado_nuevo}"
     
     

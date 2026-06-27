@@ -126,10 +126,14 @@ class HistorialValidacionSerializer(serializers.ModelSerializer):
         read_only_fields = ['fechaCambio']
     
     def get_validacion_tipo(self, obj):
+        from spme_validaciones.models import ValidacionSolicitudFondos
+        
         if hasattr(obj.validacion, 'informe'):
             return 'ACTIVIDAD'
         elif hasattr(obj.validacion, 'informeTarea'):
             return 'TAREA'
+        elif ValidacionSolicitudFondos.objects.filter(pk=obj.validacion_id).exists():
+            return 'SOLICITUD_FONDOS'
         return 'DESCONOCIDO'
 
 
