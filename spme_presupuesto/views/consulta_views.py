@@ -14,8 +14,6 @@ class EstadoPresupuestoProyectoView(APIView):
     def get(self, request, proyecto_id):
         try:
             proyecto = Proyecto.objects.get(id=proyecto_id)
-            
-        
         except Proyecto.DoesNotExist:
             return Response(
                 {'error': 'Proyecto no encontrado.'},

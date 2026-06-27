@@ -17,6 +17,7 @@ router = DefaultRouter()
 router.register(r'validaciones', ValidacionViewSet, basename='validacion')
 
 urlpatterns = [
+    ################################# Validacion de Informes ###################################################
     #Validadores Informes Actividad/Tarea
     path(r'asignar-validadores/', AsignarValidadoresViewSet.as_view({'post': 'create'}), name='asignar-validadores'),
     path(r'estado-validacion/', EstadoValidacionViewSet.as_view({'get': 'list'}), name='estado-validacion'),
@@ -27,6 +28,9 @@ urlpatterns = [
     path(r'informe-actividad/<int:informe_id>/estado-validacion/', EstadoValidacionInformeAPIView.as_view(), name='estado-validacion-informe-principal'),
     # Endpoint para verificar estado de validación de un informe de tarea específico
     path(r'informe-tarea/<int:informe_id>/estado-validacion/', EstadoValidacionInformeTareaAPIView.as_view(), name='estado-validacion-informe-tarea-principal'),
+
+    ################################ Validaciones de Solicitud de Fondos ######################################################
+    
 ] 
 
 urlpatterns += router.urls
