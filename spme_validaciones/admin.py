@@ -5,8 +5,12 @@ from .models import (
     Validacion, 
     ValidacionInformeActividad, 
     ValidacionInformeTarea,
-    HistorialValidacion
+    HistorialValidacion,
+    ValidacionSolicitudFondos,
 )
+from django.urls import reverse
+from django.db import models
+from django.utils import timezone
 
 # -------------------------------------------------------------------
 # ADMIN PARA VALIDACION BASE (SOLO LECTURA)
@@ -370,6 +374,140 @@ class ValidacionInformeTareaAdmin(admin.ModelAdmin):
 
 
 # -------------------------------------------------------------------
+# ADMIN PARA VALIDACIONES DE SOLICITUD DE FONDOS
+# -------------------------------------------------------------------
+@admin.register(ValidacionSolicitudFondos)
+class ValidacionSolicitudFondosAdmin(admin.ModelAdmin):
+    """
+    Admin para validaciones de Solicitudes de Fondos
+    """
+    list_display = [
+        'id',
+        'codigoSeguimiento',
+        'solicitud_link',
+        'usuarioValidador',
+        'estado_coloreado',
+        'versionDocumento',
+        'fechaAsignacion_corta'
+    ]
+    
+    list_filter = [
+        'estado',
+        'versionDocumento',
+        'fechaAsignacion',
+    ]
+    
+    search_fields = [
+        'codigoSeguimiento',
+        'solicitud__numeroFormulario',
+        'usuarioValidador__username',
+        'comentarios'
+    ]
+    
+    raw_id_fields = ['solicitud', 'usuarioValidador', 'usuarioRedactor']
+    
+    readonly_fields = [
+        'codigoSeguimiento',
+        'fechaAsignacion',
+        'fechaResolucion',
+        'solicitud_detalle'
+    ]
+    
+    fieldsets = (
+        ('Validación', {
+            'fields': (
+                'codigoSeguimiento',
+                ('usuarioValidador', 'usuarioRedactor'),
+                ('estado', 'versionDocumento'),
+                'comentarios'
+            )
+        }),
+        ('Solicitud Relacionada', {
+            'fields': (
+                'solicitud',
+                'solicitud_detalle'
+            )
+        }),
+        ('Fechas', {
+            'fields': (
+                ('fechaAsignacion', 'fechaResolucion'),
+            )
+        }),
+    )
+    
+    def solicitud_link(self, obj):
+        """Link a la solicitud en admin"""
+        url = f"/admin/spme_fondos/solicitudfondos/{obj.solicitud.id}/change/"
+        return format_html('<a href="{}">{}</a>', url, obj.solicitud.numeroFormulario)
+    solicitud_link.short_description = 'Solicitud'
+    solicitud_link.admin_order_field = 'solicitud__numeroFormulario'
+    
+    def solicitud_detalle(self, obj):
+        """Muestra detalles de la solicitud"""
+        if obj.solicitud:
+            return format_html(
+                '<strong>Formulario:</strong> {}<br>'
+                '<strong>Monto:</strong> {:,.2f}<br>'
+                '<strong>Tipo:</strong> {}<br>'
+                '<strong>Solicitante:</strong> {}',
+                obj.solicitud.numeroFormulario or f"SF-{obj.solicitud.id}",
+                obj.solicitud.montoSolicitado or 0,
+                obj.tipo_solicitud,
+                obj.solicitud.usuario if hasattr(obj.solicitud, 'usuario') else '-'
+            )
+        return '-'
+    solicitud_detalle.short_description = 'Detalles de la Solicitud'
+    
+    def estado_coloreado(self, obj):
+        """Muestra el estado con colores"""
+        colors = {
+            'PENDIENTE': 'orange',
+            'APROBADO': 'green',
+            'RECHAZADO': 'red',
+        }
+        color = colors.get(obj.estado, 'gray')
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{}</span>',
+            color,
+            obj.get_estado_display()
+        )
+    estado_coloreado.short_description = 'Estado'
+    estado_coloreado.admin_order_field = 'estado'
+    
+    def fechaAsignacion_corta(self, obj):
+        """Fecha en formato corto"""
+        return obj.fechaAsignacion.strftime('%d/%m/%Y %H:%M') if obj.fechaAsignacion else '-'
+    fechaAsignacion_corta.short_description = 'Asignación'
+    
+    def get_queryset(self, request):
+        """Optimizar consultas"""
+        return super().get_queryset(request).select_related(
+            'solicitud',
+            'usuarioValidador',
+            'usuarioRedactor'
+        )
+    
+    actions = ['marcar_como_aprobado', 'marcar_como_rechazado']
+    
+    def marcar_como_aprobado(self, request, queryset):
+        """Action para aprobar validaciones"""
+        for v in queryset:
+            v.estado = 'APROBADO'
+            v.save()
+        self.message_user(request, f"{queryset.count()} validaciones marcadas como APROBADAS")
+    marcar_como_aprobado.short_description = "Marcar como APROBADO"
+    
+    def marcar_como_rechazado(self, request, queryset):
+        """Action para rechazar validaciones"""
+        for v in queryset:
+            v.estado = 'RECHAZADO'
+            v.save()
+        self.message_user(request, f"{queryset.count()} validaciones marcadas como RECHAZADAS")
+    marcar_como_rechazado.short_description = "Marcar como RECHAZADO"
+
+
+
+# -------------------------------------------------------------------
 # ADMIN PARA HISTORIAL
 # -------------------------------------------------------------------
 @admin.register(HistorialValidacion)
@@ -449,8 +587,12 @@ class HistorialValidacionAdmin(admin.ModelAdmin):
     cambio_estado.short_description = 'Cambio'
     
     def fechaCambio_corta(self, obj):
-        """Fecha en formato corto"""
-        return obj.fechaCambio.strftime('%d/%m/%Y %H:%M')
+        """Fecha en formato corto con zona horaria local"""
+        if obj.fechaCambio:
+            # Convierte automáticamente a la zona horaria configurada en TIME_ZONE
+            local_time = timezone.localtime(obj.fechaCambio)
+            return local_time.strftime('%d/%m/%Y %H:%M')
+        return '-'
     fechaCambio_corta.short_description = 'Fecha'
     fechaCambio_corta.admin_order_field = 'fechaCambio'
     

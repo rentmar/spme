@@ -39,7 +39,8 @@ def encolar_email(
             cuerpo_texto = strip_tags(cuerpo_html)
         except Exception as e:
             logger.error(f"❌ Error renderizando template {template_html}: {e}")
-            return None
+            raise
+            #return None
     else:
         if cuerpo_html and not cuerpo_texto:
             cuerpo_texto = strip_tags(cuerpo_html)
@@ -492,4 +493,54 @@ def encolar_exportacion_lista(usuario, exportacion_nombre, enlace_descarga, regi
         asunto=f"💾 Tu exportación '{exportacion_nombre}' está lista",
         template_html='emails/reportes/exportacion_lista.html', contexto=contexto,
         prioridad=1, tipo_entidad='usuario', entidad_id=usuario.id, evento='exportacion_lista'
+    )
+
+
+# ============================================================
+# FUNCIÓN ESPECÍFICA PARA SOLICITUD DE FONDOS
+# ============================================================
+
+def encolar_validacion_pendiente_sf(solicitud, validador, enlace_ver_detalle=None, site_url=None):
+    """
+    Notifica al validador que tiene una solicitud de fondos pendiente.
+    Versión específica para SolicitudFondos.
+    No accede a informe.actividad ni informe.tarea.
+    
+    Args:
+        solicitud: Objeto SolicitudFondos
+        validador: Objeto Usuario
+        enlace_ver_detalle: URL para ver el detalle
+        site_url: URL base del sitio
+    """
+    site_url = site_url or 'http://localhost:8000'
+    
+    if not enlace_ver_detalle:
+        enlace_ver_detalle = f"{site_url}/solicitudes-fondos/{solicitud.id}"
+    
+    codigo = solicitud.numeroFormulario or f"SF-{solicitud.id}"
+    
+    contexto = {
+        'tipo': 'solicitud_fondos',
+        'entidad': solicitud,
+        'solicitud': solicitud,
+        'validador': validador,
+        'codigo': codigo,
+        'monto': solicitud.montoSolicitado,
+        'enlace_ver_detalle': enlace_ver_detalle,
+        'site_url': site_url,
+        'fecha': timezone.now(),
+        'icono': '💵',
+        'titulo': 'Validación Pendiente - Solicitud de Fondos',
+        'color': '#4CAF50'
+    }
+    
+    return encolar_email(
+        destinatario=validador.email if hasattr(validador, 'email') else validador.correo,
+        asunto=f"💵 Solicitud de Fondos pendiente - {codigo}",
+        template_html='emails/validacion/pendiente_sf.html',
+        contexto=contexto,
+        prioridad=3,
+        tipo_entidad='solicitud_fondos',
+        entidad_id=solicitud.id,
+        evento='validacion_pendiente_sf'
     )

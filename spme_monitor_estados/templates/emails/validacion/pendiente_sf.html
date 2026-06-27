@@ -1,0 +1,38 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<p>Hola {{ validador.get_full_name }},</p>
+
+<p>Se requiere tu validación para la siguiente <strong>solicitud de fondos</strong>:</p>
+
+<div class="info-box">
+    <table class="info-table">
+        <tr>
+            <td>💵 Código:</td>
+            <td><strong>{{ solicitud.numeroFormulario|default:solicitud.id }}</strong></td>
+        </tr>
+        <tr>
+            <td>💰 Monto:</td>
+            <td><strong>${{ solicitud.montoSolicitado }}</strong></td>
+        </tr>
+        <tr>
+            <td>👤 Solicitante:</td>
+            <td>{{ solicitud.usuario.get_full_name }}</td>
+        </tr>
+        <tr>
+            <td>📅 Fecha:</td>
+            <td>{{ solicitud.fechaSolicitud|date:"d/m/Y" }}</td>
+        </tr>
+        <tr>
+            <td>🏷️ Tu rol:</td>
+            <td>{{ validador.cargo|default:"Validador" }}</td>
+        </tr>
+    </table>
+</div>
+
+<div class="botones-accion">
+    <a href="{{ enlace_ver_detalle }}" class="button button-ver">📄 Ver Solicitud</a>
+</div>
+
+<p>Por favor, revisa y emite tu validación a la brevedad posible.</p>
+{% endblock %}

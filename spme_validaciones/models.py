@@ -5,8 +5,12 @@ from polymorphic.models import PolymorphicModel
 from spme_autenticacion.models import Usuario
 from spme_monitoreo.models import InformeActividadPrincipal
 from spme_monitoreo.models import InformeTareaPrincipal
+from spme_monitoreo.models import (
+    SolicitudFondos,
+)
 import random
 import string
+import uuid
 
 # -------------------------------------------------------------------
 # CLASE BASE PARA VALIDACIONES
@@ -79,7 +83,14 @@ class Validacion(PolymorphicModel):
     
     def generar_codigo_unico(self):
         """Genera un código único para la validación"""
+        from .models import ValidacionSolicitudFondos
         fecha = timezone.now().strftime('%Y%m%d')
+
+        #Si es solicitud de fondos genera el codigo SF-FECHA-UID
+        if isinstance(self, ValidacionSolicitudFondos):
+            uid = uuid.uuid4().hex[:8].upper()
+            return f"SF-{fecha}-{uid}"
+
         aleatorio = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
         return f"VAL-{fecha}-{aleatorio}"
     
@@ -139,11 +150,6 @@ class Validacion(PolymorphicModel):
                 comentario=f"Cambio de estado: {estado_anterior} → {self.estado}"
             )    
         
-
-
-
-
-
     
     def __str__(self):
         return f"{self.codigoSeguimiento} - {self.usuarioValidador.username} - {self.estado}"
@@ -229,6 +235,65 @@ class ValidacionInformeTarea(Validacion):
     
     def __str__(self):
         return f"IT {self.informeTarea.numeroInforme} - {self.codigoSeguimiento} - {self.estado}"
+
+# ===================================================================
+# VALIDACIÓN PARA SOLICITUD DE FONDOS
+# ===================================================================
+class ValidacionSolicitudFondos(Validacion):
+    """
+    Validacion para solicitudes de fondos (actividades y tareas)
+    """
+    
+    solicitud = models.ForeignKey(
+        SolicitudFondos,
+        on_delete=models.CASCADE,
+        related_name='validaciones',
+        verbose_name='Solicitud de Fondos'
+    )
+
+    class Meta:
+        verbose_name = "Validación de Solicitud de Fondos"
+        verbose_name_plural = "Validaciones de Solicitudes de Fondos"
+        
+    def save(self, *args, **kwargs):
+        is_new = not self.pk
+        if is_new and not self.codigoSeguimiento:
+            self.codigoSeguimiento = self.generar_codigo_unico()
+        self.clean()
+        super().save(*args, **kwargs)
+    
+    def clean(self):
+        if not self.pk:
+            if ValidacionSolicitudFondos.objects.filter(
+                solicitud=self.solicitud,
+                usuarioValidador=self.usuarioValidador
+            ).exists():
+                raise ValidationError(
+                    f"El usuario '{self.usuarioValidador.get_full_name()}' "
+                    f"ya está asignado como validador para esta solicitud"
+                )
+    
+    def __str__(self):
+        codigo = self.solicitud.numeroFormulario or f"SF-{self.solicitud.id}"
+        return f"💵 {codigo} - {self.codigoSeguimiento} - {self.get_estado_display()}"
+    
+    @property
+    def tipo_solicitud(self):
+        if self.solicitud.actividad_id and not self.solicitud.tarea_id:
+            return 'ACTIVIDAD'
+        elif self.solicitud.actividad_id and self.solicitud.tarea_id:
+            return 'TAREA'
+        return 'GENERAL'
+        
+    
+    @property
+    def monto_solicitud(self):
+        return self.solicitud.montoSolicitado
+    
+    @property
+    def codigo_solicitud(self):
+        return self.solicitud.numeroFormulario or f"SF-{self.solicitud.id}"
+
 
 
 # -------------------------------------------------------------------

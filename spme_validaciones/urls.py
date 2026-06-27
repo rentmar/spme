@@ -11,6 +11,17 @@ from .views.validaciones_informes_actividad_subac_views import (
 )
 from .views.obtener_lista_validadores_views import UsuarioValidacionAPIView
 
+#Importaciones para solicitud de fondos
+from .views.validaciones_solicitud_fondos_views import (
+    AsignarValidadoresSolicitudFondosViewSet,
+    VotarSolicitudFondosViewSet,
+    ResetearValidacionesSolicitudFondosViewSet,
+    EstadoValidacionSolicitudFondosAPIView,
+    HistorialValidacionSolicitudFondosAPIView,
+    MisValidacionesPendientesSolicitudFondosAPIView,
+)
+
+
 router = DefaultRouter()
 
 #Validadores Informes Actividad/Tarea
@@ -30,7 +41,12 @@ urlpatterns = [
     path(r'informe-tarea/<int:informe_id>/estado-validacion/', EstadoValidacionInformeTareaAPIView.as_view(), name='estado-validacion-informe-tarea-principal'),
 
     ################################ Validaciones de Solicitud de Fondos ######################################################
-    
+    path(r'solicitud-fondos/<int:solicitud_id>/asignar-validadores/', AsignarValidadoresSolicitudFondosViewSet.as_view({'post': 'create'}), name='asignar-validadores-solicitud-fondos'),
+    path(r'solicitud-fondos/<int:solicitud_id>/votar/', VotarSolicitudFondosViewSet.as_view({'post': 'create'}), name='votar-solicitud-fondos'),
+    path(r'solicitud-fondos/<int:solicitud_id>/estado-validacion/', EstadoValidacionSolicitudFondosAPIView.as_view(), name='estado-validacion-solicitud-fondos'),
+    path(r'solicitud-fondos/<int:solicitud_id>/resetear-validaciones/', ResetearValidacionesSolicitudFondosViewSet.as_view({'post': 'create'}), name='resetear-validaciones-solicitud-fondos'),
+    path(r'solicitud-fondos/<int:solicitud_id>/historial/', HistorialValidacionSolicitudFondosAPIView.as_view(), name='historial-solicitud-fondos'),
+    path(r'solicitud-fondos/mis-pendientes/', MisValidacionesPendientesSolicitudFondosAPIView.as_view(), name='mis-pendientes-solicitud-fondos'),
 ] 
 
 urlpatterns += router.urls
