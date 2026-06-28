@@ -1,0 +1,39 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<p>Hola {{ solicitante.get_full_name }},</p>
+
+<p>Tu <strong>solicitud de fondos</strong> ha sido <strong>RECHAZADA</strong>.</p>
+
+<div class="info-box">
+    <table class="info-table">
+        <tr>
+            <td>💵 Código:</td>
+            <td><strong>{{ solicitud.numeroFormulario|default:solicitud.id }}</strong></td>
+        </tr>
+        <tr>
+            <td>💰 Monto:</td>
+            <td><strong>${{ solicitud.montoSolicitado }}</strong></td>
+        </tr>
+        <tr>
+            <td>❌ Rechazado por:</td>
+            <td><strong>{{ nombre_validador }}</strong></td>
+        </tr>
+        <tr>
+            <td>📅 Fecha:</td>
+            <td>{{ fecha|date:"d/m/Y H:i" }}</td>
+        </tr>
+    </table>
+</div>
+
+<div class="error-box">
+    <p><strong>📝 Motivo del rechazo:</strong></p>
+    <p>{{ motivo }}</p>
+</div>
+
+<p>Puedes corregir la solicitud y reenviarla para una nueva validación.</p>
+
+<div class="botones-accion">
+    <a href="{{ enlace_corregir }}" class="button button-rechazar">📝 Corregir y Reenviar</a>
+</div>
+{% endblock %}

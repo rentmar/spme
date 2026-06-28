@@ -45,6 +45,10 @@ from spme_monitor_estados.utils.encolar import (
     encolar_validacion_rechazada,
     encolar_confirmacion_validador,
     encolar_validacion_pendiente_sf,
+    encolar_validacion_aprobada_sf,
+    encolar_validacion_rechazada_sf,
+    encolar_confirmacion_validador_sf
+
 )
 
 import logging
@@ -129,16 +133,87 @@ class AsignarValidadoresSolicitudFondosViewSet(viewsets.ViewSet):
             'resultados': resultados
         }, status=status.HTTP_201_CREATED)
         
-        
-        
-        
+# ===================================================================
+# EMITIR VOTO (APROBAR O RECHAZAR)
+# ===================================================================
 
 class VotarSolicitudFondosViewSet(viewsets.ViewSet):
     """
-    POST /api/solicitud-fondos/{id}/votar/
+    POST /api/solicitud-fondos/{solicitud_id}/votar/
+    Payload: {"validacion_id": 15, "estado": "APROBADO", "comentarios": "..."}
+    
+    El mismo endpoint se usa para APROBAR y RECHAZAR.
+    El campo "estado" determina la acción: "APROBADO" o "RECHAZADO".
+    Si es RECHAZADO, "comentarios" es obligatorio.
     """
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic
     def create(self, request, solicitud_id=None):
-        return Response({'msg':'Votar Sol de FOndos'})
+        voto_serializer = EmitirVotoSerializer(data=request.data)
+        if not voto_serializer.is_valid():
+            return Response(voto_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        validacion_id = request.data.get('validacion_id')
+        voto = voto_serializer.validated_data['estado']
+        comentarios = voto_serializer.validated_data.get('comentarios', '')
+
+        if voto == 'RECHAZADO' and not comentarios:
+            return Response(
+                {'error': 'Los comentarios son obligatorios cuando se rechaza'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            validacion = ValidacionSolicitudFondos.objects.get(
+                id=validacion_id,
+                usuarioValidador=request.user,
+                estado='PENDIENTE'
+            )
+        except ValidacionSolicitudFondos.DoesNotExist:
+            return Response(
+                {'error': 'Validación no encontrada o ya procesada'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        validacion.estado = voto
+        validacion.comentarios = comentarios
+        validacion.save()
+        
+        solicitud = validacion.solicitud
+
+        # Confirmar al validador
+        encolar_confirmacion_validador_sf(
+            solicitud=solicitud,
+            validador=request.user,
+            accion=voto.lower()
+        )
+
+        if voto == 'APROBADO':
+            resumen = repo.obtener_resumen_estado_solicitud(solicitud.id)
+            if resumen['aprobado_totalmente']:
+                validaciones_aprobadas = ValidacionSolicitudFondos.objects.filter(
+                    solicitud=solicitud, estado='APROBADO'
+                )
+                crear_mensaje_solicitud_aprobada(solicitud, validaciones_aprobadas)
+                encolar_validacion_aprobada_sf(    # ← BIEN
+                    solicitud=solicitud,
+                    validador=request.user
+                )
+
+        elif voto == 'RECHAZADO':
+            crear_mensaje_solicitud_rechazada(solicitud, request.user, comentarios)
+            encolar_validacion_rechazada_sf( 
+                solicitud=solicitud,
+                validador=request.user,
+                motivo=comentarios
+            )
+        
+        return Response(
+            ValidacionSolicitudFondosSerializer(validacion).data,
+            status=status.HTTP_200_OK
+        )
+
 
 
 class ResetearValidacionesSolicitudFondosViewSet(viewsets.ViewSet):

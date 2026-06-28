@@ -544,3 +544,128 @@ def encolar_validacion_pendiente_sf(solicitud, validador, enlace_ver_detalle=Non
         entidad_id=solicitud.id,
         evento='validacion_pendiente_sf'
     )
+
+def encolar_confirmacion_validador_sf(solicitud, validador, accion, enlace_ver_detalle=None, site_url=None):
+    """
+    Confirma al validador que su voto fue registrado.
+    Versión específica para SolicitudFondos.
+    No accede a informe.actividad ni informe.tarea.
+    """
+    site_url = site_url or 'http://localhost:8000'
+    
+    if not enlace_ver_detalle:
+        enlace_ver_detalle = f"{site_url}/solicitudes-fondos/{solicitud.id}"
+    
+    codigo = solicitud.numeroFormulario or f"SF-{solicitud.id}"
+    acciones_texto = {'aprobado': 'aprobado', 'rechazado': 'rechazado'}
+    
+    contexto = {
+        'tipo': 'solicitud_fondos',
+        'entidad': solicitud,
+        'solicitud': solicitud,
+        'validador': validador,
+        'accion_texto': acciones_texto.get(accion, accion),
+        'codigo': codigo,
+        'enlace_ver_detalle': enlace_ver_detalle,
+        'site_url': site_url,
+        'fecha': timezone.now(),
+        'icono': '✅',
+        'titulo': 'Confirmación de Voto',
+        'color': '#2196F3'
+    }
+    
+    return encolar_email(
+        destinatario=validador.email if hasattr(validador, 'email') else validador.correo,
+        asunto=f"✅ Has {acciones_texto.get(accion, accion).upper()} la solicitud - {codigo}",
+        template_html='emails/validacion/confirmacion_validador_sf.html',
+        contexto=contexto,
+        prioridad=2,
+        tipo_entidad='solicitud_fondos',
+        entidad_id=solicitud.id,
+        evento='confirmacion_validador_sf'
+    )
+
+def encolar_validacion_aprobada_sf(solicitud, validador, comentarios=None, enlace_ver_detalle=None, site_url=None):
+    """
+    Notifica al SOLICITANTE que su solicitud de fondos fue APROBADA.
+    Versión específica para SolicitudFondos.
+    """
+    site_url = site_url or 'http://localhost:8000'
+    
+    if not enlace_ver_detalle:
+        enlace_ver_detalle = f"{site_url}/solicitudes-fondos/{solicitud.id}"
+    
+    codigo = solicitud.numeroFormulario or f"SF-{solicitud.id}"
+    solicitante = solicitud.usuario
+    
+    contexto = {
+        'tipo': 'solicitud_fondos',
+        'entidad': solicitud,
+        'solicitud': solicitud,
+        'solicitante': solicitante,
+        'validador': validador,
+        'codigo': codigo,
+        'monto': solicitud.montoSolicitado,
+        'comentarios': comentarios,
+        'enlace_ver_detalle': enlace_ver_detalle,
+        'site_url': site_url,
+        'fecha': timezone.now(),
+        'icono': '✅',
+        'titulo': 'Solicitud Aprobada',
+        'color': '#4CAF50'
+    }
+    
+    return encolar_email(
+        destinatario=solicitante.email if hasattr(solicitante, 'email') else solicitante.correo,
+        asunto=f"✅ Solicitud APROBADA - {codigo}",
+        template_html='emails/validacion/aprobada_sf.html',
+        contexto=contexto,
+        prioridad=3,
+        tipo_entidad='solicitud_fondos',
+        entidad_id=solicitud.id,
+        evento='validacion_aprobada_sf'
+    )
+
+
+def encolar_validacion_rechazada_sf(solicitud, validador, motivo, enlace_corregir=None, site_url=None):
+    """
+    Notifica al SOLICITANTE que su solicitud de fondos fue RECHAZADA.
+    Versión específica para SolicitudFondos.
+    """
+    site_url = site_url or 'http://localhost:8000'
+    
+    if not enlace_corregir:
+        enlace_corregir = f"{site_url}/solicitudes-fondos/{solicitud.id}/corregir"
+    
+    codigo = solicitud.numeroFormulario or f"SF-{solicitud.id}"
+    solicitante = solicitud.usuario
+    nombre_validador = validador.get_full_name()
+    
+    contexto = {
+        'tipo': 'solicitud_fondos',
+        'entidad': solicitud,
+        'solicitud': solicitud,
+        'solicitante': solicitante,
+        'validador': validador,
+        'nombre_validador': nombre_validador,
+        'codigo': codigo,
+        'monto': solicitud.montoSolicitado,
+        'motivo': motivo,
+        'enlace_corregir': enlace_corregir,
+        'site_url': site_url,
+        'fecha': timezone.now(),
+        'icono': '❌',
+        'titulo': 'Solicitud Rechazada',
+        'color': '#f44336'
+    }
+    
+    return encolar_email(
+        destinatario=solicitante.email if hasattr(solicitante, 'email') else solicitante.correo,
+        asunto=f"❌ Solicitud RECHAZADA - {codigo}",
+        template_html='emails/validacion/rechazada_sf.html',
+        contexto=contexto,
+        prioridad=4,
+        tipo_entidad='solicitud_fondos',
+        entidad_id=solicitud.id,
+        evento='validacion_rechazada_sf'
+    )

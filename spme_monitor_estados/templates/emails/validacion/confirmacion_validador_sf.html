@@ -1,0 +1,52 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<p>Hola {{ validador.get_full_name }},</p>
+
+{% if accion_texto == 'aprobado' %}
+<p>Has <strong>APROBADO</strong> la siguiente solicitud de fondos:</p>
+{% else %}
+<p>Has <strong>RECHAZADO</strong> la siguiente solicitud de fondos:</p>
+{% endif %}
+
+<div class="info-box">
+    <table class="info-table">
+        <tr>
+            <td>💵 Código:</td>
+            <td><strong>{{ solicitud.numeroFormulario|default:solicitud.id }}</strong></td>
+        </tr>
+        <tr>
+            <td>💰 Monto:</td>
+            <td><strong>${{ solicitud.montoSolicitado }}</strong></td>
+        </tr>
+        <tr>
+            <td>👤 Solicitante:</td>
+            <td>{{ solicitud.usuario.get_full_name }}</td>
+        </tr>
+        <tr>
+            <td>🗳️ Tu voto:</td>
+            <td>
+                {% if accion_texto == 'aprobado' %}
+                ✅ APROBADO
+                {% else %}
+                ❌ RECHAZADO
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>📅 Fecha:</td>
+            <td>{{ fecha|date:"d/m/Y H:i" }}</td>
+        </tr>
+    </table>
+</div>
+
+{% if accion_texto == 'rechazado' %}
+<p>El solicitante podrá corregir y reenviar la solicitud para una nueva validación.</p>
+{% endif %}
+
+<div class="botones-accion">
+    <a href="{{ enlace_ver_detalle }}" class="button button-ver">📄 Ver Solicitud</a>
+</div>
+
+<p>Gracias por tu participación en el proceso de validación.</p>
+{% endblock %}

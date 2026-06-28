@@ -1,0 +1,34 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<p>Hola {{ solicitante.get_full_name }},</p>
+
+<p>¡Buenas noticias! Tu <strong>solicitud de fondos</strong> ha sido <strong>APROBADA</strong> por todos los validadores.</p>
+
+<div class="info-box">
+    <table class="info-table">
+        <tr>
+            <td>💵 Código:</td>
+            <td><strong>{{ solicitud.numeroFormulario|default:solicitud.id }}</strong></td>
+        </tr>
+        <tr>
+            <td>💰 Monto:</td>
+            <td><strong>${{ solicitud.montoSolicitado }}</strong></td>
+        </tr>
+        <tr>
+            <td>📅 Fecha de aprobación:</td>
+            <td>{{ fecha|date:"d/m/Y H:i" }}</td>
+        </tr>
+    </table>
+</div>
+
+<div class="success-box">
+    <p>✅ La solicitud ha sido aprobada y puede proceder con su ejecución.</p>
+</div>
+
+<div class="botones-accion">
+    <a href="{{ enlace_ver_detalle }}" class="button button-ver">📄 Ver Solicitud</a>
+</div>
+
+<p>Gracias por utilizar el sistema SPME.</p>
+{% endblock %}
