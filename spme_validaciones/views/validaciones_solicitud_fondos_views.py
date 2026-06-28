@@ -215,13 +215,52 @@ class VotarSolicitudFondosViewSet(viewsets.ViewSet):
         )
 
 
+# ===================================================================
+# RESETEAR VALIDACIONES (MANUAL - NO AUTOMÁTICO)
+# ===================================================================
 
 class ResetearValidacionesSolicitudFondosViewSet(viewsets.ViewSet):
     """
-    POST /api/solicitud-fondos/{id}/resetear-validaciones/
+    POST /api/solicitud-fondos/{solicitud_id}/resetear-validaciones/
+    Payload: {"nueva_version": "2"}
+    
+    ⚠️ Este endpoint NO se llama automáticamente.
+    El solicitante debe invocarlo manualmente después de corregir la solicitud.
     """
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic
     def create(self, request, solicitud_id=None):
-        return Response({'msg':'reset Sol de FOndos'})
+        serializer = ResetearValidacionesSolicitudFondosSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        solicitud = get_object_or_404(SolicitudFondos, id=solicitud_id)
+        validaciones = ValidacionSolicitudFondos.objects.filter(solicitud=solicitud)
+        nueva_version = serializer.validated_data.get('nueva_version', '2')
+        reseteadas = 0
+
+        for v in validaciones:
+            if v.estado != 'PENDIENTE':
+                v.estado = 'PENDIENTE'
+                v.versionDocumento = nueva_version
+                v.fechaResolucion = None
+                v.save()
+                reseteadas += 1
+        
+        for v in validaciones:
+            encolar_validacion_pendiente_sf(
+                solicitud=solicitud,
+                validador=v.usuarioValidador,
+                enlace_ver_detalle=f"/solicitudes-fondos/{solicitud.id}/validar"
+            )
+        
+        return Response({
+            'mensaje': f'Reseteadas {reseteadas} validaciones a versión {nueva_version}',
+            'documento_id': solicitud.id,
+            'documento_numero': solicitud.numeroFormulario or f"SF-{solicitud.id}",
+            'nueva_version': nueva_version
+        }, status=status.HTTP_200_OK)
+
     
 # ===================================================================
 # ESTADO DE VALIDACIÓN
