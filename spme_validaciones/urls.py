@@ -19,6 +19,7 @@ from .views.validaciones_solicitud_fondos_views import (
     EstadoValidacionSolicitudFondosAPIView,
     HistorialValidacionSolicitudFondosAPIView,
     MisValidacionesPendientesSolicitudFondosAPIView,
+    AsignarValidadoresSolicitudFondosSinNotificacionViewSet,
 )
 
 
@@ -47,6 +48,7 @@ urlpatterns = [
     path(r'solicitud-fondos/<int:solicitud_id>/resetear-validaciones/', ResetearValidacionesSolicitudFondosViewSet.as_view({'post': 'create'}), name='resetear-validaciones-solicitud-fondos'),
     path(r'solicitud-fondos/<int:solicitud_id>/historial/', HistorialValidacionSolicitudFondosAPIView.as_view(), name='historial-solicitud-fondos'),
     path(r'solicitud-fondos/mis-pendientes/', MisValidacionesPendientesSolicitudFondosAPIView.as_view(), name='mis-pendientes-solicitud-fondos'),
+    path(r'solicitud-fondos/<int:solicitud_id>/asignar-validadores-sin-notificacion/', AsignarValidadoresSolicitudFondosSinNotificacionViewSet.as_view({'post': 'create'}), name='asignar-validadores-solicitud-fondos-sin-notificacion'),
 ] 
 
 urlpatterns += router.urls

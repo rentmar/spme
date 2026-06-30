@@ -1,0 +1,49 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<p>Hola {{ validador.get_full_name }},</p>
+
+<div class="alert-box" style="background-color: #FFF3E0; border-left: 4px solid #FF9800; padding: 15px; margin: 15px 0;">
+    <strong>📝 SOLICITUD DE NUEVA REVISIÓN</strong><br>
+    Una solicitud de fondos que fue <strong>previamente rechazada</strong> 
+    ha sido <strong>corregida</strong> por el solicitante y requiere una 
+    <strong>nueva revisión</strong>.
+</div>
+
+<p>Se requiere tu validación para la siguiente <strong>solicitud de fondos corregida</strong>:</p>
+
+<div class="info-box">
+    <table class="info-table">
+        <tr>
+            <td>💵 Código:</td>
+            <td><strong>{{ solicitud.numeroFormulario|default:solicitud.id }}</strong></td>
+        </tr>
+        <tr>
+            <td>💰 Monto:</td>
+            <td><strong>${{ solicitud.montoSolicitado }}</strong></td>
+        </tr>
+        <tr>
+            <td>📌 Versión:</td>
+            <td><strong>{{ version }}</strong> <span style="color: #FF9800;">(Corregida)</span></td>
+        </tr>
+        <tr>
+            <td>👤 Solicitante:</td>
+            <td>{{ solicitud.usuario.get_full_name }}</td>
+        </tr>
+        <tr>
+            <td>📅 Fecha de solicitud de revisión:</td>
+            <td>{{ fecha|date:"d/m/Y" }}</td>
+        </tr>
+        <tr>
+            <td>🏷️ Tu rol:</td>
+            <td>{{ validador.cargo|default:"Validador" }}</td>
+        </tr>
+    </table>
+</div>
+
+<div class="botones-accion">
+    <a href="{{ enlace_ver_detalle }}" class="button button-revisar" style="background-color: #FF9800;">📄 Revisar Nueva Versión</a>
+</div>
+
+<p>Por favor, revisa la <strong>nueva versión corregida</strong> del documento y emite tu validación a la brevedad posible.</p>
+{% endblock %}

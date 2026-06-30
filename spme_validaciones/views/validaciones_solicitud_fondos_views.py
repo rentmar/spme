@@ -36,6 +36,7 @@ from spme_mensajes.services.notificacion_service import (
     crear_mensajes_validacion_solicitud_fondos,
     crear_mensaje_solicitud_aprobada,
     crear_mensaje_solicitud_rechazada,
+    crear_mensaje_revision_solicitud_fondos,
 ) 
 
 #Notificaciones email
@@ -47,7 +48,8 @@ from spme_monitor_estados.utils.encolar import (
     encolar_validacion_pendiente_sf,
     encolar_validacion_aprobada_sf,
     encolar_validacion_rechazada_sf,
-    encolar_confirmacion_validador_sf
+    encolar_confirmacion_validador_sf,
+    encolar_revision_solicitud_fondos,
 
 )
 
@@ -226,6 +228,10 @@ class ResetearValidacionesSolicitudFondosViewSet(viewsets.ViewSet):
     
     ⚠️ Este endpoint NO se llama automáticamente.
     El solicitante debe invocarlo manualmente después de corregir la solicitud.
+
+    Resetea TODOS los validadores a PENDIENTE, actualiza la versión,
+    y notifica por email + mensajería interna que se trata de una
+    NUEVA REVISIÓN de un documento previamente rechazado.
     """
     permission_classes = [IsAuthenticated]
 
@@ -239,19 +245,34 @@ class ResetearValidacionesSolicitudFondosViewSet(viewsets.ViewSet):
         nueva_version = serializer.validated_data.get('nueva_version', '2')
         reseteadas = 0
 
+        #Resetear las validaciones
         for v in validaciones:
-            if v.estado != 'PENDIENTE':
-                v.estado = 'PENDIENTE'
-                v.versionDocumento = nueva_version
-                v.fechaResolucion = None
-                v.save()
-                reseteadas += 1
+            v.estado = 'PENDIENTE'
+            v.versionDocumento = nueva_version
+            v.fechaResolucion = None
+            v.save()
+            reseteadas += 1
         
+        #Notificar a cada validadores
         for v in validaciones:
-            encolar_validacion_pendiente_sf(
+            # 📧 Email: Nueva revisión de documento previamente rechazado
+            encolar_revision_solicitud_fondos(
                 solicitud=solicitud,
                 validador=v.usuarioValidador,
+                version=nueva_version,
                 enlace_ver_detalle=f"/solicitudes-fondos/{solicitud.id}/validar"
+            )
+            # 🔔 Mensajería interna: Nueva revisión
+            crear_mensaje_revision_solicitud_fondos(
+                solicitud=solicitud,
+                validador={
+                    'id': v.usuarioValidador.id,
+                    'nombre_completo': v.usuarioValidador.get_full_name(),
+                    'rol': v.usuarioValidador.cargo or 'validador',
+                    'estado': 'PENDIENTE',
+                    'fechaAsignacion': str(timezone.now())
+                },
+                version=nueva_version
             )
         
         return Response({
@@ -349,6 +370,81 @@ class MisValidacionesPendientesSolicitudFondosAPIView(APIView):
             'count': len(data),
             'results': data
         }, status=status.HTTP_200_OK)
+    
 
-
-
+# ===================================================================
+# ASIGNAR VALIDADORES SIN NOTIFICACIONES
+# Solicitud de Fondos
+# ===================================================================
+class AsignarValidadoresSolicitudFondosSinNotificacionViewSet(viewsets.ViewSet):
+    """
+    POST /api/solicitud-fondos/{solicitud_id}/asignar-validadores-sin-notificacion/
+    
+    Asigna validadores SIN enviar notificaciones ni emails.
+    Basado en el endpoint original pero sin llamadas a:
+    - crear_mensajes_validacion_solicitud_fondos()
+    - encolar_validacion_pendiente()
+    
+    Reglas:
+    - Transacción atómica: todo el lote o nada
+    - Unicidad estricta: si cualquier validador ya existe, se rechaza todo
+    - Doble protección anti-duplicados: clean() en modelo + UniqueConstraint en BD
+    """
+    permission_classes = [IsAuthenticated]
+    def create(self, request, solicitud_id=None):
+        serializer = AsignarValidadoresSolicitudFondosSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        data = serializer.validated_data
+        solicitud = get_object_or_404(SolicitudFondos, id=solicitud_id)
+        validadores = Usuario.objects.filter(id__in=data['validador_ids'])
+        
+        # Validar que todos los IDs existen
+        if len(validadores) != len(data['validador_ids']):
+            ids_encontrados = list(validadores.values_list('id', flat=True))
+            ids_faltantes = set(data['validador_ids']) - set(ids_encontrados)
+            return Response(
+                {'error': f'Validadores no encontrados: {list(ids_faltantes)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validar UNICIDAD ESTRICTA: verificar que ninguno exista ya
+        duplicados = []
+        for validador in validadores:
+            if repo.existe_validador(solicitud.id, 'solicitud', validador.id):
+                duplicados.append({
+                    'validador_id': validador.id,
+                    'nombre': validador.get_full_name(),
+                    'error': 'Ya existe una validación para este usuario en esta solicitud'
+                })
+        
+        # Si hay duplicados, RECHAZAR TODO EL LOTE
+        if duplicados:
+            return Response({
+                'error': 'Validadores duplicados encontrados',
+                'detalle': duplicados
+            }, status=status.HTTP_409_CONFLICT)
+        
+        # Todos son únicos, crear validaciones
+        resultados = []
+        for validador in validadores:
+            validacion = repo.crear(
+                solicitud=solicitud,
+                usuarioValidador=validador,
+                usuarioRedactor=request.user,
+                estado='PENDIENTE',
+                versionDocumento='1'
+            )
+            resultados.append(
+                ValidacionSolicitudFondosSerializer(validacion).data
+            )
+        
+        # ❌ SIN NOTIFICACIONES
+        # ❌ SIN EMAILS
+        
+        return Response({
+            'mensaje': f'Creadas {len(resultados)} validaciones (sin notificación)',
+            'resultados': resultados
+        }, status=status.HTTP_201_CREATED)
+    

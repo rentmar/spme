@@ -669,3 +669,56 @@ def encolar_validacion_rechazada_sf(solicitud, validador, motivo, enlace_corregi
         entidad_id=solicitud.id,
         evento='validacion_rechazada_sf'
     )
+
+# ============================================================
+# FUNCIÓN PARA REVISIÓN DE SOLICITUD RECHAZADA
+# ============================================================
+
+def encolar_revision_solicitud_fondos(solicitud, validador, version, enlace_ver_detalle=None, site_url=None):
+    """
+    Notifica al VALIDADOR que una solicitud de fondos PREVIAMENTE RECHAZADA
+    ha sido corregida y requiere una NUEVA REVISIÓN.
+    
+    Args:
+        solicitud: Objeto SolicitudFondos
+        validador: Objeto Usuario (el validador que debe revisar)
+        version: String con la nueva versión (ej: "2")
+        enlace_ver_detalle: URL para ver el detalle
+        site_url: URL base del sitio
+    """
+    site_url = site_url or 'http://localhost:8000'
+    
+    if not enlace_ver_detalle:
+        enlace_ver_detalle = f"{site_url}/solicitudes-fondos/{solicitud.id}/validar"
+    
+    codigo = solicitud.numeroFormulario or f"SF-{solicitud.id}"
+    solicitante_nombre = solicitud.usuario.get_full_name() if solicitud.usuario else "Sistema"
+    
+    contexto = {
+        'tipo': 'solicitud_fondos',
+        'entidad': solicitud,
+        'solicitud': solicitud,
+        'validador': validador,
+        'codigo': codigo,
+        'monto': solicitud.montoSolicitado,
+        'version': version,
+        'solicitante_nombre': solicitante_nombre,
+        'enlace_ver_detalle': enlace_ver_detalle,
+        'site_url': site_url,
+        'fecha': timezone.now(),
+        'icono': '📝',
+        'titulo': 'Nueva Revisión - Solicitud Corregida',
+        'color': '#FF9800',
+        'es_revision': True
+    }
+    
+    return encolar_email(
+        destinatario=validador.email if hasattr(validador, 'email') else validador.correo,
+        asunto=f"📝 Nueva Revisión - {codigo} (v{version})",
+        template_html='emails/validacion/revision_sf.html',
+        contexto=contexto,
+        prioridad=3,
+        tipo_entidad='solicitud_fondos',
+        entidad_id=solicitud.id,
+        evento='revision_solicitud_fondos'
+    )

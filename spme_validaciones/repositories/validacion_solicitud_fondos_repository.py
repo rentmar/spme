@@ -56,6 +56,7 @@ class ValidacionSolicitudFondosRepository(BaseValidacionRepository):
         
         detalle = []
         for v in validaciones:
+            redactor = v.usuarioRedactor
             detalle.append({
                 'validacion_id': v.id,
                 'validador_id': v.usuarioValidador_id,
@@ -65,6 +66,15 @@ class ValidacionSolicitudFondosRepository(BaseValidacionRepository):
                 'fecha_asignacion': v.fechaAsignacion,
                 'fecha_resolucion': v.fechaResolucion,
                 'codigo_seguimiento': v.codigoSeguimiento,
+                'version_documento': v.versionDocumento,
+                'redactor':{
+                    'id': redactor.id,
+                    'nombre_completo': redactor.get_full_name(),
+                    'email': redactor.correo if hasattr(redactor, 'correo') else getattr(redactor, 'email', ''),
+                    'rol': redactor.cargo if hasattr(redactor, 'cargo') else '',
+                    'username': redactor.username
+                }
+
             })
         
         return {

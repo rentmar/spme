@@ -656,3 +656,55 @@ def crear_mensaje_solicitud_rechazada(solicitud, validador_que_rechazo, motivo):
     except Exception as e:
         logger.error(f"❌ Error en mensaje de rechazo: {e}")
         return None
+    
+def crear_mensaje_revision_solicitud_fondos(solicitud, validador, version):
+    """
+    Mensaje interno notificando que un documento RECHAZADO ha sido corregido
+    y requiere una NUEVA REVISIÓN.
+    """
+    try:
+        codigo = solicitud.numeroFormulario or f"SF-{solicitud.id}"
+        monto = solicitud.montoSolicitado
+        solicitante_nombre = solicitud.usuario.get_full_name() if solicitud.usuario else "Sistema"
+        
+        contenido = (
+            f"Hola {validador['nombre_completo']},\n\n"
+            f"📝 NUEVA REVISIÓN SOLICITADA\n\n"
+            f"El documento que fue previamente rechazado ha sido CORREGIDO "
+            f"y requiere una nueva revisión.\n\n"
+            f"💵 Solicitud: {codigo}\n"
+            f"💰 Monto: ${monto:,.2f}\n"
+            f"📌 Versión: {version}\n"
+            f"👤 Solicitante: {solicitante_nombre}\n"
+            f"⏰ Asignado: {validador.get('fechaAsignacion', timezone.now().strftime('%Y-%m-%d'))}\n\n"
+            f"Por favor, revisa la nueva versión del documento y emite tu validación."
+        )
+        
+        mensaje = MensajeUsuario.objects.create(
+            destinatario_id=validador['id'],
+            remitente=None,
+            tipo=TipoMensaje.ALERTA,
+            asunto=f"📝 Nueva Revisión - {codigo} (v{version})",
+            contenido=contenido,
+            estado=EstadoMensaje.NO_LEIDO,
+            prioridad=3,
+            fecha_envio=timezone.now(),
+            icono='📝',
+            accion_url=f'/solicitudes-fondos/{solicitud.id}/validar',
+            accion_texto='Revisar Nueva Versión',
+            routing_key='mensaje.usuario.solicitud_fondos',
+            referencia_id=f"SF-{solicitud.id}",
+            metadata={
+                'solicitud_id': solicitud.id,
+                'solicitud_codigo': codigo,
+                'tipo': 'nueva_revision',
+                'version': version
+            }
+        )
+        
+        logger.info(f"✅ Mensaje de REVISIÓN creado - {codigo} v{version} - ID: {mensaje.id}")
+        return mensaje
+        
+    except Exception as e:
+        logger.error(f"❌ Error: {e}")
+        return None
