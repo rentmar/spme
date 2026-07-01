@@ -1,3 +1,4 @@
+# spme/spme_monitoreo/models.py
 from django.db import models
 from spme_autenticacion.models import Usuario
 from spme_actividades.models import Actividad, TareaActividad

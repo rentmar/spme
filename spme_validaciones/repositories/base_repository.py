@@ -1,3 +1,4 @@
+# spme/spme_validaciones/repositories/base_repository.py
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 import logging

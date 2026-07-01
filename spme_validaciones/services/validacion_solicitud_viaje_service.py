@@ -1,13 +1,13 @@
-# spme/spme_validaciones/services/validacion_solicitud_fondos_service.py
+# spme/spme_validaciones/services/validacion_solicitud_viaje_service.py
 import logging
-from spme_validaciones.models import ValidacionSolicitudFondos
+from spme_validaciones.models import ValidacionSolicitudViaje
 from spme_autenticacion.models import Usuario
 
 logger = logging.getLogger(__name__)
 
-class ValidacionSolicitudFondosService:
+class ValidacionSolicitudViajeService:
     """
-    Servicio para validaciones de Solicitudes de Fondos.
+    Servicio para validaciones de Solicitudes de Viaje.
     """
     @staticmethod
     def crear_desde_json(solicitud, validador_json):
@@ -25,7 +25,7 @@ class ValidacionSolicitudFondosService:
         if not usuario:
             return None
         
-        existe = ValidacionSolicitudFondos.objects.filter(
+        existe = ValidacionSolicitudViaje.objects.filter(
             solicitud=solicitud, usuarioValidador=usuario
         ).exists()
         
@@ -33,7 +33,7 @@ class ValidacionSolicitudFondosService:
             logger.info(f"ℹ️ Validación ya existe para {usuario.username} - ignorando")
             return None
         
-        validacion = ValidacionSolicitudFondos(
+        validacion = ValidacionSolicitudViaje(
             solicitud=solicitud,
             usuarioValidador=usuario,
             usuarioRedactor=solicitud.usuario,
@@ -51,7 +51,7 @@ class ValidacionSolicitudFondosService:
         omitidas = 0
         
         for validador in validadores_json:
-            validacion = ValidacionSolicitudFondosService.crear_desde_json(
+            validacion = ValidacionSolicitudViajeService.crear_desde_json(
                 solicitud, validador
             )
             if validacion:
@@ -65,26 +65,26 @@ class ValidacionSolicitudFondosService:
     @staticmethod
     def actualizar_estado(validacion_id, nuevo_estado, comentarios=None):
         """Actualiza el estado de una validación usando el repositorio."""
-        from spme_validaciones.repositories.validacion_solicitud_fondos_repository import (
-            ValidacionSolicitudFondosRepository
+        from spme_validaciones.repositories.validacion_solicitud_viaje_repository import (
+            ValidacionSolicitudViajeRepository
         )
-        repo = ValidacionSolicitudFondosRepository()
+        repo = ValidacionSolicitudViajeRepository()
         return repo.actualizar_estado(validacion_id, nuevo_estado, comentarios)
     
     @staticmethod
     def obtener_resumen_estado(solicitud_id):
         """Obtiene el resumen de estado de una solicitud."""
-        from spme_validaciones.repositories.validacion_solicitud_fondos_repository import (
-            ValidacionSolicitudFondosRepository
+        from spme_validaciones.repositories.validacion_solicitud_viaje_repository import (
+            ValidacionSolicitudViajeRepository
         )
-        repo = ValidacionSolicitudFondosRepository()
+        repo = ValidacionSolicitudViajeRepository()
         return repo.obtener_resumen_estado_solicitud(solicitud_id)
 
     @staticmethod
     def obtener_estadisticas(solicitud_id):
         """Obtiene estadísticas completas de una solicitud."""
-        from spme_validaciones.repositories.validacion_solicitud_fondos_repository import (
-            ValidacionSolicitudFondosRepository
+        from spme_validaciones.repositories.validacion_solicitud_viaje_repository import (
+            ValidacionSolicitudViajeRepository
         )
-        repo = ValidacionSolicitudFondosRepository()
+        repo = ValidacionSolicitudViajeRepository()
         return repo.obtener_estadisticas_por_solicitud(solicitud_id)

@@ -7,6 +7,7 @@ from .models import (
     ValidacionInformeTarea,
     HistorialValidacion,
     ValidacionSolicitudFondos,
+    ValidacionSolicitudViaje,
 )
 from django.urls import reverse
 from django.db import models
@@ -505,7 +506,227 @@ class ValidacionSolicitudFondosAdmin(admin.ModelAdmin):
         self.message_user(request, f"{queryset.count()} validaciones marcadas como RECHAZADAS")
     marcar_como_rechazado.short_description = "Marcar como RECHAZADO"
 
-
+# -------------------------------------------------------------------
+# ADMIN PARA VALIDACIONES DE SOLICITUD DE VIAJE
+# -------------------------------------------------------------------
+@admin.register(ValidacionSolicitudViaje)
+class ValidacionSolicitudViajeAdmin(admin.ModelAdmin):
+    """
+    Admin para validaciones de Solicitudes de Viaje
+    """
+    list_display = [
+        'id',
+        'codigoSeguimiento',
+        'solicitud_link',
+        'usuarioValidador',
+        'estado_coloreado',
+        'tipo_solicitud_coloreado',
+        'versionDocumento',
+        'fechaAsignacion_corta'
+    ]
+    
+    list_filter = [
+        'estado',
+        'versionDocumento',
+        'fechaAsignacion',
+        'solicitud__actividad',  # Para filtrar por actividad
+    ]
+    
+    search_fields = [
+        'codigoSeguimiento',
+        'solicitud__numeroFormulario',
+        'usuarioValidador__username',
+        'usuarioValidador__first_name',
+        'usuarioValidador__last_name',
+        'comentarios'
+    ]
+    
+    raw_id_fields = ['solicitud', 'usuarioValidador', 'usuarioRedactor']
+    
+    readonly_fields = [
+        'codigoSeguimiento',
+        'fechaAsignacion',
+        'fechaResolucion',
+        'solicitud_detalle'
+    ]
+    
+    fieldsets = (
+        ('Validación', {
+            'fields': (
+                'codigoSeguimiento',
+                ('usuarioValidador', 'usuarioRedactor'),
+                ('estado', 'versionDocumento'),
+                'comentarios'
+            )
+        }),
+        ('Solicitud Relacionada', {
+            'fields': (
+                'solicitud',
+                'solicitud_detalle'
+            )
+        }),
+        ('Fechas', {
+            'fields': (
+                ('fechaAsignacion', 'fechaResolucion'),
+            )
+        }),
+    )
+    
+    def solicitud_link(self, obj):
+        """Link a la solicitud de viaje en admin"""
+        url = f"/admin/spme_viajes/solicitudviaje/{obj.solicitud.id}/change/"
+        return format_html('<a href="{}">✈️ {}</a>', url, obj.codigo_solicitud)
+    solicitud_link.short_description = 'Solicitud de Viaje'
+    solicitud_link.admin_order_field = 'solicitud__numeroFormulario'
+    
+    def solicitud_detalle(self, obj):
+        """Muestra detalles de la solicitud de viaje"""
+        if obj.solicitud:
+            detalles = []
+            
+            # Código de formulario
+            detalles.append(
+                f'<strong>Formulario:</strong> {obj.codigo_solicitud}'
+            )
+            
+            # Tipo de solicitud
+            tipo = obj.tipo_solicitud
+            tipo_colores = {
+                'ACTIVIDAD': '#3498db',
+                'TAREA': '#9b59b6',
+                'GENERAL': '#95a5a6'
+            }
+            color_tipo = tipo_colores.get(tipo, '#95a5a6')
+            detalles.append(
+                f'<strong>Tipo:</strong> <span style="color: {color_tipo}; font-weight: bold;">{tipo}</span>'
+            )
+            
+            # Monto
+            detalles.append(
+                f'<strong>Monto:</strong> {obj.monto_solicitud:,.2f}' if obj.monto_solicitud else '<strong>Monto:</strong> -'
+            )
+            
+            # Actividad o Tarea relacionada
+            if obj.solicitud.actividad:
+                detalles.append(
+                    f'<strong>Actividad:</strong> {obj.solicitud.actividad}'
+                )
+            if obj.solicitud.tarea:
+                detalles.append(
+                    f'<strong>Tarea:</strong> {obj.solicitud.tarea}'
+                )
+            
+            # Solicitante
+            if hasattr(obj.solicitud, 'usuario') and obj.solicitud.usuario:
+                detalles.append(
+                    f'<strong>Solicitante:</strong> {obj.solicitud.usuario.get_full_name() or obj.solicitud.usuario.username}'
+                )
+            
+            # Destino si existe
+            if hasattr(obj.solicitud, 'destino') and obj.solicitud.destino:
+                detalles.append(
+                    f'<strong>Destino:</strong> {obj.solicitud.destino}'
+                )
+            
+            # Fechas del viaje si existen
+            if hasattr(obj.solicitud, 'fechaInicio') and obj.solicitud.fechaInicio:
+                fecha_fin = obj.solicitud.fechaFin if hasattr(obj.solicitud, 'fechaFin') and obj.solicitud.fechaFin else None
+                if fecha_fin:
+                    detalles.append(
+                        f'<strong>Viaje:</strong> {obj.solicitud.fechaInicio.strftime("%d/%m/%Y")} - {fecha_fin.strftime("%d/%m/%Y")}'
+                    )
+                else:
+                    detalles.append(
+                        f'<strong>Fecha:</strong> {obj.solicitud.fechaInicio.strftime("%d/%m/%Y")}'
+                    )
+            
+            return format_html('<br>'.join(detalles))
+        return '-'
+    solicitud_detalle.short_description = 'Detalles de la Solicitud'
+    
+    def tipo_solicitud_coloreado(self, obj):
+        """Muestra el tipo de solicitud con colores"""
+        tipo = obj.tipo_solicitud
+        colores = {
+            'ACTIVIDAD': '#3498db',  # Azul
+            'TAREA': '#9b59b6',      # Púrpura
+            'GENERAL': '#95a5a6'     # Gris
+        }
+        iconos = {
+            'ACTIVIDAD': '📋',
+            'TAREA': '✅',
+            'GENERAL': '📄'
+        }
+        color = colores.get(tipo, '#95a5a6')
+        icono = iconos.get(tipo, '📄')
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{} {}</span>',
+            color,
+            icono,
+            tipo
+        )
+    tipo_solicitud_coloreado.short_description = 'Tipo'
+    
+    def estado_coloreado(self, obj):
+        """Muestra el estado con colores"""
+        colors = {
+            'PENDIENTE': 'orange',
+            'APROBADO': 'green',
+            'RECHAZADO': 'red',
+        }
+        iconos = {
+            'PENDIENTE': '⏳',
+            'APROBADO': '✅',
+            'RECHAZADO': '❌',
+        }
+        color = colors.get(obj.estado, 'gray')
+        icono = iconos.get(obj.estado, '❓')
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{} {}</span>',
+            color,
+            icono,
+            obj.get_estado_display()
+        )
+    estado_coloreado.short_description = 'Estado'
+    estado_coloreado.admin_order_field = 'estado'
+    
+    def fechaAsignacion_corta(self, obj):
+        """Fecha en formato corto"""
+        return obj.fechaAsignacion.strftime('%d/%m/%Y %H:%M') if obj.fechaAsignacion else '-'
+    fechaAsignacion_corta.short_description = 'Asignación'
+    fechaAsignacion_corta.admin_order_field = 'fechaAsignacion'
+    
+    def get_queryset(self, request):
+        """Optimizar consultas incluyendo las relaciones necesarias"""
+        return super().get_queryset(request).select_related(
+            'solicitud',
+            'solicitud__actividad',
+            'solicitud__tarea',
+            'usuarioValidador',
+            'usuarioRedactor'
+        )
+    
+    actions = ['marcar_como_aprobado', 'marcar_como_rechazado']
+    
+    def marcar_como_aprobado(self, request, queryset):
+        """Action para aprobar validaciones de viaje"""
+        contador = 0
+        for v in queryset:
+            v.estado = 'APROBADO'
+            v.save()
+            contador += 1
+        self.message_user(request, f"✈️ {contador} validaciones de viaje marcadas como APROBADAS")
+    marcar_como_aprobado.short_description = "✅ Marcar como APROBADO"
+    
+    def marcar_como_rechazado(self, request, queryset):
+        """Action para rechazar validaciones de viaje"""
+        contador = 0
+        for v in queryset:
+            v.estado = 'RECHAZADO'
+            v.save()
+            contador += 1
+        self.message_user(request, f"✈️ {contador} validaciones de viaje marcadas como RECHAZADAS")
+    marcar_como_rechazado.short_description = "❌ Marcar como RECHAZADO"
 
 # -------------------------------------------------------------------
 # ADMIN PARA HISTORIAL

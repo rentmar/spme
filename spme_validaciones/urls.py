@@ -1,3 +1,4 @@
+# spme/spme_validaciones/urls.py
 from django.urls import path, include
 from .views import *
 from rest_framework.routers import DefaultRouter
@@ -20,6 +21,17 @@ from .views.validaciones_solicitud_fondos_views import (
     HistorialValidacionSolicitudFondosAPIView,
     MisValidacionesPendientesSolicitudFondosAPIView,
     AsignarValidadoresSolicitudFondosSinNotificacionViewSet,
+)
+
+#Importaciones para solicitud de viajes
+from .views.validaciones_solicitud_viaje_views import(
+    AsignarValidadoresSolicitudViajeViewSet,
+    VotarSolicitudViajeViewSet,
+    EstadoValidacionSolicitudViajeAPIView,
+    ResetearValidacionesSolicitudViajeViewSet,
+    HistorialValidacionSolicitudViajeAPIView,
+    MisValidacionesPendientesSolicitudViajeAPIView,
+    AsignarValidadoresSolicitudViajeSinNotificacionViewSet,
 )
 
 
@@ -49,6 +61,14 @@ urlpatterns = [
     path(r'solicitud-fondos/<int:solicitud_id>/historial/', HistorialValidacionSolicitudFondosAPIView.as_view(), name='historial-solicitud-fondos'),
     path(r'solicitud-fondos/mis-pendientes/', MisValidacionesPendientesSolicitudFondosAPIView.as_view(), name='mis-pendientes-solicitud-fondos'),
     path(r'solicitud-fondos/<int:solicitud_id>/asignar-validadores-sin-notificacion/', AsignarValidadoresSolicitudFondosSinNotificacionViewSet.as_view({'post': 'create'}), name='asignar-validadores-solicitud-fondos-sin-notificacion'),
+    ################################ Validaciones de Solicitud de Viajes ######################################################
+    path(r'solicitud-viajes/<int:solicitud_id>/asignar-validadores/', AsignarValidadoresSolicitudViajeViewSet.as_view({'post': 'create'}), name='asignar-validadores-solicitud-viaje'),
+    path(r'solicitud-viajes/<int:solicitud_id>/votar/', VotarSolicitudViajeViewSet.as_view({'post': 'create'}), name='votar-solicitud-viaje'),
+    path(r'solicitud-viajes/<int:solicitud_id>/estado-validacion/', EstadoValidacionSolicitudViajeAPIView.as_view(), name='estado-validacion-solicitud-viaje'),
+    path(r'solicitud-viajes/<int:solicitud_id>/resetear-validaciones/', ResetearValidacionesSolicitudViajeViewSet.as_view({'post': 'create'}), name='resetear-validaciones-solicitud-viaje'),
+    path(r'solicitud-viajes/<int:solicitud_id>/historial/', HistorialValidacionSolicitudViajeAPIView.as_view(), name='historial-solicitud-viaje'),
+    path(r'solicitud-viajes/mis-pendientes/', MisValidacionesPendientesSolicitudViajeAPIView.as_view(), name='mis-pendientes-solicitud-viaje'),
+    path(r'solicitud-viajes/<int:solicitud_id>/asignar-validadores-sin-notificacion/', AsignarValidadoresSolicitudViajeSinNotificacionViewSet.as_view({'post': 'create'}), name='asignar-validadores-solicitud-viaje-sin-notificacion'),
 ] 
 
 urlpatterns += router.urls

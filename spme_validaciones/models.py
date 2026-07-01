@@ -7,6 +7,7 @@ from spme_monitoreo.models import InformeActividadPrincipal
 from spme_monitoreo.models import InformeTareaPrincipal
 from spme_monitoreo.models import (
     SolicitudFondos,
+    SolicitudViaje,
 )
 import random
 import string
@@ -90,6 +91,11 @@ class Validacion(PolymorphicModel):
         if isinstance(self, ValidacionSolicitudFondos):
             uid = uuid.uuid4().hex[:8].upper()
             return f"SF-{fecha}-{uid}"
+        
+        #SI es Solicitud de viajes genera el codigo SV-FECHA-UID
+        if isinstance(self, ValidacionSolicitudViaje):
+            uid = uuid.uuid4().hex[:8].upper()
+            return f"SV-{fecha}-{uid}"
 
         aleatorio = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
         return f"VAL-{fecha}-{aleatorio}"
@@ -118,7 +124,7 @@ class Validacion(PolymorphicModel):
         
         #Generar codigo si es nuevo
         if is_new and not self.codigoSeguimiento:
-           self.codigoSeguimiento = self.generar_codigo_unico()
+            self.codigoSeguimiento = self.generar_codigo_unico()
         
         # Actualizar fechaResolucion si cambia de pendiente
         if self.estado != 'PENDIENTE' and not self.fechaResolucion:
@@ -295,6 +301,64 @@ class ValidacionSolicitudFondos(Validacion):
         return self.solicitud.numeroFormulario or f"SF-{self.solicitud.id}"
 
 
+# ===================================================================
+# VALIDACIÓN PARA SOLICITUD DE VIAJES
+# ===================================================================
+class ValidacionSolicitudViaje(Validacion):
+    """
+    Validacion para solicitudes de viajes (actividades y tareas)
+    """
+    
+    #Vinculo a la solicitud de viajes
+    solicitud = models.ForeignKey(
+        SolicitudViaje,
+        on_delete=models.CASCADE,
+        related_name='validaciones',
+        verbose_name='Solicitud de Viaje'
+    )
+
+    class Meta:
+        verbose_name = "Validación de Solicitud de Viaje"
+        verbose_name_plural = "Validaciones de Solicitudes de Viaje"
+        
+    def save(self, *args, **kwargs):
+        is_new = not self.pk
+        if is_new and not self.codigoSeguimiento:
+            self.codigoSeguimiento = self.generar_codigo_unico()
+        self.clean()
+        super().save(*args, **kwargs)
+    
+    def clean(self):
+        if not self.pk:
+            if ValidacionSolicitudViaje.objects.filter(
+                solicitud=self.solicitud,
+                usuarioValidador=self.usuarioValidador
+            ).exists():
+                raise ValidationError(
+                    f"El usuario '{self.usuarioValidador.get_full_name()}' "
+                    f"ya está asignado como validador para esta solicitud de viaje"
+                )
+    
+    def __str__(self):
+        codigo = self.solicitud.numeroFormulario or f"SV-{self.solicitud.id}"
+        return f"✈️ {codigo} - {self.codigoSeguimiento} - {self.get_estado_display()}"
+    
+    @property
+    def tipo_solicitud(self):
+        if self.solicitud.actividad_id and not self.solicitud.tarea_id:
+            return 'ACTIVIDAD'
+        elif self.solicitud.actividad_id and self.solicitud.tarea_id:
+            return 'TAREA'
+        return 'GENERAL'
+    
+    @property
+    def monto_solicitud(self):
+        return self.solicitud.montoSolicitado
+    
+    @property
+    def codigo_solicitud(self):
+        return self.solicitud.numeroFormulario or f"SV-{self.solicitud.id}"
+
 
 # -------------------------------------------------------------------
 # HISTORIAL DE CAMBIOS (TODAS LAS VALIDACIONES)
@@ -359,7 +423,14 @@ class HistorialValidacion(models.Model):
         elif hasattr(self.validacion, 'informeTarea'):
             tipo = "Tarea"
         elif hasattr(self.validacion, 'solicitud'):
-            tipo = "Solicitud Fondos"
+            # Detectar si es SolicitudFondos o SolicitudViaje
+            from .models import (ValidacionSolicitudFondos, ValidacionSolicitudViaje)
+            if isinstance(self.validacion, ValidacionSolicitudFondos):
+                tipo = "Solicitud Fondos"
+            elif isinstance(self.validacion, ValidacionSolicitudViaje):
+                tipo = "Solicitud Viaje"
+            else:
+                tipo = "Solicitud"
         else:
             tipo = "Desconocido"
         return f"{tipo} - {self.validacion.codigoSeguimiento} - {self.estado_anterior}→{self.estado_nuevo}"   

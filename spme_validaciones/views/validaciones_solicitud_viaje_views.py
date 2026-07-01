@@ -1,0 +1,435 @@
+# spme/spme_validaciones/views/validaciones_solicitud_viaje_views.py
+from rest_framework import viewsets, status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
+from django.db import transaction
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+
+# Models
+from spme_monitoreo.models import SolicitudViaje
+from spme_autenticacion.models import Usuario
+from ..models import ValidacionSolicitudViaje
+
+# Serializers - Sol de Viaje
+from ..serializers.validaciones_solicitud_viaje_serializers import (
+    ValidacionSolicitudViajeSerializer,
+    AsignarValidadoresSolicitudViajeSerializer,
+    ResetearValidacionesSolicitudViajeSerializer,
+)
+
+# Services - Sol de Viaje
+from ..services.validacion_solicitud_viaje_service import ValidacionSolicitudViajeService
+
+# Repositories - Sol de Viaje
+from ..repositories.validacion_solicitud_viaje_repository import ValidacionSolicitudViajeRepository
+
+# Serializer Emitir Voto y Reset
+from ..serializers.validaciones_informes_actividad_subac_serializers import (
+    EmitirVotoSerializer,
+    HistorialValidacionSerializer,
+)
+
+# Services - mensajes
+from spme_mensajes.services.notificacion_service import (
+    crear_mensajes_validacion_solicitud_fondos,
+    crear_mensaje_solicitud_aprobada,
+    crear_mensaje_solicitud_rechazada,
+    crear_mensaje_revision_solicitud_fondos,
+)
+
+# Notificaciones email
+from spme_monitor_estados.utils.encolar import (
+    encolar_validacion_pendiente_sf,
+    encolar_validacion_aprobada_sf,
+    encolar_validacion_rechazada_sf,
+    encolar_confirmacion_validador_sf,
+    encolar_revision_solicitud_fondos,
+)
+
+import logging
+
+logger = logging.getLogger(__name__)
+repo = ValidacionSolicitudViajeRepository()
+
+# ===================================================================
+# ASIGNAR VALIDADORES
+# ===================================================================
+class AsignarValidadoresSolicitudViajeViewSet(viewsets.ViewSet):
+    """
+    POST /api/solicitud-viajes/{id}/asignar-validadores/ 
+    - Payload: {"validador_ids": [2,3]}
+    """
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic
+    def create(self, request, solicitud_id=None):
+        serializer = AsignarValidadoresSolicitudViajeSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        solicitud = get_object_or_404(SolicitudViaje, id=solicitud_id)
+        validadores = Usuario.objects.filter(
+            id__in=serializer.validated_data['validador_ids']
+        )
+        if len(validadores) != len(serializer.validated_data['validador_ids']):
+            ids_encontrados = list(validadores.values_list('id', flat=True))
+            ids_faltantes = set(serializer.validated_data['validador_ids']) - set(ids_encontrados)
+            return Response(
+                {'error': f'Validadores no encontrados: {list(ids_faltantes)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        resultados, errores, validadores_json = [], [], []
+
+        for validador in validadores:
+            try:
+                if repo.existe_validador(solicitud.id, 'solicitud', validador.id):
+                    errores.append({
+                        'validador_id': validador.id,
+                        'error': f'Ya existe validación para {validador.get_full_name()}'
+                    })
+                    continue
+                
+                v = repo.crear(
+                    solicitud=solicitud,
+                    usuarioValidador=validador,
+                    usuarioRedactor=request.user,
+                    estado='PENDIENTE',
+                    versionDocumento='1'
+                )
+                resultados.append(ValidacionSolicitudViajeSerializer(v).data)
+                validadores_json.append({
+                    'id': validador.id,
+                    'nombre_completo': validador.get_full_name(),
+                    'rol': validador.cargo or 'validador',
+                    'estado': 'PENDIENTE',
+                    'fechaAsignacion': str(timezone.now())
+                })
+                
+            except ValidationError as e:
+                errores.append({'validador_id': validador.id, 'error': str(e)})
+            except Exception as e:
+                errores.append({'validador_id': validador.id, 'error': str(e)})
+        
+        # NOTIFICACIONES (si falla, rollback de toda la transacción)
+        # if validadores_json:
+        #     crear_mensajes_validacion_solicitud_fondos(solicitud, validadores_json)
+        #     for val in validadores:
+        #         encolar_validacion_pendiente_sf(
+        #             solicitud=solicitud,
+        #             validador=val,
+        #             enlace_ver_detalle=f"/solicitudes-viajes/{solicitud.id}/validar"
+        #         )
+
+        return Response({
+            'mensaje': f'Creadas {len(resultados)} validaciones',
+            'errores': errores if errores else None,
+            'resultados': resultados
+        }, status=status.HTTP_201_CREATED)
+    
+# ===================================================================
+# EMITIR VOTO (APROBAR O RECHAZAR)
+# ===================================================================
+class VotarSolicitudViajeViewSet(viewsets.ViewSet):
+    """
+    POST /api/solicitud-viajes/{solicitud_id}/votar/
+    Payload: {"validacion_id": 15, "estado": "APROBADO", "comentarios": "..."}
+    
+    El mismo endpoint se usa para APROBAR y RECHAZAR.
+    El campo "estado" determina la acción: "APROBADO" o "RECHAZADO".
+    Si es RECHAZADO, "comentarios" es obligatorio.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic
+    def create(self, request, solicitud_id=None):
+        voto_serializer = EmitirVotoSerializer(data=request.data)
+        if not voto_serializer.is_valid():
+            return Response(voto_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        validacion_id = request.data.get('validacion_id')
+        voto = voto_serializer.validated_data['estado']
+        comentarios = voto_serializer.validated_data.get('comentarios', '')
+
+        if voto == 'RECHAZADO' and not comentarios:
+            return Response(
+                {'error': 'Los comentarios son obligatorios cuando se rechaza'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            validacion = ValidacionSolicitudViaje.objects.get(
+                id=validacion_id,
+                usuarioValidador=request.user,
+                estado='PENDIENTE'
+            )
+        except ValidacionSolicitudViaje.DoesNotExist:
+            return Response(
+                {'error': 'Validación no encontrada o ya procesada'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        validacion.estado = voto
+        validacion.comentarios = comentarios
+        validacion.save()
+        
+        solicitud = validacion.solicitud
+
+        # MENSAJERIA
+        # Confirmar al validador
+        # encolar_confirmacion_validador_sf(
+        #     solicitud=solicitud,
+        #     validador=request.user,
+        #     accion=voto.lower()
+        # )
+
+        # if voto == 'APROBADO':
+        #     resumen = repo.obtener_resumen_estado_solicitud(solicitud.id)
+        #     if resumen['aprobado_totalmente']:
+        #         validaciones_aprobadas = ValidacionSolicitudViaje.objects.filter(
+        #             solicitud=solicitud, estado='APROBADO'
+        #         )
+        #         crear_mensaje_solicitud_aprobada(solicitud, validaciones_aprobadas)
+        #         encolar_validacion_aprobada_sf(
+        #             solicitud=solicitud,
+        #             validador=request.user
+        #         )
+
+        # elif voto == 'RECHAZADO':
+        #     crear_mensaje_solicitud_rechazada(solicitud, request.user, comentarios)
+        #     encolar_validacion_rechazada_sf(
+        #         solicitud=solicitud,
+        #         validador=request.user,
+        #         motivo=comentarios
+        #     )
+
+        return Response(
+            ValidacionSolicitudViajeSerializer(validacion).data,
+            status=status.HTTP_200_OK
+        )
+
+
+# ===================================================================
+# RESETEAR VALIDACIONES
+# ===================================================================
+class ResetearValidacionesSolicitudViajeViewSet(viewsets.ViewSet):
+    """
+    POST /api/solicitud-viajes/{solicitud_id}/resetear-validaciones/
+    Payload: {"nueva_version": "2"}
+    """
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic
+    def create(self, request, solicitud_id=None):
+        serializer = ResetearValidacionesSolicitudViajeSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        solicitud = get_object_or_404(SolicitudViaje, id=solicitud_id)
+        validaciones = ValidacionSolicitudViaje.objects.filter(solicitud=solicitud)
+        nueva_version = serializer.validated_data.get('nueva_version', '2')
+        reseteadas = 0
+
+        for v in validaciones:
+            v.estado = 'PENDIENTE'
+            v.versionDocumento = nueva_version
+            v.fechaResolucion = None
+            v.save()
+            reseteadas += 1
+
+        #MENSAJERIA
+        # for v in validaciones:
+        #     encolar_revision_solicitud_fondos(
+        #         solicitud=solicitud,
+        #         validador=v.usuarioValidador,
+        #         version=nueva_version,
+        #         enlace_ver_detalle=f"/solicitudes-viajes/{solicitud.id}/validar"
+        #     )
+        #     crear_mensaje_revision_solicitud_fondos(
+        #         solicitud=solicitud,
+        #         validador={
+        #             'id': v.usuarioValidador.id,
+        #             'nombre_completo': v.usuarioValidador.get_full_name(),
+        #             'rol': v.usuarioValidador.cargo or 'validador',
+        #             'estado': 'PENDIENTE',
+        #             'fechaAsignacion': str(timezone.now())
+        #         },
+        #         version=nueva_version
+        #     )
+        
+        return Response({
+            'mensaje': f'Reseteadas {reseteadas} validaciones a versión {nueva_version}',
+            'documento_id': solicitud.id,
+            'documento_numero': solicitud.numeroFormulario or f"SV-{solicitud.id}",
+            'nueva_version': nueva_version
+        }, status=status.HTTP_200_OK)
+        
+        
+# ===================================================================
+# ESTADO DE VALIDACIÓN
+# ===================================================================
+class EstadoValidacionSolicitudViajeAPIView(APIView):
+    """
+    GET /api/solicitud-viajes/{solicitud_id}/estado-validacion/
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, solicitud_id):
+        solicitud = get_object_or_404(SolicitudViaje, id=solicitud_id)
+        estadisticas = repo.obtener_estadisticas_por_solicitud(solicitud_id)
+
+        if solicitud.actividad_id and not solicitud.tarea_id:
+            tipo = 'ACTIVIDAD'
+        elif solicitud.actividad_id and solicitud.tarea_id:
+            tipo = 'TAREA'
+        else:
+            tipo = 'GENERAL'
+        
+        return Response({
+            'solicitud_id': solicitud.id,
+            'solicitud_codigo': solicitud.numeroFormulario or f"SV-{solicitud.id}",
+            'monto': str(solicitud.montoSolicitado) if solicitud.montoSolicitado else '0.00',
+            'evento': solicitud.evento or '',
+            'lugar': solicitud.lugarEvento or '',
+            'tipo_solicitud': tipo,
+            **estadisticas
+        }, status=status.HTTP_200_OK)
+        
+
+# ===================================================================
+# HISTORIAL
+# ===================================================================
+class HistorialValidacionSolicitudViajeAPIView(APIView):
+    """
+    GET /api-val/solicitud-viajes/{solicitud_id}/historial/
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, solicitud_id):
+        solicitud = get_object_or_404(SolicitudViaje, id=solicitud_id)
+
+        from ..models import HistorialValidacion
+        historial = HistorialValidacion.objects.filter(
+            validacion__validacionsolicitudviaje__solicitud=solicitud
+        ).select_related('usuario', 'validacion__validacionsolicitudviaje').order_by('-fechaCambio')
+
+        serializer = HistorialValidacionSerializer(historial, many=True)
+
+        return Response({
+            'count': len(serializer.data),
+            'results': serializer.data
+        }, status=status.HTTP_200_OK)
+        
+
+# ===================================================================
+# MIS VALIDACIONES PENDIENTES - Solicitud de Viaje
+# ===================================================================
+class MisValidacionesPendientesSolicitudViajeAPIView(APIView):
+    """
+    GET /api-val/solicitud-viajes/mis-pendientes/
+    Return: Todas las validaciones para solicitud de viaje pendientes
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        
+        validaciones = repo.obtener_por_validador_con_solicitud(request.user.id)
+        pendientes = [v for v in validaciones if v.estado == 'PENDIENTE']
+        data = []
+        
+        for v in pendientes:
+            data.append({
+                'validacion_id': v.id,
+                'codigo_seguimiento': v.codigoSeguimiento,
+                'estado': v.estado,
+                'fecha_asignacion': v.fechaAsignacion,
+                'solicitud_id': v.solicitud.id,
+                'solicitud_codigo': v.solicitud.numeroFormulario or f"SV-{v.solicitud.id}",
+                'solicitud_monto': str(v.solicitud.montoSolicitado) if v.solicitud.montoSolicitado else '0.00',
+                'solicitante_nombre': v.usuarioRedactor.get_full_name() if v.usuarioRedactor else 'N/A',
+                'evento': v.solicitud.evento or '',
+                'lugar': v.solicitud.lugarEvento or '',
+                'tipo_solicitud': v.tipo_solicitud,
+            })
+        
+        return Response({
+            'count': len(data),
+            'results': data
+        }, status=status.HTTP_200_OK)
+        
+        
+        
+# ===================================================================
+# ASIGNAR VALIDADORES SIN NOTIFICACIONES - Solicitud de Viaje
+# ===================================================================
+class AsignarValidadoresSolicitudViajeSinNotificacionViewSet(viewsets.ViewSet):
+    """
+    POST /api/solicitud-viajes/{solicitud_id}/asignar-validadores-sin-notificacion/
+    
+    Asigna validadores SIN enviar notificaciones ni emails.
+    Reglas:
+    - Transacción atómica: todo el lote o nada
+    - Unicidad estricta: si cualquier validador ya existe, se rechaza todo
+    """
+    permission_classes = [IsAuthenticated]
+    
+    @transaction.atomic
+    def create(self, request, solicitud_id=None):
+        serializer = AsignarValidadoresSolicitudViajeSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        data = serializer.validated_data
+        solicitud = get_object_or_404(SolicitudViaje, id=solicitud_id)
+        validadores = Usuario.objects.filter(id__in=data['validador_ids'])
+
+        if len(validadores) != len(data['validador_ids']):
+            ids_encontrados = list(validadores.values_list('id', flat=True))
+            ids_faltantes = set(data['validador_ids']) - set(ids_encontrados)
+            return Response(
+                {'error': f'Validadores no encontrados: {list(ids_faltantes)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        duplicados = []
+        for validador in validadores:
+            if repo.existe_validador(solicitud.id, 'solicitud', validador.id):
+                duplicados.append({
+                    'validador_id': validador.id,
+                    'nombre': validador.get_full_name(),
+                    'error': 'Ya existe una validación para este usuario en esta solicitud'
+                })
+        
+        if duplicados:
+            return Response({
+                'error': 'Validadores duplicados encontrados',
+                'detalle': duplicados
+            }, status=status.HTTP_409_CONFLICT)
+        
+        resultados = []
+        for validador in validadores:
+            validacion = repo.crear(
+                solicitud=solicitud,
+                usuarioValidador=validador,
+                usuarioRedactor=request.user,
+                estado='PENDIENTE',
+                versionDocumento='1'
+            )
+            resultados.append(
+                ValidacionSolicitudViajeSerializer(validacion).data
+            )
+        
+        return Response({
+            'mensaje': f'Creadas {len(resultados)} validaciones (sin notificación)',
+            'resultados': resultados
+        }, status=status.HTTP_201_CREATED)
+        
+        
+
+
+
+
+
+    
