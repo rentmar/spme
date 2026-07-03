@@ -8,6 +8,7 @@ from spme_monitoreo.models import InformeTareaPrincipal
 from spme_monitoreo.models import (
     SolicitudFondos,
     SolicitudViaje,
+    SolicitudPagoDirecto,
 )
 import random
 import string
@@ -96,6 +97,11 @@ class Validacion(PolymorphicModel):
         if isinstance(self, ValidacionSolicitudViaje):
             uid = uuid.uuid4().hex[:8].upper()
             return f"SV-{fecha}-{uid}"
+        
+        #Si es Solicitud de Pago directo genera el codigo SPD-FECHA-UID
+        if isinstance(self, ValidacionSolicitudPagoDirecto):
+            uid = uuid.uuid4().hex[:8].upper()
+            return f"SP-{fecha}-{uid}"
 
         aleatorio = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
         return f"VAL-{fecha}-{aleatorio}"
@@ -359,6 +365,67 @@ class ValidacionSolicitudViaje(Validacion):
     def codigo_solicitud(self):
         return self.solicitud.numeroFormulario or f"SV-{self.solicitud.id}"
 
+# ===================================================================
+# VALIDACIÓN PARA SOLICITUD DE PAGO DIRECTO
+# ===================================================================
+class ValidacionSolicitudPagoDirecto(Validacion):
+    """
+    Validacion para solicitudes de pago directo (actividades y tareas)
+    """
+    #Vinculo a la Solicitud de pago directo
+    solicitud = models.ForeignKey(
+        SolicitudPagoDirecto,
+        on_delete=models.CASCADE,
+        related_name='validaciones',
+        verbose_name='Solicitud de Pago Directo'
+    )
+
+    class Meta:
+        verbose_name = "Validación de Solicitud de Pago Directo"
+        verbose_name_plural = "Validaciones de Solicitudes de Pago Directo"
+    
+    def save(self, *args, **kwargs):
+        is_new = not self.pk
+        if is_new and not self.codigoSeguimiento:
+            self.codigoSeguimiento = self.generar_codigo_unico()
+        self.clean()
+        super().save(*args, **kwargs)
+
+    #Comprobador para no repetir revisores
+    def clean(self):
+        if not self.pk:
+            if ValidacionSolicitudPagoDirecto.objects.filter(
+                solicitud=self.solicitud,
+                usuarioValidador=self.usuarioValidador
+            ).exists():
+                raise ValidationError(
+                    f"El usuario '{self.usuarioValidador.get_full_name()}' "
+                    f"ya está asignado como validador para esta solicitud de pago directo"
+                )
+    
+    def __str__(self):
+        codigo = self.solicitud.numeroFormulario or f"SPD-{self.solicitud.id}"
+        return f"💳 {codigo} - {self.codigoSeguimiento} - {self.get_estado_display()}"
+    
+    @property
+    def tipo_solicitud(self):
+        if self.solicitud.actividad_id and not self.solicitud.tarea_id:
+            return 'ACTIVIDAD'
+        elif self.solicitud.actividad_id and self.solicitud.tarea_id:
+            return 'TAREA'
+        return 'GENERAL'
+    
+    @property
+    def monto_solicitud(self):
+        return self.solicitud.montoSolicitado
+    
+    @property
+    def codigo_solicitud(self):
+        return self.solicitud.numeroFormulario or f"SPD-{self.solicitud.id}"
+    
+
+
+
 
 # -------------------------------------------------------------------
 # HISTORIAL DE CAMBIOS (TODAS LAS VALIDACIONES)
@@ -429,6 +496,8 @@ class HistorialValidacion(models.Model):
                 tipo = "Solicitud Fondos"
             elif isinstance(self.validacion, ValidacionSolicitudViaje):
                 tipo = "Solicitud Viaje"
+            elif isinstance(self.validacion, ValidacionSolicitudPagoDirecto):
+                tipo = "Solicitud Pago Directo"
             else:
                 tipo = "Solicitud"
         else:

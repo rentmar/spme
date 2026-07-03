@@ -34,6 +34,17 @@ from .views.validaciones_solicitud_viaje_views import(
     AsignarValidadoresSolicitudViajeSinNotificacionViewSet,
 )
 
+#Importaciones para Sol de pago directo
+from .views.validaciones_solicitud_pago_directo_views import (
+    AsignarValidadoresSolicitudPagoDirectoViewSet,
+    VotarSolicitudPagoDirectoViewSet,
+    EstadoValidacionSolicitudPagoDirectoAPIView,
+    ResetearValidacionesSolicitudPagoDirectoViewSet,
+    HistorialValidacionSolicitudPagoDirectoAPIView,
+    MisValidacionesPendientesSolicitudPagoDirectoAPIView,
+    AsignarValidadoresSolicitudPagoDirectoSinNotificacionViewSet,
+)
+
 
 router = DefaultRouter()
 
@@ -69,6 +80,14 @@ urlpatterns = [
     path(r'solicitud-viajes/<int:solicitud_id>/historial/', HistorialValidacionSolicitudViajeAPIView.as_view(), name='historial-solicitud-viaje'),
     path(r'solicitud-viajes/mis-pendientes/', MisValidacionesPendientesSolicitudViajeAPIView.as_view(), name='mis-pendientes-solicitud-viaje'),
     path(r'solicitud-viajes/<int:solicitud_id>/asignar-validadores-sin-notificacion/', AsignarValidadoresSolicitudViajeSinNotificacionViewSet.as_view({'post': 'create'}), name='asignar-validadores-solicitud-viaje-sin-notificacion'),
+        ################################ Validaciones de Solicitud de Pago Directo ##############################################
+    path(r'solicitud-pago-directo/<int:solicitud_id>/asignar-validadores/', AsignarValidadoresSolicitudPagoDirectoViewSet.as_view({'post': 'create'}), name='asignar-validadores-solicitud-pago-directo'),
+    path(r'solicitud-pago-directo/<int:solicitud_id>/votar/', VotarSolicitudPagoDirectoViewSet.as_view({'post': 'create'}), name='votar-solicitud-pago-directo'),
+    path(r'solicitud-pago-directo/<int:solicitud_id>/estado-validacion/', EstadoValidacionSolicitudPagoDirectoAPIView.as_view(), name='estado-validacion-solicitud-pago-directo'),
+    path(r'solicitud-pago-directo/<int:solicitud_id>/resetear-validaciones/', ResetearValidacionesSolicitudPagoDirectoViewSet.as_view({'post': 'create'}), name='resetear-validaciones-solicitud-pago-directo'),
+    path(r'solicitud-pago-directo/<int:solicitud_id>/historial/', HistorialValidacionSolicitudPagoDirectoAPIView.as_view(), name='historial-solicitud-pago-directo'),
+    path(r'solicitud-pago-directo/mis-pendientes/', MisValidacionesPendientesSolicitudPagoDirectoAPIView.as_view(), name='mis-pendientes-solicitud-pago-directo'),
+    path(r'solicitud-pago-directo/<int:solicitud_id>/asignar-validadores-sin-notificacion/', AsignarValidadoresSolicitudPagoDirectoSinNotificacionViewSet.as_view({'post': 'create'}), name='asignar-validadores-solicitud-pago-directo-sin-notificacion'),
 ] 
 
 urlpatterns += router.urls
