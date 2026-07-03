@@ -45,6 +45,28 @@ from .views.validaciones_solicitud_pago_directo_views import (
     AsignarValidadoresSolicitudPagoDirectoSinNotificacionViewSet,
 )
 
+#Importaciones para Sol de reembolso
+from .views.validaciones_solicitud_reembolso_views import (
+    AsignarValidadoresSolicitudReembolsoViewSet,
+    VotarSolicitudReembolsoViewSet,
+    EstadoValidacionSolicitudReembolsoAPIView,
+    ResetearValidacionesSolicitudReembolsoViewSet,
+    HistorialValidacionSolicitudReembolsoAPIView,
+    MisValidacionesPendientesSolicitudReembolsoAPIView,
+    AsignarValidadoresSolicitudReembolsoSinNotificacionViewSet,
+)
+
+# Importaciones para rendición de cuentas
+from .views.validaciones_rendicion_cuentas_views import (
+    AsignarValidadoresRendicionCuentasViewSet,
+    VotarRendicionCuentasViewSet,
+    ResetearValidacionesRendicionCuentasViewSet,
+    EstadoValidacionRendicionCuentasAPIView,
+    HistorialValidacionRendicionCuentasAPIView,
+    MisValidacionesPendientesRendicionCuentasAPIView,
+    AsignarValidadoresRendicionCuentasSinNotificacionViewSet,
+)
+
 
 router = DefaultRouter()
 
@@ -80,7 +102,7 @@ urlpatterns = [
     path(r'solicitud-viajes/<int:solicitud_id>/historial/', HistorialValidacionSolicitudViajeAPIView.as_view(), name='historial-solicitud-viaje'),
     path(r'solicitud-viajes/mis-pendientes/', MisValidacionesPendientesSolicitudViajeAPIView.as_view(), name='mis-pendientes-solicitud-viaje'),
     path(r'solicitud-viajes/<int:solicitud_id>/asignar-validadores-sin-notificacion/', AsignarValidadoresSolicitudViajeSinNotificacionViewSet.as_view({'post': 'create'}), name='asignar-validadores-solicitud-viaje-sin-notificacion'),
-        ################################ Validaciones de Solicitud de Pago Directo ##############################################
+    ################################ Validaciones de Solicitud de Pago Directo ##############################################
     path(r'solicitud-pago-directo/<int:solicitud_id>/asignar-validadores/', AsignarValidadoresSolicitudPagoDirectoViewSet.as_view({'post': 'create'}), name='asignar-validadores-solicitud-pago-directo'),
     path(r'solicitud-pago-directo/<int:solicitud_id>/votar/', VotarSolicitudPagoDirectoViewSet.as_view({'post': 'create'}), name='votar-solicitud-pago-directo'),
     path(r'solicitud-pago-directo/<int:solicitud_id>/estado-validacion/', EstadoValidacionSolicitudPagoDirectoAPIView.as_view(), name='estado-validacion-solicitud-pago-directo'),
@@ -88,6 +110,22 @@ urlpatterns = [
     path(r'solicitud-pago-directo/<int:solicitud_id>/historial/', HistorialValidacionSolicitudPagoDirectoAPIView.as_view(), name='historial-solicitud-pago-directo'),
     path(r'solicitud-pago-directo/mis-pendientes/', MisValidacionesPendientesSolicitudPagoDirectoAPIView.as_view(), name='mis-pendientes-solicitud-pago-directo'),
     path(r'solicitud-pago-directo/<int:solicitud_id>/asignar-validadores-sin-notificacion/', AsignarValidadoresSolicitudPagoDirectoSinNotificacionViewSet.as_view({'post': 'create'}), name='asignar-validadores-solicitud-pago-directo-sin-notificacion'),
+    ################################ Validaciones de Solicitud de Reembolso ##############################################
+    path(r'solicitud-reembolso/<int:solicitud_id>/asignar-validadores/', AsignarValidadoresSolicitudReembolsoViewSet.as_view({'post': 'create'}), name='asignar-validadores-solicitud-reembolso'),
+    path(r'solicitud-reembolso/<int:solicitud_id>/votar/', VotarSolicitudReembolsoViewSet.as_view({'post': 'create'}), name='votar-solicitud-reembolso'),
+    path(r'solicitud-reembolso/<int:solicitud_id>/estado-validacion/', EstadoValidacionSolicitudReembolsoAPIView.as_view(), name='estado-validacion-solicitud-reembolso'),
+    path(r'solicitud-reembolso/<int:solicitud_id>/resetear-validaciones/', ResetearValidacionesSolicitudReembolsoViewSet.as_view({'post': 'create'}), name='resetear-validaciones-solicitud-reembolso'),
+    path(r'solicitud-reembolso/<int:solicitud_id>/historial/', HistorialValidacionSolicitudReembolsoAPIView.as_view(), name='historial-solicitud-reembolso'),
+    path(r'solicitud-reembolso/mis-pendientes/', MisValidacionesPendientesSolicitudReembolsoAPIView.as_view(), name='mis-pendientes-solicitud-reembolso'),
+    path(r'solicitud-reembolso/<int:solicitud_id>/asignar-validadores-sin-notificacion/', AsignarValidadoresSolicitudReembolsoSinNotificacionViewSet.as_view({'post': 'create'}), name='asignar-validadores-solicitud-reembolso-sin-notificacion'),
+    ################################ Validaciones de Rendición de Cuentas ##############################################
+    path(r'rendicion-cuentas/<int:rendicion_id>/asignar-validadores/', AsignarValidadoresRendicionCuentasViewSet.as_view({'post': 'create'}), name='asignar-validadores-rendicion-cuentas'),
+    path(r'rendicion-cuentas/<int:rendicion_id>/votar/', VotarRendicionCuentasViewSet.as_view({'post': 'create'}), name='votar-rendicion-cuentas'),
+    path(r'rendicion-cuentas/<int:rendicion_id>/estado-validacion/', EstadoValidacionRendicionCuentasAPIView.as_view(), name='estado-validacion-rendicion-cuentas'),
+    path(r'rendicion-cuentas/<int:rendicion_id>/resetear-validaciones/', ResetearValidacionesRendicionCuentasViewSet.as_view({'post': 'create'}), name='resetear-validaciones-rendicion-cuentas'),
+    path(r'rendicion-cuentas/<int:rendicion_id>/historial/', HistorialValidacionRendicionCuentasAPIView.as_view(), name='historial-rendicion-cuentas'),
+    path(r'rendicion-cuentas/mis-pendientes/', MisValidacionesPendientesRendicionCuentasAPIView.as_view(), name='mis-pendientes-rendicion-cuentas'),
+    path(r'rendicion-cuentas/<int:rendicion_id>/asignar-validadores-sin-notificacion/', AsignarValidadoresRendicionCuentasSinNotificacionViewSet.as_view({'post': 'create'}), name='asignar-validadores-rendicion-cuentas-sin-notificacion'),
 ] 
 
 urlpatterns += router.urls

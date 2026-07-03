@@ -9,6 +9,8 @@ from spme_monitoreo.models import (
     SolicitudFondos,
     SolicitudViaje,
     SolicitudPagoDirecto,
+    SolicitudReembolso,
+    RendicionCuentas,
 )
 import random
 import string
@@ -98,10 +100,20 @@ class Validacion(PolymorphicModel):
             uid = uuid.uuid4().hex[:8].upper()
             return f"SV-{fecha}-{uid}"
         
-        #Si es Solicitud de Pago directo genera el codigo SPD-FECHA-UID
+        #Si es Solicitud de Pago directo genera el codigo SP-FECHA-UID
         if isinstance(self, ValidacionSolicitudPagoDirecto):
             uid = uuid.uuid4().hex[:8].upper()
             return f"SP-{fecha}-{uid}"
+        
+        #Si es solicitu de Reembolso genera el codigo SR-FECHA-UID
+        if isinstance(self, ValidacionSolicitudReembolso):
+            uid = uuid.uuid4().hex[:8].upper()
+            return f"SR-{fecha}-{uid}"
+        
+        #SI es una Rendicion de Cuentas genera el codigo RC-FECHA-UID
+        if isinstance(self, ValidacionRendicionCuentas):
+            uid = uuid.uuid4().hex[:8].upper()
+            return f"RC-{fecha}-{uid}"
 
         aleatorio = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
         return f"VAL-{fecha}-{aleatorio}"
@@ -421,11 +433,128 @@ class ValidacionSolicitudPagoDirecto(Validacion):
     
     @property
     def codigo_solicitud(self):
-        return self.solicitud.numeroFormulario or f"SPD-{self.solicitud.id}"
+        return self.solicitud.numeroFormulario or f"SP-{self.solicitud.id}"
     
 
+# ===================================================================
+# VALIDACIÓN PARA SOLICITUD DE REEMBOLSO
+# ===================================================================
+class ValidacionSolicitudReembolso(Validacion):
+    """
+    Validacion para solicitudes de reembolso (actividades y tareas)
+    """
+    
+    #Vinculo a la solicitud de reembolso
+    solicitud = models.ForeignKey(
+        SolicitudReembolso,
+        on_delete=models.CASCADE,
+        related_name='validaciones',
+        verbose_name='Solicitud de Reembolso'
+    )
 
+    class Meta:
+        verbose_name = "Validación de Solicitud de Reembolso"
+        verbose_name_plural = "Validaciones de Solicitudes de Reembolso"
+        
+    def save(self, *args, **kwargs):
+        is_new = not self.pk
+        if is_new and not self.codigoSeguimiento:
+            self.codigoSeguimiento = self.generar_codigo_unico()
+        self.clean()
+        super().save(*args, **kwargs)
+    
+    def clean(self):
+        if not self.pk:
+            if ValidacionSolicitudReembolso.objects.filter(
+                solicitud=self.solicitud,
+                usuarioValidador=self.usuarioValidador
+            ).exists():
+                raise ValidationError(
+                    f"El usuario '{self.usuarioValidador.get_full_name()}' "
+                    f"ya está asignado como validador para esta solicitud de reembolso"
+                )
+    
+    def __str__(self):
+        codigo = self.solicitud.numeroFormulario or f"SR-{self.solicitud.id}"
+        return f"♻️ {codigo} - {self.codigoSeguimiento} - {self.get_estado_display()}"
+    
+    @property
+    def tipo_solicitud(self):
+        if self.solicitud.actividad_id and not self.solicitud.tarea_id:
+            return 'ACTIVIDAD'
+        elif self.solicitud.actividad_id and self.solicitud.tarea_id:
+            return 'TAREA'
+        return 'GENERAL'
+    
+    @property
+    def monto_solicitud(self):
+        return self.solicitud.montoSolicitado
+    
+    @property
+    def codigo_solicitud(self):
+        return self.solicitud.numeroFormulario or f"SR-{self.solicitud.id}"
 
+# ===================================================================
+# VALIDACIÓN PARA RENDICIÓN DE CUENTAS
+# ===================================================================
+class ValidacionRendicionCuentas(Validacion):
+    """
+    Validacion para rendiciones de cuentas (actividades y tareas)
+    """
+    
+    #relacion a la rendicion de cuentas
+    rendicion = models.ForeignKey(
+        RendicionCuentas,
+        on_delete=models.CASCADE,
+        related_name='validaciones',
+        verbose_name='Rendición de Cuentas'
+    )
+
+    class Meta:
+        verbose_name = "Validación de Rendición de Cuentas"
+        verbose_name_plural = "Validaciones de Rendiciones de Cuentas"
+        
+    def save(self, *args, **kwargs):
+        is_new = not self.pk
+        if is_new and not self.codigoSeguimiento:
+            self.codigoSeguimiento = self.generar_codigo_unico()
+        self.clean()
+        super().save(*args, **kwargs)
+    
+    def clean(self):
+        if not self.pk:
+            if ValidacionRendicionCuentas.objects.filter(
+                rendicion=self.rendicion,
+                usuarioValidador=self.usuarioValidador
+            ).exists():
+                raise ValidationError(
+                    f"El usuario '{self.usuarioValidador.get_full_name()}' "
+                    f"ya está asignado como validador para esta rendición de cuentas"
+                )
+    
+    def __str__(self):
+        codigo = self.rendicion.numeroFormulario or f"RC-{self.rendicion.id}"
+        return f"📊 {codigo} - {self.codigoSeguimiento} - {self.get_estado_display()}"
+    
+    @property
+    def tipo_rendicion(self):
+        if self.rendicion.actividad_id and not self.rendicion.tarea_id:
+            return 'ACTIVIDAD'
+        elif self.rendicion.actividad_id and self.rendicion.tarea_id:
+            return 'TAREA'
+        return 'GENERAL'
+    
+    @property
+    def monto_rendicion(self):
+        return self.rendicion.montoAsignado
+    
+    @property
+    def codigo_rendicion(self):
+        return self.rendicion.numeroFormulario or f"RC-{self.rendicion.id}"
+    
+    @property
+    def saldo_rendicion(self):
+        return self.rendicion.saldo
 
 # -------------------------------------------------------------------
 # HISTORIAL DE CAMBIOS (TODAS LAS VALIDACIONES)
@@ -490,19 +619,27 @@ class HistorialValidacion(models.Model):
         elif hasattr(self.validacion, 'informeTarea'):
             tipo = "Tarea"
         elif hasattr(self.validacion, 'solicitud'):
-            # Detectar si es SolicitudFondos o SolicitudViaje
-            from .models import (ValidacionSolicitudFondos, ValidacionSolicitudViaje)
+            from .models import (
+                ValidacionSolicitudFondos, 
+                ValidacionSolicitudViaje, 
+                ValidacionSolicitudPagoDirecto,
+                ValidacionSolicitudReembolso
+            )
             if isinstance(self.validacion, ValidacionSolicitudFondos):
                 tipo = "Solicitud Fondos"
             elif isinstance(self.validacion, ValidacionSolicitudViaje):
                 tipo = "Solicitud Viaje"
             elif isinstance(self.validacion, ValidacionSolicitudPagoDirecto):
                 tipo = "Solicitud Pago Directo"
+            elif isinstance(self.validacion, ValidacionSolicitudReembolso):
+                tipo = "Solicitud Reembolso"
             else:
                 tipo = "Solicitud"
+        elif hasattr(self.validacion, 'rendicion'):
+            tipo = "Rendición Cuentas"
         else:
             tipo = "Desconocido"
-        return f"{tipo} - {self.validacion.codigoSeguimiento} - {self.estado_anterior}→{self.estado_nuevo}"   
+        return f"{tipo} - {self.validacion.codigoSeguimiento} - {self.estado_anterior}→{self.estado_nuevo}"
     # def __str__(self):
     #     tipo = "Actividad" if hasattr(self.validacion, 'informe') else "Tarea"
     #     return f"{tipo} - {self.validacion.codigoSeguimiento} - {self.estado_anterior}→{self.estado_nuevo}"

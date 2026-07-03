@@ -9,6 +9,8 @@ from .models import (
     ValidacionSolicitudFondos,
     ValidacionSolicitudViaje,
     ValidacionSolicitudPagoDirecto,
+    ValidacionSolicitudReembolso,
+    ValidacionRendicionCuentas,
 )
 from django.urls import reverse
 from django.db import models
@@ -949,6 +951,452 @@ class ValidacionSolicitudPagoDirectoAdmin(admin.ModelAdmin):
             v.save()
             contador += 1
         self.message_user(request, f"💳 {contador} validaciones de pago directo marcadas como RECHAZADAS")
+    marcar_como_rechazado.short_description = "❌ Marcar como RECHAZADO"
+
+
+# -------------------------------------------------------------------
+# ADMIN PARA VALIDACIONES DE SOLICITUD DE REEMBOLSO
+# -------------------------------------------------------------------
+@admin.register(ValidacionSolicitudReembolso)
+class ValidacionSolicitudReembolsoAdmin(admin.ModelAdmin):
+    """
+    Admin para validaciones de Solicitudes de Reembolso
+    """
+    list_display = [
+        'id',
+        'codigoSeguimiento',
+        'solicitud_link',
+        'usuarioValidador',
+        'estado_coloreado',
+        'tipo_solicitud_coloreado',
+        'versionDocumento',
+        'fechaAsignacion_corta'
+    ]
+    
+    list_filter = [
+        'estado',
+        'versionDocumento',
+        'fechaAsignacion',
+        'solicitud__actividad',  # Para filtrar por actividad
+    ]
+    
+    search_fields = [
+        'codigoSeguimiento',
+        'solicitud__numeroFormulario',
+        'usuarioValidador__username',
+        'usuarioValidador__first_name',
+        'usuarioValidador__last_name',
+        'comentarios'
+    ]
+    
+    raw_id_fields = ['solicitud', 'usuarioValidador', 'usuarioRedactor']
+    
+    readonly_fields = [
+        'codigoSeguimiento',
+        'fechaAsignacion',
+        'fechaResolucion',
+        'solicitud_detalle'
+    ]
+    
+    fieldsets = (
+        ('Validación', {
+            'fields': (
+                'codigoSeguimiento',
+                ('usuarioValidador', 'usuarioRedactor'),
+                ('estado', 'versionDocumento'),
+                'comentarios'
+            )
+        }),
+        ('Solicitud Relacionada', {
+            'fields': (
+                'solicitud',
+                'solicitud_detalle'
+            )
+        }),
+        ('Fechas', {
+            'fields': (
+                ('fechaAsignacion', 'fechaResolucion'),
+            )
+        }),
+    )
+    
+    def solicitud_link(self, obj):
+        """Link a la solicitud de reembolso en admin"""
+        url = f"/admin/spme_viajes/solicitudreembolso/{obj.solicitud.id}/change/"
+        return format_html('<a href="{}">♻️ {}</a>', url, obj.codigo_solicitud)
+    solicitud_link.short_description = 'Solicitud de Reembolso'
+    solicitud_link.admin_order_field = 'solicitud__numeroFormulario'
+    
+    def solicitud_detalle(self, obj):
+        """Muestra detalles de la solicitud de reembolso"""
+        if obj.solicitud:
+            detalles = []
+            
+            # Código de formulario
+            detalles.append(
+                f'<strong>Formulario:</strong> {obj.codigo_solicitud}'
+            )
+            
+            # Tipo de solicitud
+            tipo = obj.tipo_solicitud
+            tipo_colores = {
+                'ACTIVIDAD': '#3498db',
+                'TAREA': '#9b59b6',
+                'GENERAL': '#95a5a6'
+            }
+            color_tipo = tipo_colores.get(tipo, '#95a5a6')
+            detalles.append(
+                f'<strong>Tipo:</strong> <span style="color: {color_tipo}; font-weight: bold;">{tipo}</span>'
+            )
+            
+            # Monto
+            if obj.monto_solicitud:
+                detalles.append(
+                    f'<strong>Monto:</strong> {obj.monto_solicitud:,.2f}'
+                )
+            else:
+                detalles.append('<strong>Monto:</strong> -')
+            
+            # Actividad o Tarea relacionada
+            if obj.solicitud.actividad:
+                detalles.append(
+                    f'<strong>Actividad:</strong> {obj.solicitud.actividad}'
+                )
+            if obj.solicitud.tarea:
+                detalles.append(
+                    f'<strong>Tarea:</strong> {obj.solicitud.tarea}'
+                )
+            
+            # Solicitante
+            if hasattr(obj.solicitud, 'usuario') and obj.solicitud.usuario:
+                detalles.append(
+                    f'<strong>Solicitante:</strong> {obj.solicitud.usuario.get_full_name() or obj.solicitud.usuario.username}'
+                )
+            
+            # Beneficiario si existe
+            if hasattr(obj.solicitud, 'beneficiario') and obj.solicitud.beneficiario:
+                detalles.append(
+                    f'<strong>Beneficiario:</strong> {obj.solicitud.beneficiario}'
+                )
+            
+            # Concepto si existe
+            if hasattr(obj.solicitud, 'concepto') and obj.solicitud.concepto:
+                detalles.append(
+                    f'<strong>Concepto:</strong> {obj.solicitud.concepto}'
+                )
+            
+            # Fecha de la solicitud si existe
+            if hasattr(obj.solicitud, 'fechaSolicitud') and obj.solicitud.fechaSolicitud:
+                detalles.append(
+                    f'<strong>Fecha Solicitud:</strong> {obj.solicitud.fechaSolicitud.strftime("%d/%m/%Y")}'
+                )
+            
+            return format_html('<br>'.join(detalles))
+        return '-'
+    solicitud_detalle.short_description = 'Detalles de la Solicitud'
+    
+    def tipo_solicitud_coloreado(self, obj):
+        """Muestra el tipo de solicitud con colores"""
+        tipo = obj.tipo_solicitud
+        colores = {
+            'ACTIVIDAD': '#3498db',  # Azul
+            'TAREA': '#9b59b6',      # Púrpura
+            'GENERAL': '#95a5a6'     # Gris
+        }
+        iconos = {
+            'ACTIVIDAD': '📋',
+            'TAREA': '✅',
+            'GENERAL': '📄'
+        }
+        color = colores.get(tipo, '#95a5a6')
+        icono = iconos.get(tipo, '📄')
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{} {}</span>',
+            color,
+            icono,
+            tipo
+        )
+    tipo_solicitud_coloreado.short_description = 'Tipo'
+    
+    def estado_coloreado(self, obj):
+        """Muestra el estado con colores"""
+        colors = {
+            'PENDIENTE': 'orange',
+            'APROBADO': 'green',
+            'RECHAZADO': 'red',
+        }
+        iconos = {
+            'PENDIENTE': '⏳',
+            'APROBADO': '✅',
+            'RECHAZADO': '❌',
+        }
+        color = colors.get(obj.estado, 'gray')
+        icono = iconos.get(obj.estado, '❓')
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{} {}</span>',
+            color,
+            icono,
+            obj.get_estado_display()
+        )
+    estado_coloreado.short_description = 'Estado'
+    estado_coloreado.admin_order_field = 'estado'
+    
+    def fechaAsignacion_corta(self, obj):
+        """Fecha en formato corto"""
+        return obj.fechaAsignacion.strftime('%d/%m/%Y %H:%M') if obj.fechaAsignacion else '-'
+    fechaAsignacion_corta.short_description = 'Asignación'
+    fechaAsignacion_corta.admin_order_field = 'fechaAsignacion'
+    
+    def get_queryset(self, request):
+        """Optimizar consultas incluyendo las relaciones necesarias"""
+        return super().get_queryset(request).select_related(
+            'solicitud',
+            'solicitud__actividad',
+            'solicitud__tarea',
+            'usuarioValidador',
+            'usuarioRedactor'
+        )
+    
+    actions = ['marcar_como_aprobado', 'marcar_como_rechazado']
+    
+    def marcar_como_aprobado(self, request, queryset):
+        """Action para aprobar validaciones de reembolso"""
+        contador = 0
+        for v in queryset:
+            v.estado = 'APROBADO'
+            v.save()
+            contador += 1
+        self.message_user(request, f"♻️ {contador} validaciones de reembolso marcadas como APROBADAS")
+    marcar_como_aprobado.short_description = "✅ Marcar como APROBADO"
+    
+    def marcar_como_rechazado(self, request, queryset):
+        """Action para rechazar validaciones de reembolso"""
+        contador = 0
+        for v in queryset:
+            v.estado = 'RECHAZADO'
+            v.save()
+            contador += 1
+        self.message_user(request, f"♻️ {contador} validaciones de reembolso marcadas como RECHAZADAS")
+    marcar_como_rechazado.short_description = "❌ Marcar como RECHAZADO"
+
+
+# -------------------------------------------------------------------
+# ADMIN PARA VALIDACIONES DE RENDICIÓN DE CUENTAS
+# -------------------------------------------------------------------
+@admin.register(ValidacionRendicionCuentas)
+class ValidacionRendicionCuentasAdmin(admin.ModelAdmin):
+    """
+    Admin para validaciones de Rendiciones de Cuentas
+    """
+    list_display = [
+        'id',
+        'codigoSeguimiento',
+        'rendicion_link',
+        'usuarioValidador',
+        'estado_coloreado',
+        'tipo_rendicion_coloreado',
+        'versionDocumento',
+        'fechaAsignacion_corta'
+    ]
+    
+    list_filter = [
+        'estado',
+        'versionDocumento',
+        'fechaAsignacion',
+        'rendicion__actividad',  # Para filtrar por actividad
+    ]
+    
+    search_fields = [
+        'codigoSeguimiento',
+        'rendicion__numeroFormulario',
+        'usuarioValidador__username',
+        'usuarioValidador__first_name',
+        'usuarioValidador__last_name',
+        'comentarios'
+    ]
+    
+    raw_id_fields = ['rendicion', 'usuarioValidador', 'usuarioRedactor']
+    
+    readonly_fields = [
+        'codigoSeguimiento',
+        'fechaAsignacion',
+        'fechaResolucion',
+        'rendicion_detalle'
+    ]
+    
+    fieldsets = (
+        ('Validación', {
+            'fields': (
+                'codigoSeguimiento',
+                ('usuarioValidador', 'usuarioRedactor'),
+                ('estado', 'versionDocumento'),
+                'comentarios'
+            )
+        }),
+        ('Rendición Relacionada', {
+            'fields': (
+                'rendicion',
+                'rendicion_detalle'
+            )
+        }),
+        ('Fechas', {
+            'fields': (
+                ('fechaAsignacion', 'fechaResolucion'),
+            )
+        }),
+    )
+    
+    def rendicion_link(self, obj):
+        """Link a la rendición de cuentas en admin"""
+        url = f"/admin/spme_viajes/rendicioncuentas/{obj.rendicion.id}/change/"
+        return format_html('<a href="{}">📊 {}</a>', url, obj.codigo_rendicion)
+    rendicion_link.short_description = 'Rendición de Cuentas'
+    rendicion_link.admin_order_field = 'rendicion__numeroFormulario'
+    
+    def rendicion_detalle(self, obj):
+        """Muestra detalles de la rendición de cuentas"""
+        if obj.rendicion:
+            detalles = []
+            
+            # Código de formulario
+            detalles.append(
+                f'<strong>Formulario:</strong> {obj.codigo_rendicion}'
+            )
+            
+            # Tipo de rendición
+            tipo = obj.tipo_rendicion
+            tipo_colores = {
+                'ACTIVIDAD': '#3498db',
+                'TAREA': '#9b59b6',
+                'GENERAL': '#95a5a6'
+            }
+            color_tipo = tipo_colores.get(tipo, '#95a5a6')
+            detalles.append(
+                f'<strong>Tipo:</strong> <span style="color: {color_tipo}; font-weight: bold;">{tipo}</span>'
+            )
+            
+            # Monto asignado
+            if obj.monto_rendicion:
+                detalles.append(
+                    f'<strong>Monto Asignado:</strong> {obj.monto_rendicion:,.2f}'
+                )
+            else:
+                detalles.append('<strong>Monto Asignado:</strong> -')
+            
+            # Saldo si existe
+            if obj.saldo_rendicion is not None:
+                detalles.append(
+                    f'<strong>Saldo:</strong> {obj.saldo_rendicion:,.2f}'
+                )
+            
+            # Actividad o Tarea relacionada
+            if obj.rendicion.actividad:
+                detalles.append(
+                    f'<strong>Actividad:</strong> {obj.rendicion.actividad}'
+                )
+            if obj.rendicion.tarea:
+                detalles.append(
+                    f'<strong>Tarea:</strong> {obj.rendicion.tarea}'
+                )
+            
+            # Solicitante
+            if hasattr(obj.rendicion, 'usuario') and obj.rendicion.usuario:
+                detalles.append(
+                    f'<strong>Solicitante:</strong> {obj.rendicion.usuario.get_full_name() or obj.rendicion.usuario.username}'
+                )
+            
+            # Fecha de la rendición si existe
+            if hasattr(obj.rendicion, 'fechaRendicion') and obj.rendicion.fechaRendicion:
+                detalles.append(
+                    f'<strong>Fecha Rendición:</strong> {obj.rendicion.fechaRendicion.strftime("%d/%m/%Y")}'
+                )
+            
+            return format_html('<br>'.join(detalles))
+        return '-'
+    rendicion_detalle.short_description = 'Detalles de la Rendición'
+    
+    def tipo_rendicion_coloreado(self, obj):
+        """Muestra el tipo de rendición con colores"""
+        tipo = obj.tipo_rendicion
+        colores = {
+            'ACTIVIDAD': '#3498db',  # Azul
+            'TAREA': '#9b59b6',      # Púrpura
+            'GENERAL': '#95a5a6'     # Gris
+        }
+        iconos = {
+            'ACTIVIDAD': '📋',
+            'TAREA': '✅',
+            'GENERAL': '📄'
+        }
+        color = colores.get(tipo, '#95a5a6')
+        icono = iconos.get(tipo, '📄')
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{} {}</span>',
+            color,
+            icono,
+            tipo
+        )
+    tipo_rendicion_coloreado.short_description = 'Tipo'
+    
+    def estado_coloreado(self, obj):
+        """Muestra el estado con colores"""
+        colors = {
+            'PENDIENTE': 'orange',
+            'APROBADO': 'green',
+            'RECHAZADO': 'red',
+        }
+        iconos = {
+            'PENDIENTE': '⏳',
+            'APROBADO': '✅',
+            'RECHAZADO': '❌',
+        }
+        color = colors.get(obj.estado, 'gray')
+        icono = iconos.get(obj.estado, '❓')
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{} {}</span>',
+            color,
+            icono,
+            obj.get_estado_display()
+        )
+    estado_coloreado.short_description = 'Estado'
+    estado_coloreado.admin_order_field = 'estado'
+    
+    def fechaAsignacion_corta(self, obj):
+        """Fecha en formato corto"""
+        return obj.fechaAsignacion.strftime('%d/%m/%Y %H:%M') if obj.fechaAsignacion else '-'
+    fechaAsignacion_corta.short_description = 'Asignación'
+    fechaAsignacion_corta.admin_order_field = 'fechaAsignacion'
+    
+    def get_queryset(self, request):
+        """Optimizar consultas incluyendo las relaciones necesarias"""
+        return super().get_queryset(request).select_related(
+            'rendicion',
+            'rendicion__actividad',
+            'rendicion__tarea',
+            'usuarioValidador',
+            'usuarioRedactor'
+        )
+    
+    actions = ['marcar_como_aprobado', 'marcar_como_rechazado']
+    
+    def marcar_como_aprobado(self, request, queryset):
+        """Action para aprobar validaciones de rendición"""
+        contador = 0
+        for v in queryset:
+            v.estado = 'APROBADO'
+            v.save()
+            contador += 1
+        self.message_user(request, f"📊 {contador} validaciones de rendición marcadas como APROBADAS")
+    marcar_como_aprobado.short_description = "✅ Marcar como APROBADO"
+    
+    def marcar_como_rechazado(self, request, queryset):
+        """Action para rechazar validaciones de rendición"""
+        contador = 0
+        for v in queryset:
+            v.estado = 'RECHAZADO'
+            v.save()
+            contador += 1
+        self.message_user(request, f"📊 {contador} validaciones de rendición marcadas como RECHAZADAS")
     marcar_como_rechazado.short_description = "❌ Marcar como RECHAZADO"
 
 # -------------------------------------------------------------------
