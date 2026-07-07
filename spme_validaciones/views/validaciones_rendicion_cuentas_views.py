@@ -288,7 +288,7 @@ class EstadoValidacionRendicionCuentasAPIView(APIView):
             'monto_asignado': str(rendicion.montoAsignado) if rendicion.montoAsignado else '0.00',
             'monto_descargado': str(rendicion.montoDescargado) if rendicion.montoDescargado else '0.00',
             'saldo': str(rendicion.saldo) if rendicion.saldo else '0.00',
-            'tipo_rendicion': tipo,
+            'tipo_solicitud': tipo,
             **estadisticas
         }, status=status.HTTP_200_OK)
 
