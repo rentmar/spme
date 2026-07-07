@@ -126,6 +126,6 @@ urlpatterns = [
     path(r'rendicion-cuentas/<int:rendicion_id>/historial/', HistorialValidacionRendicionCuentasAPIView.as_view(), name='historial-rendicion-cuentas'),
     path(r'rendicion-cuentas/mis-pendientes/', MisValidacionesPendientesRendicionCuentasAPIView.as_view(), name='mis-pendientes-rendicion-cuentas'),
     path(r'rendicion-cuentas/<int:rendicion_id>/asignar-validadores-sin-notificacion/', AsignarValidadoresRendicionCuentasSinNotificacionViewSet.as_view({'post': 'create'}), name='asignar-validadores-rendicion-cuentas-sin-notificacion'),
-] 
+]  
 
 urlpatterns += router.urls

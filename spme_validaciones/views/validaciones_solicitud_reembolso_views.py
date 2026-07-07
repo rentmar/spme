@@ -230,6 +230,7 @@ class ResetearValidacionesSolicitudReembolsoViewSet(viewsets.ViewSet):
             v.estado = 'PENDIENTE'
             v.versionDocumento = nueva_version
             v.fechaResolucion = None
+            v.comentarios = ''
             v.save()
             reseteadas += 1
         
