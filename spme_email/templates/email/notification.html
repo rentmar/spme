@@ -1,0 +1,32 @@
+<!-- spme_email/templates/emails/notification.html -->
+{% extends 'base.html' %}
+
+{% block header %}
+<h2 style="color: #ffffff; margin: 0; font-size: 20px;">🔔 Notificación</h2>
+{% endblock %}
+
+{% block content %}
+<p style="color: #333; font-size: 15px; margin: 0 0 15px;">Hola <strong>{{ user_name }}</strong>,</p>
+
+<!-- Tarjeta de notificación -->
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fef9e7; border-left: 4px solid #f39c12; margin: 15px 0;">
+    <tr>
+        <td style="padding: 15px 20px;">
+            <h3 style="color: #7d6608; margin: 0 0 8px; font-size: 16px;">{{ notification_title }}</h3>
+            <p style="color: #7d6608; margin: 0; font-size: 14px; line-height: 1.5;">{{ notification_message }}</p>
+        </td>
+    </tr>
+</table>
+
+{% if action_url %}
+<table cellpadding="0" cellspacing="0" style="margin: 25px auto;">
+    <tr>
+        <td style="background-color: #f39c12; border-radius: 5px; text-align: center;">
+            <a href="{{ action_url }}" style="display: inline-block; padding: 10px 30px; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: bold;">
+                {{ action_text|default:"Ver Detalles" }}
+            </a>
+        </td>
+    </tr>
+</table>
+{% endif %}
+{% endblock %}

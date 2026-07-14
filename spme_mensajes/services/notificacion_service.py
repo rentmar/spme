@@ -430,7 +430,8 @@ def crear_mensaje_validacion_solicitud_fondos(solicitud, validador):
         
     except Exception as e:
         logger.error(f"❌ Error creando mensaje: {e}")
-        return None
+        #return None
+        raise
 
 
 def crear_mensajes_validacion_solicitud_fondos(solicitud, validadores):

@@ -90,6 +90,7 @@ class AsignarValidadoresSolicitudFondosViewSet(viewsets.ViewSet):
         
         resultados, errores, validadores_json = [], [], []
 
+        #Crear las entradas para los validadores, usando las ids recibidas
         for validador in validadores:
             try:
                 if repo.existe_validador(solicitud.id, 'solicitud', validador.id):

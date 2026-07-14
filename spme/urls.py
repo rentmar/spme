@@ -53,6 +53,7 @@ urlpatterns = [
     path('api-peirep/', include('spme_pei_reportes.urls')),
     #Api presupuestos
     path('api-pres/', include('spme_presupuesto.urls')),
-
+    #Api emails
+    path('api-mail/', include('spme_email.urls')),
 ]
 

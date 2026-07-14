@@ -116,6 +116,10 @@ from .solrendicioncuentas.views.rendicion_cuentas_mas_solicitudes_views import R
 from .informeactividadprincipal.views.vincular_solicitudes_viaje_a_informe_actividad_views import VinculacionInformeViewSet
 from .informeactividadprincipal.views.crear_informe_actividad_principal_v2_views import InformeActividadPrincipalV2
 from .informeactividadprincipal.views.crear_informe_tarea_principal_v2_views import InformeSubactividadPrincipalV2
+#importacion Formularios, helpers, beneficiarios ###################
+from .formularios.views.forma_pago_view import (BeneficiariosFormaPagoView,)
+from .formularios.views.lugar_view import LugaresSolicitudView
+
 
 #PEI
 router = DefaultRouter()
@@ -348,6 +352,10 @@ urlpatterns =[
     #Informe de Tarea(subactividad) POST, GET, PUT
     #Procesa Datos del informe de tarea, validadores(notificaciones), vinculacion Sol de viajes (notificaciones)
     path(r'informe-subactividad-principal/v2/', InformeSubactividadPrincipalV2.as_view(), name='informe-subactividad-principal-v2'),
+    ############################### Formularios, datos para helpers, auxiliares, etc. ########
+    path(r'beneficiarios-forma-pago/', BeneficiariosFormaPagoView.as_view(), name='beneficiarios-forma-pago'),
+    path(r'lugares-solicitud/', LugaresSolicitudView.as_view(), name='lugares-solicitud'),
+
 ]
  
 urlpatterns += router.urls

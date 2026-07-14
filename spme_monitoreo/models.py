@@ -55,6 +55,7 @@ class SolicitudFondos(models.Model):
         null=True,
         blank=True,
     )
+    #Redactor del formulario
     usuario = models.ForeignKey(
         Usuario,
         on_delete=models.SET_NULL,
@@ -82,6 +83,133 @@ class SolicitudFondos(models.Model):
     # created_at = models.DateTimeField(auto_now_add=True)  # Si existe
     # updated_at = models.DateTimeField(auto_now=True)      # Si existe
 
+    # ===================================================================
+    # OPCIONES
+    # ===================================================================
+    class SubTipoDocumento(models.TextChoices):
+        ACTIVIDAD = 'ACTIVIDAD', 'Actividad'
+        TAREA = 'TAREA', 'Tarea'
+    
+    # ===================================================================
+    # PROPIEDADES DE CLASIFICACIÓN
+    # ===================================================================
+    @property
+    def subtipo_documento(self):
+        """
+        Determina el subtipo de la solicitud según sus relaciones.
+        
+        - Si tiene actividad pero NO tarea → 'ACTIVIDAD'
+        - Si tiene actividad Y tarea       → 'TAREA'
+        - Por defecto                      → 'ACTIVIDAD'
+        
+        Returns:
+            str: 'ACTIVIDAD' o 'TAREA'
+        """
+        if self.actividad_id and not self.tarea_id:
+            return self.SubTipoDocumento.ACTIVIDAD
+        elif self.actividad_id and self.tarea_id:
+            return self.SubTipoDocumento.TAREA
+        return self.SubTipoDocumento.ACTIVIDAD
+    
+    @property
+    def subtipo_display(self):
+        """
+        Retorna la etiqueta legible del subtipo para el frontend.
+        
+        Returns:
+            str: 'Actividad' o 'Tarea'
+        """
+        return self.get_subtipo_display()
+    
+    # ===================================================================
+    # MÉTODOS UTILITARIOS
+    # ===================================================================
+    
+    def get_subtipo_display(self):
+        """
+        Convierte el código de subtipo a su representación legible.
+        
+        Returns:
+            str: 'Actividad' o 'Tarea'
+        """
+        mapping = {
+            self.SubTipoDocumento.ACTIVIDAD: 'Actividad',
+            self.SubTipoDocumento.TAREA: 'Subactividad',
+        }
+        return mapping.get(self.subtipo_documento, 'Actividad')
+    
+    def get_detalle_subtipo(self):
+        """
+        Genera el texto descriptivo con íconos según el subtipo.
+        
+        Returns:
+            str: Texto formateado con íconos para mensajes
+        """
+        if self.subtipo_documento == self.SubTipoDocumento.ACTIVIDAD:
+            actividad_nombre = self._get_actividad_nombre()
+            return f"📋 Actividad: {actividad_nombre}\n"
+        
+        elif self.subtipo_documento == self.SubTipoDocumento.TAREA:
+            actividad_nombre = self._get_actividad_nombre()
+            tarea_nombre = self._get_tarea_nombre()
+            return f"📋 Actividad: {actividad_nombre}\n📎 Subactividad: {tarea_nombre}\n"
+        
+        return ""
+    
+    # ===================================================================
+    # URLs
+    # ===================================================================
+    
+    def get_accion_url(self):
+        """
+        Retorna la URL de acción según el subtipo de documento.
+        
+        - Actividad: /actividades/{actividad_id}/solicitudes-fondos/{id}
+        - Tarea:     /actividades/{actividad_id}/tareas/{tarea_id}/solicitudes-fondos/{id}
+        
+        Returns:
+            str: URL para acceder a la solicitud
+        """
+        if self.subtipo_documento == self.SubTipoDocumento.ACTIVIDAD:
+            # return f"/actividades/{self.actividad_id}/solicitudes-fondos/{self.id}"
+            return f"/monitoreo/formulario011/{self.actividad_id}?solicitud_id={self.id}"
+        
+        elif self.subtipo_documento == self.SubTipoDocumento.TAREA:
+            # return f"/actividades/{self.actividad_id}/tareas/{self.tarea_id}/solicitudes-fondos/{self.id}"
+            return f'/monitoreo/formulario011/{self.actividad_id}?solicitud_id={self.id}&tarea_id={self.tarea.id}'
+        return f"/solicitudes-fondos/{self.id}"
+    
+    def get_accion_url_texto(self):
+        """
+        Retorna el texto del botón de acción.
+        
+        Returns:
+            str: 'Ir a la Solicitud de Fondos'
+        """
+        return "Ir a la Solicitud de Fondos"
+    
+    # ===================================================================
+    # HELPERS PRIVADOS
+    # ===================================================================
+    
+    def _get_actividad_nombre(self):
+        """Obtiene el nombre de la actividad de forma segura."""
+        if self.actividad_id:
+            return getattr(self.actividad, 'nombreCorto', None) or str(self.actividad)
+        return None
+    
+    def _get_tarea_nombre(self):
+        """Obtiene el nombre de la tarea de forma segura."""
+        if self.tarea_id:
+            return getattr(self.tarea, 'descripcionTarea', None) or str(self.tarea)
+        return None
+    
+    def _get_proyecto_id(self):
+        """Obtiene el ID del proyecto asociado de forma segura."""
+        if self.actividad_id and hasattr(self.actividad, 'proyecto_id'):
+            return self.actividad.proyecto_id
+        return None
+    
     def __str__(self):
         return f"{self.numeroFormulario}"
 
@@ -164,6 +292,107 @@ class SolicitudReembolso(models.Model):
         null=True,
         blank=True,
     )
+
+    # ===================================================================
+    # CHOICES
+    # ===================================================================
+    
+    class SubTipoDocumento(models.TextChoices):
+        ACTIVIDAD = 'ACTIVIDAD', 'Actividad'
+        TAREA = 'TAREA', 'Tarea'
+    
+    # ===================================================================
+    # PROPIEDADES DE CLASIFICACIÓN
+    # ===================================================================
+    
+    @property
+    def subtipo_documento(self):
+        if self.actividad_id and not self.tarea_id:
+            return self.SubTipoDocumento.ACTIVIDAD
+        elif self.actividad_id and self.tarea_id:
+            return self.SubTipoDocumento.TAREA
+        return self.SubTipoDocumento.ACTIVIDAD
+    
+    @property
+    def subtipo_display(self):
+        return self.get_subtipo_display()
+    
+    # ===================================================================
+    # MÉTODOS UTILITARIOS
+    # ===================================================================
+    
+    def get_subtipo_display(self):
+        mapping = {
+            self.SubTipoDocumento.ACTIVIDAD: 'Actividad',
+            self.SubTipoDocumento.TAREA: 'Subactividad',
+        }
+        return mapping.get(self.subtipo_documento, 'Actividad')
+    
+    def get_detalle_subtipo(self):
+        if self.subtipo_documento == self.SubTipoDocumento.ACTIVIDAD:
+            actividad_nombre = self._get_actividad_nombre()
+            return f"📋 Actividad: {actividad_nombre}\n"
+        elif self.subtipo_documento == self.SubTipoDocumento.TAREA:
+            actividad_nombre = self._get_actividad_nombre()
+            tarea_nombre = self._get_tarea_nombre()
+            return f"📋 Actividad: {actividad_nombre}\n📎 Tarea: {tarea_nombre}\n"
+        return ""
+    
+    def get_mensaje_contexto(self):
+        return {
+            'solicitud_id': self.id,
+            'codigo': self.numeroFormulario or f"SR-{self.id}",
+            'monto': str(self.montoSolicitado) if self.montoSolicitado else '0.00',
+            'subtipo_documento': self.subtipo_documento,
+            'subtipo_display': self.subtipo_display,
+            'detalle_subtipo': self.get_detalle_subtipo(),
+            'actividad_id': self.actividad_id,
+            'actividad_nombre': self._get_actividad_nombre(),
+            'tarea_id': self.tarea_id,
+            'tarea_nombre': self._get_tarea_nombre(),
+            'solicitante_id': self.usuario_id,
+            'solicitante_nombre': self.usuario.get_full_name() if self.usuario else 'Sistema',
+            'fecha_solicitud': (
+                self.fechaSolicitud.strftime('%Y-%m-%d') 
+                if self.fechaSolicitud 
+                else None
+            ),
+            'proyecto_id': self._get_proyecto_id(),
+        }
+    
+    # ===================================================================
+    # URLs
+    # ===================================================================
+    
+    def get_accion_url(self):
+        if self.subtipo_documento == self.SubTipoDocumento.ACTIVIDAD:
+            # return f"/actividades/{self.actividad_id}/solicitudes-reembolso/{self.id}"
+            return f"/monitoreo/formulario033/{self.actividad_id}?solicitud_id={self.id}"
+        elif self.subtipo_documento == self.SubTipoDocumento.TAREA:
+            return f"/monitoreo/formulario033/{self.actividad_id}?solicitud_id={self.id}&tarea_id={self.tarea.id}"
+        return f"/solicitudes-reembolso/{self.id}"
+    
+    def get_accion_url_texto(self):
+        return "Ir a la Solicitud de Reposicion"
+    
+    # ===================================================================
+    # HELPERS PRIVADOS
+    # ===================================================================
+    
+    def _get_actividad_nombre(self):
+        if self.actividad_id:
+            return getattr(self.actividad, 'nombreCorto', None) or str(self.actividad)
+        return None
+    
+    def _get_tarea_nombre(self):
+        if self.tarea_id:
+            return getattr(self.tarea, 'descripcionTarea', None) or str(self.tarea)
+        return None
+    
+    def _get_proyecto_id(self):
+        if self.actividad_id and hasattr(self.actividad, 'proyecto_id'):
+            return self.actividad.proyecto_id
+        return None
 
     def __str__(self):
         return f"{self.numeroFormulario}"
@@ -271,7 +500,109 @@ class SolicitudViaje (models.Model):
         blank=True, 
         null=True,
         help_text='Información de forma de pago (transferencia, otros, etc.)'
-    ) 
+    )
+   
+    # ===================================================================
+    # CHOICES
+    # ===================================================================
+    
+    class SubTipoDocumento(models.TextChoices):
+        ACTIVIDAD = 'ACTIVIDAD', 'Actividad'
+        TAREA = 'TAREA', 'Tarea'
+    
+    # ===================================================================
+    # PROPIEDADES DE CLASIFICACIÓN
+    # ===================================================================
+    
+    @property
+    def subtipo_documento(self):
+        if self.actividad_id and not self.tarea_id:
+            return self.SubTipoDocumento.ACTIVIDAD
+        elif self.actividad_id and self.tarea_id:
+            return self.SubTipoDocumento.TAREA
+        return self.SubTipoDocumento.ACTIVIDAD
+    
+    @property
+    def subtipo_display(self):
+        return self.get_subtipo_display()
+    
+    # ===================================================================
+    # MÉTODOS UTILITARIOS
+    # ===================================================================
+    
+    def get_subtipo_display(self):
+        mapping = {
+            self.SubTipoDocumento.ACTIVIDAD: 'Actividad',
+            self.SubTipoDocumento.TAREA: 'Subactividad',
+        }
+        return mapping.get(self.subtipo_documento, 'Actividad')
+    
+    def get_detalle_subtipo(self):
+        if self.subtipo_documento == self.SubTipoDocumento.ACTIVIDAD:
+            actividad_nombre = self._get_actividad_nombre()
+            return f"📋 Actividad: {actividad_nombre}\n"
+        elif self.subtipo_documento == self.SubTipoDocumento.TAREA:
+            actividad_nombre = self._get_actividad_nombre()
+            tarea_nombre = self._get_tarea_nombre()
+            return f"📋 Actividad: {actividad_nombre}\n📎 Tarea: {tarea_nombre}\n"
+        return ""
+    
+    def get_mensaje_contexto(self):
+        return {
+            'solicitud_id': self.id,
+            'codigo': self.numeroFormulario or f"SV-{self.id}",
+            'monto': str(self.montoSolicitado) if self.montoSolicitado else '0.00',
+            'subtipo_documento': self.subtipo_documento,
+            'subtipo_display': self.subtipo_display,
+            'detalle_subtipo': self.get_detalle_subtipo(),
+            'actividad_id': self.actividad_id,
+            'actividad_nombre': self._get_actividad_nombre(),
+            'tarea_id': self.tarea_id,
+            'tarea_nombre': self._get_tarea_nombre(),
+            'solicitante_id': self.usuario_id,
+            'solicitante_nombre': self.usuario.get_full_name() if self.usuario else 'Sistema',
+            'fecha_solicitud': (
+                self.fechaSolicitud.strftime('%Y-%m-%d') 
+                if self.fechaSolicitud 
+                else None
+            ),
+            'proyecto_id': self._get_proyecto_id(),
+        }
+    
+    # ===================================================================
+    # URLs
+    # ===================================================================
+    
+    def get_accion_url(self):
+        if self.subtipo_documento == self.SubTipoDocumento.ACTIVIDAD:
+            # return f"/actividades/{self.actividad_id}/solicitudes-viaje/{self.id}"
+            return f"/monitoreo/formulario055/{self.actividad_id}?solicitud_id={self.id}"
+        elif self.subtipo_documento == self.SubTipoDocumento.TAREA:
+            # return f"/actividades/{self.actividad_id}/tareas/{self.tarea_id}/solicitudes-viaje/{self.id}"
+            return f"/monitoreo/formulario055/{self.actividad_id}?solicitud_id={self.id}&tarea_id={self.tarea.id}"
+        return f"/solicitudes-viaje/{self.id}"
+    
+    def get_accion_url_texto(self):
+        return "Ir a la Solicitud de Viaje"
+    
+    # ===================================================================
+    # HELPERS PRIVADOS
+    # ===================================================================
+    
+    def _get_actividad_nombre(self):
+        if self.actividad_id:
+            return getattr(self.actividad, 'nombreCorto', None) or str(self.actividad)
+        return None
+    
+    def _get_tarea_nombre(self):
+        if self.tarea_id:
+            return getattr(self.tarea, 'descripcionTarea', None) or str(self.tarea)
+        return None
+    
+    def _get_proyecto_id(self):
+        if self.actividad_id and hasattr(self.actividad, 'proyecto_id'):
+            return self.actividad.proyecto_id
+        return None
     
     def __str__(self):
         return f"{self.numeroFormulario}"
@@ -345,7 +676,109 @@ class SolicitudPagoDirecto(models.Model):
         related_name='tarea_solicitud_sol_pago_directo',
         null=True,
         blank=True,
-    )  
+    )
+
+    # ===================================================================
+    # CHOICES
+    # ===================================================================
+    
+    class SubTipoDocumento(models.TextChoices):
+        ACTIVIDAD = 'ACTIVIDAD', 'Actividad'
+        TAREA = 'TAREA', 'Tarea'
+    
+    # ===================================================================
+    # PROPIEDADES DE CLASIFICACIÓN
+    # ===================================================================
+    
+    @property
+    def subtipo_documento(self):
+        if self.actividad_id and not self.tarea_id:
+            return self.SubTipoDocumento.ACTIVIDAD
+        elif self.actividad_id and self.tarea_id:
+            return self.SubTipoDocumento.TAREA
+        return self.SubTipoDocumento.ACTIVIDAD
+    
+    @property
+    def subtipo_display(self):
+        return self.get_subtipo_display()
+    
+    # ===================================================================
+    # MÉTODOS UTILITARIOS
+    # ===================================================================
+    
+    def get_subtipo_display(self):
+        mapping = {
+            self.SubTipoDocumento.ACTIVIDAD: 'Actividad',
+            self.SubTipoDocumento.TAREA: 'Subactividad',
+        }
+        return mapping.get(self.subtipo_documento, 'Actividad')
+    
+    def get_detalle_subtipo(self):
+        if self.subtipo_documento == self.SubTipoDocumento.ACTIVIDAD:
+            actividad_nombre = self._get_actividad_nombre()
+            return f"📋 Actividad: {actividad_nombre}\n"
+        elif self.subtipo_documento == self.SubTipoDocumento.TAREA:
+            actividad_nombre = self._get_actividad_nombre()
+            tarea_nombre = self._get_tarea_nombre()
+            return f"📋 Actividad: {actividad_nombre}\n📎 Tarea: {tarea_nombre}\n"
+        return ""
+    
+    def get_mensaje_contexto(self):
+        return {
+            'solicitud_id': self.id,
+            'codigo': self.numeroFormulario or f"SPD-{self.id}",
+            'monto': str(self.montoSolicitado) if self.montoSolicitado else '0.00',
+            'subtipo_documento': self.subtipo_documento,
+            'subtipo_display': self.subtipo_display,
+            'detalle_subtipo': self.get_detalle_subtipo(),
+            'actividad_id': self.actividad_id,
+            'actividad_nombre': self._get_actividad_nombre(),
+            'tarea_id': self.tarea_id,
+            'tarea_nombre': self._get_tarea_nombre(),
+            'solicitante_id': self.usuario_id,
+            'solicitante_nombre': self.usuario.get_full_name() if self.usuario else 'Sistema',
+            'fecha_solicitud': (
+                self.fechaSolicitud.strftime('%Y-%m-%d') 
+                if self.fechaSolicitud 
+                else None
+            ),
+            'proyecto_id': self._get_proyecto_id(),
+        }
+    
+    # ===================================================================
+    # URLs
+    # ===================================================================
+    
+    def get_accion_url(self):
+        if self.subtipo_documento == self.SubTipoDocumento.ACTIVIDAD:
+            # return f"/actividades/{self.actividad_id}/pagos-directos/{self.id}"
+            return f"/monitoreo/formulario088/{self.actividad_id}?solicitud_id={self.id}"
+        elif self.subtipo_documento == self.SubTipoDocumento.TAREA:
+            # return f"/actividades/{self.actividad_id}/tareas/{self.tarea_id}/pagos-directos/{self.id}"
+            return f"/monitoreo/formulario088/{self.actividad_id}?solicitud_id={self.id}&tarea_id={self.tarea.id}"
+        return f"/pagos-directos/{self.id}"
+    
+    def get_accion_url_texto(self):
+        return "Ir al Pago Directo"
+    
+    # ===================================================================
+    # HELPERS PRIVADOS
+    # ===================================================================
+    
+    def _get_actividad_nombre(self):
+        if self.actividad_id:
+            return getattr(self.actividad, 'nombreCorto', None) or str(self.actividad)
+        return None
+    
+    def _get_tarea_nombre(self):
+        if self.tarea_id:
+            return getattr(self.tarea, 'descripcionTarea', None) or str(self.tarea)
+        return None
+    
+    def _get_proyecto_id(self):
+        if self.actividad_id and hasattr(self.actividad, 'proyecto_id'):
+            return self.actividad.proyecto_id
+        return None
     
     def __str__(self):
         return f"{self.numeroFormulario}"
@@ -459,6 +892,110 @@ class RendicionCuentas(models.Model):
         null=True,
         blank=True,
     )
+
+
+    
+    # ===================================================================
+    # CHOICES
+    # ===================================================================
+    
+    class SubTipoDocumento(models.TextChoices):
+        ACTIVIDAD = 'ACTIVIDAD', 'Actividad'
+        TAREA = 'TAREA', 'Tarea'
+    
+    # ===================================================================
+    # PROPIEDADES DE CLASIFICACIÓN
+    # ===================================================================
+    
+    @property
+    def subtipo_documento(self):
+        if self.actividad_id and not self.tarea_id:
+            return self.SubTipoDocumento.ACTIVIDAD
+        elif self.actividad_id and self.tarea_id:
+            return self.SubTipoDocumento.TAREA
+        return self.SubTipoDocumento.ACTIVIDAD
+    
+    @property
+    def subtipo_display(self):
+        return self.get_subtipo_display()
+    
+    # ===================================================================
+    # MÉTODOS UTILITARIOS
+    # ===================================================================
+    
+    def get_subtipo_display(self):
+        mapping = {
+            self.SubTipoDocumento.ACTIVIDAD: 'Actividad',
+            self.SubTipoDocumento.TAREA: 'Subactividad',
+        }
+        return mapping.get(self.subtipo_documento, 'Actividad')
+    
+    def get_detalle_subtipo(self):
+        if self.subtipo_documento == self.SubTipoDocumento.ACTIVIDAD:
+            actividad_nombre = self._get_actividad_nombre()
+            return f"📋 Actividad: {actividad_nombre}\n"
+        elif self.subtipo_documento == self.SubTipoDocumento.TAREA:
+            actividad_nombre = self._get_actividad_nombre()
+            tarea_nombre = self._get_tarea_nombre()
+            return f"📋 Actividad: {actividad_nombre}\n📎 Tarea: {tarea_nombre}\n"
+        return ""
+    
+    def get_mensaje_contexto(self):
+        return {
+            'solicitud_id': self.id,
+            'codigo': self.numeroFormulario or f"RC-{self.id}",
+            'monto': str(self.montoAsignado) if self.montoAsignado else '0.00',
+            'subtipo_documento': self.subtipo_documento,
+            'subtipo_display': self.subtipo_display,
+            'detalle_subtipo': self.get_detalle_subtipo(),
+            'actividad_id': self.actividad_id,
+            'actividad_nombre': self._get_actividad_nombre(),
+            'tarea_id': self.tarea_id,
+            'tarea_nombre': self._get_tarea_nombre(),
+            'solicitante_id': self.usuario_id,
+            'solicitante_nombre': self.usuario.get_full_name() if self.usuario else 'Sistema',
+            'fecha_solicitud': (
+                self.fechaRendicion.strftime('%Y-%m-%d') 
+                if self.fechaRendicion 
+                else None
+            ),
+            'proyecto_id': self._get_proyecto_id(),
+        }
+    
+    # ===================================================================
+    # URLs
+    # ===================================================================
+    
+    def get_accion_url(self):
+        if self.subtipo_documento == self.SubTipoDocumento.ACTIVIDAD:
+            # return f"/actividades/{self.actividad_id}/rendiciones/{self.id}"
+            return f"/monitoreo/formulario022/{self.actividad_id}?solicitud_id={self.id}"
+        elif self.subtipo_documento == self.SubTipoDocumento.TAREA:
+            # return f"/actividades/{self.actividad_id}/tareas/{self.tarea_id}/rendiciones/{self.id}"
+            return f"/monitoreo/formulario022/{self.actividad_id}?solicitud_id={self.id}&tarea_id={self.tarea.id}"
+        return f"/rendiciones/{self.id}"
+    
+    def get_accion_url_texto(self):
+        return "Ir a la Rendición de Cuentas"
+    
+    # ===================================================================
+    # HELPERS PRIVADOS
+    # ===================================================================
+    
+    def _get_actividad_nombre(self):
+        if self.actividad_id:
+            return getattr(self.actividad, 'nombreCorto', None) or str(self.actividad)
+        return None
+    
+    def _get_tarea_nombre(self):
+        if self.tarea_id:
+            return getattr(self.tarea, 'descripcionTarea', None) or str(self.tarea)
+        return None
+    
+    def _get_proyecto_id(self):
+        if self.actividad_id and hasattr(self.actividad, 'proyecto_id'):
+            return self.actividad.proyecto_id
+        return None
  
     def __str__(self):
         return f"{self.numeroFormulario}"

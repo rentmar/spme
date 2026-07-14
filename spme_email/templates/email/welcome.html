@@ -1,0 +1,30 @@
+<!-- spme_email/templates/emails/welcome.html -->
+{% extends 'base.html' %}
+
+{% block header %}
+<h1 style="color: #ffffff; margin: 0; font-size: 22px;">¡Bienvenido a SPME!</h1>
+<p style="color: #d4e6f1; margin: 8px 0 0; font-size: 14px;">Sistema de Planificación y Monitoreo Estatal</p>
+{% endblock %}
+
+{% block content %}
+<p style="color: #333; font-size: 16px; margin: 0 0 15px;">Hola <strong>{{ user_name }}</strong>,</p>
+
+<p style="color: #555; font-size: 14px; line-height: 1.6; margin: 0 0 20px;">
+    Tu cuenta ha sido creada exitosamente. Ahora puedes acceder al sistema.
+</p>
+
+<!-- Botón -->
+<table cellpadding="0" cellspacing="0" style="margin: 25px auto;">
+    <tr>
+        <td style="background-color: #2e86c1; border-radius: 5px; text-align: center;">
+            <a href="{{ login_url }}" style="display: inline-block; padding: 12px 35px; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: bold;">
+                Iniciar Sesión
+            </a>
+        </td>
+    </tr>
+</table>
+
+<p style="color: #888; font-size: 12px; text-align: center; margin: 20px 0 0;">
+    O copia esta URL: <span style="color: #2e86c1;">{{ login_url }}</span>
+</p>
+{% endblock %}
