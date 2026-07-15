@@ -357,5 +357,5 @@ urlpatterns =[
     path(r'lugares-solicitud/', LugaresSolicitudView.as_view(), name='lugares-solicitud'),
 
 ]
- 
+
 urlpatterns += router.urls

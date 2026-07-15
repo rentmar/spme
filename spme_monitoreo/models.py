@@ -635,7 +635,7 @@ class SolicitudPagoDirecto(models.Model):
     #Discriminador
     bloquearIconosSolFondos = models.BooleanField(default=True)
     
-     #Validaciones
+    #Validaciones
     validacionResponsable = models.BooleanField(default=False)
     contador = models.ForeignKey(
         Usuario,
