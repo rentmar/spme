@@ -1,26 +1,22 @@
-#spme/spme_validaciones/repositories/solicitudes_viaje_usuario_repository.py
+# repositories/rendicion_cuentas_usuario_repository.py
+
 from django.db.models import Q, Prefetch, QuerySet
 from typing import Dict
-from ..models import ValidacionSolicitudViaje
-from spme_monitoreo.models import SolicitudViaje
+from ..models import ValidacionRendicionCuentas
+from spme_monitoreo.models import RendicionCuentas
 
 
-class SolicitudesViajeUsuarioRepository:
+class RendicionCuentasUsuarioRepository:
     """
-    Repositorio especializado para consultas de Solicitudes de Viaje.
+    Repositorio especializado para consultas de Rendición de Cuentas.
     """
     
     def obtener_solicitudes_por_usuario(self, usuario_id: int) -> QuerySet:
         """
-        Obtiene todas las solicitudes de viaje donde el usuario está involucrado.
-        
-        Criterios de filtrado (OR):
-        1. La solicitud le pertenece: solicitud.usuario_id == usuario_id
-        2. Es REDACTOR: existe validación con usuarioRedactor_id == usuario_id
-        3. Es REVISOR: existe validación con usuarioValidador_id == usuario_id
+        Obtiene todas las rendiciones de cuentas donde el usuario está involucrado.
         """
         return (
-            SolicitudViaje.objects
+            RendicionCuentas.objects
             .filter(
                 Q(usuario_id=usuario_id) |
                 Q(validaciones__usuarioRedactor_id=usuario_id) |
@@ -33,26 +29,36 @@ class SolicitudesViajeUsuarioRepository:
                 'actividad__tipo',
                 'actividad__responsable',
                 'actividad__proyecto',
-                'tarea'
+                'tarea',
+                'solicitudFondos',
+                'solicitudReembolso',
+                'solicitudViaje',
+                'solicitudPagoDirecto'
             )
             .prefetch_related(
                 Prefetch(
                     'validaciones',
-                    queryset=ValidacionSolicitudViaje.objects.select_related(
+                    queryset=ValidacionRendicionCuentas.objects.select_related(
                         'usuarioValidador',
                         'usuarioRedactor'
                     ).order_by('-fechaAsignacion')
                 )
             )
-            .order_by('-fechaSolicitud')
+            .order_by('-fechaRendicion')
         )
     
-    def obtener_estadisticas_validaciones(self, solicitud_id: int) -> Dict:
+    def obtener_estadisticas_validaciones(self, rendicion_id: int) -> Dict:
         """
-        Obtiene estadísticas agregadas de validaciones para una solicitud.
+        Obtiene estadísticas agregadas de validaciones para una rendición.
+        
+        Args:
+            rendicion_id: ID de la rendición de cuentas
+            
+        Returns:
+            Diccionario con conteos de validaciones por estado
         """
-        validaciones = ValidacionSolicitudViaje.objects.filter(
-            solicitud_id=solicitud_id
+        validaciones = ValidacionRendicionCuentas.objects.filter(
+            rendicion_id=rendicion_id  # ✅ CORREGIDO: rendicion_id en vez de solicitud_id
         )
         
         total = validaciones.count()
@@ -74,17 +80,17 @@ class SolicitudesViajeUsuarioRepository:
     
     def obtener_validaciones_pendientes_por_usuario(self, usuario_id: int) -> QuerySet:
         """
-        Validaciones pendientes para solicitudes de viaje.
+        Validaciones pendientes para rendiciones de cuentas.
         """
         return (
-            ValidacionSolicitudViaje.objects
+            ValidacionRendicionCuentas.objects
             .filter(
                 usuarioValidador_id=usuario_id,
                 estado='PENDIENTE'
             )
             .select_related(
-                'solicitud',
-                'solicitud__usuario',
+                'rendicion',
+                'rendicion__usuario',
                 'usuarioRedactor'
             )
             .order_by('-fechaAsignacion')

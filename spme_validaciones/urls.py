@@ -68,9 +68,12 @@ from .views.validaciones_rendicion_cuentas_views import (
 )
 
 #Importacion para solicitudes y rendicion
+from .views.todas_solicitudes_usuario_views import TodasSolicitudesUsuarioView
 from .views.solicitudes_fondos_usuario_views import SolicitudesFondosUsuarioView
 from .views.solicitudes_viaje_usuario_views import SolicitudesViajeUsuarioView
 from .views.solicitudes_pago_directo_usuario_views import SolicitudesPagoDirectoUsuarioView
+from .views.solicitudes_reembolso_usuario_views import SolicitudesReembolsoUsuarioView
+from .views.rendicion_cuentas_usuario_views import RendicionCuentasUsuarioView
 
 router = DefaultRouter()
 
@@ -131,10 +134,13 @@ urlpatterns = [
     path(r'rendicion-cuentas/mis-pendientes/', MisValidacionesPendientesRendicionCuentasAPIView.as_view(), name='mis-pendientes-rendicion-cuentas'),
     path(r'rendicion-cuentas/<int:rendicion_id>/asignar-validadores-sin-notificacion/', AsignarValidadoresRendicionCuentasSinNotificacionViewSet.as_view({'post': 'create'}), name='asignar-validadores-rendicion-cuentas-sin-notificacion'),
     ############################### Listas de Solicitudes validadas/no validadas #############
+    path(r'mis-solicitudes/', TodasSolicitudesUsuarioView.as_view(), name='todas-mis-solicitudes'),
     path(r'mis-solicitudes-fondos/', SolicitudesFondosUsuarioView.as_view(), name='solicitudes-fondos-usuario'),
     path(r'mis-solicitudes-viaje/', SolicitudesViajeUsuarioView.as_view(), name='solicitudes-viaje-usuario'),
     path(r'mis-solicitudes-pago-directo/', SolicitudesPagoDirectoUsuarioView.as_view(), name='solicitudes-pago-directo-usuario'),
-    
+    path(r'mis-solicitudes-reembolso/', SolicitudesReembolsoUsuarioView.as_view(), name='solicitudes-reembolso-usuario'),
+    path(r'mis-rendiciones-cuentas/', RendicionCuentasUsuarioView.as_view(), name='rendicion-cuentas-usuario'),
+
 ]  
 
 urlpatterns += router.urls

@@ -1,18 +1,18 @@
-#spme/spme_validaciones/repositories/solicitudes_viaje_usuario_repository.py
+# spme/spme_validaciones/repositories/solicitudes_reembolso_usuario_repository.py
 from django.db.models import Q, Prefetch, QuerySet
 from typing import Dict
-from ..models import ValidacionSolicitudViaje
-from spme_monitoreo.models import SolicitudViaje
+from ..models import ValidacionSolicitudReembolso
+from spme_monitoreo.models import SolicitudReembolso
 
 
-class SolicitudesViajeUsuarioRepository:
+class SolicitudesReembolsoUsuarioRepository:
     """
-    Repositorio especializado para consultas de Solicitudes de Viaje.
+    Repositorio especializado para consultas de Solicitudes de Reembolso.
     """
     
     def obtener_solicitudes_por_usuario(self, usuario_id: int) -> QuerySet:
         """
-        Obtiene todas las solicitudes de viaje donde el usuario está involucrado.
+        Obtiene todas las solicitudes de reembolso donde el usuario está involucrado.
         
         Criterios de filtrado (OR):
         1. La solicitud le pertenece: solicitud.usuario_id == usuario_id
@@ -20,7 +20,7 @@ class SolicitudesViajeUsuarioRepository:
         3. Es REVISOR: existe validación con usuarioValidador_id == usuario_id
         """
         return (
-            SolicitudViaje.objects
+            SolicitudReembolso.objects
             .filter(
                 Q(usuario_id=usuario_id) |
                 Q(validaciones__usuarioRedactor_id=usuario_id) |
@@ -38,7 +38,7 @@ class SolicitudesViajeUsuarioRepository:
             .prefetch_related(
                 Prefetch(
                     'validaciones',
-                    queryset=ValidacionSolicitudViaje.objects.select_related(
+                    queryset=ValidacionSolicitudReembolso.objects.select_related(
                         'usuarioValidador',
                         'usuarioRedactor'
                     ).order_by('-fechaAsignacion')
@@ -51,7 +51,7 @@ class SolicitudesViajeUsuarioRepository:
         """
         Obtiene estadísticas agregadas de validaciones para una solicitud.
         """
-        validaciones = ValidacionSolicitudViaje.objects.filter(
+        validaciones = ValidacionSolicitudReembolso.objects.filter(
             solicitud_id=solicitud_id
         )
         
@@ -74,10 +74,10 @@ class SolicitudesViajeUsuarioRepository:
     
     def obtener_validaciones_pendientes_por_usuario(self, usuario_id: int) -> QuerySet:
         """
-        Validaciones pendientes para solicitudes de viaje.
+        Validaciones pendientes para reembolsos.
         """
         return (
-            ValidacionSolicitudViaje.objects
+            ValidacionSolicitudReembolso.objects
             .filter(
                 usuarioValidador_id=usuario_id,
                 estado='PENDIENTE'

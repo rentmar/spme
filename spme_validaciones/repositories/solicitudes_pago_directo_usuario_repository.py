@@ -64,3 +64,21 @@ class SolicitudesPagoDirectoUsuarioRepository:
             'rechazadas': validaciones.filter(estado='RECHAZADO').count(),
             'pendientes': validaciones.filter(estado='PENDIENTE').count(),
         }
+    
+    def obtener_validaciones_pendientes_por_usuario(self, usuario_id: int) -> QuerySet:
+        """
+        Validaciones pendientes para pagos directos.
+        """
+        return (
+            ValidacionSolicitudPagoDirecto.objects
+            .filter(
+                usuarioValidador_id=usuario_id,
+                estado='PENDIENTE'
+            )
+            .select_related(
+                'solicitud',
+                'solicitud__usuario',
+                'usuarioRedactor'
+            )
+            .order_by('-fechaAsignacion')
+        )

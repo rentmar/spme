@@ -1,18 +1,32 @@
-# spme/spme_validaciones/services/solicitudes_pago_directo_usuario_service.py
-# services/solicitudes_pago_directo_usuario_service.py
+# services/rendicion_cuentas_usuario_service.py
+# spme/spme_validaciones/services/rendicion_cuentas_usuario_service.py
 from typing import Dict, List, Any, Optional
 import logging
 
-from ..repositories.solicitudes_pago_directo_usuario_repository import (
-    SolicitudesPagoDirectoUsuarioRepository
+from ..repositories.rendicion_cuentas_usuario_repository import (
+    RendicionCuentasUsuarioRepository
 )
 
 logger = logging.getLogger(__name__)
 
 
-class SolicitudesPagoDirectoUsuarioService:
+class RendicionCuentasUsuarioService:
     """
-    Servicio de lógica de negocio especializado en Solicitudes de Pago Directo.
+    Servicio de lógica de negocio especializado en Rendición de Cuentas.
+    
+    Criterios de negocio:
+    - REDACTOR: usuarioRedactor en tabla de validaciones
+    - REVISOR: usuarioValidador en tabla de validaciones
+    - REDACTOR_REVISOR: Cuando el usuario es ambos en la misma solicitud
+    - lePertenece: rendicion.usuario_id == usuario_id (dueño del formulario)
+    - Estado consolidado: Pendiente (al menos uno pendiente), 
+                          Aprobado (todos aprobaron), 
+                          Rechazado (al menos uno rechazó)
+    
+    Características especiales de Rendición de Cuentas:
+    - Se relaciona con múltiples tipos de solicitudes (fondos, reembolso, viaje, pago directo)
+    - Maneja conceptos de contabilidad: montoAsignado, montoDescargado, saldo
+    - Tiene fecha de desembolso y comprobante diario
     """
     
     ROL_REDACTOR = 'REDACTOR'
@@ -25,11 +39,25 @@ class SolicitudesPagoDirectoUsuarioService:
     ESTADO_PENDIENTE = 'Pendiente'
     ESTADO_SIN_REVISORES = 'SinRevisores'
     
-    def __init__(self, repository: Optional[SolicitudesPagoDirectoUsuarioRepository] = None):
-        self.repository = repository or SolicitudesPagoDirectoUsuarioRepository()
+    def __init__(self, repository: Optional[RendicionCuentasUsuarioRepository] = None):
+        """
+        Constructor con inyección de dependencias.
+        
+        Args:
+            repository: Instancia del repositorio. Si es None, crea uno nuevo.
+        """
+        self.repository = repository or RendicionCuentasUsuarioRepository()
     
     def obtener_solicitudes_usuario(self, usuario_id: int) -> Dict[str, Any]:
-        """Método principal que orquesta la obtención y estructuración de datos."""
+        """
+        Método principal que orquesta la obtención y estructuración de datos.
+        
+        Args:
+            usuario_id: ID del usuario autenticado
+            
+        Returns:
+            Diccionario con la estructura completa de respuesta
+        """
         try:
             solicitudes = self.repository.obtener_solicitudes_por_usuario(usuario_id)
             
@@ -51,7 +79,7 @@ class SolicitudesPagoDirectoUsuarioService:
                     self._actualizar_contadores(registro, contadores)
                 except Exception as e:
                     logger.error(
-                        f"Error procesando solicitud pago directo {solicitud.id}: {str(e)}",
+                        f"Error procesando rendición de cuentas {solicitud.id}: {str(e)}",
                         exc_info=True
                     )
                     continue
@@ -60,36 +88,55 @@ class SolicitudesPagoDirectoUsuarioService:
             
         except Exception as e:
             logger.error(
-                f"Error obteniendo solicitudes pago directo para usuario {usuario_id}: {str(e)}",
+                f"Error obteniendo rendiciones de cuentas para usuario {usuario_id}: {str(e)}",
                 exc_info=True
             )
             raise
     
     def _procesar_solicitud(self, solicitud, usuario_id: int) -> Dict[str, Any]:
-        """Procesa una solicitud individual aplicando reglas de negocio."""
+        """
+        Procesa una rendición individual aplicando todas las reglas de negocio.
+        
+        Args:
+            solicitud: Instancia de RendicionCuentas
+            usuario_id: ID del usuario
+            
+        Returns:
+            Diccionario con el registro procesado
+        """
         validaciones = solicitud.validaciones.all()
         
+        # Determinar roles
         es_redactor = self._es_usuario_redactor(usuario_id, validaciones)
         es_revisor = self._es_usuario_revisor(usuario_id, validaciones)
         le_pertenece = (solicitud.usuario_id == usuario_id)
         rol = self._determinar_rol(es_redactor, es_revisor, le_pertenece)
         
+        # Estado consolidado
         estado_consolidado = self._calcular_estado_consolidado(validaciones)
         
+        # Datos de MI validación como revisor
         datos_mi_validacion = self._obtener_datos_mi_validacion(
             usuario_id, validaciones, es_revisor
         )
         
+        # Versiones como redactor
         versiones_como_redactor = self._obtener_versiones_como_redactor(
             usuario_id, validaciones, es_redactor
         )
         
+        # Estadísticas
         stats = self.repository.obtener_estadisticas_validaciones(solicitud.id)
         
+        # Información de revisores
         revisores = self._construir_info_revisores(validaciones, usuario_id)
         
+        # Información de actividad y tarea
         info_actividad = self._construir_info_actividad(solicitud)
         info_tarea = self._construir_info_tarea(solicitud)
+        
+        # Información de la solicitud origen
+        solicitud_origen = self._construir_info_solicitud_origen(solicitud)
         
         return self._construir_registro_solicitud(
             solicitud=solicitud,
@@ -103,16 +150,32 @@ class SolicitudesPagoDirectoUsuarioService:
             stats=stats,
             revisores=revisores,
             actividad=info_actividad,
-            tarea=info_tarea
+            tarea=info_tarea,
+            solicitud_origen=solicitud_origen
         )
     
     def _es_usuario_redactor(self, usuario_id: int, validaciones) -> bool:
+        """
+        Verifica si el usuario es REDACTOR en al menos una validación.
+        """
         return any(v.usuarioRedactor_id == usuario_id for v in validaciones)
     
     def _es_usuario_revisor(self, usuario_id: int, validaciones) -> bool:
+        """
+        Verifica si el usuario es REVISOR en al menos una validación.
+        """
         return any(v.usuarioValidador_id == usuario_id for v in validaciones)
     
     def _determinar_rol(self, es_redactor: bool, es_revisor: bool, le_pertenece: bool) -> str:
+        """
+        Determina el rol del usuario basado en sus participaciones.
+        
+        Matriz de decisión:
+        - True, True   → REDACTOR_REVISOR
+        - True, False  → REDACTOR
+        - False, True  → REVISOR
+        - False, False → SIN_ROL
+        """
         if es_redactor and es_revisor:
             return self.ROL_REDACTOR_REVISOR
         elif es_redactor:
@@ -122,6 +185,15 @@ class SolicitudesPagoDirectoUsuarioService:
         return self.ROL_SIN_ROL
     
     def _calcular_estado_consolidado(self, validaciones) -> str:
+        """
+        Calcula el estado consolidado de la rendición según reglas de negocio.
+        
+        Reglas:
+        1. Sin validaciones → 'SinRevisores'
+        2. Al menos una RECHAZADA → 'Rechazado'
+        3. Todas APROBADO → 'Aprobado'
+        4. Caso contrario → 'Pendiente'
+        """
         if not validaciones:
             return self.ESTADO_SIN_REVISORES
         
@@ -136,6 +208,9 @@ class SolicitudesPagoDirectoUsuarioService:
         return self.ESTADO_PENDIENTE
     
     def _obtener_datos_mi_validacion(self, usuario_id: int, validaciones, es_revisor: bool) -> Dict:
+        """
+        Obtiene los datos de la validación donde el usuario es REVISOR.
+        """
         if not es_revisor:
             return {
                 'estado': None,
@@ -164,6 +239,9 @@ class SolicitudesPagoDirectoUsuarioService:
         }
     
     def _obtener_versiones_como_redactor(self, usuario_id: int, validaciones, es_redactor: bool) -> List[str]:
+        """
+        Obtiene todas las versiones de documento donde el usuario es REDACTOR.
+        """
         if not es_redactor:
             return []
         
@@ -174,6 +252,9 @@ class SolicitudesPagoDirectoUsuarioService:
         return versiones
     
     def _construir_info_revisores(self, validaciones, usuario_id: int) -> List[Dict]:
+        """
+        Construye la información detallada de cada revisor.
+        """
         revisores = []
         for validacion in validaciones:
             revisor = {
@@ -193,6 +274,9 @@ class SolicitudesPagoDirectoUsuarioService:
         return revisores
     
     def _construir_info_actividad(self, solicitud) -> Optional[Dict]:
+        """
+        Construye la información de la actividad asociada.
+        """
         if not solicitud.actividad_id:
             return None
         
@@ -236,6 +320,9 @@ class SolicitudesPagoDirectoUsuarioService:
         return data
     
     def _construir_info_tarea(self, solicitud) -> Optional[Dict]:
+        """
+        Construye la información de la tarea asociada.
+        """
         if not solicitud.tarea_id:
             return None
         
@@ -253,7 +340,48 @@ class SolicitudesPagoDirectoUsuarioService:
             'presupuesto': float(tarea.presupuesto) if tarea.presupuesto else None
         }
     
+    def _construir_info_solicitud_origen(self, solicitud) -> Optional[Dict]:
+        """
+        Construye información de la solicitud origen asociada a la rendición.
+        
+        La rendición de cuentas puede estar vinculada a:
+        - Solicitud de Fondos
+        - Solicitud de Reembolso
+        - Solicitud de Viaje
+        - Solicitud de Pago Directo
+        """
+        if solicitud.solicitudFondos:
+            return {
+                'tipo': 'Solicitud de Fondos',
+                'id': solicitud.solicitudFondos.id,
+                'numeroForm': solicitud.solicitudFondos.numeroFormulario,
+                'url': solicitud.solicitudFondos.get_accion_url() if hasattr(solicitud.solicitudFondos, 'get_accion_url') else None
+            }
+        elif solicitud.solicitudReembolso:
+            return {
+                'tipo': 'Solicitud de Reembolso',
+                'id': solicitud.solicitudReembolso.id,
+                'numeroForm': solicitud.solicitudReembolso.numeroFormulario,
+                'url': solicitud.solicitudReembolso.get_accion_url() if hasattr(solicitud.solicitudReembolso, 'get_accion_url') else None
+            }
+        elif solicitud.solicitudViaje:
+            return {
+                'tipo': 'Solicitud de Viaje',
+                'id': solicitud.solicitudViaje.id,
+                'numeroForm': solicitud.solicitudViaje.numeroFormulario,
+                'url': solicitud.solicitudViaje.get_accion_url() if hasattr(solicitud.solicitudViaje, 'get_accion_url') else None
+            }
+        elif solicitud.solicitudPagoDirecto:
+            return {
+                'tipo': 'Solicitud de Pago Directo',
+                'id': solicitud.solicitudPagoDirecto.id,
+                'numeroForm': solicitud.solicitudPagoDirecto.numeroFormulario,
+                'url': solicitud.solicitudPagoDirecto.get_accion_url() if hasattr(solicitud.solicitudPagoDirecto, 'get_accion_url') else None
+            }
+        return None
+    
     def _get_estado_actividad_display(self, estado: str) -> str:
+        """Convierte el código de estado de actividad a texto legible."""
         mapping = {
             'CRD': 'Creada',
             'PLAN': 'Planificada',
@@ -266,6 +394,7 @@ class SolicitudesPagoDirectoUsuarioService:
         return mapping.get(estado, estado)
     
     def _get_estado_tarea_display(self, estado: str) -> str:
+        """Convierte el código de estado de tarea a texto legible."""
         mapping = {
             'PEN': 'Pendiente',
             'EPROG': 'En Progreso',
@@ -286,29 +415,42 @@ class SolicitudesPagoDirectoUsuarioService:
         stats: Dict,
         revisores: List[Dict],
         actividad: Optional[Dict],
-        tarea: Optional[Dict]
+        tarea: Optional[Dict],
+        solicitud_origen: Optional[Dict]
     ) -> Dict[str, Any]:
-        """Construye el registro unificado para una solicitud de pago directo."""
+        """
+        Construye el registro unificado para una rendición de cuentas.
+        """
         return {
             # Identificación
             'id': solicitud.id,
             'numeroForm': solicitud.numeroFormulario,
-            'tipoDocumento': 'Solicitud de Pago Directo',
+            'tipoDocumento': 'Rendición de Cuentas',
             'subtipo': solicitud.subtipo_display,
             
-            # Datos específicos de Pago Directo
-            'descripcionActividad': solicitud.descripcion_actividad or '',
-            'objetivoActividad': solicitud.objetivo_actividad or '',
-            'fechaRealizacionActividad': solicitud.fechaRealizacionActividad,
+            # Datos específicos de Rendición de Cuentas
+            'cpteDiario': solicitud.cpteDiario or '',
+            'fechaDesembolso': solicitud.fechaDesembolso,
+            'montoAsignado': float(solicitud.montoAsignado) if solicitud.montoAsignado else 0,
+            'montoDescargado': float(solicitud.montoDescargado) if solicitud.montoDescargado else 0,
+            'saldo': float(solicitud.saldo) if solicitud.saldo else 0,
+            'fechaActividad': solicitud.fechaActividad,
+            'fechaRendicion': solicitud.fechaRendicion,
+            'descripcionActividad': solicitud.descripcionActividad or '',
+            'lugarActividad': solicitud.lugarActividad or '',
+            'lugarRendicion': solicitud.lugarRendicion or '',
+            
+            # Solicitud origen
+            'solicitudOrigen': solicitud_origen,
             
             # Actividad y Tarea
             'actividad': actividad,
             'tarea': tarea,
             
-            # Datos generales
-            'lugarSolicitud': solicitud.lugarSolicitud or '',
-            'fechaSolicitud': solicitud.fechaSolicitud,
-            'montoSolicitado': float(solicitud.montoSolicitado) if solicitud.montoSolicitado else 0,
+            # Datos generales (mantener compatibilidad con otros endpoints)
+            'lugarSolicitud': solicitud.lugarRendicion or '',
+            'fechaSolicitud': solicitud.fechaRendicion,
+            'montoSolicitado': float(solicitud.montoAsignado) if solicitud.montoAsignado else 0,
             
             # Pertenencia y roles
             'lePertenece': le_pertenece,
@@ -350,6 +492,9 @@ class SolicitudesPagoDirectoUsuarioService:
         }
     
     def _actualizar_contadores(self, registro: Dict, contadores: Dict) -> None:
+        """
+        Actualiza los contadores para el resumen estadístico.
+        """
         if registro['esRedactor']:
             contadores['como_redactor'] += 1
         if registro['esRevisor']:
@@ -366,8 +511,11 @@ class SolicitudesPagoDirectoUsuarioService:
             contadores['sin_revision'] += 1
     
     def _construir_respuesta(self, solicitudes: List[Dict], contadores: Dict) -> Dict[str, Any]:
+        """
+        Construye la estructura final de respuesta.
+        """
         return {
-            'tipo': 'solicitudes_pago_directo',
+            'tipo': 'rendicion_cuentas',
             'total': len(solicitudes),
             'solicitudes': solicitudes,
             'resumen': {
@@ -384,32 +532,32 @@ class SolicitudesPagoDirectoUsuarioService:
     
     def obtener_pendientes_revision(self, usuario_id: int) -> List[Dict]:
         """
-        Obtiene validaciones pendientes para pagos directos.
+        Obtiene validaciones pendientes para rendiciones de cuentas.
         """
         try:
             validaciones = self.repository.obtener_validaciones_pendientes_por_usuario(usuario_id)
             
             pendientes = []
             for v in validaciones:
-                solicitud = v.solicitud
+                rendicion = v.rendicion
                 pendientes.append({
                     'validacionId': v.id,
                     'codigoSeguimiento': v.codigoSeguimiento,
                     'estado': v.estado,
                     'fechaAsignacion': v.fechaAsignacion,
                     'versionDocumento': v.versionDocumento,
-                    'solicitudId': solicitud.id,
-                    'solicitudCodigo': solicitud.numeroFormulario or f"SPD-{solicitud.id}",
-                    'solicitudMonto': float(solicitud.montoSolicitado) if solicitud.montoSolicitado else 0,
-                    'tipoDocumento': 'Solicitud de Pago Directo',
-                    'subtipo': solicitud.subtipo_display,
+                    'solicitudId': rendicion.id,
+                    'solicitudCodigo': rendicion.numeroFormulario or f"RC-{rendicion.id}",
+                    'solicitudMonto': float(rendicion.montoAsignado) if rendicion.montoAsignado else 0,
+                    'tipoDocumento': 'Rendición de Cuentas',
+                    'subtipo': rendicion.subtipo_display,
                     'solicitanteNombre': v.usuarioRedactor.get_full_name() if v.usuarioRedactor else 'N/A',
-                    'solicitudUrl': solicitud.get_accion_url(),
-                    'solicitudUrlTexto': solicitud.get_accion_url_texto(),
+                    'solicitudUrl': rendicion.get_accion_url(),
+                    'solicitudUrlTexto': rendicion.get_accion_url_texto(),
                 })
             
             return pendientes
             
         except Exception as e:
-            logger.error(f"Error pendientes pagos usuario {usuario_id}: {str(e)}", exc_info=True)
+            logger.error(f"Error pendientes rendiciones usuario {usuario_id}: {str(e)}", exc_info=True)
             return []

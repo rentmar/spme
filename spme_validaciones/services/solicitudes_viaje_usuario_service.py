@@ -396,3 +396,35 @@ class SolicitudesViajeUsuarioService:
                 'sinRevision': contadores['sin_revision']
             }
         }
+    
+    def obtener_pendientes_revision(self, usuario_id: int) -> List[Dict]:
+        """
+        Obtiene validaciones pendientes para solicitudes de viaje.
+        """
+        try:
+            validaciones = self.repository.obtener_validaciones_pendientes_por_usuario(usuario_id)
+            
+            pendientes = []
+            for v in validaciones:
+                solicitud = v.solicitud
+                pendientes.append({
+                    'validacionId': v.id,
+                    'codigoSeguimiento': v.codigoSeguimiento,
+                    'estado': v.estado,
+                    'fechaAsignacion': v.fechaAsignacion,
+                    'versionDocumento': v.versionDocumento,
+                    'solicitudId': solicitud.id,
+                    'solicitudCodigo': solicitud.numeroFormulario or f"SV-{solicitud.id}",
+                    'solicitudMonto': float(solicitud.montoSolicitado) if solicitud.montoSolicitado else 0,
+                    'tipoDocumento': 'Solicitud de Viaje',
+                    'subtipo': solicitud.subtipo_display,
+                    'solicitanteNombre': v.usuarioRedactor.get_full_name() if v.usuarioRedactor else 'N/A',
+                    'solicitudUrl': solicitud.get_accion_url(),
+                    'solicitudUrlTexto': solicitud.get_accion_url_texto(),
+                })
+            
+            return pendientes
+            
+        except Exception as e:
+            logger.error(f"Error pendientes viajes usuario {usuario_id}: {str(e)}", exc_info=True)
+            return []

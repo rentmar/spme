@@ -94,9 +94,35 @@ class SolicitudesFondosUsuarioRepository:
         
         return {
             'total': total,
-            'aprobadas': 0,
-            'rechazadas': 0,
-            'pendientes': 0,
+            'aprobadas': validaciones.filter(estado='APROBADO').count(),
+            'rechazadas': validaciones.filter(estado='RECHAZADO').count(),
+            'pendientes': validaciones.filter(estado='PENDIENTE').count(),
         }
+    
+    def obtener_validaciones_pendientes_por_usuario(self, usuario_id: int) -> QuerySet:
+        """
+        Obtiene las validaciones pendientes del usuario para solicitudes de fondos.
+
+        Args:
+            usuario_id: ID del usuario revisor
+        
+        Returns:
+            QuerySet de ValidacionSolicitudFondos filtrado por:
+            - usuarioValidador_id = usuario_id
+            - estado = 'PENDIENTE'
+        """
+        return(
+            ValidacionSolicitudFondos.objects
+            .filter(
+                usuarioValidador_id=usuario_id,
+                estado='PENDIENTE'
+            )
+            .select_related(
+                'solicitud',
+                'solicitud__usuario',
+                'usuarioRedactor'
+            )
+            .order_by('-fechaAsignacion')
+        )
 
 
