@@ -1,0 +1,351 @@
+<!-- spme_email/templates/correos/test_estilos.html -->
+{% extends "correos/base_correo.html" %}
+
+{% block title %}Guía de Estilos - SPME{% endblock %}
+
+{% block header_title %}
+    Guía de Estilos
+    <span class="badge badge-prueba">TEST</span>
+{% endblock %}
+
+{% block header_subtitle %}Demostración de todos los componentes disponibles{% endblock %}
+
+{% block content %}
+    
+    <!-- ============================================ -->
+    <!-- SECCIÓN: BADGES DE ESTADO -->
+    <!-- ============================================ -->
+    <div class="email-message">
+        <h3 style="color: #1e3c72; margin-top: 0;">🏷️ Badges de Estado</h3>
+        <p>Utiliza estos badges para indicar el estado de solicitudes, documentos o procesos:</p>
+        
+        <p>
+            <strong>Pendiente:</strong> <span class="badge badge-pendiente">PENDIENTE</span>
+        </p>
+        <p>
+            <strong>Aprobado:</strong> <span class="badge badge-aprobado">APROBADO</span>
+        </p>
+        <p>
+            <strong>En prueba:</strong> <span class="badge badge-prueba">EN PRUEBA</span>
+        </p>
+        <p style="color: #6c757d; font-size: 13px; margin-top: 15px;">
+            <em>Uso: <code>&lt;span class="badge badge-aprobado"&gt;APROBADO&lt;/span&gt;</code></em>
+        </p>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid #e9ecef; margin: 30px 0;">
+
+    <!-- ============================================ -->
+    <!-- SECCIÓN: ALERTAS -->
+    <!-- ============================================ -->
+    <div class="email-message">
+        <h3 style="color: #1e3c72; margin-top: 0;">🔔 Alertas y Notificaciones</h3>
+        <p>Usa estas alertas para comunicar información importante al usuario:</p>
+    </div>
+
+    <div class="alert alert-success">
+        <strong>✅ Éxito:</strong> Tu solicitud ha sido procesada correctamente. Los cambios se reflejarán en las próximas 24 horas.
+    </div>
+
+    <div class="alert alert-info">
+        <strong>ℹ️ Información:</strong> Recuerda que el plazo para completar el formulario vence el próximo viernes a las 18:00.
+    </div>
+
+    <div class="alert alert-warning">
+        <strong>⚠️ Advertencia:</strong> Tu sesión expirará en 5 minutos. Guarda los cambios para no perder el progreso.
+    </div>
+
+    <p style="color: #6c757d; font-size: 13px; margin-top: 10px;">
+        <em>Uso: <code>&lt;div class="alert alert-success"&gt;...&lt;/div&gt;</code></em>
+    </p>
+
+    <hr style="border: none; border-top: 1px solid #e9ecef; margin: 30px 0;">
+
+    <!-- ============================================ -->
+    <!-- SECCIÓN: BOTONES -->
+    <!-- ============================================ -->
+    <div class="email-message">
+        <h3 style="color: #1e3c72; margin-top: 0;">🔘 Botones de Acción</h3>
+        <p>Los botones guían al usuario hacia la acción principal del correo:</p>
+    </div>
+
+    <!-- Botón primario (default) -->
+    <div style="text-align: center;">
+        <a href="#" class="email-button">📄 Acción Principal</a>
+    </div>
+
+    <!-- Botón de éxito (verde) -->
+    <div style="text-align: center;">
+        <a href="#" class="email-button" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+            ✅ Confirmar Acción
+        </a>
+    </div>
+
+    <!-- Botón de advertencia -->
+    <div style="text-align: center;">
+        <a href="#" class="email-button" style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); color: #212529;">
+            ⚡ Acción Urgente
+        </a>
+    </div>
+
+    <!-- Botón de peligro -->
+    <div style="text-align: center;">
+        <a href="#" class="email-button" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">
+            🚫 Acción Crítica
+        </a>
+    </div>
+
+    <p style="color: #6c757d; font-size: 13px; margin-top: 15px;">
+        <em>El botón default usa gradiente azul. Puedes sobrescribir el estilo inline para otros colores.</em>
+    </p>
+
+    <hr style="border: none; border-top: 1px solid #e9ecef; margin: 30px 0;">
+
+    <!-- ============================================ -->
+    <!-- SECCIÓN: DETALLES -->
+    <!-- ============================================ -->
+    <div class="email-message">
+        <h3 style="color: #1e3c72; margin-top: 0;">📋 Panel de Detalles</h3>
+        <p>Ideal para mostrar información estructurada de una solicitud o proceso:</p>
+    </div>
+
+    <div class="email-details">
+        <h3 style="margin-top: 0; color: #1e3c72;">📋 Detalles de la Solicitud</h3>
+        
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6; width: 40%;">
+                    <span class="detail-label">Código:</span>
+                </td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    <strong>SOL-2024-00158</strong>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    <span class="detail-label">Solicitante:</span>
+                </td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    Juan Carlos Rodríguez
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    <span class="detail-label">Fecha de envío:</span>
+                </td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    15/07/2024 14:30
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    <span class="detail-label">Estado:</span>
+                </td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    <span class="badge badge-aprobado">APROBADO</span>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    <span class="detail-label">Departamento:</span>
+                </td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    Planificación Estratégica
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0;">
+                    <span class="detail-label">Observaciones:</span>
+                </td>
+                <td style="padding: 8px 0;">
+                    <em>Sin observaciones adicionales</em>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid #e9ecef; margin: 30px 0;">
+
+    <!-- ============================================ -->
+    <!-- SECCIÓN: TIPOGRAFÍA Y MENSAJES -->
+    <!-- ============================================ -->
+    <div class="email-message">
+        <h3 style="color: #1e3c72; margin-top: 0;">📝 Estilos de Texto</h3>
+        
+        <h1 style="color: #1e3c72; font-size: 24px;">Título Principal H1</h1>
+        <h2 style="color: #2a5298; font-size: 20px;">Subtítulo H2</h2>
+        <h3 style="color: #2a5298; font-size: 18px;">Sección H3</h3>
+        <h4 style="color: #1e3c72; font-size: 16px;">Subsección H4</h4>
+        
+        <p>Este es un párrafo normal con <strong>texto en negrita</strong>, <em>texto en cursiva</em> y <a href="#" style="color: #1e3c72;">enlaces</a>.</p>
+        
+        <p style="color: #6c757d;">Texto secundario en color gris para información menos relevante.</p>
+        
+        <p style="font-size: 13px; color: #adb5bd;">Texto pequeño para notas al pie o detalles menores.</p>
+        
+        <blockquote style="border-left: 4px solid #1e3c72; padding-left: 15px; margin: 15px 0; color: #6c757d; background-color: #f8f9fa; padding: 15px; border-radius: 4px;">
+            Esto es una cita o bloque de texto destacado. Puede usarse para testimonios, citas textuales o información que deba resaltarse del resto del contenido.
+        </blockquote>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid #e9ecef; margin: 30px 0;">
+
+    <!-- ============================================ -->
+    <!-- SECCIÓN: TABLAS DE RESUMEN -->
+    <!-- ============================================ -->
+    <div class="email-message">
+        <h3 style="color: #1e3c72; margin-top: 0;">📊 Tabla de Resumen</h3>
+        <p>Para mostrar datos comparativos o resúmenes de proceso:</p>
+    </div>
+
+    <div style="background-color: #d4edda; border-radius: 6px; border-left: 4px solid #28a745; padding: 20px; margin: 20px 0;">
+        <h4 style="margin-top: 0; color: #155724;">📋 Resumen del Proceso (Estilo Éxito)</h4>
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #c3e6cb;"><strong>Estado actual:</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #c3e6cb; color: #28a745;">✅ Completado</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #c3e6cb;"><strong>Siguiente fase:</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #c3e6cb;">Implementación</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #c3e6cb;"><strong>Responsable:</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #c3e6cb;">Equipo Técnico</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px;"><strong>Fecha límite:</strong></td>
+                <td style="padding: 8px;">📅 30/07/2024</td>
+            </tr>
+        </table>
+    </div>
+
+    <div style="background-color: #fff3cd; border-radius: 6px; border-left: 4px solid #ffc107; padding: 20px; margin: 20px 0;">
+        <h4 style="margin-top: 0; color: #856404;">⚠️ Resumen del Proceso (Estilo Advertencia)</h4>
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #ffeaa7;"><strong>Estado actual:</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #ffeaa7; color: #856404;">⏳ Pendiente de revisión</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #ffeaa7;"><strong>Revisores asignados:</strong></td>
+                <td style="padding: 8px; border-bottom: 1px solid #ffeaa7;">2 de 3</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px;"><strong>Tiempo restante:</strong></td>
+                <td style="padding: 8px;">⏰ 3 días hábiles</td>
+            </tr>
+        </table>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid #e9ecef; margin: 30px 0;">
+
+    <!-- ============================================ -->
+    <!-- SECCIÓN: ICONOGRAFÍA Y EMOJIS -->
+    <!-- ============================================ -->
+    <div class="email-message">
+        <h3 style="color: #1e3c72; margin-top: 0;">🎨 Iconografía Recomendada</h3>
+        <p>Emojis sugeridos para mantener consistencia visual en todos los correos:</p>
+        
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+            <tr style="background-color: #f8f9fa;">
+                <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>✅</strong></td>
+                <td style="padding: 10px; border: 1px solid #dee2e6;">Aprobación / Éxito</td>
+                <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>📄</strong></td>
+                <td style="padding: 10px; border: 1px solid #dee2e6;">Documentos / Ver</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>❌</strong></td>
+                <td style="padding: 10px; border: 1px solid #dee2e6;">Rechazo / Error</td>
+                <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>📋</strong></td>
+                <td style="padding: 10px; border: 1px solid #dee2e6;">Detalles / Lista</td>
+            </tr>
+            <tr style="background-color: #f8f9fa;">
+                <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>⚠️</strong></td>
+                <td style="padding: 10px; border: 1px solid #dee2e6;">Advertencia</td>
+                <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>🔔</strong></td>
+                <td style="padding: 10px; border: 1px solid #dee2e6;">Notificación</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>ℹ️</strong></td>
+                <td style="padding: 10px; border: 1px solid #dee2e6;">Información</td>
+                <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>📅</strong></td>
+                <td style="padding: 10px; border: 1px solid #dee2e6;">Fechas / Calendario</td>
+            </tr>
+            <tr style="background-color: #f8f9fa;">
+                <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>🚀</strong></td>
+                <td style="padding: 10px; border: 1px solid #dee2e6;">Continuar / Avanzar</td>
+                <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>⏰</strong></td>
+                <td style="padding: 10px; border: 1px solid #dee2e6;">Tiempo / Plazos</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>👤</strong></td>
+                <td style="padding: 10px; border: 1px solid #dee2e6;">Usuario / Persona</td>
+                <td style="padding: 10px; border: 1px solid #dee2e6;"><strong>📧</strong></td>
+                <td style="padding: 10px; border: 1px solid #dee2e6;">Email / Contacto</td>
+            </tr>
+        </table>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid #e9ecef; margin: 30px 0;">
+
+    <!-- ============================================ -->
+    <!-- SECCIÓN: EJEMPLO COMPLETO -->
+    <!-- ============================================ -->
+    <div class="email-message">
+        <h3 style="color: #1e3c72; margin-top: 0;">✨ Ejemplo de Uso Combinado</h3>
+        <p>Así se vería un correo típico usando todos los componentes:</p>
+    </div>
+
+    <div class="alert alert-info">
+        <strong>ℹ️ Nueva solicitud recibida</strong><br>
+        Se ha registrado una nueva solicitud que requiere tu atención.
+    </div>
+
+    <div class="email-details">
+        <h3 style="margin-top: 0; color: #1e3c72;">📋 Detalles de la Solicitud</h3>
+        
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    <span class="detail-label">Código:</span>
+                </td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    <strong>SOL-2024-00158</strong>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0;">
+                    <span class="detail-label">Estado:</span>
+                </td>
+                <td style="padding: 8px 0;">
+                    <span class="badge badge-pendiente">PENDIENTE</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div style="text-align: center; margin-top: 25px;">
+        <a href="#" class="email-button">📄 Revisar Solicitud</a>
+        <p style="margin-top: 15px; font-size: 13px; color: #6c757d;">
+            También puedes <a href="#" style="color: #1e3c72;">asignar un revisor</a> si lo prefieres
+        </p>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid #e9ecef; margin: 30px 0;">
+
+    <!-- ============================================ -->
+    <!-- NOTAS DE USO -->
+    <!-- ============================================ -->
+    <div style="background-color: #d1ecf1; padding: 15px; border-radius: 6px; border-left: 4px solid #17a2b8; margin-top: 20px;">
+        <h4 style="margin-top: 0; color: #0c5460;">📌 Notas de Implementación</h4>
+        <ul style="color: #0c5460; margin-bottom: 0; padding-left: 20px;">
+            <li style="margin-bottom: 5px;">Usa <strong>estilos inline</strong> para propiedades críticas en clientes de correo restrictivos</li>
+            <li style="margin-bottom: 5px;">Las clases CSS funcionan en la mayoría de clientes modernos</li>
+            <li style="margin-bottom: 5px;">Prueba siempre en <strong>Outlook</strong> y <strong>Gmail</strong> antes de producción</li>
+            <li style="margin-bottom: 5px;">Los emojis son compatibles con la mayoría de dispositivos</li>
+            <li>Mantén el diseño simple y el mensaje claro</li>
+        </ul>
+    </div>
+
+{% endblock %}

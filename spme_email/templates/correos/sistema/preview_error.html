@@ -1,0 +1,125 @@
+<!-- spme_email/templates/correos/sistema/preview_error.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Previews - SPME</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 40px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1e3c72;
+            margin-top: 0;
+        }
+        .message {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        .category {
+            margin-bottom: 20px;
+        }
+        .category h3 {
+            color: #1e3c72;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+        .template-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            transition: background 0.2s;
+        }
+        .template-item:hover {
+            background: #f8f9fa;
+        }
+        .template-name {
+            font-weight: 600;
+            color: #495057;
+        }
+        .template-path {
+            font-size: 12px;
+            color: #adb5bd;
+            margin-left: 10px;
+        }
+        .preview-link {
+            background: #1e3c72;
+            color: white;
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 5px;
+            font-size: 13px;
+            transition: background 0.3s;
+        }
+        .preview-link:hover {
+            background: #2a5298;
+        }
+        code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔷 SPME - Email Previews</h1>
+        
+        {% if message %}
+        <div class="message">
+            <strong>⚠️ {{ message }}</strong>
+            {% if template_path %}
+            <br><small>Ruta: <code>{{ template_path }}</code></small>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        {% if available %}
+        <p style="color: #6c757d;">Templates disponibles para previsualizar:</p>
+        
+        {% for category, templates in available.items %}
+        <div class="category">
+            <h3>📁 {{ category }}/</h3>
+            
+            {% for template in templates %}
+            <div class="template-item">
+                <div>
+                    <span class="template-name">📧 {{ template.name }}.html</span>
+                    <span class="template-path">{{ template.path }}</span>
+                </div>
+                <a href="/api-mail/email/preview/{{ template.name }}/" class="preview-link">
+                    👁️ Preview
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+        
+        {% else %}
+        <p style="color: #6c757d;">No hay templates configurados.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

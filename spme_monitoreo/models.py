@@ -156,6 +156,37 @@ class SolicitudFondos(models.Model):
         
         return ""
     
+    #Genera el contexto para emails
+    def get_mensaje_contexto(self):
+        """
+        Retorna un diccionario con el contexto necesario para las notificaciones.
+        
+        Returns:
+            dict: Datos de la solicitud formateados para templates de email
+        """
+        return {
+            'solicitud_id': self.id,
+            'codigo': self.numeroFormulario or f"SF-{self.id}",
+            'monto': str(self.montoSolicitado) if self.montoSolicitado else '0.00',
+            'subtipo_documento': self.subtipo_documento,
+            'subtipo_display': self.subtipo_display,
+            'detalle_subtipo': self.get_detalle_subtipo(),
+            'actividad_id': self.actividad_id,
+            'actividad_nombre': self._get_actividad_nombre(),
+            'tarea_id': self.tarea_id,
+            'tarea_nombre': self._get_tarea_nombre(),
+            'solicitante_id': self.usuario_id,
+            'solicitante_nombre': self.usuario.get_full_name() if self.usuario else 'Sistema',
+            'fecha_solicitud': (
+                self.fechaSolicitud.strftime('%Y-%m-%d') 
+                if self.fechaSolicitud 
+                else None
+            ),
+            'proyecto_id': self._get_proyecto_id(),
+            'accion_url': self.get_accion_url(),
+            'accion_url_texto': self.get_accion_url_texto(),
+        }
+    
     # ===================================================================
     # URLs
     # ===================================================================

@@ -60,58 +60,6 @@ class TestSimpleEmailView(APIView):
             }, status=500)
         
 
-class PreviewEmailView(View):
-    """
-    Endpoint para previsualizar templates de email en el navegador.
-    
-    URLs:
-        GET /api/email/preview/welcome/
-        GET /api/email/preview/notification/
-        GET /api/email/preview/report/
-    """
-    TEST_CONTEXT = {
-        'welcome':{
-            'user_name': 'Juan Pérez Rodríguez',
-            'login_url': 'http://localhost:5173/login',
-            'current_year': datetime.now().year,
-        },
-        'notification': {
-            'user_name': 'María García López',
-            'notification_title': 'Indicador Fuera de Rango',
-            'notification_message': 'El indicador "Avance Físico" ha superado el umbral del 85%.',
-            'action_url': 'http://localhost:5173/dashboard',
-            'action_text': 'Ver Indicador',
-            'current_year': datetime.now().year,  # Lo usa base.html en el footer
-        },
-        'report':{
-            'user_name': 'Carlos Mendoza',
-            'report_title': 'Reporte Mensual - Junio 2024',
-            'report_data': {
-                'Proyectos Activos': 42,
-                'Presupuesto Total': 'Bs. 15,234,567',
-                'Ejecutado': 'Bs. 12,845,320 (84.3%)',
-                'Tareas Pendientes': 23,
-            },
-            'generated_at': datetime.now().strftime('%d/%m/%Y %H:%M'),
-            'current_year': datetime.now().year,  # Lo usa base.html en el footer
-        },
-    }
-    def get(self, request, template_name=None):
-
-        # Validar que el template existe
-        if template_name not in self.TEST_CONTEXT:
-            return render(request, 'emails/preview_error.html', {
-                'message': f'Template "{template_name}" no encontrado.',
-                'available': list(self.TEST_CONTEXT.keys()),
-            })
-
-        #Renderiza template con datos de prueba
-        return render(
-            request,
-            f'email/{template_name}.html',
-            self.TEST_CONTEXT[template_name]
-        )
-    
 class SendTemplatedEmailView(APIView):
     """
     Envía email usando las plantillas
@@ -211,8 +159,3 @@ class SendAsyncEmailView(APIView):
                 #'task_id': task.id,
                 'status': 'PENDING',
             })
-
-
-
-        return Response({'msg':'Envio de email asincrono'})
-
