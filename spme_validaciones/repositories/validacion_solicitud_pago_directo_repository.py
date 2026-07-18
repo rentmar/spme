@@ -103,3 +103,5 @@ class ValidacionSolicitudPagoDirectoRepository(BaseValidacionRepository):
             estado='PENDIENTE',
             fechaAsignacion__lte=limite
         ).select_related('solicitud').order_by('fechaAsignacion')
+    
+   

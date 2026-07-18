@@ -95,3 +95,18 @@ class RendicionCuentasUsuarioRepository:
             )
             .order_by('-fechaAsignacion')
         )
+    
+    def obtener_validaciones_por_validador(self, usuario_id: int) -> QuerySet:
+        """Obtiene TODAS las validaciones donde el usuario es validador para rendiciones."""
+        return (
+            ValidacionRendicionCuentas.objects
+            .filter(usuarioValidador_id=usuario_id)
+            .select_related(
+                'rendicion',
+                'rendicion__usuario',
+                'rendicion__actividad',
+                'rendicion__tarea',
+                'usuarioRedactor'
+            )
+            .order_by('-fechaAsignacion')
+        )

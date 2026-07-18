@@ -82,3 +82,18 @@ class SolicitudesPagoDirectoUsuarioRepository:
             )
             .order_by('-fechaAsignacion')
         )
+    
+    def obtener_validaciones_por_validador(self, usuario_id: int) -> QuerySet:
+        """Obtiene TODAS las validaciones donde el usuario es validador para pagos directos."""
+        return (
+            ValidacionSolicitudPagoDirecto.objects
+            .filter(usuarioValidador_id=usuario_id)
+            .select_related(
+                'solicitud',
+                'solicitud__usuario',
+                'solicitud__actividad',
+                'solicitud__tarea',
+                'usuarioRedactor'
+            )
+            .order_by('-fechaAsignacion')
+        )

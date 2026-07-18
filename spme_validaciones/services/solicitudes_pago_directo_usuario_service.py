@@ -413,3 +413,47 @@ class SolicitudesPagoDirectoUsuarioService:
         except Exception as e:
             logger.error(f"Error pendientes pagos usuario {usuario_id}: {str(e)}", exc_info=True)
             return []
+        
+
+    def obtener_validaciones_como_validador(self, usuario_id: int) -> List[Dict]:
+        """
+        Obtiene TODAS las validaciones de pagos directos donde el usuario es validador.
+        
+        Incluye todos los estados: PENDIENTE, APROBADO, RECHAZADO
+        
+        Args:
+            usuario_id: ID del usuario validador
+            
+        Returns:
+            Lista de validaciones con datos de la solicitud
+        """
+        try:
+            validaciones = self.repository.obtener_validaciones_por_validador(usuario_id)
+            
+            datos = []
+            for v in validaciones:
+                solicitud = v.solicitud
+                datos.append({
+                    'validacionId': v.id,
+                    'codigoSeguimiento': v.codigoSeguimiento,
+                    'estado': v.estado,
+                    'fechaAsignacion': v.fechaAsignacion,
+                    'fechaResolucion': v.fechaResolucion,
+                    'versionDocumento': v.versionDocumento,
+                    'comentarios': v.comentarios or '',
+                    'solicitudId': solicitud.id,
+                    'solicitudCodigo': solicitud.numeroFormulario or f"SPD-{solicitud.id}",
+                    'solicitudMonto': float(solicitud.montoSolicitado) if solicitud.montoSolicitado else 0,
+                    'tipoDocumento': 'Solicitud de Pago Directo',
+                    'subtipo': solicitud.subtipo_display,
+                    'solicitanteId': solicitud.usuario_id,
+                    'solicitanteNombre': solicitud.usuario.get_full_name() if solicitud.usuario else 'N/A',
+                    'solicitudUrl': solicitud.get_accion_url(),
+                    'solicitudUrlTexto': solicitud.get_accion_url_texto(),
+                })
+            
+            return datos
+            
+        except Exception as e:
+            logger.error(f"Error validaciones pagos usuario {usuario_id}: {str(e)}", exc_info=True)
+            return []

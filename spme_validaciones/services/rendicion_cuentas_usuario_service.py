@@ -561,3 +561,47 @@ class RendicionCuentasUsuarioService:
         except Exception as e:
             logger.error(f"Error pendientes rendiciones usuario {usuario_id}: {str(e)}", exc_info=True)
             return []
+        
+
+    def obtener_validaciones_como_validador(self, usuario_id: int) -> List[Dict]:
+        """
+        Obtiene TODAS las validaciones de rendiciones donde el usuario es validador.
+        
+        Incluye todos los estados: PENDIENTE, APROBADO, RECHAZADO
+        
+        Args:
+            usuario_id: ID del usuario validador
+            
+        Returns:
+            Lista de validaciones con datos de la rendición
+        """
+        try:
+            validaciones = self.repository.obtener_validaciones_por_validador(usuario_id)
+            
+            datos = []
+            for v in validaciones:
+                rendicion = v.rendicion
+                datos.append({
+                    'validacionId': v.id,
+                    'codigoSeguimiento': v.codigoSeguimiento,
+                    'estado': v.estado,
+                    'fechaAsignacion': v.fechaAsignacion,
+                    'fechaResolucion': v.fechaResolucion,
+                    'versionDocumento': v.versionDocumento,
+                    'comentarios': v.comentarios or '',
+                    'documentoId': rendicion.id,
+                    'documentoCodigo': rendicion.numeroFormulario or f"RC-{rendicion.id}",
+                    'documentoMonto': float(rendicion.montoAsignado) if rendicion.montoAsignado else 0,
+                    'tipoDocumento': 'Rendición de Cuentas',
+                    'subtipo': rendicion.subtipo_display,
+                    'solicitanteId': rendicion.usuario_id,
+                    'solicitanteNombre': rendicion.usuario.get_full_name() if rendicion.usuario else 'N/A',
+                    'documentoUrl': rendicion.get_accion_url(),
+                    'documentoUrlTexto': rendicion.get_accion_url_texto(),
+                })
+            
+            return datos
+            
+        except Exception as e:
+            logger.error(f"Error validaciones rendiciones usuario {usuario_id}: {str(e)}", exc_info=True)
+            return []
