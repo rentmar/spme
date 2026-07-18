@@ -389,6 +389,8 @@ class SolicitudReembolso(models.Model):
                 else None
             ),
             'proyecto_id': self._get_proyecto_id(),
+            'accion_url': self.get_accion_url(),
+            'accion_url_texto': self.get_accion_url_texto(),
         }
     
     # ===================================================================
@@ -598,6 +600,8 @@ class SolicitudViaje (models.Model):
                 else None
             ),
             'proyecto_id': self._get_proyecto_id(),
+            'accion_url': self.get_accion_url(),
+            'accion_url_texto': self.get_accion_url_texto(),
         }
     
     # ===================================================================
@@ -774,6 +778,8 @@ class SolicitudPagoDirecto(models.Model):
                 else None
             ),
             'proyecto_id': self._get_proyecto_id(),
+            'accion_url': self.get_accion_url(),
+            'accion_url_texto': self.get_accion_url_texto(),
         }
     
     # ===================================================================
@@ -991,6 +997,8 @@ class RendicionCuentas(models.Model):
                 else None
             ),
             'proyecto_id': self._get_proyecto_id(),
+            'accion_url': self.get_accion_url(),
+            'accion_url_texto': self.get_accion_url_texto(),
         }
     
     # ===================================================================

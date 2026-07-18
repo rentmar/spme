@@ -1,0 +1,88 @@
+<!-- spme_email/templates/correos/sistema/formularios/solicitudReembolso/aprobacion.html -->
+{% extends "correos/base_correo.html" %}
+
+{% block title %}Solicitud Aprobada - {{ codigo }}{% endblock %}
+
+{% block header_title %}
+    ✅ Solicitud Aprobada
+{% endblock %}
+
+{% block header_subtitle %}
+    Solicitud de Reposición - {{ codigo }}
+    <span class="badge badge-aprobado">{{ subtipo_display }}</span>
+{% endblock %}
+
+{% block content %}
+    <div class="email-message">
+        <p>Hola <strong>{{ solicitante_nombre }}</strong>,</p>
+        <p>Tu <strong>Solicitud de Reposición</strong> ha sido <strong>aprobada</strong>.</p>
+    </div>
+
+    <div class="alert alert-success">
+        <strong>✅ ¡Aprobada!</strong> La solicitud fue revisada y aprobada por {{ nombre_aprobador }}.
+    </div>
+
+    <div class="alert alert-info">
+        <strong>📋 Actividad:</strong> {{ actividad_nombre }}
+        {% if tarea_nombre %}
+        <br><strong>📎 Subactividad:</strong> {{ tarea_nombre }}
+        {% endif %}
+    </div>
+
+    <div class="email-details">
+        <h3 style="margin-top: 0; color: #1e3c72;">📋 Detalles de la Solicitud</h3>
+        
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6; width: 40%;">
+                    <span class="detail-label">Código:</span>
+                </td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    <strong>{{ codigo }}</strong>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    <span class="detail-label">Tipo:</span>
+                </td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    <strong>{{ subtipo_display }}</strong>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    <span class="detail-label">Monto:</span>
+                </td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    <strong style="color: #28a745;">Bs. {{ monto }}</strong>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    <span class="detail-label">Aprobado por:</span>
+                </td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    {{ nombre_aprobador }}
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0;">
+                    <span class="detail-label">Fecha aprobación:</span>
+                </td>
+                <td style="padding: 8px 0;">
+                    {{ fecha_aprobacion }}
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="{{ accion_url }}" class="email-button" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+            {{ accion_url_texto }}
+        </a>
+    </div>
+
+    <p style="margin-top: 25px; color: #6c757d; font-size: 14px; text-align: center;">
+        La solicitud ha sido aprobada exitosamente.
+    </p>
+{% endblock %}

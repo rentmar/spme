@@ -1,0 +1,84 @@
+<!-- spme_email/templates/correos/sistema/formularios/solicitudPagoDirecto/peticion_revision.html -->
+{% extends "correos/base_correo.html" %}
+
+{% block title %}Revisión Pago Directo - {{ codigo }}{% endblock %}
+
+{% block header_title %}
+    📋 Solicitud de Revisión
+{% endblock %}
+
+{% block header_subtitle %}
+    Pago Directo - {{ codigo }}
+    <span class="badge badge-info" style="background-color: #17a2b8; color: white;">{{ subtipo_display }}</span>
+{% endblock %}
+
+{% block content %}
+    <div class="email-message">
+        <p>Hola <strong>{{ nombre_revisor }}</strong>,</p>
+        <p>Se ha solicitado tu revisión para un <strong>Pago Directo</strong>.</p>
+    </div>
+
+    <div class="alert alert-info">
+        <strong>📋 Actividad:</strong> {{ actividad_nombre }}
+        {% if tarea_nombre %}
+        <br><strong>📎 Subactividad:</strong> {{ tarea_nombre }}
+        {% endif %}
+    </div>
+
+    <div class="email-details">
+        <h3 style="margin-top: 0; color: #1e3c72;">📋 Detalles de la Solicitud</h3>
+        
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6; width: 40%;">
+                    <span class="detail-label">Código:</span>
+                </td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    <strong>{{ codigo }}</strong>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    <span class="detail-label">Tipo:</span>
+                </td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    <strong>{{ subtipo_display }}</strong>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    <span class="detail-label">Solicitante:</span>
+                </td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    {{ solicitante_nombre }}
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    <span class="detail-label">Monto:</span>
+                </td>
+                <td style="padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                    <strong style="color: #1e3c72;">Bs. {{ monto }}</strong>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0;">
+                    <span class="detail-label">Fecha solicitud:</span>
+                </td>
+                <td style="padding: 8px 0;">
+                    {{ fecha_solicitud }}
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="{{ accion_url }}" class="email-button">
+            {{ accion_url_texto }}
+        </a>
+    </div>
+
+    <p style="margin-top: 25px; color: #6c757d; font-size: 14px; text-align: center;">
+        Por favor revisa la solicitud a la brevedad posible.
+    </p>
+{% endblock %}
