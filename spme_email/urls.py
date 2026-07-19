@@ -10,6 +10,9 @@ from .views.email_views import (
     SendAsyncEmailView,
 )
 
+#Envio de notificaciones email para formularios
+from .views.notificacion_views import NotificacionSolicitudView
+
 router = DefaultRouter()
 
 urlpatterns = [
@@ -23,5 +26,7 @@ urlpatterns = [
     path(r'email/template/send/', SendTemplatedEmailView.as_view(), name="send-email"),
     #Envio asincrono de email
     path(r'email/template/send-async/', SendAsyncEmailView.as_view(), name="send-async-email"),
+    #Envio de notificaciones para formularios
+    path(r'email/notificaciones/enviar/', NotificacionSolicitudView.as_view(), name='enviar_notificacion'),
 ]
 urlpatterns += router.urls
