@@ -338,6 +338,8 @@ def crear_mensaje_validacion_solicitud_fondos(solicitud, validador):
     try:
         codigo = solicitud.numeroFormulario or f"SF-{solicitud.id}"
         monto = solicitud.montoSolicitado
+        context = solicitud.get_mensaje_contexto()
+
         
         # ─── Determinar tipo (Actividad o Tarea) ───
         if solicitud.actividad_id and not solicitud.tarea_id:
@@ -408,8 +410,8 @@ def crear_mensaje_validacion_solicitud_fondos(solicitud, validador):
             actividad_id=actividad_id,
             proyecto_id=proyecto_id,
             icono='💵',
-            accion_url=f'/solicitudes-fondos/{solicitud.id}/validar',
-            accion_texto='Validar Solicitud',
+            accion_url=context['accion_url'],
+            accion_texto=context['accion_url_texto'],
             routing_key='mensaje.usuario.solicitud_fondos',
             referencia_id=f"SF-{solicitud.id}",
             metadata={

@@ -39,7 +39,7 @@ from spme_mensajes.services.notificacion_service import (
     crear_mensaje_revision_solicitud_fondos,
 ) 
 
-#Notificaciones email
+#Notificaciones email - encolar
 from spme_monitor_estados.utils.encolar import (
     encolar_validacion_pendiente,
     encolar_validacion_aprobada,
@@ -50,8 +50,10 @@ from spme_monitor_estados.utils.encolar import (
     encolar_validacion_rechazada_sf,
     encolar_confirmacion_validador_sf,
     encolar_revision_solicitud_fondos,
-
 )
+
+#Notificacion email - celery
+from spme_email.services.notificacion_service import NotificacionService
 
 import logging
 
@@ -69,6 +71,10 @@ class AsignarValidadoresSolicitudFondosViewSet(viewsets.ViewSet):
     """
     permission_classes = [IsAuthenticated]
 
+    def __init__(self, **kwargs):
+        self.servicio = NotificacionService()        
+        
+
     @transaction.atomic
     def create(self, request, solicitud_id=None):
         serializer = AsignarValidadoresSolicitudFondosSerializer(data=request.data)
@@ -76,9 +82,11 @@ class AsignarValidadoresSolicitudFondosViewSet(viewsets.ViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         solicitud = get_object_or_404(SolicitudFondos, id=solicitud_id)
+        validadoresIds = serializer.validated_data['validador_ids'] 
         validadores = Usuario.objects.filter(
             id__in=serializer.validated_data['validador_ids']
         )
+
 
         if len(validadores) != len(serializer.validated_data['validador_ids']):
             ids_encontrados = list(validadores.values_list('id', flat=True))
@@ -124,14 +132,17 @@ class AsignarValidadoresSolicitudFondosViewSet(viewsets.ViewSet):
         # NOTIFICACIONES (si falla, rollback de toda la transacción)
         if validadores_json:
             crear_mensajes_validacion_solicitud_fondos(solicitud, validadores_json)
-            for val in validadores:
-                encolar_validacion_pendiente_sf(
-                    solicitud=solicitud,
-                    validador=val,
-                    enlace_ver_detalle=f"/solicitudes-fondos/{solicitud.id}/validar"
-                )
+            # for val in validadores:
+            #     encolar_validacion_pendiente_sf(
+            #         solicitud=solicitud,
+            #         validador=val,
+            #         enlace_ver_detalle=f"/solicitudes-fondos/{solicitud.id}/validar"
+            #     )
+            resultadoEnvio = self.servicio.enviar('fondos',solicitud.id, 'revision', validadoresIds, request.headers.get('Origin', ''))
+            
         return Response({
             'mensaje': f'Creadas {len(resultados)} validaciones',
+            **resultadoEnvio,
             'errores': errores if errores else None,
             'resultados': resultados
         }, status=status.HTTP_201_CREATED)
