@@ -48,6 +48,12 @@ from spme_monitor_estados.utils.encolar import (
     encolar_revision_solicitud_fondos,
 )
 
+
+#Notificacion email - celery
+from spme_email.services.notificacion_service import NotificacionService
+#Notificacion via mensajeria interna
+from spme_mensajes.services.notificacion_service import enviar_notificacion_mensajeria_interna
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -64,6 +70,9 @@ class AsignarValidadoresSolicitudReembolsoViewSet(viewsets.ViewSet):
     """
     permission_classes = [IsAuthenticated]
 
+    def __init__(self, **kwargs):
+        self.servicio = NotificacionService()
+
     @transaction.atomic
     def create(self, request, solicitud_id=None):
         serializer = AsignarValidadoresSolicitudReembolsoSerializer(data=request.data)
@@ -74,6 +83,7 @@ class AsignarValidadoresSolicitudReembolsoViewSet(viewsets.ViewSet):
         validadores = Usuario.objects.filter(
             id__in=serializer.validated_data['validador_ids']
         )
+        destinatariosIds = serializer.validated_data['validador_ids']
 
         if len(validadores) != len(serializer.validated_data['validador_ids']):
             ids_encontrados = list(validadores.values_list('id', flat=True))
@@ -116,13 +126,29 @@ class AsignarValidadoresSolicitudReembolsoViewSet(viewsets.ViewSet):
                 errores.append({'validador_id': validador.id, 'error': str(e)})
         
         if validadores_json:
-            crear_mensajes_validacion_solicitud_fondos(solicitud, validadores_json)
-            for val in validadores:
-                encolar_validacion_pendiente_sf(
-                    solicitud=solicitud,
-                    validador=val,
-                    enlace_ver_detalle=f"/solicitudes-reembolso/{solicitud.id}/validar"
-                )
+            # crear_mensajes_validacion_solicitud_fondos(solicitud, validadores_json)
+            # for val in validadores:
+            #     encolar_validacion_pendiente_sf(
+            #         solicitud=solicitud,
+            #         validador=val,
+            #         enlace_ver_detalle=f"/solicitudes-reembolso/{solicitud.id}/validar"
+            #     )
+            respmensaje = enviar_notificacion_mensajeria_interna(
+                'reposicion', 
+                'revision',
+                solicitud,
+                destinatariosIds,
+                request.headers.get('Origin', '')
+            )
+
+            resultadoEnvio = self.servicio.enviar(
+                'reposicion',
+                solicitud.id, 
+                'revision', 
+                destinatariosIds, 
+                request.headers.get('Origin', '')
+            )
+            
         return Response({
             'mensaje': f'Creadas {len(resultados)} validaciones',
             'errores': errores if errores else None,
@@ -139,6 +165,9 @@ class VotarSolicitudReembolsoViewSet(viewsets.ViewSet):
     Payload: {"validacion_id": 15, "estado": "APROBADO", "comentarios": "..."}
     """
     permission_classes = [IsAuthenticated]
+
+    def __init__(self, **kwargs):
+        self.servicio = NotificacionService()
 
     @transaction.atomic
     def create(self, request, solicitud_id=None):
@@ -173,6 +202,9 @@ class VotarSolicitudReembolsoViewSet(viewsets.ViewSet):
         validacion.save()
         
         solicitud = validacion.solicitud
+        context = solicitud.get_mensaje_contexto()
+        solicitante_id = context['solicitante_id']
+        destinatarios_ids = [solicitante_id]
 
         encolar_confirmacion_validador_sf(
             solicitud=solicitud,
@@ -183,21 +215,53 @@ class VotarSolicitudReembolsoViewSet(viewsets.ViewSet):
         if voto == 'APROBADO':
             resumen = repo.obtener_resumen_estado_solicitud(solicitud.id)
             if resumen['aprobado_totalmente']:
-                validaciones_aprobadas = ValidacionSolicitudReembolso.objects.filter(
-                    solicitud=solicitud, estado='APROBADO'
+                # validaciones_aprobadas = ValidacionSolicitudReembolso.objects.filter(
+                #     solicitud=solicitud, estado='APROBADO'
+                # )
+                # crear_mensaje_solicitud_aprobada(solicitud, validaciones_aprobadas)
+                # encolar_validacion_aprobada_sf(
+                #     solicitud=solicitud,
+                #     validador=request.user
+                # )
+                respmensaje = enviar_notificacion_mensajeria_interna(
+                    'reposicion', 
+                    'aprobacion',
+                    solicitud,
+                    destinatarios_ids,
+                    request.headers.get('Origin', '')
                 )
-                crear_mensaje_solicitud_aprobada(solicitud, validaciones_aprobadas)
-                encolar_validacion_aprobada_sf(
-                    solicitud=solicitud,
-                    validador=request.user
+
+                #Notificacion por email
+                resultadoEnvio = self.servicio.enviar(
+                    'reposicion',
+                    solicitud.id, 
+                    'aprobacion', 
+                    destinatarios_ids, 
+                    request.headers.get('Origin', '')
                 )
 
         elif voto == 'RECHAZADO':
-            crear_mensaje_solicitud_rechazada(solicitud, request.user, comentarios)
-            encolar_validacion_rechazada_sf(
-                solicitud=solicitud,
-                validador=request.user,
+            # crear_mensaje_solicitud_rechazada(solicitud, request.user, comentarios)
+            # encolar_validacion_rechazada_sf(
+            #     solicitud=solicitud,
+            #     validador=request.user,
+            #     motivo=comentarios
+            # )
+            respmensaje = enviar_notificacion_mensajeria_interna(
+                'reposicion',
+                'rechazo',
+                solicitud,
+                destinatarios_ids,
+                request.headers.get('Origin', ''),
                 motivo=comentarios
+            )
+            #Notificacion por email
+            resultadoEnvio = self.servicio.enviar(
+                'reposicion',
+                solicitud.id, 
+                'rechazo', 
+                destinatarios_ids, 
+                request.headers.get('Origin', '')
             )
         
         return Response(
@@ -216,6 +280,9 @@ class ResetearValidacionesSolicitudReembolsoViewSet(viewsets.ViewSet):
     """
     permission_classes = [IsAuthenticated]
 
+    def __init__(self, **kwargs):
+        self.servicio = NotificacionService()
+
     @transaction.atomic
     def create(self, request, solicitud_id=None):
         serializer = ResetearValidacionesSolicitudReembolsoSerializer(data=request.data)
@@ -225,6 +292,7 @@ class ResetearValidacionesSolicitudReembolsoViewSet(viewsets.ViewSet):
         validaciones = ValidacionSolicitudReembolso.objects.filter(solicitud=solicitud)
         nueva_version = serializer.validated_data.get('nueva_version', '2')
         reseteadas = 0
+        destinatarios_ids = list(validaciones.values_list('usuarioValidador_id', flat=True))
 
         for v in validaciones:
             v.estado = 'PENDIENTE'
@@ -233,25 +301,44 @@ class ResetearValidacionesSolicitudReembolsoViewSet(viewsets.ViewSet):
             v.comentarios = ''
             v.save()
             reseteadas += 1
+
         
-        for v in validaciones:
-            encolar_revision_solicitud_fondos(
-                solicitud=solicitud,
-                validador=v.usuarioValidador,
+        respmensaje = enviar_notificacion_mensajeria_interna(
+                'viaje',
+                'nueva_revision',
+                solicitud,
+                destinatarios_ids,
+                request.headers.get('Origin', ''),
                 version=nueva_version,
-                enlace_ver_detalle=f"/solicitudes-reembolso/{solicitud.id}/validar"
             )
-            crear_mensaje_revision_solicitud_fondos(
-                solicitud=solicitud,
-                validador={
-                    'id': v.usuarioValidador.id,
-                    'nombre_completo': v.usuarioValidador.get_full_name(),
-                    'rol': v.usuarioValidador.cargo or 'validador',
-                    'estado': 'PENDIENTE',
-                    'fechaAsignacion': str(timezone.now())
-                },
-                version=nueva_version
+        
+        #Notificacion por email
+        resultadoEnvio = self.servicio.enviar(
+                'viaje',
+                solicitud.id, 
+                'nueva_revision', 
+                destinatarios_ids, 
+                request.headers.get('Origin', '')
             )
+        
+        # for v in validaciones:
+        #     encolar_revision_solicitud_fondos(
+        #         solicitud=solicitud,
+        #         validador=v.usuarioValidador,
+        #         version=nueva_version,
+        #         enlace_ver_detalle=f"/solicitudes-reembolso/{solicitud.id}/validar"
+        #     )
+        #     crear_mensaje_revision_solicitud_fondos(
+        #         solicitud=solicitud,
+        #         validador={
+        #             'id': v.usuarioValidador.id,
+        #             'nombre_completo': v.usuarioValidador.get_full_name(),
+        #             'rol': v.usuarioValidador.cargo or 'validador',
+        #             'estado': 'PENDIENTE',
+        #             'fechaAsignacion': str(timezone.now())
+        #         },
+        #         version=nueva_version
+        #     )
         
         return Response({
             'mensaje': f'Reseteadas {reseteadas} validaciones a versión {nueva_version}',

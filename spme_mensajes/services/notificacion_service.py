@@ -729,7 +729,7 @@ TIPO_NOMBRE_MAP = {
     'fondos': 'Solicitud de Fondos',
     'reposicion': 'Solicitud de Reposición',
     'viaje': 'Solicitud de Viaje',
-    'pago_directo': 'Pago Directo',
+    'pago_directo': 'Solicitud Pago Directo',
     'rendicion': 'Rendición de Cuentas',
 }
 
