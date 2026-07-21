@@ -48,6 +48,12 @@ from spme_monitor_estados.utils.encolar import (
     encolar_revision_solicitud_fondos,
 )
 
+#Notificacion email - celery
+from spme_email.services.notificacion_service import NotificacionService
+#Notificacion via mensajeria interna
+from spme_mensajes.services.notificacion_service import enviar_notificacion_mensajeria_interna
+
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -64,6 +70,10 @@ class AsignarValidadoresRendicionCuentasViewSet(viewsets.ViewSet):
     """
     permission_classes = [IsAuthenticated]
 
+    def __init__(self, **kwargs):
+        self.servicio = NotificacionService()
+
+
     @transaction.atomic
     def create(self, request, rendicion_id=None):
         serializer = AsignarValidadoresRendicionCuentasSerializer(data=request.data)
@@ -74,6 +84,8 @@ class AsignarValidadoresRendicionCuentasViewSet(viewsets.ViewSet):
         validadores = Usuario.objects.filter(
             id__in=serializer.validated_data['validador_ids']
         )
+        solicitud = rendicion
+        destinatariosIds = serializer.validated_data['validador_ids']
 
         if len(validadores) != len(serializer.validated_data['validador_ids']):
             ids_encontrados = list(validadores.values_list('id', flat=True))
@@ -116,7 +128,22 @@ class AsignarValidadoresRendicionCuentasViewSet(viewsets.ViewSet):
                 errores.append({'validador_id': validador.id, 'error': str(e)})
         
         #Notificacion y mensaje
-        # if validadores_json:
+        if validadores_json:
+            respmensaje = enviar_notificacion_mensajeria_interna(
+                'rendicion', 
+                'revision',
+                solicitud,
+                destinatariosIds,
+                request.headers.get('Origin', '')
+            )
+
+            resultadoEnvio = self.servicio.enviar(
+                'rendicion',
+                solicitud.id, 
+                'revision', 
+                destinatariosIds, 
+                request.headers.get('Origin', '')
+            )
         #     crear_mensajes_validacion_solicitud_fondos(rendicion, validadores_json)
         #     for val in validadores:
         #         encolar_validacion_pendiente_sf(
@@ -140,6 +167,10 @@ class VotarRendicionCuentasViewSet(viewsets.ViewSet):
     Payload: {"validacion_id": 15, "estado": "APROBADO", "comentarios": "..."}
     """
     permission_classes = [IsAuthenticated]
+
+    def __init__(self, **kwargs):
+        self.servicio = NotificacionService()
+
 
     @transaction.atomic
     def create(self, request, rendicion_id=None):
@@ -174,6 +205,10 @@ class VotarRendicionCuentasViewSet(viewsets.ViewSet):
         validacion.save()
         
         rendicion = validacion.rendicion
+        solicitud = rendicion
+        context = solicitud.get_mensaje_contexto()
+        solicitante_id = context['solicitante_id']
+        destinatarios_ids = [solicitante_id]
 
         # encolar_confirmacion_validador_sf(
         #     solicitud=rendicion,
@@ -187,19 +222,52 @@ class VotarRendicionCuentasViewSet(viewsets.ViewSet):
                 validaciones_aprobadas = ValidacionRendicionCuentas.objects.filter(
                     rendicion=rendicion, estado='APROBADO'
                 )
-                crear_mensaje_solicitud_aprobada(rendicion, validaciones_aprobadas)
+                # crear_mensaje_solicitud_aprobada(rendicion, validaciones_aprobadas)
                 # encolar_validacion_aprobada_sf(
                 #     solicitud=rendicion,
                 #     validador=request.user
                 # )
+                respmensaje = enviar_notificacion_mensajeria_interna(
+                    'rendicion', 
+                    'aprobacion',
+                    solicitud,
+                    destinatarios_ids,
+                    request.headers.get('Origin', '')
+                )
+
+                #Notificacion por email
+                resultadoEnvio = self.servicio.enviar(
+                    'rendicion',
+                    solicitud.id, 
+                    'aprobacion', 
+                    destinatarios_ids, 
+                    request.headers.get('Origin', '')
+                )
+
 
         elif voto == 'RECHAZADO':
-            crear_mensaje_solicitud_rechazada(rendicion, request.user, comentarios)
+            # crear_mensaje_solicitud_rechazada(rendicion, request.user, comentarios)
             # encolar_validacion_rechazada_sf(
             #     solicitud=rendicion,
             #     validador=request.user,
             #     motivo=comentarios
             # )
+            respmensaje = enviar_notificacion_mensajeria_interna(
+                'rendicion',
+                'rechazo',
+                solicitud,
+                destinatarios_ids,
+                request.headers.get('Origin', ''),
+                motivo=comentarios
+            )
+            #Notificacion por email
+            resultadoEnvio = self.servicio.enviar(
+                'rendicion',
+                solicitud.id, 
+                'rechazo', 
+                destinatarios_ids, 
+                request.headers.get('Origin', '')
+            )
         
         return Response(
             ValidacionRendicionCuentasSerializer(validacion).data,
@@ -217,6 +285,9 @@ class ResetearValidacionesRendicionCuentasViewSet(viewsets.ViewSet):
     """
     permission_classes = [IsAuthenticated]
 
+    def __init__(self, **kwargs):
+        self.servicio = NotificacionService()
+
     @transaction.atomic
     def create(self, request, rendicion_id=None):
         serializer = ResetearValidacionesRendicionCuentasSerializer(data=request.data)
@@ -226,6 +297,8 @@ class ResetearValidacionesRendicionCuentasViewSet(viewsets.ViewSet):
         validaciones = ValidacionRendicionCuentas.objects.filter(rendicion=rendicion)
         nueva_version = serializer.validated_data.get('nueva_version', '2')
         reseteadas = 0
+        solicitud = rendicion
+        destinatarios_ids = list(validaciones.values_list('usuarioValidador_id', flat=True))
 
         for v in validaciones:
             v.estado = 'PENDIENTE'
@@ -234,25 +307,44 @@ class ResetearValidacionesRendicionCuentasViewSet(viewsets.ViewSet):
             v.comentarios = ''
             v.save()
             reseteadas += 1
+
+        respmensaje = enviar_notificacion_mensajeria_interna(
+                'rendicion',
+                'nueva_revision',
+                solicitud,
+                destinatarios_ids,
+                request.headers.get('Origin', ''),
+                version=nueva_version,
+            )
         
-        for v in validaciones:
+        #Notificacion por email
+        resultadoEnvio = self.servicio.enviar(
+                'rendicion',
+                solicitud.id, 
+                'nueva_revision', 
+                destinatarios_ids, 
+                request.headers.get('Origin', '')
+            )
+        
+        
+        # for v in validaciones:
             # encolar_revision_solicitud_fondos(
             #     solicitud=rendicion,
             #     validador=v.usuarioValidador,
             #     version=nueva_version,
             #     enlace_ver_detalle=f"/rendiciones-cuentas/{rendicion.id}/validar"
             # )
-            crear_mensaje_revision_solicitud_fondos(
-                solicitud=rendicion,
-                validador={
-                    'id': v.usuarioValidador.id,
-                    'nombre_completo': v.usuarioValidador.get_full_name(),
-                    'rol': v.usuarioValidador.cargo or 'validador',
-                    'estado': 'PENDIENTE',
-                    'fechaAsignacion': str(timezone.now())
-                },
-                version=nueva_version
-            )
+            # crear_mensaje_revision_solicitud_fondos(
+            #     solicitud=rendicion,
+            #     validador={
+            #         'id': v.usuarioValidador.id,
+            #         'nombre_completo': v.usuarioValidador.get_full_name(),
+            #         'rol': v.usuarioValidador.cargo or 'validador',
+            #         'estado': 'PENDIENTE',
+            #         'fechaAsignacion': str(timezone.now())
+            #     },
+            #     version=nueva_version
+            # )
         
         return Response({
             'mensaje': f'Reseteadas {reseteadas} validaciones a versión {nueva_version}',

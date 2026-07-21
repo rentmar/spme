@@ -789,6 +789,32 @@ def enviar_notificacion_mensajeria_interna(tipo:str, accion:str, solicitud, dest
 
     if accion not in acciones:
         raise ValueError(f"Acción no soportada: {accion}")
+
+    if tipo == 'rendicion':
+        acciones = {
+            'revision': lambda: _procesar_revision_rendicion(
+                solicitud=solicitud,
+                revisores_ids=destinatarios_ids,
+                base_url=base_url,
+            ),
+            'aprobacion': lambda: _procesar_aprobacion_rendicion(
+                solicitud=solicitud,
+                redactores_ids=destinatarios_ids,
+                base_url=base_url,
+            ),
+            'rechazo': lambda: _procesar_rechazo_rendicion(
+                solicitud=solicitud,
+                redactores_ids=destinatarios_ids,
+                motivo=motivo,
+                base_url=base_url,
+            ),
+            'nueva_revision': lambda: _procesar_nueva_revision_rendicion(
+                solicitud=solicitud,
+                destinatarios_ids=destinatarios_ids,
+                version=version,
+                base_url=base_url,
+            ),
+        }
     
     return acciones[accion]()
 
@@ -1412,3 +1438,284 @@ def _extraer_validacion_por_revisor(solicitud, tipo: str, revisor_id: int) -> di
         'fechaAsignacion': timezone.localtime(validacion.fechaAsignacion).strftime('%d/%m/%Y %H:%M'),
         'fechaResolucion': timezone.localtime(validacion.fechaResolucion).strftime('%d/%m/%Y %H:%M') if validacion.fechaResolucion else None,
     }
+
+# ─── FUNCIONES ESPECÍFICAS PARA RENDICIÓN DE CUENTAS ───
+
+def _procesar_revision_rendicion(solicitud, revisores_ids, base_url):
+    """Procesa revisión para Rendición de Cuentas."""
+    resultados = {'creados': 0, 'errores': 0, 'mensajes': []}
+    
+    if not revisores_ids:
+        logger.info("No hay revisores para notificar")
+        return resultados
+    
+    for revisor in revisores_ids:
+        mensaje = _crear_mensaje_peticion_revision_rendicion(solicitud, revisor)
+        if mensaje:
+            resultados['creados'] += 1
+            resultados['mensajes'].append({'validador_id': revisor, 'mensaje_id': mensaje.id})
+        else:
+            resultados['errores'] += 1
+            resultados['mensajes'].append({'validador_id': revisor, 'error': 'No se pudo crear el mensaje'})
+    
+    logger.info(f"📊 Lote procesado: {resultados['creados']} creados, {resultados['errores']} errores")
+    return resultados
+
+
+def _procesar_aprobacion_rendicion(solicitud, redactores_ids, base_url):
+    """Procesa aprobación para Rendición de Cuentas."""
+    resultados = {'creados': 0, 'errores': 0, 'mensajes': []}
+    
+    if not redactores_ids:
+        logger.info("No hay redactores para notificar")
+        return resultados
+    
+    for redactor in redactores_ids:
+        mensaje = _crear_mensaje_aprobacion_rendicion(solicitud, redactor)
+        if mensaje:
+            resultados['creados'] += 1
+            resultados['mensajes'].append({'validador_id': redactor, 'mensaje_id': mensaje.id})
+        else:
+            resultados['errores'] += 1
+    
+    logger.info(f"📊 Lote procesado: {resultados['creados']} creados, {resultados['errores']} errores")
+    return resultados
+
+
+def _procesar_rechazo_rendicion(solicitud, redactores_ids, motivo, base_url):
+    """Procesa rechazo para Rendición de Cuentas."""
+    resultados = {'creados': 0, 'errores': 0, 'mensajes': []}
+    
+    if not redactores_ids:
+        logger.info("No hay redactores para notificar")
+        return resultados
+    
+    for redactor in redactores_ids:
+        mensaje = _crear_mensaje_rechazo_rendicion(solicitud, redactor, motivo)
+        if mensaje:
+            resultados['creados'] += 1
+            resultados['mensajes'].append({'validador_id': redactor, 'mensaje_id': mensaje.id})
+        else:
+            resultados['errores'] += 1
+    
+    logger.info(f"📊 Lote procesado: {resultados['creados']} creados, {resultados['errores']} errores")
+    return resultados
+
+
+def _procesar_nueva_revision_rendicion(solicitud, destinatarios_ids, version, base_url):
+    """Procesa nueva revisión para Rendición de Cuentas."""
+    resultados = {'creados': 0, 'errores': 0, 'mensajes': []}
+    
+    if not destinatarios_ids:
+        logger.info("No hay revisores para notificar")
+        return resultados
+    
+    for revisor in destinatarios_ids:
+        mensaje = _crear_mensaje_nueva_revision_rendicion(solicitud, revisor, version)
+        if mensaje:
+            resultados['creados'] += 1
+            resultados['mensajes'].append({'validador_id': revisor, 'mensaje_id': mensaje.id})
+        else:
+            resultados['errores'] += 1
+    
+    logger.info(f"📊 Lote procesado: {resultados['creados']} creados, {resultados['errores']} errores")
+    return resultados
+
+
+# ─── CREADORES DE MENSAJE PARA RENDICIÓN ───
+
+def _crear_mensaje_peticion_revision_rendicion(solicitud, revisor_id):
+    """Mensaje de revisión para Rendición de Cuentas."""
+    try:
+        context = solicitud.get_mensaje_contexto()
+        codigo = context['codigo']
+        monto = solicitud.montoAsignado
+        revisor = Usuario.objects.get(id=revisor_id)
+        validacion = _extraer_validacion_por_revisor(solicitud, 'rendicion', revisor_id)
+        
+        contenido = (
+            f"Hola {revisor.get_full_name()},\n\n"
+            f"Se requiere tu validación como {revisor.cargo} "
+            f"para la siguiente Rendición de Cuentas:\n\n"
+            f"📋 Código: {codigo}\n"
+            f"💰 Monto asignado: Bs. {monto:,.2f}\n"
+            f"{context.get('detalle_subtipo', '')}"
+            f"👤 Solicitante: {context['solicitante_nombre']}\n"
+            f"📅 Fecha: {context['fecha_solicitud']}\n"
+            f"🏷️ Tu rol: {revisor.cargo}\n"
+            f"⏰ Asignado: {validacion['fechaAsignacion'] if validacion else timezone.now().strftime('%d/%m/%Y %H:%M')}\n\n"
+            f"Por favor, revisa y emite tu validación a la brevedad posible."
+        )
+        
+        mensaje = MensajeUsuario.objects.create(
+            destinatario_id=revisor_id,
+            remitente=None,
+            tipo=TipoMensaje.ALERTA,
+            asunto=f"📋 Validar Rendición - {codigo}",
+            contenido=contenido,
+            estado=EstadoMensaje.NO_LEIDO,
+            prioridad=3,
+            fecha_envio=timezone.now(),
+            icono='📋',
+            accion_url=context['accion_url'],
+            accion_texto=context['accion_url_texto'],
+            routing_key='mensaje.usuario.rendicion_cuentas',
+            referencia_id=f"RC-{solicitud.id}",
+            metadata={
+                'solicitud_id': solicitud.id,
+                'solicitud_codigo': codigo,
+                'tipo': 'peticion_revision',
+                'version': validacion['versionDocumento'] if validacion else '1',
+            }
+        )
+        
+        logger.info(f"✅ Mensaje REVISIÓN Rendición - {codigo} - ID: {mensaje.id}")
+        return mensaje
+    except Exception as e:
+        logger.error(f"❌ Error: {e}")
+        raise
+
+
+def _crear_mensaje_aprobacion_rendicion(solicitud, redactor_id):
+    """Mensaje de aprobación para Rendición de Cuentas."""
+    try:
+        context = solicitud.get_mensaje_contexto()
+        codigo = context['codigo']
+        monto = solicitud.montoAsignado
+        redactor = Usuario.objects.get(id=redactor_id)
+        
+        contenido = (
+            f"Hola {redactor.get_full_name()},\n\n"
+            f"Tu Rendición de Cuentas ha sido APROBADA.\n\n"
+            f"📋 Código: {codigo}\n"
+            f"💰 Monto asignado: Bs. {monto:,.2f}\n"
+            f"💰 Monto descargado: Bs. {solicitud.montoDescargado or 0:,.2f}\n"
+            f"💰 Saldo: Bs. {solicitud.saldo or 0:,.2f}\n"
+            f"📅 Fecha de aprobación: {timezone.now().strftime('%Y-%m-%d %H:%M')}\n\n"
+            f"La rendición ha sido aprobada exitosamente."
+        )
+        
+        mensaje = MensajeUsuario.objects.create(
+            destinatario_id=redactor_id,
+            remitente=None,
+            tipo=TipoMensaje.ALERTA,
+            asunto=f"✅ Rendición APROBADA - {codigo}",
+            contenido=contenido,
+            estado=EstadoMensaje.NO_LEIDO,
+            prioridad=3,
+            fecha_envio=timezone.now(),
+            icono='✅',
+            accion_url=context['accion_url'],
+            accion_texto=context['accion_url_texto'],
+            routing_key='mensaje.usuario.rendicion_cuentas',
+            referencia_id=f"RC-{solicitud.id}",
+            metadata={
+                'solicitud_id': solicitud.id,
+                'solicitud_codigo': codigo,
+                'monto': str(monto),
+                'tipo': 'aprobacion',
+            }
+        )
+        
+        logger.info(f"✅ Mensaje APROBACIÓN Rendición - {codigo} - ID: {mensaje.id}")
+        return mensaje
+    except Exception as e:
+        logger.error(f"❌ Error: {e}")
+        raise
+
+
+def _crear_mensaje_rechazo_rendicion(solicitud, redactor_id, motivo):
+    """Mensaje de rechazo para Rendición de Cuentas."""
+    try:
+        context = solicitud.get_mensaje_contexto()
+        codigo = context['codigo']
+        monto = solicitud.montoAsignado
+        redactor = Usuario.objects.get(id=redactor_id)
+        
+        contenido = (
+            f"Hola {redactor.get_full_name()},\n\n"
+            f"Tu Rendición de Cuentas ha sido RECHAZADA.\n\n"
+            f"📋 Código: {codigo}\n"
+            f"💰 Monto asignado: Bs. {monto:,.2f}\n"
+            f"📅 Fecha de rechazo: {timezone.now().strftime('%Y-%m-%d %H:%M')}\n\n"
+            f"📝 Motivo del rechazo:\n{motivo}\n\n"
+            f"Puedes corregir la rendición y reenviarla para una nueva validación."
+        )
+        
+        mensaje = MensajeUsuario.objects.create(
+            destinatario_id=redactor_id,
+            remitente=None,
+            tipo=TipoMensaje.ALERTA,
+            asunto=f"❌ Rendición RECHAZADA - {codigo}",
+            contenido=contenido,
+            estado=EstadoMensaje.NO_LEIDO,
+            prioridad=3,
+            fecha_envio=timezone.now(),
+            icono='❌',
+            accion_url=context['accion_url'],
+            accion_texto=context['accion_url_texto'],
+            routing_key='mensaje.usuario.rendicion_cuentas',
+            referencia_id=f"RC-{solicitud.id}",
+            metadata={
+                'solicitud_id': solicitud.id,
+                'solicitud_codigo': codigo,
+                'monto': str(monto),
+                'tipo': 'rechazo',
+                'motivo': motivo,
+            }
+        )
+        
+        logger.info(f"✅ Mensaje RECHAZO Rendición - {codigo} - ID: {mensaje.id}")
+        return mensaje
+    except Exception as e:
+        logger.error(f"❌ Error: {e}")
+        raise
+
+
+def _crear_mensaje_nueva_revision_rendicion(solicitud, revisor_id, version):
+    """Mensaje de nueva revisión para Rendición de Cuentas."""
+    try:
+        context = solicitud.get_mensaje_contexto()
+        codigo = context['codigo']
+        monto = solicitud.montoAsignado
+        revisor = Usuario.objects.get(id=revisor_id)
+        
+        contenido = (
+            f"Hola {revisor.get_full_name()},\n\n"
+            f"📝 NUEVA REVISIÓN SOLICITADA\n\n"
+            f"La Rendición de Cuentas que fue previamente rechazada ha sido CORREGIDA "
+            f"y requiere una nueva revisión.\n\n"
+            f"📋 Solicitud: {codigo}\n"
+            f"💰 Monto asignado: Bs. {monto:,.2f}\n"
+            f"📌 Versión: {version}\n"
+            f"👤 Solicitante: {context['solicitante_nombre']}\n\n"
+            f"Por favor, revisa la nueva versión del documento y emite tu validación."
+        )
+        
+        mensaje = MensajeUsuario.objects.create(
+            destinatario_id=revisor_id,
+            remitente=None,
+            tipo=TipoMensaje.ALERTA,
+            asunto=f"📝 Nueva Revisión Rendición - {codigo} (v{version})",
+            contenido=contenido,
+            estado=EstadoMensaje.NO_LEIDO,
+            prioridad=3,
+            fecha_envio=timezone.now(),
+            icono='📝',
+            accion_url=context['accion_url'],
+            accion_texto=context['accion_url_texto'],
+            routing_key='mensaje.usuario.rendicion_cuentas',
+            referencia_id=f"RC-{solicitud.id}",
+            metadata={
+                'solicitud_id': solicitud.id,
+                'solicitud_codigo': codigo,
+                'tipo': 'nueva_revision',
+                'version': version,
+            }
+        )
+        
+        logger.info(f"✅ Mensaje NUEVA REVISIÓN Rendición - {codigo} v{version} - ID: {mensaje.id}")
+        return mensaje
+    except Exception as e:
+        logger.error(f"❌ Error: {e}")
+        raise
