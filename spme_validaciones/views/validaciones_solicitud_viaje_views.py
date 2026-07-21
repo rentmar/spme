@@ -49,6 +49,12 @@ from spme_monitor_estados.utils.encolar import (
     encolar_revision_solicitud_fondos,
 )
 
+#Notificacion email - celery
+from spme_email.services.notificacion_service import NotificacionService
+#Notificacion via mensajeria interna
+from spme_mensajes.services.notificacion_service import enviar_notificacion_mensajeria_interna
+
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -64,6 +70,9 @@ class AsignarValidadoresSolicitudViajeViewSet(viewsets.ViewSet):
     """
     permission_classes = [IsAuthenticated]
 
+    def __init__(self, **kwargs):
+        self.servicio = NotificacionService()
+
     @transaction.atomic
     def create(self, request, solicitud_id=None):
         serializer = AsignarValidadoresSolicitudViajeSerializer(data=request.data)
@@ -74,6 +83,7 @@ class AsignarValidadoresSolicitudViajeViewSet(viewsets.ViewSet):
         validadores = Usuario.objects.filter(
             id__in=serializer.validated_data['validador_ids']
         )
+        destinatariosIds = serializer.validated_data['validador_ids']
         if len(validadores) != len(serializer.validated_data['validador_ids']):
             ids_encontrados = list(validadores.values_list('id', flat=True))
             ids_faltantes = set(serializer.validated_data['validador_ids']) - set(ids_encontrados)
@@ -115,14 +125,28 @@ class AsignarValidadoresSolicitudViajeViewSet(viewsets.ViewSet):
                 errores.append({'validador_id': validador.id, 'error': str(e)})
         
         # NOTIFICACIONES (si falla, rollback de toda la transacción)
-        # if validadores_json:
-        #     crear_mensajes_validacion_solicitud_fondos(solicitud, validadores_json)
-        #     for val in validadores:
-        #         encolar_validacion_pendiente_sf(
-        #             solicitud=solicitud,
-        #             validador=val,
-        #             enlace_ver_detalle=f"/solicitudes-viajes/{solicitud.id}/validar"
-        #         )
+        if validadores_json:
+            #crear_mensajes_validacion_solicitud_fondos(solicitud, validadores_json)
+            # for val in validadores:
+            #     encolar_validacion_pendiente_sf(
+            #         solicitud=solicitud,
+            #         validador=val,
+            #         enlace_ver_detalle=f"/solicitudes-viajes/{solicitud.id}/validar"
+            #     )
+
+            #Generar la notificacion via mensajeria interna
+            #Generar la notificacion via email
+            respmensaje = enviar_notificacion_mensajeria_interna(
+                'viaje', 
+                'revision',
+                solicitud,
+                destinatariosIds,
+                request.headers.get('Origin', '')
+            )
+
+            resultadoEnvio = self.servicio.enviar('viaje',solicitud.id, 'revision', destinatariosIds, request.headers.get('Origin', ''))
+            
+            
 
         return Response({
             'mensaje': f'Creadas {len(resultados)} validaciones',
@@ -143,6 +167,9 @@ class VotarSolicitudViajeViewSet(viewsets.ViewSet):
     Si es RECHAZADO, "comentarios" es obligatorio.
     """
     permission_classes = [IsAuthenticated]
+
+    def __init__(self, **kwargs):
+        self.servicio = NotificacionService()
 
     @transaction.atomic
     def create(self, request, solicitud_id=None):
@@ -177,35 +204,68 @@ class VotarSolicitudViajeViewSet(viewsets.ViewSet):
         validacion.save()
         
         solicitud = validacion.solicitud
+        context = solicitud.get_mensaje_contexto()
+        solicitante_id = context['solicitante_id']
+        destinatarios_ids = [solicitante_id]
 
         # MENSAJERIA
         # Confirmar al validador
-        # encolar_confirmacion_validador_sf(
-        #     solicitud=solicitud,
-        #     validador=request.user,
-        #     accion=voto.lower()
-        # )
+        encolar_confirmacion_validador_sf(
+            solicitud=solicitud,
+            validador=request.user,
+            accion=voto.lower()
+        )
 
-        # if voto == 'APROBADO':
-        #     resumen = repo.obtener_resumen_estado_solicitud(solicitud.id)
-        #     if resumen['aprobado_totalmente']:
-        #         validaciones_aprobadas = ValidacionSolicitudViaje.objects.filter(
-        #             solicitud=solicitud, estado='APROBADO'
-        #         )
-        #         crear_mensaje_solicitud_aprobada(solicitud, validaciones_aprobadas)
-        #         encolar_validacion_aprobada_sf(
-        #             solicitud=solicitud,
-        #             validador=request.user
-        #         )
+        if voto == 'APROBADO':
+            resumen = repo.obtener_resumen_estado_solicitud(solicitud.id)
+            if resumen['aprobado_totalmente']:
+                validaciones_aprobadas = ValidacionSolicitudViaje.objects.filter(
+                    solicitud=solicitud, estado='APROBADO'
+                )
+                # crear_mensaje_solicitud_aprobada(solicitud, validaciones_aprobadas)
+                # encolar_validacion_aprobada_sf(
+                #     solicitud=solicitud,
+                #     validador=request.user
+                # )
+                respmensaje = enviar_notificacion_mensajeria_interna(
+                    'viaje', 
+                    'aprobacion',
+                    solicitud,
+                    destinatarios_ids,
+                request.headers.get('Origin', '')
+                )
 
-        # elif voto == 'RECHAZADO':
-        #     crear_mensaje_solicitud_rechazada(solicitud, request.user, comentarios)
-        #     encolar_validacion_rechazada_sf(
-        #         solicitud=solicitud,
-        #         validador=request.user,
-        #         motivo=comentarios
-        #     )
-
+                #Notificacion por email
+                resultadoEnvio = self.servicio.enviar(
+                    'viaje',
+                    solicitud.id, 
+                    'aprobacion', 
+                    destinatarios_ids, 
+                    request.headers.get('Origin', '')
+                )
+        elif voto == 'RECHAZADO':
+            # crear_mensaje_solicitud_rechazada(solicitud, request.user, comentarios)
+            # encolar_validacion_rechazada_sf(
+            #     solicitud=solicitud,
+            #     validador=request.user,
+            #     motivo=comentarios
+            # )
+            respmensaje = enviar_notificacion_mensajeria_interna(
+                'viaje',
+                'rechazo',
+                solicitud,
+                destinatarios_ids,
+                request.headers.get('Origin', ''),
+                motivo=comentarios
+            )
+            #Notificacion por email
+            resultadoEnvio = self.servicio.enviar(
+                'viaje',
+                solicitud.id, 
+                'rechazo', 
+                destinatarios_ids, 
+                request.headers.get('Origin', '')
+            )
         return Response(
             ValidacionSolicitudViajeSerializer(validacion).data,
             status=status.HTTP_200_OK
@@ -222,6 +282,9 @@ class ResetearValidacionesSolicitudViajeViewSet(viewsets.ViewSet):
     """
     permission_classes = [IsAuthenticated]
 
+    def __init__(self, **kwargs):
+        self.servicio = NotificacionService()
+
     @transaction.atomic
     def create(self, request, solicitud_id=None):
         serializer = ResetearValidacionesSolicitudViajeSerializer(data=request.data)
@@ -231,6 +294,7 @@ class ResetearValidacionesSolicitudViajeViewSet(viewsets.ViewSet):
         validaciones = ValidacionSolicitudViaje.objects.filter(solicitud=solicitud)
         nueva_version = serializer.validated_data.get('nueva_version', '2')
         reseteadas = 0
+        destinatarios_ids = list(validaciones.values_list('usuarioValidador_id', flat=True))
 
         for v in validaciones:
             v.estado = 'PENDIENTE'
@@ -239,6 +303,26 @@ class ResetearValidacionesSolicitudViajeViewSet(viewsets.ViewSet):
             v.comentarios = ''
             v.save()
             reseteadas += 1
+        
+        respmensaje = enviar_notificacion_mensajeria_interna(
+                'viaje',
+                'nueva_revision',
+                solicitud,
+                destinatarios_ids,
+                request.headers.get('Origin', ''),
+                version=nueva_version,
+            )
+        
+        #Notificacion por email
+        resultadoEnvio = self.servicio.enviar(
+                'viaje',
+                solicitud.id, 
+                'nueva_revision', 
+                destinatarios_ids, 
+                request.headers.get('Origin', '')
+            )
+
+        
 
         #MENSAJERIA
         # for v in validaciones:

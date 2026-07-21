@@ -79,18 +79,18 @@ class NotificacionService:
         #definir el tipo y la accion
         tipo_config = TEMPLATE_MAP[tipo]
         accion_config = ACCION_MAP[accion]
-        print('************* Tipo y Accion *****************************')
-        print('tipo: ', tipo_config)
-        print('Accion: ', accion_config)
-        print('********************************************************')
+        # print('************* Tipo y Accion *****************************')
+        # print('tipo: ', tipo_config)
+        # print('Accion: ', accion_config)
+        # print('********************************************************')
 
         #Contexto desde el modelo
         solicitud = self._get_solicitud(tipo, solicitud_id)
         context = solicitud.get_mensaje_contexto()
-        print('************* Solicitud y Contexto *****************************')
-        print('Solicitud: ', solicitud)
-        print('contexto: ', context)
-        print('******************************************************')
+        # print('************* Solicitud y Contexto *****************************')
+        # print('Solicitud: ', solicitud)
+        # print('contexto: ', context)
+        # print('******************************************************')
 
         #Construir la URL y colocarla en el contexto
         if 'accion_url' in context:
@@ -98,18 +98,18 @@ class NotificacionService:
         
         context.setdefault('current_year', datetime.now().year)
 
-        print('************* URL y ajuste de contexto *****************************')
-        print('CONTEXTO AJUSTADO: ', context)
-        print('******************************************')
+        # print('************* URL y ajuste de contexto *****************************')
+        # print('CONTEXTO AJUSTADO: ', context)
+        # print('******************************************')
 
         #Obtener los emails de los destinatarios
         destinatarios = self.repository.get_usuarios_por_ids(destinatarios_ids)
         to_emails = [d['email'] for d in destinatarios if d['email']]
         if not to_emails:
             raise ValueError("No se encontraron emails para los destinatarios")
-        print('************* Emails de los destinatarios *****************************')
-        print('emails: ', to_emails)
-        print('*************************************************************************')
+        # print('************* Emails de los destinatarios *****************************')
+        # print('emails: ', to_emails)
+        # print('*************************************************************************')
 
         #Template y el asunto
         template_path = f"{tipo_config['base_path']}/{accion_config['template']}"
@@ -117,10 +117,10 @@ class NotificacionService:
             tipo=TIPO_NOMBRE_MAP[tipo],
             codigo=context.get('codigo', ''),
         )
-        print('************* Ruta del Template y Asunto *****************************')
-        print('template ruta: ', template_path)
-        print('Asunto email:', subject)
-        print('************************************************************')
+        # print('************* Ruta del Template y Asunto *****************************')
+        # print('template ruta: ', template_path)
+        # print('Asunto email:', subject)
+        # print('************************************************************')
 
         #Enviar
 

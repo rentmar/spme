@@ -162,6 +162,9 @@ class VotarSolicitudFondosViewSet(viewsets.ViewSet):
     """
     permission_classes = [IsAuthenticated]
 
+    def __init__(self, **kwargs):
+        self.servicio = NotificacionService()
+
     @transaction.atomic
     def create(self, request, solicitud_id=None):
         voto_serializer = EmitirVotoSerializer(data=request.data)
@@ -195,6 +198,9 @@ class VotarSolicitudFondosViewSet(viewsets.ViewSet):
         validacion.save()
         
         solicitud = validacion.solicitud
+        context = solicitud.get_mensaje_contexto()
+        solicitante_id = context['solicitante_id']  # 72
+        destinatarios_ids = [solicitante_id]  # [72]
 
         # Confirmar al validador
         encolar_confirmacion_validador_sf(
@@ -210,18 +216,21 @@ class VotarSolicitudFondosViewSet(viewsets.ViewSet):
                     solicitud=solicitud, estado='APROBADO'
                 )
                 crear_mensaje_solicitud_aprobada(solicitud, validaciones_aprobadas)
-                encolar_validacion_aprobada_sf(    # ← BIEN
-                    solicitud=solicitud,
-                    validador=request.user
-                )
+                # encolar_validacion_aprobada_sf(    # ← BIEN
+                #     solicitud=solicitud,
+                #     validador=request.user
+                # )
+                respuesta = self.servicio.enviar('fondos', solicitud.id, 'aprobacion', destinatarios_ids, request.headers.get('Origin', ''))
+
 
         elif voto == 'RECHAZADO':
-            crear_mensaje_solicitud_rechazada(solicitud, request.user, comentarios)
-            encolar_validacion_rechazada_sf( 
-                solicitud=solicitud,
-                validador=request.user,
-                motivo=comentarios
-            )
+            # crear_mensaje_solicitud_rechazada(solicitud, request.user, comentarios)
+            # encolar_validacion_rechazada_sf( 
+            #     solicitud=solicitud,
+            #     validador=request.user,
+            #     motivo=comentarios
+            # )
+            respuesta = self.servicio.enviar('fondos', solicitud_id, 'rechazo', destinatarios_ids, request.headers.get('Origin', ''))
         
         return Response(
             ValidacionSolicitudFondosSerializer(validacion).data,
@@ -247,6 +256,9 @@ class ResetearValidacionesSolicitudFondosViewSet(viewsets.ViewSet):
     """
     permission_classes = [IsAuthenticated]
 
+    def __init__(self, **kwargs):
+        self.servicio = NotificacionService()
+
     @transaction.atomic
     def create(self, request, solicitud_id=None):
         serializer = ResetearValidacionesSolicitudFondosSerializer(data=request.data)
@@ -254,6 +266,7 @@ class ResetearValidacionesSolicitudFondosViewSet(viewsets.ViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         solicitud = get_object_or_404(SolicitudFondos, id=solicitud_id)
         validaciones = ValidacionSolicitudFondos.objects.filter(solicitud=solicitud)
+        validadoresIds = list(ValidacionSolicitudFondos.objects.filter(solicitud=solicitud).values_list('usuarioValidador_id', flat=True).distinct()) 
         nueva_version = serializer.validated_data.get('nueva_version', '2')
         reseteadas = 0
 
@@ -269,12 +282,12 @@ class ResetearValidacionesSolicitudFondosViewSet(viewsets.ViewSet):
         #Notificar a cada validadores
         for v in validaciones:
             # 📧 Email: Nueva revisión de documento previamente rechazado
-            encolar_revision_solicitud_fondos(
-                solicitud=solicitud,
-                validador=v.usuarioValidador,
-                version=nueva_version,
-                enlace_ver_detalle=f"/solicitudes-fondos/{solicitud.id}/validar"
-            )
+            # encolar_revision_solicitud_fondos(
+            #     solicitud=solicitud,
+            #     validador=v.usuarioValidador,
+            #     version=nueva_version,
+            #     enlace_ver_detalle=f"/solicitudes-fondos/{solicitud.id}/validar"
+            # )
             # 🔔 Mensajería interna: Nueva revisión
             crear_mensaje_revision_solicitud_fondos(
                 solicitud=solicitud,
@@ -287,6 +300,9 @@ class ResetearValidacionesSolicitudFondosViewSet(viewsets.ViewSet):
                 },
                 version=nueva_version
             )
+        
+        respuesta = self.servicio.enviar('fondos', solicitud_id, 'nueva_revision', validadoresIds, request.headers.get('Origin', ''))
+        
         
         return Response({
             'mensaje': f'Reseteadas {reseteadas} validaciones a versión {nueva_version}',

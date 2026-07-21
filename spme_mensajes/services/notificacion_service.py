@@ -7,6 +7,9 @@ from spme_mensajes.models import (
 from django.utils import timezone
 import logging
 from spme_actividades.models import TareaActividad
+from typing import List
+from spme_autenticacion.models import Usuario
+
 
 logger = logging.getLogger(__name__)
 
@@ -503,6 +506,7 @@ def crear_mensaje_solicitud_aprobada(solicitud, validaciones_aprobadas):
         codigo = solicitud.numeroFormulario or f"SF-{solicitud.id}"
         monto = solicitud.montoSolicitado
         total = len(validaciones_aprobadas)
+        context = solicitud.get_mensaje_contexto()
         
         # ─── Construir resumen de validadores ───
         resumen = ""
@@ -544,7 +548,7 @@ def crear_mensaje_solicitud_aprobada(solicitud, validaciones_aprobadas):
         mensaje = MensajeUsuario.objects.create(
             destinatario=solicitud.usuario,
             remitente=None,
-            tipo=TipoMensaje.EXITO,
+            tipo=TipoMensaje.ALERTA,
             asunto=f"✅ Solicitud APROBADA - {codigo}",
             contenido=contenido,
             estado=EstadoMensaje.NO_LEIDO,
@@ -553,8 +557,8 @@ def crear_mensaje_solicitud_aprobada(solicitud, validaciones_aprobadas):
             actividad_id=actividad_id,
             proyecto_id=proyecto_id,
             icono='✅',
-            accion_url=f'/solicitudes-fondos/{solicitud.id}',
-            accion_texto='Ver Solicitud',
+            accion_url=context['accion_url'],
+            accion_texto=context['accion_url_texto'],
             routing_key='mensaje.usuario.solicitud_fondos',
             referencia_id=f"SF-{solicitud.id}",
             metadata={
@@ -574,8 +578,11 @@ def crear_mensaje_solicitud_aprobada(solicitud, validaciones_aprobadas):
         return mensaje
         
     except Exception as e:
+        logger.error(f"❌ Error: {type(e).__name__}: {e}")
+        logger.error(f"❌ Traceback:", exc_info=True)
         logger.error(f"❌ Error en mensaje de aprobación: {e}")
         return None
+    
 
 
 def crear_mensaje_solicitud_rechazada(solicitud, validador_que_rechazo, motivo):
@@ -599,6 +606,7 @@ def crear_mensaje_solicitud_rechazada(solicitud, validador_que_rechazo, motivo):
         codigo = solicitud.numeroFormulario or f"SF-{solicitud.id}"
         monto = solicitud.montoSolicitado
         nombre_validador = validador_que_rechazo.get_full_name()
+        contexto = solicitud.get_mensaje_contexto()
         
         # ─── Contenido del mensaje ───
         contenido = (
@@ -629,13 +637,13 @@ def crear_mensaje_solicitud_rechazada(solicitud, validador_que_rechazo, motivo):
             asunto=f"❌ Solicitud RECHAZADA - {codigo}",
             contenido=contenido,
             estado=EstadoMensaje.NO_LEIDO,
-            prioridad=4,
+            prioridad=3,
             fecha_envio=timezone.now(),
             actividad_id=actividad_id,
             proyecto_id=proyecto_id,
             icono='❌',
-            accion_url=f'/solicitudes-fondos/{solicitud.id}/corregir',
-            accion_texto='Corregir y Reenviar',
+            accion_url=contexto['accion_url'],
+            accion_texto=contexto['accion_url_texto'],
             routing_key='mensaje.usuario.solicitud_fondos',
             referencia_id=f"SF-{solicitud.id}",
             metadata={
@@ -669,7 +677,8 @@ def crear_mensaje_revision_solicitud_fondos(solicitud, validador, version):
         codigo = solicitud.numeroFormulario or f"SF-{solicitud.id}"
         monto = solicitud.montoSolicitado
         solicitante_nombre = solicitud.usuario.get_full_name() if solicitud.usuario else "Sistema"
-        
+        contexto = solicitud.get_mensaje_contexto()
+
         contenido = (
             f"Hola {validador['nombre_completo']},\n\n"
             f"📝 NUEVA REVISIÓN SOLICITADA\n\n"
@@ -693,8 +702,8 @@ def crear_mensaje_revision_solicitud_fondos(solicitud, validador, version):
             prioridad=3,
             fecha_envio=timezone.now(),
             icono='📝',
-            accion_url=f'/solicitudes-fondos/{solicitud.id}/validar',
-            accion_texto='Revisar Nueva Versión',
+            accion_url=contexto['accion_url'],
+            accion_texto=contexto['accion_url_texto'],
             routing_key='mensaje.usuario.solicitud_fondos',
             referencia_id=f"SF-{solicitud.id}",
             metadata={
@@ -711,3 +720,695 @@ def crear_mensaje_revision_solicitud_fondos(solicitud, validador, version):
     except Exception as e:
         logger.error(f"❌ Error: {e}")
         return None
+
+
+# =========================================================================================
+#        NOTIFICACIONES PARA FORMULARIOS
+# =========================================================================================
+TIPO_NOMBRE_MAP = {
+    'fondos': 'Solicitud de Fondos',
+    'reposicion': 'Solicitud de Reposición',
+    'viaje': 'Solicitud de Viaje',
+    'pago_directo': 'Pago Directo',
+    'rendicion': 'Rendición de Cuentas',
+}
+
+ICONO_MAP = {
+    'fondos': '💵',
+    'reposicion': '💳',
+    'viaje': '✈️',
+    'pago_directo': '💳',
+    'rendicion': '📋',
+}
+def enviar_notificacion_mensajeria_interna(tipo:str, accion:str, solicitud, destinatarios_ids: List[int], base_url: str, motivo: str = '',version: str = '1',)->dict: 
+    """
+    Orquestador de notificaciones internas.
+    Args:
+        solicitud: Objeto de la solicitud
+        destinatarios_ids: [68, 46]
+        base_url: URL base del frontend
+        tipo: 'fondos' | 'reposicion' | 'viaje' | 'pago_directo' | 'rendicion'
+        accion: 'revision' | 'aprobacion' | 'rechazo' | 'nueva_revision'
+        motivo: Texto del rechazo
+        version: Versión del documento
+    Returns:
+        dict: {'mensajes': [MensajeUsuario, ...]}
+    """
+    #Comprobar si el tipo de documento se encuentra soportado
+    if tipo not in TIPO_NOMBRE_MAP:
+        raise ValueError(f"Tipo de documento no soportado: {tipo}")
+    
+    acciones = {
+        'revision': lambda: _procesar_revision(
+            solicitud=solicitud,
+            revisores_ids=destinatarios_ids,
+            tipo=tipo,
+            base_url=base_url,
+        ),
+        'aprobacion': lambda: _procesar_aprobacion(
+            solicitud=solicitud,
+            redactores_ids=destinatarios_ids,
+            tipo=tipo,
+            base_url=base_url,
+        ),
+        'rechazo': lambda: _procesar_rechazo(
+            solicitud=solicitud,
+            redactores_ids=destinatarios_ids,
+            tipo=tipo,
+            motivo=motivo,
+            base_url=base_url,
+        ),
+        'nueva_revision': lambda: _procesar_nueva_revision(
+            solicitud=solicitud,
+            destinatarios_ids=destinatarios_ids,
+            tipo=tipo,
+            version=version,
+            base_url=base_url,
+        ),
+    }
+
+    if accion not in acciones:
+        raise ValueError(f"Acción no soportada: {accion}")
+    
+    return acciones[accion]()
+
+#Funcion para procesar peticion de revision
+def _procesar_revision(tipo, solicitud, revisores_ids, base_url):
+    """
+    Procesa por lotes de mensajes
+    Args:
+        tipo: 'fondos' | 'reposicion' | 'viaje' | 'pago_directo' | 'rendicion'
+        solicitud: Objeto de la solicitud
+        revisores_ids: [68, 46]
+        base_url: URL base del frontend
+    Returns:
+        dict: {'mensajes': [MensajeUsuario, ...]}
+
+    """
+    resultados = {
+        'creados': 0,
+        'errores': 0,
+        'mensajes': []
+    }
+    #Comprobar si hay revisores
+    if not revisores_ids:
+        logger.info("No hay revisores para notificar")
+        return resultados
+    
+    #Crear mensaje
+    for revisor in revisores_ids:
+        mensaje = _crear_mensaje_peticion_revision(tipo, solicitud, revisor)
+        if mensaje:
+            resultados['creados'] += 1
+            resultados['mensajes'].append({
+                'validador_id': revisor,
+                'mensaje_id': mensaje.id
+            })
+        else:
+            resultados['errores'] += 1
+            resultados['mensajes'].append({
+                'validador_id': revisor,
+                'error': 'No se pudo crear el mensaje'
+            })
+    
+    logger.info(
+            f"📊 Lote procesado: {resultados['creados']} creados, "
+            f"{resultados['errores']} errores"
+        )
+    return resultados
+
+#Funcion para procesaro aprobacion
+def _procesar_aprobacion(tipo, solicitud, redactores_ids, base_url):
+    """
+    Procesa por lotes de mensajes
+    Args:
+        tipo: 'fondos' | 'reposicion' | 'viaje' | 'pago_directo' | 'rendicion'
+        solicitud: Objeto de la solicitud
+        revisores_ids: [68, 46]
+        base_url: URL base del frontend
+    Returns:
+        dict: {'mensajes': [MensajeUsuario, ...]}
+
+    """
+    resultados = {
+        'creados': 0,
+        'errores': 0,
+        'mensajes': []
+    }
+
+    #Comprobar si hay revisores
+    if not redactores_ids:
+        logger.info("No hay redactores para notificar")
+        return resultados
+    
+    #Crear mensaje
+    for revisor in redactores_ids:
+        mensaje = _crear_mensaje_aprobacion(tipo, solicitud, revisor)
+        if mensaje:
+            resultados['creados'] += 1
+            resultados['mensajes'].append({
+                'validador_id': revisor,
+                'mensaje_id': mensaje.id
+            })
+        else:
+            resultados['errores'] += 1
+            resultados['mensajes'].append({
+                'validador_id': revisor,
+                'error': 'No se pudo crear el mensaje'
+            })
+    
+    logger.info(
+            f"📊 Lote procesado: {resultados['creados']} creados, "
+            f"{resultados['errores']} errores"
+        )
+    return resultados
+    
+#Funcion para procesar rechazo
+def _procesar_rechazo(tipo, solicitud, redactores_ids, base_url, motivo):
+    """
+    Procesa por lotes de mensajes
+    Args:
+        tipo: 'fondos' | 'reposicion' | 'viaje' | 'pago_directo' | 'rendicion'
+        solicitud: Objeto de la solicitud
+        revisores_ids: [68, 46]
+        base_url: URL base del frontend
+    Returns:
+        dict: {'mensajes': [MensajeUsuario, ...]}
+    """
+    resultados = {
+        'creados': 0,
+        'errores': 0,
+        'mensajes': []
+    }
+    #Comprobar si hay revisores
+    if not redactores_ids:
+        logger.info("No hay redactores para notificar")
+        return resultados
+    
+    #Crear mensaje
+    for revisor in redactores_ids:
+        mensaje = _crear_mensaje_rechazo(tipo, solicitud, revisor, comentario=motivo)
+        if mensaje:
+            resultados['creados'] += 1
+            resultados['mensajes'].append({
+                'validador_id': revisor,
+                'mensaje_id': mensaje.id
+            })
+        else:
+            resultados['errores'] += 1
+            resultados['mensajes'].append({
+                'validador_id': revisor,
+                'error': 'No se pudo crear el mensaje'
+            })
+    
+    logger.info(
+            f"📊 Lote procesado: {resultados['creados']} creados, "
+            f"{resultados['errores']} errores"
+        )
+    return resultados
+    
+
+
+    
+
+#Funcion para procesar nueva revision
+def _procesar_nueva_revision(tipo, solicitud, destinatarios_ids, base_url, version):
+
+    """
+    Procesa por lotes de mensajes
+    Args:
+        tipo: 'fondos' | 'reposicion' | 'viaje' | 'pago_directo' | 'rendicion'
+        solicitud: Objeto de la solicitud
+        revisores_ids: [68, 46]
+        base_url: URL base del frontend
+    Returns:
+        dict: {'mensajes': [MensajeUsuario, ...]}
+
+    """
+    resultados = {
+        'creados': 0,
+        'errores': 0,
+        'mensajes': []
+    }
+    #Comprobar si hay revisores
+    if not destinatarios_ids:
+        logger.info("No hay revisores para notificar")
+        return resultados
+    
+    #Crear mensaje
+    for revisor in destinatarios_ids:
+        mensaje = _crear_mensaje_nueva_revision(tipo, solicitud, revisor, version)
+        if mensaje:
+            resultados['creados'] += 1
+            resultados['mensajes'].append({
+                'validador_id': revisor,
+                'mensaje_id': mensaje.id
+            })
+        else:
+            resultados['errores'] += 1
+            resultados['mensajes'].append({
+                'validador_id': revisor,
+                'error': 'No se pudo crear el mensaje'
+            })
+    
+    logger.info(
+            f"📊 Lote procesado: {resultados['creados']} creados, "
+            f"{resultados['errores']} errores"
+        )
+    return resultados
+
+
+#Funcion para crear mensaje para petcion de revision
+def _crear_mensaje_peticion_revision(tipo, solicitud, revisor_id):
+    """
+    Crear una notificacion para informar a los revisores que una solicitud
+    se les asigno y requiere su revision
+    Args:
+        tipo_display: String para el tipo de documento
+        solicitud: Objeto SolicitudFondos
+        revisor_id: Revisor ID
+    
+    Returns:
+        MensajeUsuario creado o None si hay error
+    """
+    try:
+        tipo_icono = ICONO_MAP[tipo]
+        tipo_nombre = TIPO_NOMBRE_MAP[tipo]
+        codigo = solicitud.numeroFormulario
+        monto = solicitud.montoSolicitado
+        context = solicitud.get_mensaje_contexto()
+        revisor = Usuario.objects.get(id=revisor_id)
+        validacion = _extraer_validacion_por_revisor(solicitud, tipo, revisor_id)
+
+        # print('TIPO: ', tipo_nombre)
+        # print('CONTEXTO: ', context)
+        # print('VALIDACION: ', validacion)
+
+        #Determinar el subtipo del documento
+        if solicitud.actividad_id and not solicitud.tarea_id:
+            tipo_solicitud = "Actividad"
+            actividad_nombre = getattr(solicitud.actividad, 'nombreCorto', str(solicitud.actividad))
+            detalle = f"📋 Actividad: {actividad_nombre}\n"
+            
+        elif solicitud.actividad_id and solicitud.tarea_id:
+            tipo_solicitud = "Tarea"
+            actividad_nombre = getattr(
+                getattr(solicitud.tarea, 'actividad', None), 'nombreCorto', 'N/A'
+            )
+            tarea_nombre = getattr(solicitud.tarea, 'descripcionTarea', str(solicitud.tarea))
+            detalle = f"📋 Actividad: {actividad_nombre}\n📎 Tarea: {tarea_nombre}\n"
+            
+        else:
+            tipo_solicitud = "General"
+            detalle = ""
+        
+        print('SUBTIPO: ', tipo_solicitud)
+
+        #NOmbre del solicitante
+        solicitante_nombre = context['solicitante_nombre']
+
+        #Revisor
+        revisor_nombre = revisor.get_full_name()
+        print('Revisor: ', revisor_nombre)
+        #Fecha de la solicitud
+        fecha_solicitud = (
+            solicitud.fechaSolicitud.strftime('%Y-%m-%d')
+            if solicitud.fechaSolicitud
+            else timezone.now().strftime('%Y-%m-%d')
+        )
+
+        #Contenido del mensaje
+        contenido = (
+            f"Hola {revisor.get_full_name()},\n\n"
+            f"Se requiere tu validación como {revisor.cargo} "
+            f"para la siguiente { tipo_icono } {tipo_nombre}:\n\n"
+            f"💵 Código: {codigo}\n"
+            f"💰 Monto: ${monto:,.2f}\n"
+            f"📌 Tipo: Solicitud para {tipo_solicitud}\n"
+            f"{detalle}"
+            f"👤 Solicitante: {solicitante_nombre}\n"
+            f"📅 Fecha: {fecha_solicitud}\n"
+            f"🏷️ Tu rol: {revisor.cargo}\n"
+            f"⏰ Asignado: {validacion['fechaAsignacion'] }\n\n"
+            f"Por favor, revisa y emite tu validación a la brevedad posible."
+        )
+
+        #Genera el mensaje
+        mensaje = MensajeUsuario.objects.create(
+            destinatario_id = revisor_id,
+            remitente=None,
+            tipo=TipoMensaje.ALERTA,
+            asunto=f"📝 Revisión - {codigo} (v{validacion['versionDocumento']})",
+            contenido=contenido,
+            estado=EstadoMensaje.NO_LEIDO,
+            prioridad=3,
+            fecha_envio=timezone.now(),
+            icono='📝',
+            accion_url=context['accion_url'],
+            accion_texto=context['accion_url_texto'],
+            routing_key='mensaje.usuario.solicitud_viaje',
+            referencia_id=f"SV-{solicitud.id}",
+            metadata={
+                'solicitud_id': solicitud.id,
+                'solicitud_codigo': codigo,
+                'tipo': 'revision',
+                'version': validacion['versionDocumento']
+            }
+        )
+
+        logger.info(f"✅ Mensaje de REVISIÓN creado - {codigo} v{validacion['versionDocumento']} - ID: {mensaje.id}")
+        return mensaje
+    
+    except Exception as e:
+        logger.error(f"❌ Error creando mensaje: {e}")
+        #return None
+        raise
+
+
+#Funcion para crear mensaje aprobacion
+def _crear_mensaje_aprobacion(tipo, solicitud, revisor_id):
+    """
+    Crear una notificacion para informar al redactor que su solicitud ha sido aprobada
+    Args:
+        tipoy: String para el tipo de documento
+        solicitud: Objeto SolicitudFondos
+        revisor_id: Revisor ID
+    
+    Returns:
+        MensajeUsuario creado o None si hay error
+    """
+    try:
+        tipo_icono = ICONO_MAP[tipo]
+        tipo_nombre = TIPO_NOMBRE_MAP[tipo]
+        codigo = solicitud.numeroFormulario
+        monto = solicitud.montoSolicitado
+        context = solicitud.get_mensaje_contexto()
+        redactor = Usuario.objects.get(id=revisor_id)
+
+        #Determinar el subtipo del documento
+        if solicitud.actividad_id and not solicitud.tarea_id:
+            tipo_solicitud = "Actividad"
+            actividad_nombre = getattr(solicitud.actividad, 'nombreCorto', str(solicitud.actividad))
+            detalle = f"📋 Actividad: {actividad_nombre}\n"
+            
+        elif solicitud.actividad_id and solicitud.tarea_id:
+            tipo_solicitud = "Tarea"
+            actividad_nombre = getattr(
+                getattr(solicitud.tarea, 'actividad', None), 'nombreCorto', 'N/A'
+            )
+            tarea_nombre = getattr(solicitud.tarea, 'descripcionTarea', str(solicitud.tarea))
+            detalle = f"📋 Actividad: {actividad_nombre}\n📎 Tarea: {tarea_nombre}\n"
+            
+        else:
+            tipo_solicitud = "General"
+            detalle = ""
+        
+        print('SUBTIPO: ', tipo_solicitud)
+
+        #NOmbre del solicitante
+        solicitante_nombre = context['solicitante_nombre']
+
+        #Fecha de la solicitud
+        fecha_solicitud = (
+            solicitud.fechaSolicitud.strftime('%Y-%m-%d')
+            if solicitud.fechaSolicitud
+            else timezone.now().strftime('%Y-%m-%d')
+        )
+
+        #Contenido del mensaje
+        contenido = (
+            f"Hola { redactor.get_full_name()},\n\n"
+            f"Tu solicitud de {tipo_icono} {tipo_nombre} ha sido "
+            f"APROBADA por todos los revisores.\n\n"
+            f"💵 Código: {codigo}\n"
+            f"💰 Monto: ${monto:,.2f}\n"
+            f"📅 Fecha de aprobación: {timezone.now().strftime('%Y-%m-%d %H:%M')}\n\n"
+            f"La solicitud ha sido aprobada y puede proceder con su ejecución."
+        )
+        # ─── Crear mensaje ───
+        mensaje = MensajeUsuario.objects.create(
+            destinatario=solicitud.usuario,
+            remitente=None,
+            tipo=TipoMensaje.ALERTA,
+            asunto=f"✅ Solicitud APROBADA - {codigo}",
+            contenido=contenido,
+            estado=EstadoMensaje.NO_LEIDO,
+            prioridad=3,
+            fecha_envio=timezone.now(),
+            icono='✅',
+            accion_url=context['accion_url'],
+            accion_texto=context['accion_url_texto'],
+            routing_key='mensaje.usuario.solicitud_fondos',
+            referencia_id=f"SV-{solicitud.id}",
+            metadata={
+                'solicitud_id': solicitud.id,
+                'solicitud_codigo': codigo,
+                'monto': str(monto),
+                'tipo': 'aprovacion',
+            }
+        )
+        
+        logger.info(
+            f"✅ Mensaje de APROBACIÓN para {solicitud.usuario.get_full_name()} "
+            f"- {codigo} - ID: {mensaje.id}"
+        )
+        return mensaje   
+    except Exception as e:
+        logger.error(f"❌ Error creando mensaje: {e}")
+        #return None
+        raise
+
+
+
+
+#Funcion para crear mensaje de rechazo
+def _crear_mensaje_rechazo(tipo, solicitud, redactor_id, comentario):
+    """
+    Crear una notificacion para informar al redactor que su solicitud ha sido rechazada
+    Args:
+        tipo: String para el tipo de documento
+        solicitud: Objeto SolicitudFondos
+        revisor_id: Revisor ID
+    
+    Returns:
+        MensajeUsuario creado o None si hay error
+    """
+
+    try:
+        tipo_icono = ICONO_MAP[tipo]
+        tipo_nombre = TIPO_NOMBRE_MAP[tipo]
+        codigo = solicitud.numeroFormulario
+        monto = solicitud.montoSolicitado
+        context = solicitud.get_mensaje_contexto()
+        redactor = Usuario.objects.get(id=redactor_id)
+        motivo = comentario
+
+        #Determinar el subtipo del documento
+        if solicitud.actividad_id and not solicitud.tarea_id:
+            tipo_solicitud = "Actividad"
+            actividad_nombre = getattr(solicitud.actividad, 'nombreCorto', str(solicitud.actividad))
+            detalle = f"📋 Actividad: {actividad_nombre}\n"
+            
+        elif solicitud.actividad_id and solicitud.tarea_id:
+            tipo_solicitud = "Tarea"
+            actividad_nombre = getattr(
+                getattr(solicitud.tarea, 'actividad', None), 'nombreCorto', 'N/A'
+            )
+            tarea_nombre = getattr(solicitud.tarea, 'descripcionTarea', str(solicitud.tarea))
+            detalle = f"📋 Actividad: {actividad_nombre}\n📎 Tarea: {tarea_nombre}\n"
+            
+        else:
+            tipo_solicitud = "General"
+            detalle = ""
+
+        contenido = (
+            f"Hola {redactor.get_full_name()},\n\n"
+            f"Tu  {tipo_icono} {tipo_nombre} ha sido RECHAZADA.\n\n"
+            f"💵 Código: {codigo}\n"
+            f"💰 Monto: ${monto:,.2f}\n"
+            f"📅 Fecha de rechazo: {timezone.now().strftime('%Y-%m-%d %H:%M')}\n\n"
+            f"❌ Rechazado"
+            f"📝 Motivo del rechazo:\n"
+            f"{motivo}\n\n"
+            f"Puedes corregir la solicitud y reenviarla para una nueva validación."
+        )
+
+        # ─── Crear mensaje ───
+        mensaje = MensajeUsuario.objects.create(
+            destinatario=redactor,
+            remitente=None,
+            tipo=TipoMensaje.ALERTA,
+            asunto=f"❌ Solicitud Rechazada - {codigo}",
+            contenido=contenido,
+            estado=EstadoMensaje.NO_LEIDO,
+            prioridad=3,
+            fecha_envio=timezone.now(),
+            icono='✅',
+            accion_url=context['accion_url'],
+            accion_texto=context['accion_url_texto'],
+            routing_key='mensaje.usuario.solicitud_viaje',
+            referencia_id=f"SV-{solicitud.id}",
+            metadata={
+                'solicitud_id': solicitud.id,
+                'solicitud_codigo': codigo,
+                'monto': str(monto),
+                'tipo': 'rechazo',
+            }
+        )
+        
+        logger.info(
+            f"❌ Mensaje de RECHAZO para {solicitud.usuario.get_full_name()} "
+            f"- {codigo} - ID: {mensaje.id}"
+        )
+        return mensaje 
+
+    except Exception as e:
+        logger.error(f"❌ Error creando mensaje: {e}")
+        #return None
+        raise
+
+
+#Funcion para crear mensaje para peticion de nueva revision
+def _crear_mensaje_nueva_revision(tipo, solicitud, revisor_id, version):
+    """
+    Genera mensaje para nueva revision
+    """
+    try:
+        tipo_icono = ICONO_MAP[tipo]
+        tipo_nombre = TIPO_NOMBRE_MAP[tipo]
+        codigo = solicitud.numeroFormulario
+        monto = solicitud.montoSolicitado
+        context = solicitud.get_mensaje_contexto()
+        revisor = Usuario.objects.get(id=revisor_id)
+        
+        
+        # print('TIPO: ', tipo_nombre)
+        # print('CONTEXTO: ', context)
+        # print('VALIDACION: ', validacion)
+
+        #Determinar el subtipo del documento
+        if solicitud.actividad_id and not solicitud.tarea_id:
+            tipo_solicitud = "Actividad"
+            actividad_nombre = getattr(solicitud.actividad, 'nombreCorto', str(solicitud.actividad))
+            detalle = f"📋 Actividad: {actividad_nombre}\n"
+            
+        elif solicitud.actividad_id and solicitud.tarea_id:
+            tipo_solicitud = "Tarea"
+            actividad_nombre = getattr(
+                getattr(solicitud.tarea, 'actividad', None), 'nombreCorto', 'N/A'
+            )
+            tarea_nombre = getattr(solicitud.tarea, 'descripcionTarea', str(solicitud.tarea))
+            detalle = f"📋 Actividad: {actividad_nombre}\n📎 Tarea: {tarea_nombre}\n"
+            
+        else:
+            tipo_solicitud = "General"
+            detalle = ""
+        
+        print('SUBTIPO: ', tipo_solicitud)
+
+        #NOmbre del solicitante
+        solicitante_nombre = context['solicitante_nombre']
+
+        #Revisor
+        revisor_nombre = revisor.get_full_name()
+        print('Revisor: ', revisor_nombre)
+        #Fecha de la solicitud
+        fecha_solicitud = (
+            solicitud.fechaSolicitud.strftime('%Y-%m-%d')
+            if solicitud.fechaSolicitud
+            else timezone.now().strftime('%Y-%m-%d')
+        )
+        contenido = (
+            f"Hola {revisor.get_full_name()},\n\n"
+            f"📝 NUEVA REVISIÓN SOLICITADA\n\n"
+            f"El documento que fue previamente rechazado ha sido CORREGIDO "
+            f"y requiere una nueva revisión.\n\n"
+            f"💵 Solicitud: {codigo}\n"
+            f"💰 Monto: ${monto:,.2f}\n"
+            f"📌 Versión: {version}\n"
+            f"👤 Solicitante: {solicitante_nombre}\n"
+            f"Por favor, revisa la nueva versión del documento y emite tu validación."
+        )
+        
+        mensaje = MensajeUsuario.objects.create(
+            destinatario_id=revisor.id,
+            remitente=None,
+            tipo=TipoMensaje.ALERTA,
+            asunto=f"📝 Nueva Revisión - {codigo} (v{version})",
+            contenido=contenido,
+            estado=EstadoMensaje.NO_LEIDO,
+            prioridad=3,
+            fecha_envio=timezone.now(),
+            icono='📝',
+            accion_url=context['accion_url'],
+            accion_texto=context['accion_url_texto'],
+            routing_key='mensaje.usuario.solicitud_fondos',
+            referencia_id=f"SF-{solicitud.id}",
+            metadata={
+                'solicitud_id': solicitud.id,
+                'solicitud_codigo': codigo,
+                'tipo': 'nueva_revision',
+                'version': version
+            }
+        )
+        
+        logger.info(f"✅ Mensaje de REVISIÓN creado - {codigo} v{version} - ID: {mensaje.id}")
+        return mensaje
+        
+    
+    except Exception as e:
+        logger.error(f"❌ Error creando mensaje: {e}")
+        #return None
+        raise
+
+
+
+
+    
+
+#Extraer validaciones por revisor
+def _extraer_validacion_por_revisor(solicitud, tipo: str, revisor_id: int) -> dict:
+    """
+    Extrae la validación de un revisor específico.
+    
+    Returns:
+        dict con los datos de la validación o None si no existe
+    """
+    from spme_validaciones.models import (
+        ValidacionSolicitudFondos,
+        ValidacionSolicitudReembolso,
+        ValidacionSolicitudViaje,
+        ValidacionSolicitudPagoDirecto,
+        ValidacionRendicionCuentas,
+    )
+    from django.core.exceptions import ObjectDoesNotExist
+    
+    MODELO_MAP = {
+        'fondos': ValidacionSolicitudFondos,
+        'reposicion': ValidacionSolicitudReembolso,
+        'viaje': ValidacionSolicitudViaje,
+        'pago_directo': ValidacionSolicitudPagoDirecto,
+        'rendicion': ValidacionRendicionCuentas,
+    }
+    
+    modelo = MODELO_MAP[tipo]
+    
+    try:
+        if tipo == 'rendicion':
+            validacion = modelo.objects.get(rendicion=solicitud, usuarioValidador_id=revisor_id)
+        else:
+            validacion = modelo.objects.get(solicitud=solicitud, usuarioValidador_id=revisor_id)
+    except ObjectDoesNotExist:
+        return None
+    
+    return {
+        'id': validacion.id,
+        'codigoSeguimiento': validacion.codigoSeguimiento,
+        'usuarioValidador_id': validacion.usuarioValidador_id,
+        'usuarioRedactor_id': validacion.usuarioRedactor_id,
+        'estado': validacion.estado,
+        'comentarios': validacion.comentarios,
+        'versionDocumento': validacion.versionDocumento,
+        'fechaAsignacion': timezone.localtime(validacion.fechaAsignacion).strftime('%d/%m/%Y %H:%M'),
+        'fechaResolucion': timezone.localtime(validacion.fechaResolucion).strftime('%d/%m/%Y %H:%M') if validacion.fechaResolucion else None,
+    }
