@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from spme_monitoreo.models import SolicitudPagoDirecto, FormaPago
 from spme_autenticacion.models import Usuario
+from ..services.estado_solicitud_service import EstadoSolicitudService
+
 
 
 class SolicitudPagoDirectoSerializer(serializers.ModelSerializer):
@@ -45,11 +47,5 @@ class SolicitudPagoDirectoSerializer(serializers.ModelSerializer):
         return obj.formaPago.formaPago if obj.formaPago else None
     
     def get_estado_validacion(self, obj):
-        if obj.validacionResponsable and obj.validacionCoordinador:
-            return 'validado_completamente'
-        elif obj.validacionResponsable:
-            return 'validado_parcialmente'
-        elif obj.validacionCoordinador:
-            return 'rechazado'
-        else:
-            return 'pendiente'
+        estado = EstadoSolicitudService.get_estado_actual(obj)
+        return EstadoSolicitudService.get_estado_display(estado)

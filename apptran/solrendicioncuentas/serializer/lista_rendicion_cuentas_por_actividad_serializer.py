@@ -2,6 +2,8 @@
 from rest_framework import serializers
 from spme_monitoreo.models import RendicionCuentas
 from spme_autenticacion.models import Usuario
+from ..services.estado_solicitud_service import EstadoSolicitudService
+
 
 class RendicionCuentasSimpleSerializer(serializers.ModelSerializer):
     """Serializador simplificado para listar rendiciones de cuentas"""
@@ -52,11 +54,5 @@ class RendicionCuentasSimpleSerializer(serializers.ModelSerializer):
         return None
     
     def get_estado_validacion(self, obj):
-        if (obj.validacionResponsable and obj.validacionCoordinador and 
-            obj.validacionContador and obj.validacionAdministrador):
-            return 'validada_completamente'
-        elif (obj.validacionResponsable or obj.validacionCoordinador or 
-              obj.validacionContador or obj.validacionAdministrador):
-            return 'validada_parcialmente'
-        else:
-            return 'pendiente'
+        estado = EstadoSolicitudService.get_estado_actual(obj)
+        return EstadoSolicitudService.get_estado_display(estado)

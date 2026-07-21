@@ -2,6 +2,7 @@
 from rest_framework import serializers
 from spme_monitoreo.models import SolicitudReembolso, FormaPago
 from spme_autenticacion.models import Usuario
+from..services.estado_solicitud_service import EstadoSolicitudService
 
 class SolicitudReembolsoSimpleSerializer(serializers.ModelSerializer):
     """Serializador simplificado para listar solicitudes de reembolso"""
@@ -47,14 +48,8 @@ class SolicitudReembolsoSimpleSerializer(serializers.ModelSerializer):
         return None
     
     def get_estado_validacion(self, obj):
-        if obj.validacionResponsable and obj.validacionCoordinador:
-            return 'validada_completamente'
-        elif obj.validacionResponsable:
-            return 'validada_parcialmente'
-        elif obj.validacionCoordinador:
-            return 'rechazada'
-        else:
-            return 'pendiente'
+        estado = EstadoSolicitudService.get_estado_actual(obj)
+        return EstadoSolicitudService.get_estado_display(estado)
     
     def get_forma_pago_nombre(self, obj):
         return obj.formaPago.formaPago if obj.formaPago else 'No especificada'

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from spme_autenticacion.models import Usuario
 from spme_monitoreo.models import SolicitudViaje, FormaPago
+from ..services.estado_solicitud_service import EstadoSolicitudService
  
 class SolicitudViajeSerializer(serializers.ModelSerializer):
     solicitante = serializers.SerializerMethodField()
@@ -50,11 +51,5 @@ class SolicitudViajeSerializer(serializers.ModelSerializer):
         return obj.formaPago.formaPago if obj.formaPago else None
     
     def get_estado_validacion(self, obj):
-        if obj.validacionResponsable and obj.validacionCoordinador:
-            return 'validado_completamente'
-        elif obj.validacionResponsable:
-            return 'validado_parcialmente'
-        elif obj.validacionCoordinador:
-            return 'rechazado'
-        else:
-            return 'pendiente'
+        estado = EstadoSolicitudService.get_estado_actual(obj)
+        return EstadoSolicitudService.get_estado_display(estado)
