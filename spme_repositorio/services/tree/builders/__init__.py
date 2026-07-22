@@ -9,7 +9,10 @@ from .indicador_oe_builder import IndicadorOEBuilder
 from .resultado_oe_builder import ResultadoOEBuilder        
 from .producto_oe_builder import ProductoOEBuilder          
 from .proceso_oe_builder import ProcesoOEBuilder            
-from .proceso_poe_builder import ProcesoPOEBuilder          
+from .proceso_poe_builder import ProcesoPOEBuilder   
+from .indicador_roe_builder import IndicadorROEBuilder      
+from .producto_roe_builder import ProductoROEBuilder        
+from .proceso_roe_builder import ProcesoROEBuilder                
 
 __all__ = [
     'ProyectoBuilder', 'ObjetivoGeneralBuilder',
@@ -17,4 +20,5 @@ __all__ = [
     'ResultadoOGBuilder', 'KpiBuilder',
     'IndicadorOEBuilder', 'ResultadoOEBuilder',             
     'ProductoOEBuilder', 'ProcesoOEBuilder', 'ProcesoPOEBuilder',  
+    'IndicadorROEBuilder', 'ProductoROEBuilder', 'ProcesoROEBuilder',
 ]

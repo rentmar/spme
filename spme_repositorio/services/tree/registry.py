@@ -96,7 +96,11 @@ class NodeRegistry:
                 'model': 'IndicadorObjetivoEspecifico'
             },
             NodeType.RESULTADO_OE.value: {
-                'children': [],
+                'children': [
+                    NodeType.INDICADOR_ROE.value,    
+                    NodeType.PRODUCTO_ROE.value,     
+                    NodeType.PROCESO_ROE.value,      
+                ],
                 'parent': NodeType.OBJETIVO_ESPECIFICO_OG.value,
                 'label': 'Resultado OE',
                 'model': 'ResultadoOE'
@@ -117,6 +121,24 @@ class NodeRegistry:
                 'children': [],
                 'parent': NodeType.PRODUCTO_OE.value,
                 'label': 'Proceso Producto OE',
+                'model': 'Proceso'
+            },
+            NodeType.INDICADOR_ROE.value: {
+                'children': [],
+                'parent': NodeType.RESULTADO_OE.value,
+                'label': 'Indicador Res. OE',
+                'model': 'IndicadorResultadoObjEspecifico'
+            },
+            NodeType.PRODUCTO_ROE.value: {
+                'children': [],
+                'parent': NodeType.RESULTADO_OE.value,
+                'label': 'Producto Res. OE',
+                'model': 'ProductoResultadoOE'
+            },
+            NodeType.PROCESO_ROE.value: {
+                'children': [],
+                'parent': NodeType.RESULTADO_OE.value,
+                'label': 'Proceso Res. OE',
                 'model': 'Proceso'
             },
 

@@ -16,6 +16,9 @@ from .builders.resultado_oe_builder import ResultadoOEBuilder
 from .builders.producto_oe_builder import ProductoOEBuilder
 from .builders.proceso_oe_builder import ProcesoOEBuilder
 from .builders.proceso_poe_builder import ProcesoPOEBuilder
+from .builders.indicador_roe_builder import IndicadorROEBuilder
+from .builders.producto_roe_builder import ProductoROEBuilder
+from .builders.proceso_roe_builder import ProcesoROEBuilder
 
 def create_tree_orchestrator() -> TreeOrchestrator:
     """
@@ -37,11 +40,14 @@ def create_tree_orchestrator() -> TreeOrchestrator:
     registry.register_builder(NodeType.INDICADOR_ROG.value, IndicadorROGBuilder())  
     registry.register_builder(NodeType.PROCESO_ROG.value, ProcesoROGBuilder())   
     registry.register_builder(NodeType.KPI.value, KpiBuilder())
-    registry.register_builder(NodeType.INDICADOR_OE.value, IndicadorOEBuilder())      # ← NUEVO
-    registry.register_builder(NodeType.RESULTADO_OE.value, ResultadoOEBuilder())      # ← NUEVO
-    registry.register_builder(NodeType.PRODUCTO_OE.value, ProductoOEBuilder())        # ← NUEVO
-    registry.register_builder(NodeType.PROCESO_OE.value, ProcesoOEBuilder())          # ← NUEVO
-    registry.register_builder(NodeType.PROCESO_POE.value, ProcesoPOEBuilder())        # ← NUEVO
+    registry.register_builder(NodeType.INDICADOR_OE.value, IndicadorOEBuilder())      
+    registry.register_builder(NodeType.RESULTADO_OE.value, ResultadoOEBuilder())      
+    registry.register_builder(NodeType.PRODUCTO_OE.value, ProductoOEBuilder())        
+    registry.register_builder(NodeType.PROCESO_OE.value, ProcesoOEBuilder())          
+    registry.register_builder(NodeType.PROCESO_POE.value, ProcesoPOEBuilder())        
+    registry.register_builder(NodeType.INDICADOR_ROE.value, IndicadorROEBuilder())    
+    registry.register_builder(NodeType.PRODUCTO_ROE.value, ProductoROEBuilder())      
+    registry.register_builder(NodeType.PROCESO_ROE.value, ProcesoROEBuilder())      
     
     # Crear orchestrator
     orchestrator = TreeOrchestrator(registry)
