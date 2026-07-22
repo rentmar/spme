@@ -46,7 +46,12 @@ class NodeRegistry:
                 'model': 'ObjetivoGeneralProyecto'
             },
             NodeType.OBJETIVO_ESPECIFICO_OG.value: {
-                'children': [],
+                'children': [
+                    NodeType.INDICADOR_OE.value,     
+                    NodeType.RESULTADO_OE.value,    
+                    NodeType.PRODUCTO_OE.value,     
+                    NodeType.PROCESO_OE.value,      
+                ],
                 'parent': NodeType.OBJETIVO_GENERAL.value,
                 'label': 'Objetivo Especifico',
                 'model': 'ObjetivoEspecificoProyecto'
@@ -83,6 +88,36 @@ class NodeRegistry:
                 'parent': NodeType.OBJETIVO_GENERAL.value,
                 'label': 'Kpi',
                 'model': 'Kpi',
+            },
+             NodeType.INDICADOR_OE.value: {
+                'children': [],
+                'parent': NodeType.OBJETIVO_ESPECIFICO_OG.value,
+                'label': 'Indicador OE',
+                'model': 'IndicadorObjetivoEspecifico'
+            },
+            NodeType.RESULTADO_OE.value: {
+                'children': [],
+                'parent': NodeType.OBJETIVO_ESPECIFICO_OG.value,
+                'label': 'Resultado OE',
+                'model': 'ResultadoOE'
+            },
+            NodeType.PRODUCTO_OE.value: {
+                'children': [NodeType.PROCESO_POE.value],    # Producto tiene hijo Proceso
+                'parent': NodeType.OBJETIVO_ESPECIFICO_OG.value,
+                'label': 'Producto OE',
+                'model': 'ProductoOE'
+            },
+            NodeType.PROCESO_OE.value: {
+                'children': [],
+                'parent': NodeType.OBJETIVO_ESPECIFICO_OG.value,
+                'label': 'Proceso OE',
+                'model': 'Proceso'
+            },
+            NodeType.PROCESO_POE.value: {
+                'children': [],
+                'parent': NodeType.PRODUCTO_OE.value,
+                'label': 'Proceso Producto OE',
+                'model': 'Proceso'
             },
 
         }

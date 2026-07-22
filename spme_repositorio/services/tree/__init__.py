@@ -11,6 +11,11 @@ from .builders.resultado_og_builder import ResultadoOGBuilder
 from .builders.indicador_rog_builder import IndicadorROGBuilder
 from .builders.proceso_rog_builder import ProcesoROGBuilder
 from .builders.kpi_builder import KpiBuilder
+from .builders.indicador_oe_builder import IndicadorOEBuilder
+from .builders.resultado_oe_builder import ResultadoOEBuilder
+from .builders.producto_oe_builder import ProductoOEBuilder
+from .builders.proceso_oe_builder import ProcesoOEBuilder
+from .builders.proceso_poe_builder import ProcesoPOEBuilder
 
 def create_tree_orchestrator() -> TreeOrchestrator:
     """
@@ -32,6 +37,12 @@ def create_tree_orchestrator() -> TreeOrchestrator:
     registry.register_builder(NodeType.INDICADOR_ROG.value, IndicadorROGBuilder())  
     registry.register_builder(NodeType.PROCESO_ROG.value, ProcesoROGBuilder())   
     registry.register_builder(NodeType.KPI.value, KpiBuilder())
+    registry.register_builder(NodeType.INDICADOR_OE.value, IndicadorOEBuilder())      # ← NUEVO
+    registry.register_builder(NodeType.RESULTADO_OE.value, ResultadoOEBuilder())      # ← NUEVO
+    registry.register_builder(NodeType.PRODUCTO_OE.value, ProductoOEBuilder())        # ← NUEVO
+    registry.register_builder(NodeType.PROCESO_OE.value, ProcesoOEBuilder())          # ← NUEVO
+    registry.register_builder(NodeType.PROCESO_POE.value, ProcesoPOEBuilder())        # ← NUEVO
+    
     # Crear orchestrator
     orchestrator = TreeOrchestrator(registry)
     
