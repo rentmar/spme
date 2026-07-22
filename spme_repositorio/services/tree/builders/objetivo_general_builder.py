@@ -44,7 +44,7 @@ class ObjetivoGeneralBuilder(BaseNodeBuilder):
             datos = self._extract_data(objetivo)
             
             return self._create_node(
-                tipo_nodo=NodeType.OBJETIVO_GENERAL,
+                tipo_nodo=NodeType.OBJETIVO_GENERAL.value,
                 node_id=objetivo.id,
                 nivel=nivel,
                 datos=datos,

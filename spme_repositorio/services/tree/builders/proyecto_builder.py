@@ -40,7 +40,7 @@ class ProyectoBuilder(BaseNodeBuilder):
             datos = self._extract_data(proyecto)
             
             return self._create_node(
-                tipo_nodo=NodeType.PROYECTO,
+                tipo_nodo=NodeType.PROYECTO.value,
                 node_id=proyecto.id,
                 nivel=nivel,
                 datos=datos,

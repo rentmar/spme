@@ -56,6 +56,10 @@ class BaseNodeBuilder(ABC):
         """
         Método helper para crear instancias de TreeNode
         """
+        #Convertir enum a string cuando es necesario
+        if hasattr(tipo_nodo, 'value'):
+            tipo_nodo = tipo_nodo.value
+            
         return TreeNode(
             tipo_nodo=tipo_nodo,
             id=node_id,

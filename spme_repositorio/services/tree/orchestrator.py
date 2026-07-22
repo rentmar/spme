@@ -5,7 +5,6 @@ from .registry import NodeRegistry
 from .depth_strategy import DepthStrategy
 from .enums import Direction
 
-
 class TreeOrchestrator:
     """
     Orquestador principal del sistema de árbol.
@@ -48,13 +47,16 @@ class TreeOrchestrator:
         
         # Construir según dirección
         if direction == Direction.DOWN:
-            root, total_nodos = self._build_down(node_type, node_id, depth_strategy)
+            root, _ = self._build_down(node_type, node_id, depth_strategy)
         elif direction == Direction.UP:
-            root, total_nodos = self._build_up(node_type, node_id, depth_strategy)
+            root, _ = self._build_up(node_type, node_id, depth_strategy)
         elif direction == Direction.BOTH:
-            root, total_nodos = self._build_both(node_type, node_id, depth_strategy)
+            root, _ = self._build_both(node_type, node_id, depth_strategy)
         else:
             raise ValueError(f"Dirección no soportada: {direction}")
+        
+        # Calcular total real de nodos recorriendo el árbol
+        total_nodos = self._count_all_nodes(root) if root else 0
         
         # Calcular profundidad alcanzada
         profundidad_alcanzada = self._calculate_max_depth(root)
@@ -70,6 +72,15 @@ class TreeOrchestrator:
         )
         
         return TreeResponse(arbol=root, metadata=metadata)
+    
+    def _count_all_nodes(self, nodo: TreeNode) -> int:
+        """Cuenta todos los nodos en el árbol recursivamente"""
+        if nodo is None:
+            return 0
+        count = 1
+        for hijo in nodo.hijos:
+            count += self._count_all_nodes(hijo)
+        return count
     
     def _build_down(
         self,
@@ -131,7 +142,7 @@ class TreeOrchestrator:
         builder = self.registry.get_builder(node_type)
         nodo = builder.build(
             node_id=node_id,
-            nivel=0,  # Nivel temporal, se ajustará después
+            nivel=0,
             es_nodo_objetivo=True
         )
         total_nodos += 1
@@ -168,9 +179,6 @@ class TreeOrchestrator:
         
         # 1. Construir hacia arriba (ancestros)
         if not self.registry.is_root(node_type):
-            # Obtener el padre para construir hacia arriba
-            parent_type = self.registry.get_parent_type(node_type)
-            
             # Construir ancestros primero
             root, niveles_subidos = self._build_up_from_child(
                 child_type=node_type,

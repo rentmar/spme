@@ -28,18 +28,24 @@ class NodeRegistry:
     def _initialize_structure(self):
         """Define la estructura base del árbol (relaciones padre-hijo)"""
         self._tree_structure = {
-            NodeType.PROYECTO: {
-                'children': [NodeType.OBJETIVO_GENERAL],
+            NodeType.PROYECTO.value: {
+                'children': [NodeType.OBJETIVO_GENERAL.value],
                 'parent': None,  # Es raíz
                 'label': 'Proyecto',
                 'model': 'Proyecto'
             },
-            NodeType.OBJETIVO_GENERAL: {
-                'children': [],  # Futuros hijos
-                'parent': NodeType.PROYECTO,
+            NodeType.OBJETIVO_GENERAL.value: {
+                'children': [NodeType.OBJETIVO_ESPECIFICO_OG.value],  # Futuros hijos
+                'parent': NodeType.PROYECTO.value,
                 'label': 'Objetivo General',
                 'model': 'ObjetivoGeneralProyecto'
             },
+            NodeType.OBJETIVO_ESPECIFICO_OG.value: {
+                'children': [],
+                'parent': NodeType.OBJETIVO_GENERAL.value,
+                'label': 'Objetivo Especifico',
+                'model': 'ObjetivoEspecificoProyecto'
+            }
         }
     
     def register_builder(self, node_type: str, builder: BaseNodeBuilder):

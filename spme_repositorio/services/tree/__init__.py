@@ -5,7 +5,7 @@ from .enums import NodeType, Direction, DepthType
 from .dto import TreeNode, TreeMetadata, TreeResponse, BuildContext
 from .builders.proyecto_builder import ProyectoBuilder
 from .builders.objetivo_general_builder import ObjetivoGeneralBuilder
-
+from .builders.objetivo_especifico_og_builder import ObjetivoEspecificoOGBuilder
 
 def create_tree_orchestrator() -> TreeOrchestrator:
     """
@@ -19,9 +19,9 @@ def create_tree_orchestrator() -> TreeOrchestrator:
     registry = NodeRegistry()
     
     # Registrar builders
-    registry.register_builder(NodeType.PROYECTO, ProyectoBuilder())
-    registry.register_builder(NodeType.OBJETIVO_GENERAL, ObjetivoGeneralBuilder())
-    
+    registry.register_builder(NodeType.PROYECTO.value, ProyectoBuilder())
+    registry.register_builder(NodeType.OBJETIVO_GENERAL.value, ObjetivoGeneralBuilder())
+    registry.register_builder(NodeType.OBJETIVO_ESPECIFICO_OG.value, ObjetivoEspecificoOGBuilder())
     # Crear orchestrator
     orchestrator = TreeOrchestrator(registry)
     
