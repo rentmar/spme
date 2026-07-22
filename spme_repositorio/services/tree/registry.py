@@ -39,6 +39,7 @@ class NodeRegistry:
                     NodeType.OBJETIVO_ESPECIFICO_OG.value,
                     NodeType.INDICADOR_OG.value,
                     NodeType.RESULTADO_OG.value,
+                    NodeType.KPI.value,  
                 ], 
                 'parent': NodeType.PROYECTO.value,
                 'label': 'Objetivo General',
@@ -76,6 +77,12 @@ class NodeRegistry:
                 'parent': NodeType.RESULTADO_OG.value,
                 'label': 'Proceso Res. OG',
                 'model': 'Proceso'
+            },
+            NodeType.KPI.value:{
+                'children': [],
+                'parent': NodeType.OBJETIVO_GENERAL.value,
+                'label': 'Kpi',
+                'model': 'Kpi',
             },
 
         }

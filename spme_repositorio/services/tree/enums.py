@@ -13,7 +13,8 @@ class NodeType(str, Enum):
     INDICADOR_OG = 'indicadorog'        
     RESULTADO_OG = 'resultadoog'  
     INDICADOR_ROG = 'indicadorrog'        
-    PROCESO_ROG = 'procesorog'               
+    PROCESO_ROG = 'procesorog'
+    KPI = 'kpi'               
 
 
 class Direction(str, Enum):

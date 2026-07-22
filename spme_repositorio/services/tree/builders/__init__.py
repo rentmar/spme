@@ -5,7 +5,8 @@ from .objetivo_especifico_og_builder import ObjetivoEspecificoOGBuilder
 from .indicador_og_builder import IndicadorOGBuilder
 from .resultado_og_builder import ResultadoOGBuilder
 from .indicador_rog_builder import IndicadorROGBuilder      
-from .proceso_rog_builder import ProcesoROGBuilder          
+from .proceso_rog_builder import ProcesoROGBuilder   
+from .kpi_builder import KpiBuilder       
 
 __all__ = [
     'ProyectoBuilder',
@@ -15,4 +16,5 @@ __all__ = [
     'ResultadoOGBuilder',
     'IndicadorROGBuilder',     
     'ProcesoROGBuilder',      
+    'KpiBuilder',
 ]

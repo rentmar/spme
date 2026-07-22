@@ -10,6 +10,7 @@ from .builders.indicador_og_builder import IndicadorOGBuilder
 from .builders.resultado_og_builder import ResultadoOGBuilder
 from .builders.indicador_rog_builder import IndicadorROGBuilder
 from .builders.proceso_rog_builder import ProcesoROGBuilder
+from .builders.kpi_builder import KpiBuilder
 
 def create_tree_orchestrator() -> TreeOrchestrator:
     """
@@ -30,7 +31,7 @@ def create_tree_orchestrator() -> TreeOrchestrator:
     registry.register_builder(NodeType.RESULTADO_OG.value, ResultadoOGBuilder())    
     registry.register_builder(NodeType.INDICADOR_ROG.value, IndicadorROGBuilder())  
     registry.register_builder(NodeType.PROCESO_ROG.value, ProcesoROGBuilder())   
-    
+    registry.register_builder(NodeType.KPI.value, KpiBuilder())
     # Crear orchestrator
     orchestrator = TreeOrchestrator(registry)
     

@@ -141,7 +141,7 @@ class ObjetivoGeneralProyecto(models.Model):
     def __str__(self):
         return f"OO-{self.proyecto.codigo}: {self.descripcion[:50]}..."
 
-# KPI
+# KPI 
 class Kpi(models.Model):
     codigo = models.CharField(max_length=50, null=True, blank=True)
     descripcion = models.TextField(verbose_name="Redaccion del KPI", null=True, blank=True)
