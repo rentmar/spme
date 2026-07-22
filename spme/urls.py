@@ -55,5 +55,7 @@ urlpatterns = [
     path('api-pres/', include('spme_presupuesto.urls')),
     #Api emails
     path('api-mail/', include('spme_email.urls')),
+    #Api repositorio
+    path('api-repo/', include('spme_repositorio.urls')),
 ]
 
