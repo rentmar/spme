@@ -57,10 +57,25 @@ class NodeRegistry:
                 'model': 'IndicadorObjetivoGeneral'
             },
             NodeType.RESULTADO_OG.value: {           
-                'children': [],
+                'children': [
+                    NodeType.INDICADOR_ROG.value,   
+                    NodeType.PROCESO_ROG.value,     
+                ],
                 'parent': NodeType.OBJETIVO_GENERAL.value,
                 'label': 'Resultado OG',
                 'model': 'ResultadoOG'
+            },
+            NodeType.INDICADOR_ROG.value: {         
+                'children': [],
+                'parent': NodeType.RESULTADO_OG.value,
+                'label': 'Indicador Res. OG',
+                'model': 'IndicadorResultadoObjGral'
+            },
+            NodeType.PROCESO_ROG.value: {           
+                'children': [],
+                'parent': NodeType.RESULTADO_OG.value,
+                'label': 'Proceso Res. OG',
+                'model': 'Proceso'
             },
 
         }

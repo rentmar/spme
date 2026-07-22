@@ -11,7 +11,9 @@ class NodeType(str, Enum):
     OBJETIVO_GENERAL = 'objetivogeneral'
     OBJETIVO_ESPECIFICO_OG = 'objetivoespecificoog'
     INDICADOR_OG = 'indicadorog'        
-    RESULTADO_OG = 'resultadoog'        
+    RESULTADO_OG = 'resultadoog'  
+    INDICADOR_ROG = 'indicadorrog'        
+    PROCESO_ROG = 'procesorog'               
 
 
 class Direction(str, Enum):
