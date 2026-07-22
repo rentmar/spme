@@ -6,6 +6,8 @@ from .dto import TreeNode, TreeMetadata, TreeResponse, BuildContext
 from .builders.proyecto_builder import ProyectoBuilder
 from .builders.objetivo_general_builder import ObjetivoGeneralBuilder
 from .builders.objetivo_especifico_og_builder import ObjetivoEspecificoOGBuilder
+from .builders.indicador_og_builder import IndicadorOGBuilder
+from .builders.resultado_og_builder import ResultadoOGBuilder
 
 def create_tree_orchestrator() -> TreeOrchestrator:
     """
@@ -22,6 +24,9 @@ def create_tree_orchestrator() -> TreeOrchestrator:
     registry.register_builder(NodeType.PROYECTO.value, ProyectoBuilder())
     registry.register_builder(NodeType.OBJETIVO_GENERAL.value, ObjetivoGeneralBuilder())
     registry.register_builder(NodeType.OBJETIVO_ESPECIFICO_OG.value, ObjetivoEspecificoOGBuilder())
+    registry.register_builder(NodeType.INDICADOR_OG.value, IndicadorOGBuilder())      
+    registry.register_builder(NodeType.RESULTADO_OG.value, ResultadoOGBuilder())      
+    
     # Crear orchestrator
     orchestrator = TreeOrchestrator(registry)
     

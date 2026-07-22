@@ -35,7 +35,11 @@ class NodeRegistry:
                 'model': 'Proyecto'
             },
             NodeType.OBJETIVO_GENERAL.value: {
-                'children': [NodeType.OBJETIVO_ESPECIFICO_OG.value],  # Futuros hijos
+                'children': [
+                    NodeType.OBJETIVO_ESPECIFICO_OG.value,
+                    NodeType.INDICADOR_OG.value,
+                    NodeType.RESULTADO_OG.value,
+                ], 
                 'parent': NodeType.PROYECTO.value,
                 'label': 'Objetivo General',
                 'model': 'ObjetivoGeneralProyecto'
@@ -45,7 +49,20 @@ class NodeRegistry:
                 'parent': NodeType.OBJETIVO_GENERAL.value,
                 'label': 'Objetivo Especifico',
                 'model': 'ObjetivoEspecificoProyecto'
-            }
+            },
+            NodeType.INDICADOR_OG.value: {           
+                'children': [],
+                'parent': NodeType.OBJETIVO_GENERAL.value,
+                'label': 'Indicador OG',
+                'model': 'IndicadorObjetivoGeneral'
+            },
+            NodeType.RESULTADO_OG.value: {           
+                'children': [],
+                'parent': NodeType.OBJETIVO_GENERAL.value,
+                'label': 'Resultado OG',
+                'model': 'ResultadoOG'
+            },
+
         }
     
     def register_builder(self, node_type: str, builder: BaseNodeBuilder):
