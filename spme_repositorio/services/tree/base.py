@@ -102,5 +102,45 @@ class BaseNodeBuilder(ABC):
             nivel=nivel,
             datos=datos,
             es_nodo_objetivo=es_nodo_objetivo,
-            actividades_relacionadas=actividades  # ← NUEVO
+            actividades_relacionadas=actividades 
         )
+
+    def _calcular_estado_consolidado(self, validaciones) -> str:
+        """
+        Calcula el estado consolidado según reglas de validación paralela.
+        
+        Reglas:
+        - SinRevisores: no hay validaciones
+        - Aprobado: todas en estado APROBADO
+        - Rechazado: al menos una RECHAZADO
+        - Pendiente: al menos una PENDIENTE (y ninguna RECHAZADO)
+        """
+        if not validaciones or len(validaciones) == 0:
+            return 'SinRevisores'
+        
+        estados = [v.estado for v in validaciones]
+        
+        if any(e == 'RECHAZADO' for e in estados):
+            return 'Rechazado'
+        
+        if any(e == 'PENDIENTE' for e in estados):
+            return 'Pendiente'
+        
+        if all(e == 'APROBADO' for e in estados):
+            return 'Aprobado'
+        
+        return 'SinRevisores'
+
+    def _extraer_validaciones(self, validaciones) -> list:
+        """Extrae datos relevantes de las validaciones"""
+        return [
+            {
+                'codigo_seguimiento': v.codigoSeguimiento or '',
+                'usuario_validador': v.usuarioValidador.get_full_name() if v.usuarioValidador else '',
+                'estado': v.estado,
+                'fecha_asignacion': v.fechaAsignacion.isoformat() if v.fechaAsignacion else None,
+                'fecha_resolucion': v.fechaResolucion.isoformat() if v.fechaResolucion else None,
+                'version_documento': v.versionDocumento or '',
+            }
+            for v in validaciones
+    ]

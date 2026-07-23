@@ -495,7 +495,7 @@ class ValidacionSolicitudReembolso(Validacion):
         return self.solicitud.numeroFormulario or f"SR-{self.solicitud.id}"
 
 # ===================================================================
-# VALIDACIÓN PARA RENDICIÓN DE CUENTAS
+# VALIDACIÓN PARA RENDICIÓN DE CUENTAS 
 # ===================================================================
 class ValidacionRendicionCuentas(Validacion):
     """

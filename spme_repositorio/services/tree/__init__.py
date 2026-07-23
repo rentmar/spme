@@ -21,6 +21,16 @@ from .builders.producto_roe_builder import ProductoROEBuilder
 from .builders.proceso_roe_builder import ProcesoROEBuilder
 from .builders.actividad_builder import ActividadBuilder
 from .builders.tarea_builder import TareaBuilder
+from .builders.solfondosact_builder import SolFondosActBuilder
+from .builders.solfondossub_builder import SolFondosSubBuilder
+from .builders.solviajeact_builder import SolViajeActBuilder
+from .builders.solviajesub_builder import SolViajeSubBuilder
+from .builders.solpagodirectoact_builder import SolPagoDirectoActBuilder
+from .builders.solpagodirectosub_builder import SolPagoDirectoSubBuilder
+from .builders.solreposicionact_builder import SolReposicionActBuilder
+from .builders.solreposicionsub_builder import SolReposicionSubBuilder
+from .builders.rendicioncuentasact_builder import RendicionCuentasActBuilder
+from .builders.rendicioncuentassub_builder import RendicionCuentasSubBuilder
 
 
 def create_tree_orchestrator() -> TreeOrchestrator:
@@ -52,7 +62,18 @@ def create_tree_orchestrator() -> TreeOrchestrator:
     registry.register_builder(NodeType.PRODUCTO_ROE.value, ProductoROEBuilder())      
     registry.register_builder(NodeType.PROCESO_ROE.value, ProcesoROEBuilder())      
     registry.register_builder(NodeType.ACTIVIDAD.value, ActividadBuilder())    
-    registry.register_builder(NodeType.TAREA.value, TareaBuilder())            
+    registry.register_builder(NodeType.TAREA.value, TareaBuilder())   
+    registry.register_builder(NodeType.SOL_FONDOS_ACT.value, SolFondosActBuilder())
+    registry.register_builder(NodeType.SOL_FONDOS_SUB.value, SolFondosSubBuilder())
+    registry.register_builder(NodeType.SOL_VIAJE_ACT.value, SolViajeActBuilder())
+    registry.register_builder(NodeType.SOL_VIAJE_SUB.value, SolViajeSubBuilder())
+    registry.register_builder(NodeType.SOL_PAGO_DIRECTO_ACT.value, SolPagoDirectoActBuilder())
+    registry.register_builder(NodeType.SOL_PAGO_DIRECTO_SUB.value, SolPagoDirectoSubBuilder())
+    registry.register_builder(NodeType.SOL_REPOSICION_ACT.value, SolReposicionActBuilder())
+    registry.register_builder(NodeType.SOL_REPOSICION_SUB.value, SolReposicionSubBuilder())
+    registry.register_builder(NodeType.RENDICION_CUENTAS_ACT.value, RendicionCuentasActBuilder())
+    registry.register_builder(NodeType.RENDICION_CUENTAS_SUB.value, RendicionCuentasSubBuilder())
+             
     
     # Crear orchestrator
     orchestrator = TreeOrchestrator(registry)

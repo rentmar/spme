@@ -24,7 +24,19 @@ class NodeType(str, Enum):
     PRODUCTO_ROE = 'productoroe'          
     PROCESO_ROE = 'procesoroe'   
     ACTIVIDAD = 'actividad'            
-    TAREA = 'tarea'                                       
+    TAREA = 'tarea'    
+    # Solicitudes/Rendiciones - Actividad
+    SOL_FONDOS_ACT = 'solfondosact'
+    SOL_VIAJE_ACT = 'solviajeact'
+    SOL_PAGO_DIRECTO_ACT = 'solpagodirectoact'
+    SOL_REPOSICION_ACT = 'solreposicionact'
+    RENDICION_CUENTAS_ACT = 'rendicioncuentasact'
+    # Solicitudes/Rendiciones - Tarea
+    SOL_FONDOS_SUB = 'solfondossub'
+    SOL_VIAJE_SUB = 'solviajesub'
+    SOL_PAGO_DIRECTO_SUB = 'solpagodirectosub'
+    SOL_REPOSICION_SUB = 'solreposicionsub'
+    RENDICION_CUENTAS_SUB = 'rendicioncuentassub'                                   
             
 
 

@@ -142,18 +142,92 @@ class NodeRegistry:
                 'model': 'Proceso'
             },
             NodeType.ACTIVIDAD.value: {
-                'children': [NodeType.TAREA.value],
+                'children': [
+                    NodeType.SOL_FONDOS_ACT.value,
+                    NodeType.SOL_VIAJE_ACT.value,
+                    NodeType.SOL_PAGO_DIRECTO_ACT.value,
+                    NodeType.SOL_REPOSICION_ACT.value,
+                    NodeType.RENDICION_CUENTAS_ACT.value,
+                    NodeType.TAREA.value,
+                ],
                 'parent': None,  # Transversal
                 'label': 'Actividad',
                 'model': 'Actividad'
             },
             NodeType.TAREA.value: {
-                'children': [],
+                'children': [
+                    NodeType.SOL_FONDOS_SUB.value,
+                    NodeType.SOL_VIAJE_SUB.value,
+                    NodeType.SOL_PAGO_DIRECTO_SUB.value,
+                    NodeType.SOL_REPOSICION_SUB.value,
+                    NodeType.RENDICION_CUENTAS_SUB.value,
+                ],
                 'parent': NodeType.ACTIVIDAD.value,
                 'label': 'Tarea',
                 'model': 'TareaActividad'
             },
-
+            # --- SOLICITUDES/RENDICIONES - ACTIVIDAD ---
+            NodeType.SOL_FONDOS_ACT.value: {
+                'children': [],
+                'parent': NodeType.ACTIVIDAD.value,
+                'label': 'Solicitud Fondos (Act)',
+                'model': 'SolicitudFondos'
+            },
+            NodeType.SOL_VIAJE_ACT.value: {
+                'children': [],
+                'parent': NodeType.ACTIVIDAD.value,
+                'label': 'Solicitud Viaje (Act)',
+                'model': 'SolicitudViaje'
+            },
+            NodeType.SOL_PAGO_DIRECTO_ACT.value: {
+                'children': [],
+                'parent': NodeType.ACTIVIDAD.value,
+                'label': 'Pago Directo (Act)',
+                'model': 'SolicitudPagoDirecto'
+            },
+            NodeType.SOL_REPOSICION_ACT.value: {
+                'children': [],
+                'parent': NodeType.ACTIVIDAD.value,
+                'label': 'Reposicion (Act)',
+                'model': 'SolicitudReembolso'
+            },
+            NodeType.RENDICION_CUENTAS_ACT.value: {
+                'children': [],
+                'parent': NodeType.ACTIVIDAD.value,
+                'label': 'Rendicion (Act)',
+                'model': 'RendicionCuentas'
+            },
+            # --- SOLICITUDES/RENDICIONES - TAREA ---
+            NodeType.SOL_FONDOS_SUB.value: {
+                'children': [],
+                'parent': NodeType.TAREA.value,
+                'label': 'Solicitud Fondos (Sub)',
+                'model': 'SolicitudFondos'
+            },
+            NodeType.SOL_VIAJE_SUB.value: {
+                'children': [],
+                'parent': NodeType.TAREA.value,
+                'label': 'Solicitud Viaje (Sub)',
+                'model': 'SolicitudViaje'
+            },
+            NodeType.SOL_PAGO_DIRECTO_SUB.value: {
+                'children': [],
+                'parent': NodeType.TAREA.value,
+                'label': 'Pago Directo (Sub)',
+                'model': 'SolicitudPagoDirecto'
+            },
+            NodeType.SOL_REPOSICION_SUB.value: {
+                'children': [],
+                'parent': NodeType.TAREA.value,
+                'label': 'Reposicion (Sub)',
+                'model': 'SolicitudReembolso'
+            },
+            NodeType.RENDICION_CUENTAS_SUB.value: {
+                'children': [],
+                'parent': NodeType.TAREA.value,
+                'label': 'Rendicion (Sub)',
+                'model': 'RendicionCuentas'
+            },
         }
     
     def register_builder(self, node_type: str, builder: BaseNodeBuilder):

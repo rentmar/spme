@@ -14,7 +14,17 @@ from .indicador_roe_builder import IndicadorROEBuilder
 from .producto_roe_builder import ProductoROEBuilder        
 from .proceso_roe_builder import ProcesoROEBuilder    
 from .actividad_builder import ActividadBuilder      
-from .tarea_builder import TareaBuilder              
+from .tarea_builder import TareaBuilder  
+from .solfondosact_builder import SolFondosActBuilder
+from .solfondossub_builder import SolFondosSubBuilder
+from .solviajeact_builder import SolViajeActBuilder
+from .solviajesub_builder import SolViajeSubBuilder
+from .solpagodirectoact_builder import SolPagoDirectoActBuilder
+from .solpagodirectosub_builder import SolPagoDirectoSubBuilder
+from .solreposicionact_builder import SolReposicionActBuilder
+from .solreposicionsub_builder import SolReposicionSubBuilder
+from .rendicioncuentasact_builder import RendicionCuentasActBuilder
+from .rendicioncuentassub_builder import RendicionCuentasSubBuilder            
 
 
 __all__ = [
@@ -25,4 +35,9 @@ __all__ = [
     'ProductoOEBuilder', 'ProcesoOEBuilder', 'ProcesoPOEBuilder',  
     'IndicadorROEBuilder', 'ProductoROEBuilder', 'ProcesoROEBuilder',
     'ActividadBuilder', 'TareaBuilder', 
+    'SolFondosActBuilder', 'SolFondosSubBuilder',
+    'SolViajeActBuilder', 'SolViajeSubBuilder',
+    'SolPagoDirectoActBuilder', 'SolPagoDirectoSubBuilder',
+    'SolReposicionActBuilder', 'SolReposicionSubBuilder',
+    'RendicionCuentasActBuilder', 'RendicionCuentasSubBuilder',
 ]
