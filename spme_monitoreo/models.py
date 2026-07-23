@@ -1073,8 +1073,11 @@ class InformeActividad(models.Model):
         verbose_name = 'Informe Actividad'
         verbose_name_plural = 'Informes de Actividad'
 
-
-#Informe de Actividades - Completo
+##########################################################################
+#
+#   Informe de Actividades - Completo
+#   
+##########################################################################
 class InformeActividadBase(PolymorphicModel):
     numeroInforme = models.CharField(max_length=50, blank=True, null=True)
     fechaEjecucion = models.DateField(blank=True, null=True)
@@ -1248,6 +1251,9 @@ class InformeTareaPrincipal(InformeActividadBase):
                 self.numeroInforme = f"INFSUBACT-{id_formateado}-{self.tarea.codigo}"
             
             super().save(*args, **kwargs)
+
+###############################################################################################
+
 
 #Informe Base
 class InformeBase(PolymorphicModel):

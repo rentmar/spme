@@ -36,7 +36,10 @@ class NodeType(str, Enum):
     SOL_VIAJE_SUB = 'solviajesub'
     SOL_PAGO_DIRECTO_SUB = 'solpagodirectosub'
     SOL_REPOSICION_SUB = 'solreposicionsub'
-    RENDICION_CUENTAS_SUB = 'rendicioncuentassub'                                   
+    RENDICION_CUENTAS_SUB = 'rendicioncuentassub'   
+    #INFORMES
+    INFORME_ACTIVIDAD = 'informeactividad'        
+    INFORME_SUBACTIVIDAD = 'informesubactividad'  
             
 
 

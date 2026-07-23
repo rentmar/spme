@@ -31,6 +31,8 @@ from .builders.solreposicionact_builder import SolReposicionActBuilder
 from .builders.solreposicionsub_builder import SolReposicionSubBuilder
 from .builders.rendicioncuentasact_builder import RendicionCuentasActBuilder
 from .builders.rendicioncuentassub_builder import RendicionCuentasSubBuilder
+from .builders.informeactividad_builder import InformeActividadBuilder
+from .builders.informesubactividad_builder import InformeSubactividadBuilder
 
 
 def create_tree_orchestrator() -> TreeOrchestrator:
@@ -73,7 +75,9 @@ def create_tree_orchestrator() -> TreeOrchestrator:
     registry.register_builder(NodeType.SOL_REPOSICION_SUB.value, SolReposicionSubBuilder())
     registry.register_builder(NodeType.RENDICION_CUENTAS_ACT.value, RendicionCuentasActBuilder())
     registry.register_builder(NodeType.RENDICION_CUENTAS_SUB.value, RendicionCuentasSubBuilder())
-             
+    registry.register_builder(NodeType.INFORME_ACTIVIDAD.value, InformeActividadBuilder())
+    registry.register_builder(NodeType.INFORME_SUBACTIVIDAD.value, InformeSubactividadBuilder())
+
     
     # Crear orchestrator
     orchestrator = TreeOrchestrator(registry)

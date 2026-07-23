@@ -148,6 +148,7 @@ class NodeRegistry:
                     NodeType.SOL_PAGO_DIRECTO_ACT.value,
                     NodeType.SOL_REPOSICION_ACT.value,
                     NodeType.RENDICION_CUENTAS_ACT.value,
+                    NodeType.INFORME_ACTIVIDAD.value, 
                     NodeType.TAREA.value,
                 ],
                 'parent': None,  # Transversal
@@ -161,6 +162,7 @@ class NodeRegistry:
                     NodeType.SOL_PAGO_DIRECTO_SUB.value,
                     NodeType.SOL_REPOSICION_SUB.value,
                     NodeType.RENDICION_CUENTAS_SUB.value,
+                    NodeType.INFORME_SUBACTIVIDAD.value,
                 ],
                 'parent': NodeType.ACTIVIDAD.value,
                 'label': 'Tarea',
@@ -227,6 +229,20 @@ class NodeRegistry:
                 'parent': NodeType.TAREA.value,
                 'label': 'Rendicion (Sub)',
                 'model': 'RendicionCuentas'
+            },
+
+            # --- NUEVOS BLOQUES ---
+            NodeType.INFORME_ACTIVIDAD.value: {
+                'children': [],
+                'parent': NodeType.ACTIVIDAD.value,
+                'label': 'Informe Actividad',
+                'model': 'InformeActividadPrincipal'
+            },
+            NodeType.INFORME_SUBACTIVIDAD.value: {
+                'children': [],
+                'parent': NodeType.TAREA.value,
+                'label': 'Informe Subactividad',
+                'model': 'InformeTareaPrincipal'
             },
         }
     

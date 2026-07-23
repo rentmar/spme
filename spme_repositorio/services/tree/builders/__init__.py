@@ -24,7 +24,9 @@ from .solpagodirectosub_builder import SolPagoDirectoSubBuilder
 from .solreposicionact_builder import SolReposicionActBuilder
 from .solreposicionsub_builder import SolReposicionSubBuilder
 from .rendicioncuentasact_builder import RendicionCuentasActBuilder
-from .rendicioncuentassub_builder import RendicionCuentasSubBuilder            
+from .rendicioncuentassub_builder import RendicionCuentasSubBuilder    
+from .informeactividad_builder import InformeActividadBuilder
+from .informesubactividad_builder import InformeSubactividadBuilder        
 
 
 __all__ = [
@@ -40,4 +42,5 @@ __all__ = [
     'SolPagoDirectoActBuilder', 'SolPagoDirectoSubBuilder',
     'SolReposicionActBuilder', 'SolReposicionSubBuilder',
     'RendicionCuentasActBuilder', 'RendicionCuentasSubBuilder',
+    'InformeActividadBuilder', 'InformeSubactividadBuilder',
 ]
