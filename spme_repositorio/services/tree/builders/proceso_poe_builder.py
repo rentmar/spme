@@ -31,7 +31,13 @@ class ProcesoPOEBuilder(BaseNodeBuilder):
     
     def build(self, node_id, nivel=0, es_nodo_objetivo=False, depth_remaining=None, build_context=None) -> TreeNode:
         obj = Proceso.objects.get(id=node_id)
-        return self._create_node(NodeType.PROCESO_POE.value, obj.id, nivel, {
-            'codigo': obj.codigo or '', 'titulo': obj.titulo or '',
-            'descripcion': obj.descripcion or '',
-        }, es_nodo_objetivo)
+        return self._create_node(
+            NodeType.PROCESO_POE.value,
+            obj.id, nivel, {
+                'codigo': obj.codigo or '', 
+                'titulo': obj.titulo or '',
+                'descripcion': obj.descripcion or '',
+            }, 
+            es_nodo_objetivo,  
+            build_context=build_context
+        )

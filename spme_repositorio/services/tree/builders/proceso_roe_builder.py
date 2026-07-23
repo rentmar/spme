@@ -34,4 +34,4 @@ class ProcesoROEBuilder(BaseNodeBuilder):
         return self._create_node(NodeType.PROCESO_ROE.value, obj.id, nivel, {
             'codigo': obj.codigo or '', 'titulo': obj.titulo or '',
             'descripcion': obj.descripcion or '',
-        }, es_nodo_objetivo)
+        }, es_nodo_objetivo,  build_context=build_context)

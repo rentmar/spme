@@ -31,8 +31,16 @@ class IndicadorOEBuilder(BaseNodeBuilder):
     
     def build(self, node_id, nivel=0, es_nodo_objetivo=False, depth_remaining=None, build_context=None) -> TreeNode:
         obj = IndicadorObjetivoEspecifico.objects.select_related('objetivo_especifico').get(id=node_id)
-        return self._create_node(NodeType.INDICADOR_OE.value, obj.id, nivel, {
-            'codigo': obj.codigo or '', 'descripcion': obj.descripcion or '',
-            'tipo': obj.tipo or '', 'frecuencia': obj.frecuencia or '',
-            'objetivo_especifico_id': obj.objetivo_especifico.id if obj.objetivo_especifico else None,
-        }, es_nodo_objetivo)
+        return self._create_node(
+            NodeType.INDICADOR_OE.value, 
+            obj.id, nivel, 
+            {
+                'codigo': obj.codigo or '', 
+                'descripcion': obj.descripcion or '',
+                'tipo': obj.tipo or '', 
+                'frecuencia': obj.frecuencia or '',
+                'objetivo_especifico_id': obj.objetivo_especifico.id if obj.objetivo_especifico else None,
+            }, 
+            es_nodo_objetivo, 
+            build_context=build_context
+        )

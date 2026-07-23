@@ -35,4 +35,4 @@ class ResultadoOEBuilder(BaseNodeBuilder):
             'codigo': obj.codigo or '', 'descripcion': obj.descripcion or '',
             'supuestos': obj.supuestos or '', 'riesgos': obj.riesgos or '',
             'objetivo_especifico_id': obj.objetivo_especifico.id if obj.objetivo_especifico else None,
-        }, es_nodo_objetivo)
+        }, es_nodo_objetivo,  build_context=build_context)

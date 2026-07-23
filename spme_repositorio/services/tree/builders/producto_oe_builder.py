@@ -36,4 +36,4 @@ class ProductoOEBuilder(BaseNodeBuilder):
             'supuestos': obj.supuestos or '', 'riesgos': obj.riesgos or '',
             'entregado': obj.entregado,
             'objetivo_especifico_id': obj.objetivo_especifico.id if obj.objetivo_especifico else None,
-        }, es_nodo_objetivo)
+        }, es_nodo_objetivo,  build_context=build_context)

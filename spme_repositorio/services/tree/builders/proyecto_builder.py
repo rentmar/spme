@@ -44,7 +44,8 @@ class ProyectoBuilder(BaseNodeBuilder):
                 node_id=proyecto.id,
                 nivel=nivel,
                 datos=datos,
-                es_nodo_objetivo=es_nodo_objetivo
+                es_nodo_objetivo=es_nodo_objetivo,
+                build_context=build_context
             )
             
         except Proyecto.DoesNotExist:

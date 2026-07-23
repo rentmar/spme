@@ -52,7 +52,8 @@ class ResultadoOGBuilder(BaseNodeBuilder):
                 node_id=resultado.id,
                 nivel=nivel,
                 datos=datos,
-                es_nodo_objetivo=es_nodo_objetivo
+                es_nodo_objetivo=es_nodo_objetivo,
+                build_context=build_context
             )
             
         except ResultadoOG.DoesNotExist:

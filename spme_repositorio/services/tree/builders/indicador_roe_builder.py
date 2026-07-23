@@ -35,8 +35,16 @@ class IndicadorROEBuilder(BaseNodeBuilder):
         obj = IndicadorResultadoObjEspecifico.objects.select_related(
             'resultado_obj_especifico'
         ).get(id=node_id)
-        return self._create_node(NodeType.INDICADOR_ROE.value, obj.id, nivel, {
-            'codigo': obj.codigo or '', 'descripcion': obj.descripcion or '',
-            'tipo': obj.tipo or '', 'frecuencia': obj.frecuencia or '',
-            'resultado_oe_id': obj.resultado_obj_especifico.id if obj.resultado_obj_especifico else None,
-        }, es_nodo_objetivo)
+        return self._create_node(
+            NodeType.INDICADOR_ROE.value, 
+            obj.id, 
+            nivel, {
+                'codigo': obj.codigo or '',
+                'descripcion': obj.descripcion or '',
+                'tipo': obj.tipo or '', 
+                'frecuencia': obj.frecuencia or '',
+                'resultado_oe_id': obj.resultado_obj_especifico.id if obj.resultado_obj_especifico else None,
+            }, 
+            es_nodo_objetivo,
+            build_context=build_context,
+        )

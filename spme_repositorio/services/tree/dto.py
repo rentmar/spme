@@ -14,6 +14,7 @@ class TreeNode:
     datos: Dict[str, Any]
     hijos: List['TreeNode'] = field(default_factory=list)
     es_nodo_objetivo: bool = False
+    actividades_relacionadas: List[Dict] = field(default_factory=list)
     
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -25,7 +26,8 @@ class TreeNode:
             'nivel': self.nivel,
             'datos': self.datos,
             'hijos': [hijo.to_dict() for hijo in self.hijos],
-            'es_nodo_objetivo': self.es_nodo_objetivo
+            'es_nodo_objetivo': self.es_nodo_objetivo,
+            'actividades_relacionadas': self.actividades_relacionadas,
         }
 
 @dataclass
@@ -77,6 +79,7 @@ class BuildContext:
     current_level: int = 0
     max_depth: Optional[int] = None
     total_nodes: int = 0
+    actividades_index: Dict[str, List[Dict]] = field(default_factory=dict)
     
     def increment_level(self) -> 'BuildContext':
         """
@@ -89,6 +92,7 @@ class BuildContext:
             direction=self.direction,
             current_level=self.current_level + 1,
             max_depth=self.max_depth,
-            total_nodes=self.total_nodes
+            total_nodes=self.total_nodes,
+            actividades_index=self.actividades_index 
         )
 

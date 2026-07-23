@@ -48,7 +48,8 @@ class ObjetivoGeneralBuilder(BaseNodeBuilder):
                 node_id=objetivo.id,
                 nivel=nivel,
                 datos=datos,
-                es_nodo_objetivo=es_nodo_objetivo
+                es_nodo_objetivo=es_nodo_objetivo,
+                build_context=build_context,
             )
             
         except ObjetivoGeneralProyecto.DoesNotExist:

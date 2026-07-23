@@ -1,9 +1,12 @@
  # Coordinador principal
-from typing import Optional
+from typing import Optional, Dict, List
 from .dto import TreeNode, TreeMetadata, TreeResponse, BuildContext
 from .registry import NodeRegistry
 from .depth_strategy import DepthStrategy
 from .enums import Direction
+from django.apps import apps
+from .base import BaseNodeBuilder
+from .enums import NodeType
 
 class TreeOrchestrator:
     """
@@ -18,6 +21,83 @@ class TreeOrchestrator:
     
     def __init__(self, registry: NodeRegistry):
         self.registry = registry
+
+    def _cargar_actividades_proyecto(self, proyecto_id) -> Dict[str, List[Dict]]:
+        """
+        Carga todas las actividades activas del proyecto y las indexa
+        por node_type:node_id usando su estructuraProcedencia.
+        
+        Returns:
+            Diccionario: {"objetivogeneral:44": [{id, codigo, ...}], ...}
+        """
+        print(f"\n[DEBUG CARGA ACTIVIDADES] Cargando actividades del proyecto {proyecto_id}")
+        
+        try:
+            Actividad = apps.get_model('spme_actividades', 'Actividad')
+            
+            actividades = Actividad.objects.filter(
+                proyecto_id=proyecto_id,
+                estaInactiva=False
+            ).only('id', 'codigo', 'nombreCorto', 'estructuraProcedencia')
+            
+            print(f"[DEBUG CARGA ACTIVIDADES] Encontradas: {actividades.count()} actividades activas")
+            
+            index = {}
+            
+            for actividad in actividades:
+                print(f"\n[DEBUG CARGA ACTIVIDADES] Procesando Actividad ID={actividad.id}, Código={actividad.codigo}")
+                
+                if not actividad.estructuraProcedencia:
+                    print(f"[DEBUG CARGA ACTIVIDADES]   Sin estructuraProcedencia, saltando")
+                    continue
+                
+                selecciones = actividad.estructuraProcedencia.get('seleccionesSimples', {})
+                print(f"[DEBUG CARGA ACTIVIDADES]   seleccionesSimples: {selecciones}")
+                
+                # Recorrer el mapeo para indexar esta actividad
+                for node_type, config in BaseNodeBuilder.SELECCIONES_MAPPING.items():
+                    campo = config['campo']
+                    es_array = config['es_array']
+                    
+                    if campo not in selecciones:
+                        continue
+                    
+                    valor = selecciones[campo]
+                    
+                    if es_array and isinstance(valor, list):
+                        for v in valor:
+                            key = f"{node_type}:{v}"
+                            if key not in index:
+                                index[key] = []
+                            index[key].append({
+                                'id': actividad.id,
+                                'codigo': actividad.codigo or '',
+                                'nombre': actividad.nombreCorto or '',
+                                'tipo_nodo': 'actividad'
+                            })
+                            print(f"[DEBUG CARGA ACTIVIDADES]   Indexado: '{key}'")
+                    elif not es_array and valor is not None:
+                        key = f"{node_type}:{valor}"
+                        if key not in index:
+                            index[key] = []
+                        index[key].append({
+                            'id': actividad.id,
+                            'codigo': actividad.codigo or '',
+                            'nombre': actividad.nombreCorto or '',
+                            'tipo_nodo': 'actividad'
+                        })
+                        print(f"[DEBUG CARGA ACTIVIDADES]   Indexado: '{key}'")
+            
+            print(f"\n[DEBUG CARGA ACTIVIDADES] Índice final: {len(index)} claves")
+            for k, v in index.items():
+                print(f"[DEBUG CARGA ACTIVIDADES]   {k}: {len(v)} actividades")
+            
+            return index
+            
+        except Exception as e:
+            print(f"[DEBUG CARGA ACTIVIDADES] Error: {e}")
+            return {}
+
     
     def build_tree(
         self,
@@ -38,30 +118,42 @@ class TreeOrchestrator:
         Returns:
             TreeResponse con el árbol y metadata
         """
-        # Validar que el tipo de nodo existe
         if not self.registry.has_builder(node_type):
             raise ValueError(f"Tipo de nodo no soportado: {node_type}")
         
-        # Inicializar estrategia de profundidad
         depth_strategy = DepthStrategy(depth)
         
-        # Construir según dirección
+        # Cargar actividades si es un proyecto
+        actividades_index = {}
+        if node_type == NodeType.PROYECTO.value:
+            print(f"\n[DEBUG ORCH] Iniciando árbol desde proyecto {node_id}")
+            actividades_index = self._cargar_actividades_proyecto(node_id)
+        elif node_type == 'proyecto':
+            print(f"\n[DEBUG ORCH] Iniciando árbol desde proyecto {node_id}")
+            actividades_index = self._cargar_actividades_proyecto(node_id)
+        
+        # Crear contexto
+        context = BuildContext(
+            node_type=node_type,
+            node_id=node_id,
+            depth=depth,
+            direction=direction,
+            actividades_index=actividades_index
+        )
+        
+        # Construir según dirección (pasando context)
         if direction == Direction.DOWN:
-            root, _ = self._build_down(node_type, node_id, depth_strategy)
+            root, _ = self._build_down(node_type, node_id, depth_strategy, context=context)
         elif direction == Direction.UP:
-            root, _ = self._build_up(node_type, node_id, depth_strategy)
+            root, _ = self._build_up(node_type, node_id, depth_strategy, context=context)
         elif direction == Direction.BOTH:
-            root, _ = self._build_both(node_type, node_id, depth_strategy)
+            root, _ = self._build_both(node_type, node_id, depth_strategy, context=context)
         else:
             raise ValueError(f"Dirección no soportada: {direction}")
         
-        # Calcular total real de nodos recorriendo el árbol
         total_nodos = self._count_all_nodes(root) if root else 0
-        
-        # Calcular profundidad alcanzada
         profundidad_alcanzada = self._calculate_max_depth(root)
         
-        # Generar metadata
         metadata = TreeMetadata(
             nodo_inicio=f"{node_type}:{node_id}",
             profundidad_solicitada=depth,
@@ -88,43 +180,42 @@ class TreeOrchestrator:
         node_id,
         depth_strategy: DepthStrategy,
         nivel: int = 0,
-        es_nodo_objetivo: bool = True
+        es_nodo_objetivo: bool = True,
+        context: BuildContext = None  # ← NUEVO
     ) -> tuple:
-        """
-        Construye el árbol hacia abajo (descendientes).
-        El nodo solicitado es la RAÍZ.
-        """
         total_nodos = 0
         
-        # Construir nodo actual
         builder = self.registry.get_builder(node_type)
         nodo = builder.build(
             node_id=node_id,
             nivel=nivel,
-            es_nodo_objetivo=es_nodo_objetivo
+            es_nodo_objetivo=es_nodo_objetivo,
+            build_context=context  # ← NUEVO
         )
         total_nodos += 1
         
-        # Si depth=self, no expandir hijos
         if depth_strategy.is_self_only():
             return nodo, total_nodos
         
-        # Verificar si debemos continuar expandiendo
         if depth_strategy.should_continue(nivel):
             children_types = self.registry.get_children_types(node_type)
+            
+            # Crear sub-contexto para hijos
+            child_context = context.increment_level() if context else None
             
             for child_type in children_types:
                 child_nodes = self._build_children(
                     parent_nodo=nodo,
                     child_type=child_type,
                     depth_strategy=depth_strategy,
-                    nivel_actual=nivel
+                    nivel_actual=nivel,
+                    context=child_context  # ← NUEVO
                 )
                 nodo.hijos.extend(child_nodes)
                 total_nodos += len(child_nodes)
         
-        return nodo, total_nodos
-    
+        return nodo, total_nodos   
+
     def _build_up(
         self,
         node_type: str,
@@ -212,13 +303,14 @@ class TreeOrchestrator:
             )
         
         return root, total_nodos
-    
+        
     def _build_children(
         self,
         parent_nodo: TreeNode,
         child_type: str,
         depth_strategy: DepthStrategy,
-        nivel_actual: int
+        nivel_actual: int,
+        context: BuildContext = None  # ← NUEVO
     ) -> list:
         """
         Construye los hijos de un nodo padre.
@@ -226,8 +318,6 @@ class TreeOrchestrator:
         """
         children = []
         child_builder = self.registry.get_builder(child_type)
-        
-        # Obtener IDs de hijos desde el nodo padre
         child_ids = self._get_child_ids(parent_nodo, child_type)
         
         for child_id in child_ids:
@@ -235,26 +325,72 @@ class TreeOrchestrator:
                 child_nodo = child_builder.build(
                     node_id=child_id,
                     nivel=nivel_actual + 1,
-                    es_nodo_objetivo=False
+                    es_nodo_objetivo=False,
+                    build_context=context  # ← NUEVO
                 )
                 children.append(child_nodo)
                 
-                # Expandir recursivamente si depth lo permite
                 if depth_strategy.should_continue(nivel_actual + 1):
                     grandchildren_types = self.registry.get_children_types(child_type)
+                    # Crear sub-contexto para nietos
+                    grandchild_context = context.increment_level() if context else None
                     for grandchild_type in grandchildren_types:
                         grandchild_nodes = self._build_children(
                             parent_nodo=child_nodo,
                             child_type=grandchild_type,
                             depth_strategy=depth_strategy,
-                            nivel_actual=nivel_actual + 1
+                            nivel_actual=nivel_actual + 1,
+                            context=grandchild_context  # ← NUEVO
                         )
                         child_nodo.hijos.extend(grandchild_nodes)
-                        
             except (ValueError, Exception):
                 continue
         
         return children
+
+
+    # def _build_children(
+    #     self,
+    #     parent_nodo: TreeNode,
+    #     child_type: str,
+    #     depth_strategy: DepthStrategy,
+    #     nivel_actual: int
+    # ) -> list:
+    #     """
+    #     Construye los hijos de un nodo padre.
+    #     Busca en el modelo padre los IDs de los hijos.
+    #     """
+    #     children = []
+    #     child_builder = self.registry.get_builder(child_type)
+        
+    #     # Obtener IDs de hijos desde el nodo padre
+    #     child_ids = self._get_child_ids(parent_nodo, child_type)
+        
+    #     for child_id in child_ids:
+    #         try:
+    #             child_nodo = child_builder.build(
+    #                 node_id=child_id,
+    #                 nivel=nivel_actual + 1,
+    #                 es_nodo_objetivo=False
+    #             )
+    #             children.append(child_nodo)
+                
+    #             # Expandir recursivamente si depth lo permite
+    #             if depth_strategy.should_continue(nivel_actual + 1):
+    #                 grandchildren_types = self.registry.get_children_types(child_type)
+    #                 for grandchild_type in grandchildren_types:
+    #                     grandchild_nodes = self._build_children(
+    #                         parent_nodo=child_nodo,
+    #                         child_type=grandchild_type,
+    #                         depth_strategy=depth_strategy,
+    #                         nivel_actual=nivel_actual + 1
+    #                     )
+    #                     child_nodo.hijos.extend(grandchild_nodes)
+                        
+    #         except (ValueError, Exception):
+    #             continue
+        
+    #     return children
     
     def _build_children_from_node(
         self,
