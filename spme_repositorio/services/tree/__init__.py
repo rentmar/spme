@@ -19,6 +19,9 @@ from .builders.proceso_poe_builder import ProcesoPOEBuilder
 from .builders.indicador_roe_builder import IndicadorROEBuilder
 from .builders.producto_roe_builder import ProductoROEBuilder
 from .builders.proceso_roe_builder import ProcesoROEBuilder
+from .builders.actividad_builder import ActividadBuilder
+from .builders.tarea_builder import TareaBuilder
+
 
 def create_tree_orchestrator() -> TreeOrchestrator:
     """
@@ -48,6 +51,8 @@ def create_tree_orchestrator() -> TreeOrchestrator:
     registry.register_builder(NodeType.INDICADOR_ROE.value, IndicadorROEBuilder())    
     registry.register_builder(NodeType.PRODUCTO_ROE.value, ProductoROEBuilder())      
     registry.register_builder(NodeType.PROCESO_ROE.value, ProcesoROEBuilder())      
+    registry.register_builder(NodeType.ACTIVIDAD.value, ActividadBuilder())    
+    registry.register_builder(NodeType.TAREA.value, TareaBuilder())            
     
     # Crear orchestrator
     orchestrator = TreeOrchestrator(registry)

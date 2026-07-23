@@ -22,7 +22,9 @@ class NodeType(str, Enum):
     PROCESO_POE = 'procesopoe'  
     INDICADOR_ROE = 'indicadorroe'        
     PRODUCTO_ROE = 'productoroe'          
-    PROCESO_ROE = 'procesoroe'                      
+    PROCESO_ROE = 'procesoroe'   
+    ACTIVIDAD = 'actividad'            
+    TAREA = 'tarea'                                       
             
 
 

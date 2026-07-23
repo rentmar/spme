@@ -12,7 +12,10 @@ from .proceso_oe_builder import ProcesoOEBuilder
 from .proceso_poe_builder import ProcesoPOEBuilder   
 from .indicador_roe_builder import IndicadorROEBuilder      
 from .producto_roe_builder import ProductoROEBuilder        
-from .proceso_roe_builder import ProcesoROEBuilder                
+from .proceso_roe_builder import ProcesoROEBuilder    
+from .actividad_builder import ActividadBuilder      
+from .tarea_builder import TareaBuilder              
+
 
 __all__ = [
     'ProyectoBuilder', 'ObjetivoGeneralBuilder',
@@ -21,4 +24,5 @@ __all__ = [
     'IndicadorOEBuilder', 'ResultadoOEBuilder',             
     'ProductoOEBuilder', 'ProcesoOEBuilder', 'ProcesoPOEBuilder',  
     'IndicadorROEBuilder', 'ProductoROEBuilder', 'ProcesoROEBuilder',
+    'ActividadBuilder', 'TareaBuilder', 
 ]

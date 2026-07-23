@@ -89,7 +89,7 @@ class NodeRegistry:
                 'label': 'Kpi',
                 'model': 'Kpi',
             },
-             NodeType.INDICADOR_OE.value: {
+            NodeType.INDICADOR_OE.value: {
                 'children': [],
                 'parent': NodeType.OBJETIVO_ESPECIFICO_OG.value,
                 'label': 'Indicador OE',
@@ -140,6 +140,18 @@ class NodeRegistry:
                 'parent': NodeType.RESULTADO_OE.value,
                 'label': 'Proceso Res. OE',
                 'model': 'Proceso'
+            },
+            NodeType.ACTIVIDAD.value: {
+                'children': [NodeType.TAREA.value],
+                'parent': None,  # Transversal
+                'label': 'Actividad',
+                'model': 'Actividad'
+            },
+            NodeType.TAREA.value: {
+                'children': [],
+                'parent': NodeType.ACTIVIDAD.value,
+                'label': 'Tarea',
+                'model': 'TareaActividad'
             },
 
         }
