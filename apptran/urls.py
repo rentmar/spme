@@ -120,6 +120,12 @@ from .informeactividadprincipal.views.crear_informe_tarea_principal_v2_views imp
 from .formularios.views.forma_pago_view import (BeneficiariosFormaPagoView,)
 from .formularios.views.lugar_view import LugaresSolicitudView
 
+####################################Proyecto################################
+from .proyecto.views.proyecto_views import(
+    ProyectoEstructuraCompletaView,
+    ProyectoActividadesInactivasView,
+)
+
 
 #PEI
 router = DefaultRouter()
@@ -244,6 +250,19 @@ urlpatterns =[
     path(r'proyectos/<int:proyecto_id>/resultados-og/count/', count_resultados_og, name='count-resultados-og'),
     path(r'proyectos/<int:proyecto_id>/column-stats/', ColumnVisibilityStatsView.as_view(), name='column-stats'),
     path(r'proyectos/diagrama/<int:proyecto_id>/', DiagramaPorProyectoView.as_view(), name='diagrama-de-un.proyecto'),
+    # Endpoint para estructura completa: Proyecto → Actividades → Tareas
+    path(
+        r'proyectos/<int:proyecto_id>/actividades-activas/',
+        ProyectoEstructuraCompletaView.as_view(),
+        name='proyecto-estructura-completa'
+    ),
+    path(
+        r'proyectos/<int:proyecto_id>/actividades-inactivas/',
+        ProyectoActividadesInactivasView.as_view(),
+        name='proyecto-actividades-inactivas'
+    ),
+    
+
     path(r'test/', test_endpoint, name='test-endpoint'),
     #Actividades y planificacion
     path(r'actividades/proyecto/<int:proyecto_id>/', actividades_por_proyecto, name='actividades_por_proyecto'), 
