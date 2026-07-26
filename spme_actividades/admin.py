@@ -6,7 +6,7 @@ from django.utils.html import format_html
 # Register your models here.
 #admin.site.register(Actividad)
 #admin.site.register(TareaActividad)
-#admin.site.register(TipoActividad)
+admin.site.register(TipoActividad)
 
 
 @admin.register(TareaActividad)

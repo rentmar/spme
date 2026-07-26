@@ -15,7 +15,7 @@ class TipoActividad(models.Model):
         verbose_name_plural = 'Tipos de Activida'
 
     def __str__(self):
-        return f'{self.sigla} - {self.tipo_actividad}'    
+        return f'{self.sigla}-{self.tipo_actividad}'    
 
 #Actividad
 class Actividad(models.Model):
