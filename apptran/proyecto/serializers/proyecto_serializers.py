@@ -35,7 +35,8 @@ class ActividadConTareasSerializer(serializers.ModelSerializer):
     tareas = TareaActividadSerializer(many=True, read_only=True)
     tipo_actividad = serializers.StringRelatedField(source='tipo')
     tipo_actividad_id = serializers.IntegerField(source='tipo.id', read_only=True)
-    
+    responsable = serializers.StringRelatedField()  
+    responsable_id = serializers.IntegerField(source='responsable.id', read_only=True) 
     class Meta:
         model = Actividad
         fields = [
@@ -46,6 +47,7 @@ class ActividadConTareasSerializer(serializers.ModelSerializer):
             'estado',
             'tipo_actividad_id',
             'tipo_actividad',
+            'responsable_id',       
             'fecha_programada',
             'fecha_inicio',
             'fecha_cierre',
