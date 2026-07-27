@@ -25,6 +25,9 @@ from .views.balance_views import (
 #Tree
 from .views.presupuesto_tree_view import EstructuraPresupuestoView
 
+#Arbol de presupuesto de planificacion
+from .views.arbol_pres_plan_view import ArbolPresPlanView
+
 router = DefaultRouter()
 
 urlpatterns = [
@@ -46,8 +49,13 @@ urlpatterns = [
     path(r'balance/proyecto/<int:proyecto_id>/', BalanceProyectoView.as_view(), name='balance_proyecto'),
     path(r'balance/actividad/<int:actividad_id>/', BalanceActividadView.as_view(), name='balance_actividad'),
     path(r'balance/tarea/<int:tarea_id>/', BalanceTareaView.as_view(), name='balance_tarea'),
-    ############################ Presupuesto Tree #######################################3
+    ############################ Arbol de presupuestos #######################################
     path(r'tree/proyecto/<int:proyecto_id>/estructura-presupuesto/', EstructuraPresupuestoView.as_view(), name='estructura-presupuesto'),
+    #Arbol presupuesto para planificacion
+    path(r'proyecto/<int:proyecto_id>/arbol-presupuesto-plan/',
+        ArbolPresPlanView.as_view(),
+        name='arbol-presupuesto-plan'
+    ),
 
 
 
