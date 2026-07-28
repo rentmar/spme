@@ -141,7 +141,11 @@ class ProyectoService:
         # En lugar de usar get_actividades_con_tareas, usar el related_name del proyecto
         actividades = proyecto.actividad_proyecto.filter(
             estaInactiva=False
-        ).prefetch_related('tareas').order_by('fecha_programada', 'codigo')
+        ).prefetch_related('tareas').order_by('id')
+        actividades = sorted(actividades, key=lambda a: a.id)
+        # actividades = proyecto.actividad_proyecto.filter(
+        #     estaInactiva=False
+        # ).prefetch_related('tareas').order_by('fecha_programada', 'codigo')
         
         # Serializar
         serializer = ActividadConTareasSerializer(actividades, many=True)

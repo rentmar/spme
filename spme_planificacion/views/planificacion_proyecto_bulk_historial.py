@@ -49,6 +49,9 @@ class ProyectoPlanificacionHistorialView(APIView):
                 servicio_actividad = ActividadService()
                 actualizadas, errores = servicio_actividad.actualizar_actividades(actividades_actualizar)
                 # 4. Crear actividades nuevas
+                actualizadas = servicio_actividad.actualizar_actividades(actividades_actualizar)
+                creadas, mapeo_ids = servicio_actividad.crear_actividades(actividades_nuevas, proyecto_id)
+                print(mapeo_ids)
                 # 5. Actualizar tareas existentes
                 # 6. Crear tareas nuevas
                 # 7. Guardar historial de actividades
