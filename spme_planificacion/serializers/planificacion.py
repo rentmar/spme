@@ -31,6 +31,7 @@ class ActividadActualizarSerializer(serializers.Serializer):
     # FK
     tipo_id = serializers.IntegerField(required=False, allow_null=True)
     responsable_id = serializers.IntegerField(required=False, allow_null=True)
+    responsable = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     proceso_id = serializers.IntegerField(required=False, allow_null=True)
     resultado_og_id = serializers.IntegerField(required=False, allow_null=True)
     resultado_oe_id = serializers.IntegerField(required=False, allow_null=True)
@@ -83,6 +84,7 @@ class ActividadCrearSerializer(serializers.Serializer):
     gradoEjecucion = serializers.CharField(required=False, allow_null=True, allow_blank=True, default='PLANIFICADA')
     tipo_id = serializers.IntegerField(required=False, allow_null=True)
     responsable_id = serializers.IntegerField(required=False, allow_null=True)
+    responsable = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     proceso_id = serializers.IntegerField(required=False, allow_null=True)
     resultado_og_id = serializers.IntegerField(required=False, allow_null=True)
     resultado_oe_id = serializers.IntegerField(required=False, allow_null=True)

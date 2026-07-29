@@ -11,6 +11,7 @@ from .views.planificacion_pei_bulk_views import ProcesarPlanificacionPeiView
 from .views.planificacion_proyecto_bulk_views import ActividadProyectoViewSet
 from .views.planificacion_proyecto_bulk_historial import ProyectoPlanificacionHistorialView
 from .views.planificacion import guardar_planificacion
+from .views.actividad_tarea_views import ActividadPlanificacionViewSet, TareaPlanificacionViewSet
 
 
 router = DefaultRouter()
@@ -20,6 +21,10 @@ router = DefaultRouter()
 router.register(r'planificacion-proyecto-respaldo', PlanificacionProyectoViewSet, basename='planificacion_proyecto_respaldo')
 router.register(r'cambio-planificacion-proyecto-respaldo', CambioPlanificacionProyectoViewSet, basename='cambio_planificacion_proyecto_respaldo')
 router.register(r'planificacion-pei-crud', PlanificacionPeiViewSet, basename='planificacion_pei_crud')
+router.register(r'actividad-planificacion-proyecto', ActividadPlanificacionViewSet, basename='actividad_crud_planificacion')
+router.register(r'tarea-planificacion-proyecto', TareaPlanificacionViewSet, basename='tarea_crud_planificacion')
+
+
 
 urlpatterns = [
     #path(r'planes/<int:plan_id>/crear-revision/', ProyectoPlanViewSet.as_view({'post': 'create_revision'}), name='plan-crear-revision'), 

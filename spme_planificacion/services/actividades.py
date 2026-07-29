@@ -1,4 +1,5 @@
 from spme_actividades.models import Actividad
+from spme_autenticacion.models import Usuario
 
 
 def actualizar_actividades(datos_validados):
@@ -50,6 +51,14 @@ def actualizar_actividades(datos_validados):
         if 'estaInactiva' in item:
             actividad.estaInactiva = item['estaInactiva']
 
+        # Responsable: nombre sobre ID
+        if item.get('responsable'):
+            responsable_id = _obtener_responsable_id(item['responsable'])
+            if responsable_id:
+                actividad.responsable_id = responsable_id
+        elif 'responsable_id' in item:
+            actividad.responsable_id = item['responsable_id']
+
         actividad.save()
 
 
@@ -62,6 +71,10 @@ def crear_actividades(datos_validados, proyecto_id):
 
     for item in datos_validados:
         id_temporal = item.get('id')  # ID temporal del frontend
+        # Responsable: nombre sobre ID
+        responsable_id = _obtener_responsable_id(item.get('responsable'))
+        if not responsable_id:
+            responsable_id = item.get('responsable_id')
 
         actividad = Actividad.objects.create(
             proyecto_id=proyecto_id,
@@ -105,3 +118,12 @@ def crear_actividades(datos_validados, proyecto_id):
             })
 
     return mapeo_ids
+
+def _obtener_responsable_id(nombre_usuario):
+    """Busca el ID del usuario por username."""
+    if not nombre_usuario:
+        return None
+    try:
+        return Usuario.objects.get(username=nombre_usuario).id
+    except Usuario.DoesNotExist:
+        return None

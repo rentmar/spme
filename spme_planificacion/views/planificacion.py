@@ -12,6 +12,7 @@ from ..services.orquestador import guardar_planificacion as orquestar
 @transaction.atomic
 def guardar_planificacion(request):
     """Endpoint transaccional. Delega toda la lógica al orquestador."""
+    print(request.data)
     try:
         resultado = orquestar(request.data, request.user.id)
         return Response(resultado, status=status.HTTP_200_OK)
