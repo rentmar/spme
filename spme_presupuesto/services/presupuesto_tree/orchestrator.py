@@ -232,11 +232,44 @@ class PresupuestoOrchestrator:
                     child_node = self._build_down(child_type, child_id, depth, build_context, nivel + 1)
                     current.hijos.append(child_node)
 
+        # Calcular sumatoria de tareas para actividades
+        if nodo == NodeType.ACTIVIDAD.value:
+            suma_presupuesto = sum(
+                t.datos.get('presupuesto_tarea', 0) for t in current.hijos
+            )
+            suma_ejecutado = sum(
+                t.datos.get('presupuesto_ejecutado', 0) for t in current.hijos
+            )
+            current.datos['presupuesto_tareas'] = suma_presupuesto
+            current.datos['ejecutado_tareas'] = suma_ejecutado
+            current.datos['cantidad_tareas'] = len(current.hijos)
+
         # Después de construir hijos, actualizar nodos virtuales
         if nodo == NodeType.PROYECTO.value:
             self._actualizar_resultados(current)
 
         return current
+
+    # def _build_down(self, nodo, id, depth, build_context, nivel=0):
+    #     builder = self.registry.get_builder(nodo)
+    #     es_objetivo = (nivel == 0)
+    #     current = builder.build(id, build_context, es_nodo_objetivo=es_objetivo, nivel=nivel)
+    #     self._total_nodos += 1
+
+    #     if self.depth_strategy.can_expand(nivel, depth):
+    #         children_types = self.registry.get_children_types(nodo)
+    #         for child_type in children_types:
+    #             child_builder = self.registry.get_builder(child_type)
+    #             child_ids = child_builder.get_ids_by_parent(id, nodo)
+    #             for child_id in child_ids:
+    #                 child_node = self._build_down(child_type, child_id, depth, build_context, nivel + 1)
+    #                 current.hijos.append(child_node)
+
+    #     # Después de construir hijos, actualizar nodos virtuales
+    #     if nodo == NodeType.PROYECTO.value:
+    #         self._actualizar_resultados(current)
+
+    #     return current
 
     
     #Metodo para la precarga de formulario
@@ -510,6 +543,38 @@ class PresupuestoOrchestrator:
         
         build_context.formularios_por_actividad = dict(form_por_actividad)
         build_context.actividades_incluidas = [actividad_id]
+
+        # También cargar formularios de las tareas de esta actividad
+        tareas_ids = list(
+            TareaActividad.objects
+            .filter(actividad_id=actividad_id)
+            .values_list('id', flat=True)
+        )
+
+        if tareas_ids:
+            form_por_tarea = defaultdict(list)
+            
+            def procesar_tarea(queryset, tipo, campo_monto):
+                for form in queryset:
+                    estado = self._calcular_estado_consolidado(form)
+                    form_por_tarea[form.tarea_id].append({
+                        'id': form.id,
+                        'uid': f"{tipo}:{form.id}",
+                        'tipo': tipo,
+                        'codigo': form.numeroFormulario or f'{tipo[:3].upper()}-{form.id}',
+                        'monto': float(getattr(form, campo_monto) or 0),
+                        'estado': estado,
+                        'fecha': form.fechaSolicitud.isoformat() if hasattr(form, 'fechaSolicitud') and form.fechaSolicitud else None,
+                        'moneda': 'BOB'
+                    })
+            
+            procesar_tarea(SolicitudFondos.objects.filter(tarea_id__in=tareas_ids), 'solicitud_fondos', 'montoSolicitado')
+            procesar_tarea(SolicitudReembolso.objects.filter(tarea_id__in=tareas_ids), 'solicitud_reembolso', 'montoSolicitado')
+            procesar_tarea(SolicitudViaje.objects.filter(tarea_id__in=tareas_ids), 'solicitud_viaje', 'montoSolicitado')
+            procesar_tarea(SolicitudPagoDirecto.objects.filter(tarea_id__in=tareas_ids), 'solicitud_pago_directo', 'montoSolicitado')
+            procesar_tarea(RendicionCuentas.objects.filter(tarea_id__in=tareas_ids), 'rendicion_cuentas', 'montoDescargado')
+            
+            build_context.formularios_por_tarea = dict(form_por_tarea)
 
 
     def _precargar_formularios_tarea(self, tarea_id, build_context):
