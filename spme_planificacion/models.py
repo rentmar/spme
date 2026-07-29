@@ -1,19 +1,115 @@
 from django.db import models
 from spme_estructuracion_proyecto.models import Proyecto
-from django.db import models
-#utils
 from django.utils import timezone
-#Auditlog
 from auditlog.registry import auditlog
 from auditlog.models import AuditlogHistoryField
-#Modelos
-from spme_estructuracion_pei.models import (
-    Pei
-    )
-#Modelos usuario
+from spme_estructuracion_pei.models import Pei
 from spme_autenticacion.models import Usuario
+from polymorphic.models import PolymorphicModel
+from .utils.acciones import get_accion_display
 
- 
+
+#==================================================================================
+#    Sistema de seguimiento para la planificacion de un proyecto
+#==================================================================================
+
+class PlanificacionVersion(models.Model):
+    proyecto = models.ForeignKey(
+        Proyecto, 
+        on_delete=models.CASCADE,
+        related_name='versiones_planificacion', 
+        verbose_name='Proyecto'
+    )
+    version_numero = models.IntegerField(verbose_name='Número de versión')
+    timestamp = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de creación')
+    usuario = models.ForeignKey(
+        Usuario, 
+        on_delete=models.SET_NULL, 
+        null=True,
+        related_name='versiones_planificacion', 
+        verbose_name='Usuario que realizó los cambios'
+    )
+    motivo = models.TextField(verbose_name='Motivo de la modificación')
+    estado_anterior = models.JSONField(verbose_name='Estado anterior del proyecto (snapshot)')
+    resumen = models.JSONField(null=True, blank=True, verbose_name='Resumen de cambios aplicados')
+
+    class Meta:
+        verbose_name = 'Versión de Planificación'
+        verbose_name_plural = 'Versiones de Planificación'
+        unique_together = ['proyecto', 'version_numero']
+        ordering = ['-version_numero']
+        indexes = [
+            models.Index(fields=['proyecto', 'version_numero']),
+            models.Index(fields=['timestamp']),
+        ]
+
+    def __str__(self):
+        return f"Proyecto {self.proyecto_id} - Versión {self.version_numero}"
+
+
+class HistorialCambio(PolymorphicModel):
+    version = models.ForeignKey(
+        PlanificacionVersion, 
+        on_delete=models.CASCADE,
+        related_name='cambios', 
+        verbose_name='Versión'
+    )
+    trackid = models.UUIDField(null=True, blank=True, editable=False, verbose_name='ID del frontend')
+    tipo = models.CharField(max_length=20, verbose_name='Tipo de elemento')
+    accion = models.CharField(max_length=30, verbose_name='Acción realizada')
+    columna = models.CharField(max_length=100, verbose_name='Columna modificada')
+    valor_anterior = models.JSONField(null=True, blank=True, verbose_name='Valor anterior')
+    valor_nuevo = models.JSONField(null=True, blank=True, verbose_name='Valor nuevo')
+    usuario = models.CharField(max_length=255, verbose_name='Usuario')
+    timestamp = models.DateTimeField(verbose_name='Fecha y hora del cambio')
+
+    class Meta:
+        verbose_name = 'Historial de Cambio'
+        verbose_name_plural = 'Historial de Cambios'
+        ordering = ['timestamp']
+        indexes = [
+            models.Index(fields=['version']),
+            models.Index(fields=['tipo']),
+            models.Index(fields=['accion']),
+            models.Index(fields=['columna']),
+            models.Index(fields=['usuario']),
+            models.Index(fields=['timestamp']),
+        ]
+
+    def __str__(self):
+        return f"{self.accion_display} - {self.columna}"
+
+    @property
+    def accion_display(self):
+        return get_accion_display(self.accion)
+
+
+class HistorialCambioPlanificacion(HistorialCambio):
+    actividad_id = models.IntegerField(verbose_name='ID de la actividad')
+    actividad_codigo = models.CharField(
+        max_length=60, null=True, blank=True,
+        verbose_name='Código de la actividad'
+    )
+
+    class Meta:
+        verbose_name = 'Historial de Cambio - Planificación'
+        verbose_name_plural = 'Historial de Cambios - Planificación'
+        indexes = [
+            models.Index(fields=['actividad_id']),
+            models.Index(fields=['actividad_codigo']),
+        ]
+
+    def __str__(self):
+        return f"Actividad {self.actividad_codigo or self.actividad_id} - {self.columna}"
+
+    def save(self, *args, **kwargs):
+        self.tipo = 'actividad'
+        super().save(*args, **kwargs)
+
+#==================================================================================
+#==================================================================================
+
+
 #Almacena la planificacion completa de un proyecto para seguimiento
 class PlanificacionProyecto(models.Model):
     proyecto = models.ForeignKey(

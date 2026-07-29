@@ -24,6 +24,9 @@ from .views.balance_views import (
 )
 #Tree
 from .views.presupuesto_tree_view import EstructuraPresupuestoView
+from .views.presupuesto_tree_view_v2 import PresupuestoTreeViewV2
+
+from .views.presupuesto_tree_view_v2 import PresupuestoTreeViewV2
 
 #Arbol de presupuesto de planificacion
 from .views.arbol_pres_plan_view import ArbolPresPlanView
@@ -56,6 +59,10 @@ urlpatterns = [
         ArbolPresPlanView.as_view(),
         name='arbol-presupuesto-plan'
     ),
+    #Arbol presupuesto planificacion y ejecucion
+    path(r'proyecto/arbol-presupuesto/', 
+        PresupuestoTreeViewV2.as_view(), 
+        name='arbol-presupuestario'),
 
 
 

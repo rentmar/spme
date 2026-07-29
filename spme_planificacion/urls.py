@@ -10,6 +10,8 @@ from .views.planificacion_pei_seguimiento_historial_views import SeguimientoPeiV
 from .views.planificacion_pei_bulk_views import ProcesarPlanificacionPeiView
 from .views.planificacion_proyecto_bulk_views import ActividadProyectoViewSet
 from .views.planificacion_proyecto_bulk_historial import ProyectoPlanificacionHistorialView
+from .views.planificacion import guardar_planificacion
+
 
 router = DefaultRouter()
 
@@ -30,6 +32,7 @@ urlpatterns = [
     path(r'planificacion-pei/procesar-bulk/',  ProcesarPlanificacionPeiView.as_view(), name='procesar_planificacion_pei'),
     path(r'planificacion/procesar-bulk/',  ActividadProyectoViewSet.as_view({'post': 'procesar_actividades'}), name='procesar_proyecto_proyecto' ),
     path(r'planificacion/proyecto/procesar-bulk/', ProyectoPlanificacionHistorialView.as_view(), name='planificacion_proyecto_procesar_bulk'),
+    path(r'planificacion/guardar/', guardar_planificacion, name='guardar-planificacion'),
 
 
 
