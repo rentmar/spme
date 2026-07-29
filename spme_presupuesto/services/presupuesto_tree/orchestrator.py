@@ -238,42 +238,7 @@ class PresupuestoOrchestrator:
 
         return current
 
-    def _actualizar_resultados(self, proyecto_nodo: TreeNode):
-        """Actualiza los nodos virtuales con totales calculados."""
-        actividades = []
-        todas_tareas = []
-        
-        for hijo in proyecto_nodo.hijos:
-            if hijo.tipo_nodo == NodeType.ACTIVIDAD.value:
-                actividades.append(hijo)
-                for nieto in hijo.hijos:
-                    if nieto.tipo_nodo == NodeType.TAREA.value:
-                        todas_tareas.append(nieto)
-        
-        # Actualizar resultado_actividades
-        for hijo in proyecto_nodo.hijos:
-            if hijo.tipo_nodo == NodeType.RESULTADO_ACTIVIDADES.value:
-                total_presupuesto = sum(a.datos.get('presupuesto_actividad', 0) for a in actividades)
-                total_ejecutado = sum(a.datos.get('presupuesto_ejecutado', 0) for a in actividades)
-                
-                hijo.datos['presupuesto_total'] = total_presupuesto
-                hijo.datos['ejecutado_total'] = total_ejecutado
-                hijo.datos['porcentaje_ejecucion_global'] = round(
-                    (total_ejecutado / total_presupuesto * 100), 1
-                ) if total_presupuesto > 0 else 0.0
-                hijo.datos['cantidad_actividades'] = len(actividades)
-            
-            if hijo.tipo_nodo == NodeType.RESULTADO_TAREAS.value:
-                total_presupuesto_tareas = sum(t.datos.get('presupuesto_tarea', 0) for t in todas_tareas)
-                total_ejecutado_tareas = sum(t.datos.get('presupuesto_ejecutado', 0) for t in todas_tareas)
-                
-                hijo.datos['presupuesto_total_tareas'] = total_presupuesto_tareas
-                hijo.datos['ejecutado_total_tareas'] = total_ejecutado_tareas
-                hijo.datos['porcentaje_ejecucion_tareas'] = round(
-                    (total_ejecutado_tareas / total_presupuesto_tareas * 100), 1
-                ) if total_presupuesto_tareas > 0 else 0.0
-                hijo.datos['cantidad_tareas'] = len(todas_tareas)
-
+    
     #Metodo para la precarga de formulario
     def _precargar_formularios(self, proyecto_id: int, build_context: BuildContext):
         """
@@ -408,6 +373,17 @@ class PresupuestoOrchestrator:
         for hijo in proyecto_nodo.hijos:
             if hijo.tipo_nodo == NodeType.ACTIVIDAD.value:
                 actividades.append(hijo)
+                # ← AGREGAR ESTO:
+                suma_presupuesto_tareas = sum(
+                    t.datos.get('presupuesto_tarea', 0) for t in hijo.hijos
+                )
+                suma_ejecutado_tareas = sum(
+                    t.datos.get('presupuesto_ejecutado', 0) for t in hijo.hijos
+                )
+                hijo.datos['presupuesto_tareas'] = suma_presupuesto_tareas
+                hijo.datos['ejecutado_tareas'] = suma_ejecutado_tareas
+                hijo.datos['cantidad_tareas'] = len(hijo.hijos)
+                # ← FIN AGREGAR
                 for nieto in hijo.hijos:
                     if nieto.tipo_nodo == NodeType.TAREA.value:
                         todas_tareas.append(nieto)
