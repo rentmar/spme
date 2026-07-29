@@ -70,6 +70,7 @@ class ActividadActualizarSerializer(serializers.Serializer):
 
 class ActividadCrearSerializer(serializers.Serializer):
     """Valida datos para crear nuevas actividades."""
+    id = serializers.IntegerField(required=False, allow_null=True) 
     codigo = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     nombreCorto = serializers.CharField(required=False, allow_null=True, allow_blank=True, default='')
     descripcion = serializers.CharField(required=False, allow_null=True, allow_blank=True, default='')

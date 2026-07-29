@@ -39,19 +39,14 @@ OPERACIONES = {
 
 
 def guardar_planificacion(payload, usuario_id):
-    """
-    Orquesta el guardado completo de la planificación.
-    
-    - Itera sobre OPERACIONES y ejecuta las que tengan datos en el payload.
-    - Para añadir/quitar servicios, solo modificar el diccionario OPERACIONES.
-    """
     metadatos = payload.get('metadatos_seguimiento', {})
     proyecto_id = metadatos.get('proyecto_id')
 
     if not proyecto_id:
         raise ValueError('metadatos_seguimiento.proyecto_id es requerido')
 
-    # ── Ejecutar cada operación configurada ──
+    mapeo_nuevas = []
+
     for seccion, config in OPERACIONES.items():
         datos = payload.get(seccion)
         if not datos:
@@ -64,17 +59,19 @@ def guardar_planificacion(payload, usuario_id):
         serializer.is_valid(raise_exception=True)
 
         if config['extra_args']:
-            servicio(serializer.validated_data, proyecto_id)
+            resultado = servicio(serializer.validated_data, proyecto_id)
+            if seccion == 'actividades_nuevas':
+                mapeo_nuevas = resultado
         else:
             servicio(serializer.validated_data)
 
-    # ── Seguimiento ──
     version = crear_version(
         proyecto_id=proyecto_id,
         usuario_id=usuario_id,
         estado_anterior=payload.get('estado_anterior', {}),
         motivo=metadatos.get('porque_modificacion', 'Sin motivo'),
         historial_actividades=payload.get('historial_actividades', []),
+        mapeo_nuevas=mapeo_nuevas,
     )
 
     return {

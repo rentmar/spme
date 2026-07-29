@@ -56,10 +56,14 @@ def actualizar_actividades(datos_validados):
 def crear_actividades(datos_validados, proyecto_id):
     """
     Crea nuevas actividades.
-    Cualquier error de BD → excepción → rollback.
+    Retorna lista de {id_temporal, id_real} para el resumen.
     """
+    mapeo_ids = []
+
     for item in datos_validados:
-        Actividad.objects.create(
+        id_temporal = item.get('id')  # ID temporal del frontend
+
+        actividad = Actividad.objects.create(
             proyecto_id=proyecto_id,
             codigo=item.get('codigo'),
             nombreCorto=item.get('nombreCorto', ''),
@@ -93,3 +97,11 @@ def crear_actividades(datos_validados, proyecto_id):
             estructuraProcedencia=item.get('estructuraProcedencia'),
             estaInactiva=item.get('estaInactiva', False),
         )
+
+        if id_temporal:
+            mapeo_ids.append({
+                'id_temporal': id_temporal,
+                'id_real': actividad.id,
+            })
+
+    return mapeo_ids

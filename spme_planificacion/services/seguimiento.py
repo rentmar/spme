@@ -9,15 +9,15 @@ from ..utils.validators import (
     validar_tipo,
 )
 
-def crear_version(proyecto_id, usuario_id, estado_anterior, motivo, historial_actividades):
-    """
-    Crea una nueva versión y registra el historial de cambios.
-    Cualquier error → excepción → rollback.
-    """
+def crear_version(proyecto_id, usuario_id, estado_anterior, motivo, historial_actividades, mapeo_nuevas=None):
     ultima = PlanificacionVersion.objects.filter(
         proyecto_id=proyecto_id
     ).order_by('-version_numero').first()
     nuevo_numero = 1 if not ultima else ultima.version_numero + 1
+
+    resumen = {'total_cambios': len(historial_actividades)}
+    if mapeo_nuevas:
+        resumen['mapeo_nuevas_actividades'] = mapeo_nuevas
 
     version = PlanificacionVersion.objects.create(
         proyecto_id=proyecto_id,
@@ -25,7 +25,7 @@ def crear_version(proyecto_id, usuario_id, estado_anterior, motivo, historial_ac
         usuario_id=usuario_id,
         motivo=motivo,
         estado_anterior=estado_anterior,
-        resumen={'total_cambios': len(historial_actividades)},
+        resumen=resumen,
     )
 
     for item in historial_actividades:
