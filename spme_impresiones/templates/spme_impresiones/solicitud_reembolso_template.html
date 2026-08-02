@@ -1,407 +1,308 @@
 {% extends "spme_impresiones/base_template.html" %}
 
 {% block content %}
-<style>
-    /* Estilos para Solicitud de Reembolso - LEGIBLES */
-    .solicitud-header {
-        background: linear-gradient(to right, #1976d2, #2196f3);
-        color: white;
-        padding: 8px 12px;
-        border-radius: 4px;
-        margin-bottom: 10px;
-        text-align: center;
-    }
-    
-    .solicitud-titulo {
-        font-size: 11px;
-        font-weight: bold;
-    }
-    
-    .info-card {
-        border: 1px solid #e0e0e0;
-        border-radius: 4px;
-        padding: 8px;
-        margin-bottom: 8px;
-        background: #fafafa;
-    }
-    
-    .info-card-titulo {
-        font-size: 9px;
-        font-weight: bold;
-        padding: 4px 8px;
-        border-radius: 3px;
-        margin-bottom: 8px;
-        color: white;
-    }
-    
-    .campo-fila {
-        margin-bottom: 5px;
-    }
-    
-    .etiqueta-card {
-        font-size: 8px;
-        font-weight: bold;
-        color: #555;
-        display: inline-block;
-        min-width: 60px;
-    }
-    
-    .valor-card {
-        font-size: 9px;
-        background: #f8f9fa;
-        padding: 2px 6px;
-        border-radius: 2px;
-        border: 1px solid #e0e0e0;
-    }
-    
-    .tabla-gastos {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 8px;
-        margin: 6px 0;
-    }
-    
-    .tabla-gastos th {
-        background: #1976d2;
-        color: white;
-        padding: 4px 3px;
-        font-size: 8px;
-        font-weight: bold;
-        text-align: left;
-        border: 1px solid #1565c0;
-    }
-    
-    .tabla-gastos td {
-        padding: 3px;
-        border: 1px solid #ddd;
-        font-size: 8px;
-        vertical-align: top;
-    }
-    
-    .tabla-gastos tr:nth-child(even) {
-        background-color: #f8f9fa;
-    }
-    
-    .total-row {
-        background: #e3f2fd !important;
-        font-weight: bold;
-    }
-    
-    .alerta-pago {
-        padding: 5px 8px;
-        margin-top: 6px;
-        font-size: 8px;
-        border-radius: 3px;
-    }
-    
-    .alerta-transferencia {
-        background: #e8f5e9;
-        border-left: 3px solid #4caf50;
-    }
-    
-    .alerta-cheque {
-        background: #fff3e0;
-        border-left: 3px solid #ff9800;
-    }
-    
-    .alerta-efectivo {
-        background: #e3f2fd;
-        border-left: 3px solid #2196f3;
-    }
-    
-    .alerta-otros {
-        background: #f5f5f5;
-        border-left: 3px solid #9e9e9e;
-    }
-    
-    .firma-seccion {
-        margin-top: 12px;
-    }
-    
-    .firma-grid {
-        width: 100%;
-    }
-    
-    .firma-grid td {
-        width: 33.33%;
-        text-align: center;
-        padding: 0 10px;
-        vertical-align: bottom;
-    }
-    
-    .firma-nombre-persona {
-        font-size: 10px;
-        font-weight: bold;
-        margin-bottom: 2px;
-    }
-    
-    .firma-info {
-        font-size: 8px;
-        color: #1976d2;
-        margin-bottom: 2px;
-    }
-    
-    .firma-linea {
-        border-top: 1px solid #333;
-        width: 85%;
-        margin: 12px auto 0 auto;
-        padding-top: 3px;
-    }
-    
-    .firma-cargo-etiqueta {
-        font-size: 7px;
-        color: #888;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .texto-centrado {
-        text-align: center;
-        color: #999;
-        font-style: italic;
-        padding: 8px;
-    }
-</style>
-
-<!-- ENCABEZADO -->
-<div class="solicitud-header">
-    <div class="solicitud-titulo">SOLICITUD DE REEMBOLSO</div>
-</div>
-
-<!-- SECCIÓN 1: DATOS DEL SOLICITANTE -->
-<div class="info-card">
-    <div class="info-card-titulo" style="background: #1976d2;">DATOS DEL SOLICITANTE</div>
-    
-    <table style="width: 100%;">
-        <tr>
-            <td style="width: 50%;">
-                <div class="campo-fila">
-                    <span class="etiqueta-card">Nombre:</span>
-                    <span class="valor-card">{{ nombre_solicitante|default:"-" }}</span>
-                </div>
-            </td>
-            <td style="width: 25%;">
-                <div class="campo-fila">
-                    <span class="etiqueta-card">C.I.:</span>
-                    <span class="valor-card">{{ documento_identidad|default:"-" }}</span>
-                </div>
-            </td>
-            <td style="width: 25%;">
-                <div class="campo-fila">
-                    <span class="etiqueta-card">Cargo:</span>
-                    <span class="valor-card">{{ cargo|default:"-" }}</span>
-                </div>
-            </td>
-        </tr>
-    </table>
-</div>
-
-<!-- SECCIÓN 2: INFORMACIÓN DE LA ACTIVIDAD -->
-<div class="info-card">
-    <div class="info-card-titulo" style="background: #ff9800;">INFORMACIÓN DE LA ACTIVIDAD</div>
-    
-    <table style="width: 100%; margin-bottom: 5px;">
-        <tr>
-            <td style="width: 33%;">
-                <div class="campo-fila">
-                    <span class="etiqueta-card">Código:</span>
-                    <span class="valor-card">{{ codigo_actividad|default:"-" }}</span>
-                </div>
-            </td>
-            <td style="width: 33%;">
-                <div class="campo-fila">
-                    <span class="etiqueta-card">Ejecución:</span>
-                    <span class="valor-card">{{ fecha_ejecucion|default:"-" }}</span>
-                </div>
-            </td>
-            <td style="width: 34%;">
-                <div class="campo-fila">
-                    <span class="etiqueta-card">Actividad:</span>
-                    <span class="valor-card">{{ nombre_actividad|default:"-" }}</span>
-                </div>
-            </td>
-        </tr>
-    </table>
-    
-    <div class="campo-fila">
-        <span class="etiqueta-card">Descripción:</span>
-        <span class="valor-card">{{ descripcion_actividad|default:"-" }}</span>
-    </div>
-    
-    <div class="campo-fila">
-        <span class="etiqueta-card">Objetivo:</span>
-        <span class="valor-card">{{ objetivo_actividad|default:"-" }}</span>
-    </div>
-    
-    {% if fuentes_financiamiento %}
-    <div class="campo-fila">
-        <span class="etiqueta-card">Financiamiento:</span>
-        <span class="valor-card">
-            {% for fuente in fuentes_financiamiento %}
-                {{ fuente.nombre }}: Bs. {{ fuente.monto|floatformat:0 }}{% if not forloop.last %}, {% endif %}
-            {% endfor %}
-        </span>
-    </div>
-    {% endif %}
-</div>
-
-<!-- SECCIÓN 3: DETALLE DE GASTOS A REEMBOLSAR -->
-<div class="seccion">
-    <div class="seccion-titulo">GASTOS A REEMBOLSAR</div>
-    
-    {% if detalle_gastos %}
-    <table class="tabla-gastos">
-        <thead>
-            <tr>
-                <th style="width: 3%;">#</th>
-                <th style="width: 11%;">FECHA</th>
-                <th style="width: 9%;">PARTIDA</th>
-                <th style="width: 9%;">FUENTE</th>
-                <th style="width: 12%;">FACTURA</th>
-                <th style="width: 36%;">CONCEPTO</th>
-                <th style="width: 20%; text-align: right;">MONTO (Bs.)</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for gasto in detalle_gastos %}
-            <tr>
-                <td style="text-align: center;">{{ gasto.indice|default:forloop.counter }}</td>
-                <td>{{ gasto.fecha|default:"-" }}</td>
-                <td>{{ gasto.partida|default:"-" }}</td>
-                <td>{{ gasto.fuente|default:"-" }}</td>
-                <td>{{ gasto.factura_recibo|default:"-" }}</td>
-                <td>{{ gasto.concepto|default:"-" }}</td>
-                <td style="text-align: right;">{{ gasto.monto|floatformat:2 }}</td>
-            </tr>
-            {% endfor %}
+    <!-- SECCIÓN 1: INFORMACIÓN DEL SOLICITANTE -->
+    <div class="seccion compact-section">
+        <div class="seccion-titulo">👤 INFORMACIÓN DEL SOLICITANTE</div>
+        
+        <div class="grid-3">
+            <div class="campo">
+                <div class="etiqueta">Nombre:</div>
+                <div class="valor texto-largo">{{ solicitante.nombre }}</div>
+            </div>
             
-            <tr class="total-row">
-                <td colspan="6" style="text-align: right; font-weight: bold;">TOTAL:</td>
-                <td style="text-align: right; font-weight: bold; font-size: 9px;">
-                    Bs. {{ total_monto_solicitado|floatformat:2 }}
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    {% else %}
-    <div class="texto-centrado">No se registraron gastos para este reembolso</div>
-    {% endif %}
-</div>
-
-<!-- SECCIÓN 4: FORMA DE PAGO -->
-<div class="info-card">
-    <div class="info-card-titulo" style="background: #607d8b;">FORMA DE PAGO</div>
-    
-    <table style="width: 100%; margin-bottom: 5px;">
-        <tr>
-            <td style="width: 50%;">
-                <div class="campo-fila">
-                    <span class="etiqueta-card">Lugar:</span>
-                    <span class="valor-card">{{ lugar_solicitud|default:"-" }}</span>
-                </div>
-            </td>
-            <td style="width: 50%;">
-                <div class="campo-fila">
-                    <span class="etiqueta-card">Fecha:</span>
-                    <span class="valor-card">{{ fecha_solicitud|default:"-" }}</span>
-                </div>
-            </td>
-        </tr>
-    </table>
-    
-    <div class="campo-fila">
-        <span class="etiqueta-card">Forma de Pago:</span>
-        <span style="background: #e3f2fd; padding: 3px 8px; border-radius: 3px; font-size: 9px; font-weight: bold;">
-            {{ forma_pago|default:"No especificada" }}
-        </span>
+            <div class="campo">
+                <div class="etiqueta">C.I.:</div>
+                <div class="valor">{{ solicitante.documento_identidad }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Cargo:</div>
+                <div class="valor">{{ solicitante.cargo }}</div>
+            </div>
+        </div>
     </div>
     
-    <!-- TRANSFERENCIA -->
-    {% if datos_transferencia.mostrar_transferencia and datos_transferencia.transferencia %}
-    <div class="alerta-pago alerta-transferencia">
-        <strong>Transferencia Bancaria:</strong>
-        <table style="width: 100%; margin-top: 3px; font-size: 8px;">
-            <tr>
-                <td style="width: 50%;"><span class="etiqueta-card">Titular:</span> {{ datos_transferencia.transferencia.nombre_transferencia|default:"-" }}</td>
-                <td style="width: 50%;"><span class="etiqueta-card">C.I.:</span> {{ datos_transferencia.transferencia.ci_transferencia|default:"-" }}</td>
-            </tr>
-            <tr>
-                <td style="width: 50%;"><span class="etiqueta-card">Banco:</span> {{ datos_transferencia.transferencia.entidad_bancaria|default:"-" }}</td>
-                <td style="width: 50%;"><span class="etiqueta-card">N° Cuenta:</span> {{ datos_transferencia.transferencia.numero_cuenta|default:"-" }}</td>
-            </tr>
+    <!-- SECCIÓN 2: INFORMACIÓN DE LA ACTIVIDAD -->
+    <div class="seccion compact-section">
+        <div class="seccion-titulo">📅 INFORMACIÓN DE LA ACTIVIDAD</div>
+        
+        <div class="grid-3">
+            <div class="campo">
+                <div class="etiqueta">Actividad:</div>
+                <div class="valor texto-largo">{{ nombre_actividad|truncatechars:30 }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Ejecución:</div>
+                <div class="valor">{{ fecha_ejecucion }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Código:</div>
+                <div class="valor">{{ codigo_actividad }}</div>
+            </div>
+        </div>
+        
+        <div class="grid-3">
+            <div class="campo">
+                <div class="etiqueta">Descripción:</div>
+                <div class="valor texto-largo">{{ descripcion_actividad|truncatechars:35 }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Objetivo:</div>
+                <div class="valor texto-largo">{{ objetivo_actividad|truncatechars:35 }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Financiamiento:</div>
+                <div class="valor texto-largo">
+                    {% for fuente in fuentes_financiamiento|slice:":2" %}
+                        {{ fuente.nombre|truncatechars:12 }}: Bs.{{ fuente.monto|floatformat:0 }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        No especificado
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SECCIÓN 3: DETALLE DE GASTOS A REEMBOLSAR -->
+    <div class="seccion">
+        <div class="seccion-titulo">💰 GASTOS A REEMBOLSAR</div>
+        
+        {% if detalle_gastos %}
+        <table class="tabla tabla-gastos">
+            <thead>
+                <tr>
+                    <th style="width: 3%;">N°</th>
+                    <th style="width: 10%;">FECHA</th>
+                    <th style="width: 10%;">PARTIDA</th>
+                    <th style="width: 10%;">FUENTE</th>
+                    <th style="width: 12%;">FACTURA</th>
+                    <th style="width: 35%;">CONCEPTO</th>
+                    <th style="width: 20%; text-align: right;">MONTO (Bs.)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for gasto in detalle_gastos %}
+                <tr>
+                    <td style="text-align: center;">{{ gasto.indice|default:forloop.counter }}</td>
+                    <td>{{ gasto.fecha|default:"-" }}</td>
+                    <td>{{ gasto.partida|default:"-" }}</td>
+                    <td>{{ gasto.fuente|default:"-" }}</td>
+                    <td>{{ gasto.factura_recibo|default:"-" }}</td>
+                    <td class="texto-largo">{{ gasto.concepto|truncatechars:35|default:"-" }}</td>
+                    <td style="text-align: right;">{{ gasto.monto|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 8px; color: #999; font-size: 8px;">
+                        No se registraron gastos para este reembolso
+                    </td>
+                </tr>
+                {% endfor %}
+                
+                <tr class="total-row">
+                    <td colspan="6" style="text-align: right; font-weight: bold;">TOTAL A REEMBOLSAR:</td>
+                    <td style="text-align: right; font-weight: bold; font-size: 9px;">
+                        Bs. {{ total_monto_solicitado|floatformat:2 }}
+                    </td>
+                </tr>
+            </tbody>
         </table>
+        
+        {% if detalle_gastos %}
+        <div style="margin-top: 5px; font-size: 8px; color: #666; text-align: right;">
+            Total de {{ detalle_gastos|length }} gasto{{ detalle_gastos|length|pluralize:"s" }}
+        </div>
+        {% endif %}
+        {% else %}
+        <div style="text-align: center; padding: 8px; color: #999; font-size: 8px;">
+            No se registraron gastos para este reembolso
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
     
-    <!-- CHEQUE -->
-    {% if datos_transferencia.mostrar_cheque and datos_transferencia.otros %}
-    <div class="alerta-pago alerta-cheque">
-        <strong>Cheque:</strong>
-        <table style="width: 100%; margin-top: 3px; font-size: 8px;">
-            <tr>
-                <td style="width: 50%;"><span class="etiqueta-card">Beneficiario:</span> {{ datos_transferencia.otros.nombre_otros|default:nombre_solicitante }}</td>
-                <td style="width: 50%;"><span class="etiqueta-card">C.I.:</span> {{ datos_transferencia.otros.ci_otros|default:documento_identidad }}</td>
-            </tr>
-        </table>
-    </div>
-    {% endif %}
-    
-    <!-- EFECTIVO -->
-    {% if datos_transferencia.mostrar_efectivo and datos_transferencia.otros %}
-    <div class="alerta-pago alerta-efectivo">
-        <strong>Efectivo:</strong>
-        <table style="width: 100%; margin-top: 3px; font-size: 8px;">
-            <tr>
-                <td style="width: 50%;"><span class="etiqueta-card">Receptor:</span> {{ datos_transferencia.otros.nombre_otros|default:nombre_solicitante }}</td>
-                <td style="width: 50%;"><span class="etiqueta-card">C.I.:</span> {{ datos_transferencia.otros.ci_otros|default:documento_identidad }}</td>
-            </tr>
-        </table>
-    </div>
-    {% endif %}
-    
-    <!-- OTROS -->
-    {% if datos_transferencia.mostrar_otros and not datos_transferencia.mostrar_cheque and not datos_transferencia.mostrar_efectivo and datos_transferencia.otros %}
-    <div class="alerta-pago alerta-otros">
-        <strong>Pago a Tercero:</strong>
-        <table style="width: 100%; margin-top: 3px; font-size: 8px;">
-            <tr>
-                <td style="width: 50%;"><span class="etiqueta-card">Nombre:</span> {{ datos_transferencia.otros.nombre_otros|default:nombre_solicitante }}</td>
-                <td style="width: 50%;"><span class="etiqueta-card">C.I.:</span> {{ datos_transferencia.otros.ci_otros|default:documento_identidad }}</td>
-            </tr>
-        </table>
-    </div>
-    {% endif %}
-</div>
-
-<!-- SECCIÓN 5: FIRMAS -->
-<div class="firma-seccion">
-    <div class="seccion-titulo">FIRMAS DE APROBACIÓN</div>
-    
-    <table class="firma-grid">
-        <tr>
-            <td>
-                <div class="firma-nombre-persona">{{ nombre_solicitante|default:"_________________" }}</div>
-                <!-- <div class="firma-info">CI: {{ documento_identidad|default:"-" }}</div> -->
-                <div class="firma-linea">
-                    <span class="firma-cargo-etiqueta">Solicitante</span>
+    <!-- SECCIÓN 4: INFORMACIÓN ADICIONAL -->
+    <div class="seccion compact-section">
+        <div class="seccion-titulo">📋 INFORMACIÓN ADICIONAL</div>
+        
+        <div class="grid-3">
+            <div class="campo">
+                <div class="etiqueta">Lugar:</div>
+                <div class="valor">{{ lugar_solicitud|default:"-"|truncatechars:20 }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Fecha Solicitud:</div>
+                <div class="valor">{{ fecha_solicitud }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="etiqueta">Forma de Pago:</div>
+                <div class="valor">{{ forma_pago }}</div>
+            </div>
+        </div>
+        
+        <!-- PAGO EN EFECTIVO -->
+        {% if datos_transferencia.mostrar_efectivo %}
+        <div class="forma-pago-detalle">
+            <div class="etiqueta" style="color: #1976d2; margin-bottom: 5px;">💰 PAGO EN EFECTIVO</div>
+            <div class="valor">
+                El pago se realizará en efectivo al solicitante.
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- DATOS DE TRANSFERENCIA BANCARIA -->
+        {% if datos_transferencia.mostrar_transferencia %}
+        <div class="forma-pago-detalle">
+            <div class="etiqueta" style="color: #1976d2; margin-bottom: 5px;">📊 DATOS DE TRANSFERENCIA BANCARIA:</div>
+            
+            <div class="grid-2">
+                <div class="campo">
+                    <div class="etiqueta">Nombre:</div>
+                    <div class="valor texto-largo">
+                        {{ datos_transferencia.transferencia.nombre_transferencia|default:"-"|truncatechars:25 }}
+                    </div>
                 </div>
-            </td>
-            <td>
-                <div class="firma-nombre-persona">{{ nombre_responsable|default:"_________________" }}</div>
-                <div class="firma-info">&nbsp;</div>
-                <div class="firma-linea">
-                    <span class="firma-cargo-etiqueta">Responsable</span>
+                
+                <div class="campo">
+                    <div class="etiqueta">C.I.:</div>
+                    <div class="valor">{{ datos_transferencia.transferencia.ci_transferencia|default:"-" }}</div>
                 </div>
-            </td>
-            <td>
-                <div class="firma-nombre-persona">{{ nombre_coordinador|default:"_________________" }}</div>
-                <div class="firma-info">&nbsp;</div>
-                <div class="firma-linea">
-                    <span class="firma-cargo-etiqueta">Coordinador</span>
+                
+                <div class="campo">
+                    <div class="etiqueta">Banco/Entidad:</div>
+                    <div class="valor">{{ datos_transferencia.transferencia.entidad_bancaria|default:"-"|truncatechars:15 }}</div>
                 </div>
-            </td>
-        </tr>
-    </table>
-</div>
-
+                
+                <div class="campo">
+                    <div class="etiqueta">Tipo de Cuenta:</div>
+                    <div class="valor">{{ datos_transferencia.transferencia.tipo_cuenta|default:"-" }}</div>
+                </div>
+                
+                <div class="campo" style="grid-column: span 2;">
+                    <div class="etiqueta">Número de Cuenta:</div>
+                    <div class="valor">{{ datos_transferencia.transferencia.numero_cuenta|default:"-"|truncatechars:20 }}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- DATOS DE CHEQUE -->
+        {% if datos_transferencia.mostrar_cheque %}
+        <div class="forma-pago-detalle">
+            <div class="etiqueta" style="color: #1976d2; margin-bottom: 5px;">💳 DATOS DE CHEQUE:</div>
+            
+            <div class="grid-2">
+                <div class="campo">
+                    <div class="etiqueta">Nombre:</div>
+                    <div class="valor texto-largo">
+                        {{ datos_transferencia.cheque.nombre_cheque|default:"-"|truncatechars:25 }}
+                    </div>
+                </div>
+                
+                <div class="campo">
+                    <div class="etiqueta">C.I.:</div>
+                    <div class="valor">{{ datos_transferencia.cheque.ci_cheque|default:"-" }}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- DATOS DE PAGO A TERCEROS/OTROS -->
+        {% if datos_transferencia.mostrar_otros %}
+        <div class="forma-pago-detalle">
+            <div class="etiqueta" style="color: #1976d2; margin-bottom: 5px;">👤 DATOS DE PAGO A TERCEROS:</div>
+            
+            <div class="grid-2">
+                <div class="campo">
+                    <div class="etiqueta">Nombre:</div>
+                    <div class="valor texto-largo">
+                        {{ datos_transferencia.otros.nombre_otros|default:"-"|truncatechars:25 }}
+                    </div>
+                </div>
+                
+                <div class="campo">
+                    <div class="etiqueta">C.I.:</div>
+                    <div class="valor">{{ datos_transferencia.otros.ci_otros|default:"-" }}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- SECCIÓN 5: FIRMAS Y VALIDACIONES -->
+    <div class="seccion">
+        <div class="seccion-titulo">✍️ FIRMAS Y VALIDACIONES</div>
+        
+        {% if estado_documento == 'SIN_REVISORES' %}
+        <div style="text-align: center; padding: 8px; margin-bottom: 10px; background: #f5f5f5; border-left: 3px solid #9e9e9e; font-size: 9px; color: #666;">
+            ⚠️ Este documento no tiene revisores asignados
+        </div>
+        {% endif %}
+        
+        <div class="grid-firmas" style="display: flex; justify-content: space-around; text-align: center;">
+            <!-- SOLICITANTE -->
+            <div class="firma-columna" style="flex: 1; padding: 0 10px;">
+                <div class="firma-area">
+                    <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 30px 0 5px 0;"></div>
+                    <div class="nombre-firma" style="font-size: 12px; font-weight: bold;">
+                        {{ solicitante.nombre }}
+                    </div>
+                    <div class="cargo-firma" style="font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">
+                        SOLICITANTE
+                    </div>
+                </div>
+            </div>
+            
+            <!-- REVISORES -->
+            {% if estado_documento == 'SIN_REVISORES' %}
+                <div class="firma-columna" style="flex: 1; padding: 0 10px;">
+                    <div class="firma-area">
+                        <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 30px 0 5px 0;"></div>
+                        <div class="nombre-firma" style="font-size: 12px; font-weight: bold; color: #999;">
+                            _________________
+                        </div>
+                        <div class="cargo-firma" style="font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">
+                            REVISOR
+                        </div>
+                    </div>
+                </div>
+                <div class="firma-columna" style="flex: 1; padding: 0 10px;">
+                    <div class="firma-area">
+                        <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 30px 0 5px 0;"></div>
+                        <div class="nombre-firma" style="font-size: 12px; font-weight: bold; color: #999;">
+                            _________________
+                        </div>
+                        <div class="cargo-firma" style="font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">
+                            REVISOR
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                {% for validador in validadores %}
+                <div class="firma-columna" style="flex: 1; padding: 0 10px;">
+                    <div class="firma-area">
+                        <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 30px 0 5px 0;"></div>
+                        <div class="nombre-firma" style="font-size: 12px; font-weight: bold;">
+                            {{ validador.nombre }}
+                        </div>
+                        <div class="cargo-firma" style="font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">
+                            {{ validador.etiqueta_cargo }}
+                        </div>
+                        {% if validador.estado != 'PENDIENTE' %}
+                        <div class="estado-firma" style="font-size: 7px; margin-top: 2px; {% if validador.estado == 'APROBADO' %}color: #28a745;{% elif validador.estado == 'RECHAZADO' %}color: #dc3545;{% endif %}">
+                            {{ validador.estado_display }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}

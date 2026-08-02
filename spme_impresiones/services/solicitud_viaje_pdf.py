@@ -1,55 +1,61 @@
+# spme_impresiones/pdf_generators/solicitud_viaje.py
+
 from .pdf_base import BasePDFGenerator
 from spme_monitoreo.models import SolicitudViaje
+from spme_impresiones.services.validadores_documentos_service import ValidadoresDocumentoService
+
 
 class SolicitudViajePDFGenerator(BasePDFGenerator):
     """
     Generador específico para Solicitud de Viaje
+    
+    Configuración:
+        USAR_ETIQUETAS_GENERICAS = True  → Todos los validadores como "REVISOR"
+        USAR_ETIQUETAS_GENERICAS = False → Muestra el cargo real (Contable, Coordinador, etc.)
     """
+    
+    USAR_ETIQUETAS_GENERICAS = True
     
     def __init__(self):
         super().__init__()
         self.template_name = 'spme_impresiones/solicitud_viaje_template.html'
+        self.validacion_service = ValidadoresDocumentoService()
+        
+        self.etiquetas_revisor = {
+            'admin': 'REVISOR',
+            'coordinador': 'REVISOR',
+            'tecnico': 'REVISOR',
+            'contable': 'REVISOR',
+            'dir-administrativo': 'REVISOR',
+        }
     
     def prepare_context(self, obj):
-        """
-        Prepara el contexto específico para Solicitud de Viaje
-        """
         if not isinstance(obj, SolicitudViaje):
             raise ValueError("El objeto debe ser una instancia de SolicitudViaje")
         
-        # Obtener datos del solicitante
-        nombre_solicitante = "No asignado"
-        documento_identidad = "No asignado"
-        cargo = "No asignado"
-        
-        if obj.usuario:
-            nombre_solicitante = f"{obj.usuario.nombre or ''} {obj.usuario.paterno or ''}".strip()
-            documento_identidad = obj.usuario.ci or "No asignado"
-            cargo = obj.usuario.cargo or "No asignado"
-        
         # Procesar detalle de gastos
-        detalle_gastos = []
-        total_gastos = 0.0
-        monto_solicitado = 0.0
+        detalle_gastos, total_gastos = self._procesar_detalle_gastos(obj)
+        monto_solicitado = float(obj.montoSolicitado) if obj.montoSolicitado else total_gastos
         
-        # Procesar detalleGasto
-        if obj.detalleGasto:
-            detalle_gastos, total_gastos = self._procesar_detalle_gastos(obj)
-            # Usar el total calculado o el monto del objeto
-            monto_solicitado = float(obj.montoSolicitado) if obj.montoSolicitado else total_gastos
+        # Obtener validadores según configuración
+        if self.USAR_ETIQUETAS_GENERICAS:
+            validadores = self.validacion_service.obtener_validadores(obj, self.etiquetas_revisor)
         else:
-            monto_solicitado = float(obj.montoSolicitado) if obj.montoSolicitado else 0.0
+            validadores = self.validacion_service.obtener_validadores(obj)
         
-        # Obtener datos de responsables
-        nombre_responsable = "No asignado"
-        if obj.responsable:
-            nombre_responsable = f"{obj.responsable.nombre or ''} {obj.responsable.paterno or ''}".strip()
+        solicitante = self.validacion_service.obtener_solicitante(obj)
+        estado = self.validacion_service.calcular_estado_documento(validadores)
         
-        nombre_coordinador = "No asignado"
-        if obj.coordinador:
-            nombre_coordinador = f"{obj.coordinador.nombre or ''} {obj.coordinador.paterno or ''}".strip()
+        contexto_validacion = {
+            'validadores': validadores,
+            'solicitante': solicitante,
+            'estado_documento': estado,
+            'total_validadores': len(validadores),
+            'aprobados': sum(1 for v in validadores if v['estado'] == 'APROBADO'),
+            'pendientes': sum(1 for v in validadores if v['estado'] == 'PENDIENTE'),
+            'rechazados': sum(1 for v in validadores if v['estado'] == 'RECHAZADO'),
+        }
         
-        # Construir contexto
         context = {
             # Información del formulario
             'numero_formulario': obj.numeroFormulario or f"SV-{obj.id:04d}",
@@ -57,10 +63,10 @@ class SolicitudViajePDFGenerator(BasePDFGenerator):
             'fecha_solicitud': obj.fechaSolicitud.strftime('%d/%m/%Y') if obj.fechaSolicitud else "No especificada",
             'lugar_solicitud': obj.lugarSolicitud or "No especificado",
             
-            # Información del solicitante
-            'nombre_solicitante': nombre_solicitante,
-            'documento_identidad': documento_identidad,
-            'cargo': cargo,
+            # Información del solicitante (desde el servicio)
+            'nombre_solicitante': contexto_validacion['solicitante']['nombre'],
+            'documento_identidad': contexto_validacion['solicitante']['documento_identidad'],
+            'cargo': contexto_validacion['solicitante']['cargo'],
             
             # Información del viaje
             'evento': obj.evento or "No especificado",
@@ -83,11 +89,16 @@ class SolicitudViajePDFGenerator(BasePDFGenerator):
             'detalle_gastos': detalle_gastos,
             'total_gastos': total_gastos,
             
-            # Información de validaciones
-            'nombre_responsable': nombre_responsable,
-            'nombre_coordinador': nombre_coordinador,
+            # Validaciones (NUEVO - desde el servicio)
+            'validadores': contexto_validacion['validadores'],
+            'solicitante': contexto_validacion['solicitante'],
+            'estado_documento': contexto_validacion['estado_documento'],
+            'total_validadores': contexto_validacion['total_validadores'],
+            'aprobados': contexto_validacion['aprobados'],
+            'pendientes': contexto_validacion['pendientes'],
+            'rechazados': contexto_validacion['rechazados'],
             
-            # Información de actividad si existe
+            # Información de actividad
             'codigo_actividad': obj.actividad.codigo if obj.actividad else "No asignado",
             'nombre_actividad': obj.actividad.nombreCorto if obj.actividad else "No especificado",
             
@@ -96,27 +107,21 @@ class SolicitudViajePDFGenerator(BasePDFGenerator):
             'subtipo_documento': 'F-03',
         }
         
-        # Procesar datos de transferencia (igual que en fondos)
         context['datos_transferencia'] = self._procesar_datos_transferencia(obj)
-        
-        # DEBUG: Imprimir para verificar
-        print(f"[DEBUG] Detalle gastos: {detalle_gastos}")
-        print(f"[DEBUG] Total gastos: {total_gastos}")
-        print(f"[DEBUG] Monto solicitado: {monto_solicitado}")
         
         return context
     
     def _procesar_datos_transferencia(self, obj):
-        """
-        Procesa los datos de forma de pago del formulario (IGUAL QUE EN FONDOS)
-        """
         datos_forma_pago = {
-            'tipo': 'otros',
-            'otros': {},
+            'efectivo': {},
             'transferencia': {},
-            'mostrar_transferencia': False,
-            'mostrar_otros': False,
+            'cheque': {},
+            'otros': {},
             'mostrar_efectivo': False,
+            'mostrar_transferencia': False,
+            'mostrar_cheque': False,
+            'mostrar_otros': False,
+            'tipo': None,
         }
         
         if not obj.datos_forma_pago:
@@ -125,36 +130,6 @@ class SolicitudViajePDFGenerator(BasePDFGenerator):
         try:
             if isinstance(obj.datos_forma_pago, dict):
                 datos_forma_pago.update(obj.datos_forma_pago)
-                
-                # Determinar qué tipo de pago mostrar
-                tiene_datos_otros = datos_forma_pago.get('otros', {}).get('nombre_otros')
-                tiene_datos_transferencia = datos_forma_pago.get('transferencia', {}).get('nombre_transferencia')
-                
-                # Verificar por el tipo de forma de pago
-                if obj.formaPago:
-                    if 'transferencia' in obj.formaPago.formaPago.lower():
-                        datos_forma_pago['tipo'] = 'transferencia'
-                        datos_forma_pago['mostrar_transferencia'] = True
-                        datos_forma_pago['mostrar_otros'] = False
-                        datos_forma_pago['mostrar_efectivo'] = False
-                    elif 'cheque' in obj.formaPago.formaPago.lower():
-                        datos_forma_pago['tipo'] = 'otros'
-                        datos_forma_pago['mostrar_transferencia'] = False
-                        datos_forma_pago['mostrar_otros'] = True
-                        datos_forma_pago['mostrar_efectivo'] = False
-                    else:  # Efectivo u otros
-                        datos_forma_pago['tipo'] = 'efectivo'
-                        datos_forma_pago['mostrar_transferencia'] = False
-                        datos_forma_pago['mostrar_otros'] = False
-                        datos_forma_pago['mostrar_efectivo'] = True
-                else:
-                    if tiene_datos_transferencia:
-                        datos_forma_pago['tipo'] = 'transferencia'
-                        datos_forma_pago['mostrar_transferencia'] = True
-                    elif tiene_datos_otros:
-                        datos_forma_pago['tipo'] = 'otros'
-                        datos_forma_pago['mostrar_otros'] = True
-            
             elif isinstance(obj.datos_forma_pago, str):
                 import json
                 try:
@@ -162,6 +137,20 @@ class SolicitudViajePDFGenerator(BasePDFGenerator):
                     datos_forma_pago.update(parsed_data)
                 except json.JSONDecodeError:
                     pass
+            
+            codigo = obj.formaPago.codigo if obj.formaPago else None
+            
+            mapeo_tipos = {
+                'EFEC': 'efectivo',
+                'TB': 'transferencia',
+                'CHE': 'cheque',
+            }
+            
+            tipo_seleccionado = mapeo_tipos.get(codigo)
+            
+            if tipo_seleccionado:
+                datos_forma_pago['tipo'] = tipo_seleccionado
+                datos_forma_pago[f'mostrar_{tipo_seleccionado}'] = True
         
         except Exception as e:
             print(f"Error procesando datos de forma de pago: {e}")
@@ -169,10 +158,6 @@ class SolicitudViajePDFGenerator(BasePDFGenerator):
         return datos_forma_pago
     
     def _procesar_detalle_gastos(self, obj):
-        """
-        Procesa el detalle de gastos del viaje
-        Formato esperado: {"items": [{"partida": "...", "fuente": "...", "concepto": "...", "monto": ...}]}
-        """
         detalle_gastos = []
         total_gastos = 0.0
         
@@ -180,21 +165,15 @@ class SolicitudViajePDFGenerator(BasePDFGenerator):
             return detalle_gastos, total_gastos
         
         try:
-            # Obtener los datos
             data_dict = obj.detalleGasto
             
-            # Si es string, parsear JSON
             if isinstance(data_dict, str):
                 import json
                 try:
                     data_dict = json.loads(data_dict)
                 except json.JSONDecodeError:
-                    print(f"[ERROR] No se pudo parsear JSON: {data_dict[:100]}")
                     return detalle_gastos, total_gastos
             
-            print(f"[DEBUG] data_dict: {data_dict}")
-            
-            # Extraer items
             items_list = []
             if isinstance(data_dict, dict):
                 if 'items' in data_dict:
@@ -206,32 +185,30 @@ class SolicitudViajePDFGenerator(BasePDFGenerator):
             elif isinstance(data_dict, list):
                 items_list = data_dict
             
-            print(f"[DEBUG] items_list: {items_list}")
-            
             if not items_list:
                 return detalle_gastos, total_gastos
             
-            # Procesar cada item
             for index, item in enumerate(items_list):
                 if not isinstance(item, dict):
                     continue
                 
-                print(f"[DEBUG] Procesando item {index}: {item}")
-                
-                # Extraer campos - según tu JSON
                 partida = item.get('partida', '')
                 
-                #Fuente de finaciamiento
-                fuente = (
+                fuente_raw = (
                     item.get('fuente') or 
                     item.get('fuente_financiamiento') or 
                     item.get('fuente_fin') or 
                     item.get('origen') or 
                     'No especificada'
-                )      
+                )
+                
+                if isinstance(fuente_raw, dict):
+                    fuente = fuente_raw.get('sigla', str(fuente_raw))
+                else:
+                    fuente = str(fuente_raw)
+                
                 concepto = item.get('concepto') or item.get('descripcion') or f"Item {index + 1}"
                 
-                # Extraer monto
                 monto_raw = item.get('monto', 0)
                 try:
                     monto = float(monto_raw)
@@ -239,7 +216,6 @@ class SolicitudViajePDFGenerator(BasePDFGenerator):
                 except (ValueError, TypeError):
                     monto = 0.0
                 
-                # Agregar a la lista
                 detalle_gastos.append({
                     'indice': index + 1,
                     'partida': partida,
@@ -248,20 +224,12 @@ class SolicitudViajePDFGenerator(BasePDFGenerator):
                     'monto': monto,
                 })
             
-            print(f"[DEBUG] detalle_gastos final: {detalle_gastos}")
-            print(f"[DEBUG] total_gastos final: {total_gastos}")
-            
         except Exception as e:
             print(f"Error procesando detalle de gastos de viaje: {e}")
-            import traceback
-            traceback.print_exc()
         
         return detalle_gastos, total_gastos
     
     def generate_filename(self, obj):
-        """
-        Genera el nombre del archivo PDF
-        """
         numero = obj.numeroFormulario or f"SV{obj.id:04d}"
         numero_limpio = "".join(c for c in numero if c.isalnum() or c in ['-', '_'])
         return f"Solicitud_Viaje_{numero_limpio}.pdf"

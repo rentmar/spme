@@ -126,6 +126,10 @@ from .proyecto.views.proyecto_views import(
     ProyectoActividadesInactivasView,
 )
 
+from .proyecto.views.actividad_views import(
+    ActividadViewSet,
+)
+
 
 #PEI
 router = DefaultRouter()
@@ -374,6 +378,8 @@ urlpatterns =[
     ############################### Formularios, datos para helpers, auxiliares, etc. ########
     path(r'beneficiarios-forma-pago/', BeneficiariosFormaPagoView.as_view(), name='beneficiarios-forma-pago'),
     path(r'lugares-solicitud/', LugaresSolicitudView.as_view(), name='lugares-solicitud'),
+    ##############################Actividades!!""°!!!##############################333
+    path(r'actividades-formularios/<int:pk>/detalle/', ActividadViewSet.as_view({'get':'detalle'}), name='actividad-detalle-formularios'),
 
 ]
 

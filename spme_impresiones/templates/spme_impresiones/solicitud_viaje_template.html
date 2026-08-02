@@ -2,7 +2,6 @@
 
 {% block content %}
 <style>
-    /* Estilos para Solicitud de Viaje - LEGIBLES */
     .solicitud-header {
         background: linear-gradient(to right, #1976d2, #2196f3);
         color: white;
@@ -127,7 +126,6 @@
     }
     
     .firma-grid td {
-        width: 33.33%;
         text-align: center;
         padding: 0 8px;
         vertical-align: bottom;
@@ -181,19 +179,19 @@
             <td style="width: 50%;">
                 <div class="campo-fila">
                     <span class="etiqueta-card">Nombre:</span>
-                    <span class="valor-card">{{ nombre_solicitante|default:"-" }}</span>
+                    <span class="valor-card">{{ solicitante.nombre|default:"-" }}</span>
                 </div>
             </td>
             <td style="width: 25%;">
                 <div class="campo-fila">
                     <span class="etiqueta-card">C.I.:</span>
-                    <span class="valor-card">{{ documento_identidad|default:"-" }}</span>
+                    <span class="valor-card">{{ solicitante.documento_identidad|default:"-" }}</span>
                 </div>
             </td>
             <td style="width: 25%;">
                 <div class="campo-fila">
                     <span class="etiqueta-card">Cargo:</span>
-                    <span class="valor-card">{{ cargo|default:"-" }}</span>
+                    <span class="valor-card">{{ solicitante.cargo|default:"-" }}</span>
                 </div>
             </td>
         </tr>
@@ -340,8 +338,15 @@
         </span>
     </div>
     
+    <!-- EFECTIVO -->
+    {% if datos_transferencia.mostrar_efectivo %}
+    <div class="alerta-pago alerta-efectivo">
+        <strong>Efectivo:</strong> El pago se realizará en efectivo al solicitante.
+    </div>
+    {% endif %}
+    
     <!-- TRANSFERENCIA BANCARIA -->
-    {% if datos_transferencia.mostrar_transferencia and datos_transferencia.transferencia %}
+    {% if datos_transferencia.mostrar_transferencia %}
     <div class="alerta-pago alerta-transferencia">
         <strong>Transferencia Bancaria:</strong>
         <table style="width: 100%; margin-top: 3px; font-size: 8px;">
@@ -353,44 +358,35 @@
                 <td style="width: 50%;"><span class="etiqueta-card">Banco:</span> {{ datos_transferencia.transferencia.entidad_bancaria|default:"-" }}</td>
                 <td style="width: 50%;"><span class="etiqueta-card">N° Cuenta:</span> {{ datos_transferencia.transferencia.numero_cuenta|default:"-" }}</td>
             </tr>
-        </table>
-    </div>
-    {% endif %}
-    
-    <!-- CHEQUE -->
-    {% if datos_transferencia.mostrar_cheque and datos_transferencia.otros %}
-    <div class="alerta-pago alerta-cheque">
-        <strong>Cheque:</strong>
-        <table style="width: 100%; margin-top: 3px; font-size: 8px;">
             <tr>
-                <td style="width: 50%;"><span class="etiqueta-card">Beneficiario:</span> {{ datos_transferencia.otros.nombre_otros|default:nombre_solicitante }}</td>
-                <td style="width: 50%;"><span class="etiqueta-card">C.I.:</span> {{ datos_transferencia.otros.ci_otros|default:documento_identidad }}</td>
+                <td style="width: 50%;"><span class="etiqueta-card">Tipo Cuenta:</span> {{ datos_transferencia.transferencia.tipo_cuenta|default:"-" }}</td>
+                <td style="width: 50%;"></td>
             </tr>
         </table>
     </div>
     {% endif %}
     
-    <!-- EFECTIVO -->
-    {% if datos_transferencia.mostrar_efectivo and datos_transferencia.otros %}
-    <div class="alerta-pago alerta-efectivo">
-        <strong>Efectivo:</strong>
+    <!-- CHEQUE -->
+    {% if datos_transferencia.mostrar_cheque %}
+    <div class="alerta-pago alerta-cheque">
+        <strong>Cheque:</strong>
         <table style="width: 100%; margin-top: 3px; font-size: 8px;">
             <tr>
-                <td style="width: 50%;"><span class="etiqueta-card">Receptor:</span> {{ datos_transferencia.otros.nombre_otros|default:nombre_solicitante }}</td>
-                <td style="width: 50%;"><span class="etiqueta-card">C.I.:</span> {{ datos_transferencia.otros.ci_otros|default:documento_identidad }}</td>
+                <td style="width: 50%;"><span class="etiqueta-card">Beneficiario:</span> {{ datos_transferencia.cheque.nombre_cheque|default:solicitante.nombre }}</td>
+                <td style="width: 50%;"><span class="etiqueta-card">C.I.:</span> {{ datos_transferencia.cheque.ci_cheque|default:solicitante.documento_identidad }}</td>
             </tr>
         </table>
     </div>
     {% endif %}
     
     <!-- OTROS -->
-    {% if datos_transferencia.mostrar_otros and not datos_transferencia.mostrar_cheque and not datos_transferencia.mostrar_efectivo and datos_transferencia.otros %}
+    {% if datos_transferencia.mostrar_otros %}
     <div class="alerta-pago alerta-otros">
         <strong>Pago a Tercero:</strong>
         <table style="width: 100%; margin-top: 3px; font-size: 8px;">
             <tr>
-                <td style="width: 50%;"><span class="etiqueta-card">Nombre:</span> {{ datos_transferencia.otros.nombre_otros|default:nombre_solicitante }}</td>
-                <td style="width: 50%;"><span class="etiqueta-card">C.I.:</span> {{ datos_transferencia.otros.ci_otros|default:documento_identidad }}</td>
+                <td style="width: 50%;"><span class="etiqueta-card">Nombre:</span> {{ datos_transferencia.otros.nombre_otros|default:"-" }}</td>
+                <td style="width: 50%;"><span class="etiqueta-card">C.I.:</span> {{ datos_transferencia.otros.ci_otros|default:"-" }}</td>
             </tr>
         </table>
     </div>
@@ -401,29 +397,39 @@
 <div class="firma-seccion">
     <div class="seccion-titulo">FIRMAS DE APROBACIÓN</div>
     
+    {% if estado_documento == 'SIN_REVISORES' %}
+    <div class="alerta-pago alerta-otros" style="text-align: center; margin-bottom: 8px;">
+        <strong>⚠️ Este documento no tiene revisores asignados</strong>
+    </div>
+    {% endif %}
+    
     <table class="firma-grid">
         <tr>
+            <!-- SOLICITANTE -->
             <td>
-                <div class="firma-nombre-persona">{{ nombre_solicitante|default:"_________________" }}</div>
-                <div class="firma-info">CI: {{ documento_identidad|default:"-" }}</div>
+                <div class="firma-nombre-persona">{{ solicitante.nombre|default:"_________________" }}</div>
+                <div class="firma-info">CI: {{ solicitante.documento_identidad|default:"-" }}</div>
                 <div class="firma-linea">
                     <span class="firma-cargo-etiqueta">Solicitante</span>
                 </div>
             </td>
+            
+            <!-- REVISORES -->
+            {% for validador in validadores %}
             <td>
-                <div class="firma-nombre-persona">{{ nombre_responsable|default:"_________________" }}</div>
-                <div class="firma-info">&nbsp;</div>
+                <div class="firma-nombre-persona">{{ validador.nombre|default:"_________________" }}</div>
+                <div class="firma-info">
+                    {% if validador.estado != 'PENDIENTE' %}
+                        {{ validador.estado_display }}
+                    {% else %}
+                        &nbsp;
+                    {% endif %}
+                </div>
                 <div class="firma-linea">
-                    <span class="firma-cargo-etiqueta">Responsable</span>
+                    <span class="firma-cargo-etiqueta">{{ validador.etiqueta_cargo }}</span>
                 </div>
             </td>
-            <td>
-                <div class="firma-nombre-persona">{{ nombre_coordinador|default:"_________________" }}</div>
-                <div class="firma-info">&nbsp;</div>
-                <div class="firma-linea">
-                    <span class="firma-cargo-etiqueta">Coordinador</span>
-                </div>
-            </td>
+            {% endfor %}
         </tr>
     </table>
     
