@@ -19,6 +19,7 @@ from .actividades.views.tarea_detalles_porid_views import obtener_tarea_detalle
 from .actividades.views.lista_informes_actividad_views import actividad_informes_completos
 from .actividadespei.views.actividad_pei_planificacion_lista_views import actividades_por_pei_planificacion
 from .actividadespei.views.tareas_pei_crud_views import TareaPeiActividadPeiView
+from .actividades.views.actividad_crud_view import ActividadCrudView
 #from planificacion.vistas.viewsrutas import PruebaPlanificacionView
 from .actividades.views.viewsactividadrutas import rutas_actividad, ruta_actividad_proyecto
 from .actividades.views.viewsactividadrutaindicador import obtener_ruta_actividad_con_indicadores
@@ -125,9 +126,13 @@ from .proyecto.views.proyecto_views import(
     ProyectoEstructuraCompletaView,
     ProyectoActividadesInactivasView,
 )
+from .proyecto.views.actividad_solicitudes_view import ActividadSolicitudesView
 
 from .proyecto.views.actividad_views import(
     ActividadViewSet,
+)
+from .proyecto.views.actividad_rendiciones_view import(
+    ActividadRendicionesView,
 )
 
 
@@ -171,6 +176,7 @@ router.register(r'efectos-proyecto', EfectoProyectoView, basename='efectos_proye
 router.register(r'tipo-actividad', TipoActividadView, basename='tipo_actividad')
 #Lista de actividades
 router.register(r'actividades-tareas-lista', ActividadSubActividadViewSet, basename='lista_actividades_tareas')
+router.register(r'actividades-proyectos-lista', ActividadCrudView, basename='lista_actividades_func_crud')
 #Tareas de Actividades
 router.register(r'tareas-actividad', TareaActividadView, basename='tareas-actividades')
 router.register(r'tareas-pei-actividad-pei', TareaPeiActividadPeiView, basename='tareaspei-actividadpei')
@@ -284,6 +290,11 @@ urlpatterns =[
     path(r'actividades-pei-con-tareas/', ActividadPeiConTareasListView.as_view(), name='actividades-pei-con-tareas'),
     path(r'tarea-detalles/<int:tarea_id>/', obtener_tarea_detalle, name='obtener_tarea_detalle'),     
     path(r'actividades-con-tareas/<int:pk>/', ActividadConTareasDetailView.as_view(), name='actividad-detalle-con-tareas'),
+    path(r'actividades/tareas/solicitudes/',
+        ActividadSolicitudesView.as_view(),
+        name='actividad-solicitudes'
+    ),
+    path(r'actividades/tareas/rendiciones/', ActividadRendicionesView.as_view(), name='actividad-rendiciones'),
     #Ruta de actividad
     path(r'actividades/<int:actividad_id>/ruta-proyecto/', ruta_actividad_proyecto, name="ruta_actividad_proyecto"),
     #Rutas de actividad

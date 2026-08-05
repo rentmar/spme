@@ -12,7 +12,7 @@ from .views.planificacion_proyecto_bulk_views import ActividadProyectoViewSet
 from .views.planificacion_proyecto_bulk_historial import ProyectoPlanificacionHistorialView
 from .views.planificacion import guardar_planificacion
 from .views.actividad_tarea_views import ActividadPlanificacionViewSet, TareaPlanificacionViewSet
-
+from .views.gantt_views import ProyectosGanttView
 
 router = DefaultRouter()
 
@@ -38,9 +38,7 @@ urlpatterns = [
     path(r'planificacion/procesar-bulk/',  ActividadProyectoViewSet.as_view({'post': 'procesar_actividades'}), name='procesar_proyecto_proyecto' ),
     path(r'planificacion/proyecto/procesar-bulk/', ProyectoPlanificacionHistorialView.as_view(), name='planificacion_proyecto_procesar_bulk'),
     path(r'planificacion/guardar/', guardar_planificacion, name='guardar-planificacion'),
-
-
-
+    path(r'gantt/proyectos/', ProyectosGanttView.as_view(), name='gantt-proyectos'),
 ]
 
 urlpatterns += router.urls
