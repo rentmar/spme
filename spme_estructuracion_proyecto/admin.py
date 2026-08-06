@@ -14,7 +14,7 @@ admin.site.register(IndicadorProyecto)
 #admin.site.register(IndicadorResultadoObjGral)
 #admin.site.register(IndicadorResultadoObjEspecifico)
 #admin.site.register(ObjetivoGeneralProyecto)
-admin.site.register(Proceso)
+# admin.site.register(Proceso)
 
 
 @admin.register(Proyecto)
@@ -942,3 +942,96 @@ class DiagramaEstructuraAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+
+
+@admin.register(Proceso)
+class ProcesoAdmin(admin.ModelAdmin):
+    # Campos que se muestran en la lista
+    list_display = [
+        'codigo', 
+        'titulo', 
+        'resultado_og_link', 
+        'resultado_oe_link',
+        'producto_oe_link',
+        'objetivo_especifico_link',
+    ]
+    
+    # Campos por los que se puede buscar
+    search_fields = [
+        'codigo', 
+        'titulo', 
+        'descripcion',
+    ]
+    
+    # Filtros laterales
+    list_filter = [
+        'resultado_og',
+        'resultado_oe',
+        'producto_oe',
+        'objetivo_especifico',
+    ]
+    
+    # Organización de campos en el formulario de edición
+    fieldsets = (
+        ('Información Básica', {
+            'fields': ('codigo', 'titulo', 'descripcion')
+        }),
+        ('Relaciones con Objetivos y Resultados', {
+            'fields': ('objetivo_especifico', 'resultado_og', 'resultado_oe', 'producto_oe'),
+            'description': 'Seleccione los objetivos y resultados asociados a este proceso'
+        }),
+    )
+    
+    # Comentamos autocomplete_fields temporalmente hasta que registres los admins
+    # de todos los modelos relacionados
+    # autocomplete_fields = [
+    #     'resultado_og',
+    #     'resultado_oe', 
+    #     'producto_oe',
+    #     'objetivo_especifico'
+    # ]
+    
+    # O usa raw_id_fields como alternativa que no requiere admin registrado
+    raw_id_fields = [
+        'resultado_og',
+        'resultado_oe', 
+        'producto_oe',
+        'objetivo_especifico'
+    ]
+    
+    # Número de items por página
+    list_per_page = 25
+    
+    # Métodos personalizados para mostrar enlaces en la lista
+    def resultado_og_link(self, obj):
+        if obj.resultado_og:
+            url = f"/admin/{obj.resultado_og._meta.app_label}/{obj.resultado_og._meta.model_name}/{obj.resultado_og.id}/change/"
+            return format_html('<a href="{}">{}</a>', url, obj.resultado_og)
+        return "-"
+    resultado_og_link.short_description = 'Resultado OG'
+    resultado_og_link.admin_order_field = 'resultado_og'
+    
+    def resultado_oe_link(self, obj):
+        if obj.resultado_oe:
+            url = f"/admin/{obj.resultado_oe._meta.app_label}/{obj.resultado_oe._meta.model_name}/{obj.resultado_oe.id}/change/"
+            return format_html('<a href="{}">{}</a>', url, obj.resultado_oe)
+        return "-"
+    resultado_oe_link.short_description = 'Resultado OE'
+    resultado_oe_link.admin_order_field = 'resultado_oe'
+    
+    def producto_oe_link(self, obj):
+        if obj.producto_oe:
+            url = f"/admin/{obj.producto_oe._meta.app_label}/{obj.producto_oe._meta.model_name}/{obj.producto_oe.id}/change/"
+            return format_html('<a href="{}">{}</a>', url, obj.producto_oe)
+        return "-"
+    producto_oe_link.short_description = 'Producto OE'
+    producto_oe_link.admin_order_field = 'producto_oe'
+    
+    def objetivo_especifico_link(self, obj):
+        if obj.objetivo_especifico:
+            url = f"/admin/{obj.objetivo_especifico._meta.app_label}/{obj.objetivo_especifico._meta.model_name}/{obj.objetivo_especifico.id}/change/"
+            return format_html('<a href="{}">{}</a>', url, obj.objetivo_especifico)
+        return "-"
+    objetivo_especifico_link.short_description = 'Objetivo Específico'
+    objetivo_especifico_link.admin_order_field = 'objetivo_especifico'

@@ -57,5 +57,7 @@ urlpatterns = [
     path('api-mail/', include('spme_email.urls')),
     #Api repositorio
     path('api-repo/', include('spme_repositorio.urls')),
-]
+    #Api reporte tree
+    path('api-rtree/', include('spme_tree_reporter.urls'))
+] 
 
