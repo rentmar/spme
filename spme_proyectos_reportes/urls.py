@@ -26,6 +26,13 @@ from .views.obtener_indicadores_por_ids_views import (
     get_indicadores_oe_by_ids,
     get_indicadores_roe_by_ids,
 )
+#Bitacoras crud - implementan servicios
+from .views.bitacora_crud_views import (
+    BitacoraOGViewSet,
+    BitacoraOEViewSet,
+    BitacoraROGViewSet,
+    BitacoraROEViewSet,
+)
 
 router = DefaultRouter()
 
@@ -38,7 +45,11 @@ router.register(r'bitacora-indicador-og-crud', BitacoraIndicadorOGViewset, basen
 router.register(r'bitacora-indicador-oe-crud', BitacoraIndicadorOEViewset, basename='bitacora-indicador-oe_crud')
 router.register(r'bitacora-indicador-rog-crud', BitacoraIndicadorROGViewset, basename='bitacore-indicador-rog_crud')
 router.register(r'bitacora-indicador-roe-crud', BitacoraIndicadorROEViewset, basename='bitacora-indicador.roe_crud')
- 
+#nuevos endpoints CRUD para las bitacoras - implementan servicios
+router.register(r'bitacoras/og', BitacoraOGViewSet, basename='bitacora-og')
+router.register(r'bitacoras/oe', BitacoraOEViewSet, basename='bitacora-oe')
+router.register(r'bitacoras/rog', BitacoraROGViewSet, basename='bitacora-rog')
+router.register(r'bitacoras/roe', BitacoraROEViewSet, basename='bitacora-roe')
 
 urlpatterns = [
     path(r'test-cnx/', prueba_conexion_reportes, name='reportes-test'),
