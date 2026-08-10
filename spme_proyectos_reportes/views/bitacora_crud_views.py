@@ -216,6 +216,31 @@ class BitacoraBaseViewSet(viewsets.ViewSet):
         serializer = self.serializer_class(registro)
         return Response(serializer.data)
 
+    #POr tipo de indicado
+    @action(detail=False, methods=['get'])
+    def por_indicador(self, request):
+        """
+        GET /api/bitacoras/{tipo}/por_indicador/?indicador_id={id}
+        
+        Obtiene todas las entradas de un indicador específico.
+        Ordenado por fecha descendente.
+        """
+        indicador_id = request.query_params.get('indicador_id')
+        
+        if not indicador_id:
+            return Response(
+                {'error': 'indicador_id es requerido'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        resultados = self.servicio.obtener_por_indicador(int(indicador_id))
+        
+        output = self.serializer_class(resultados, many=True)
+        return Response({
+            'count': resultados.count(),
+            'results': output.data
+        })
+
 
 # ═══════════════════════════════════════════════════════
 # VIEWSETS CONCRETOS

@@ -138,6 +138,15 @@ class BitacoraCrudService:
         return self.repository.obtener_ultimo(
             **{self.campo_indicador: indicador_id}
         )
+
+    def obtener_por_indicador(self, indicador_id: int):
+        """
+        Obtiene todas las entradas de un indicador específico.
+        Ordenado por fecha descendente.
+        """
+        return self.repository.filtrar(
+            **{self.campo_indicador: indicador_id}
+        ).order_by('-fecha_registro', '-timestamp_registro')
     
     # ═══════════════════════════════════════════════════════
     # ACTUALIZACIÓN

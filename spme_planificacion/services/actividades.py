@@ -89,7 +89,7 @@ def crear_actividades(datos_validados, proyecto_id):
             descripcion_tipo_actividad=item.get('descripcion_tipo_actividad', ''),
             gradoEjecucion=item.get('gradoEjecucion', 'PLANIFICADA'),
             tipo_id=item.get('tipo_id'),
-            responsable_id=item.get('responsable_id'),
+            responsable_id=responsable_id,
             proceso_id=item.get('proceso_id'),
             resultado_og_id=item.get('resultado_og_id'),
             resultado_oe_id=item.get('resultado_oe_id'),
