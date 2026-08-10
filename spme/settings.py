@@ -150,7 +150,8 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'EXCEPTION_HANDLER': 'spme_repositorio.views.error_handler.repositorio_exception_handler',
     # 'DEFAULT_PERMISSION_CLASSES': (
     #     'rest_framework.permissions.IsAuthenticated', # Por defecto, requiere autenticación
     # )
@@ -325,3 +326,16 @@ CELERY_TASK_QUEUES = {
 }
 
 CELERY_TASK_DEFAULT_QUEUE = 'default'
+
+############################# GARAGE SETTINGS ######################
+#Ajustar esta parte de acuerdo a los accesos del server
+GARAGE_CONFIG = {
+    'endpoint_url': 'http://localhost:3900',
+    'aws_access_key_id': 'GKe5809eba5cdcbd3647587f74',
+    'aws_secret_access_key': '9a2a1e82579d0bd465f395aa669212ed51e29cb94b8b6bcd5772cf1a20f95fd1',
+    'region_name': 'garage',
+    'use_ssl': False,
+    'verify': False,
+}
+
+GARAGE_BUCKET = 'spme-files'
