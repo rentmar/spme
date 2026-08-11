@@ -117,6 +117,40 @@ class Adjunto(models.Model):
         return f"{self.archivo.nombre_original} → {self.content_type.model}#{self.object_id}"
 
 
+class ReferenciaExterna(models.Model):
+    """
+    Enlaces externos asociados a objetos de negocio.
+    YouTube, Google Drive, redes sociales, sitios web, etc.
+    """
+    #informacion de la referencia externa
+    url = models.CharField(max_length=2000)
+    nombre = models.CharField(max_length=500)
+    categoria = models.CharField(max_length=50, default='OTRO')
+    descripcion = models.TextField(blank=True)
+    #Relacion generica
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    #Orden
+    orden = models.PositiveIntegerField(default=0)
+    #Auditoria
+    creado_por = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name='referencias_creadas')
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Referencia Externa'
+        verbose_name_plural = 'Referencias Externas'
+        ordering = ['orden', '-creado_en']
+        indexes = [
+            models.Index(fields=['content_type', 'object_id']),
+        ]
+
+    def __str__(self):
+        return f"{self.categoria}: {self.nombre}"
+
+
+
+
 
 
 

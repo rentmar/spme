@@ -11,6 +11,13 @@ from .views.upload_views import (
 from .views.download_views import (
     DescargarArchivoView,
 )
+#Referencias externas
+from .views.referencia_views import (
+    ReferenciaListView,
+    ReferenciaSingleView,
+    ReferenciaBulkView,
+    ReferenciaDeleteView,
+)
 
 router = DefaultRouter()
 
@@ -22,6 +29,7 @@ urlpatterns = [
     #Validadores Informes Actividad/Tarea
     #path(r'asignar-validadores/', AsignarValidadoresViewSet.as_view({'post': 'create'}), name='asignar-validadores'),
     path(r'repositorio/arbol/', arbol_endpoint, name='arbol-repositorio'),
+    ################################# Repositorio: Adjuntos + Garage #########################
     #Upload al repositorio Garaga
     path(r'repositorio/upload/', UploadArchivoView.as_view(), name='upload-archivo'),
     #Lista los archivos asociados al modelo/nodo(tipo_objeto) y su id
@@ -30,6 +38,11 @@ urlpatterns = [
     path(r'repositorio/descargar/<int:archivo_id>/', DescargarArchivoView.as_view(), name='descargar-archivo'),
     #Eliminar adjuntos
     path(r'repositorio/adjuntos/<int:adjunto_id>/', EliminarAdjuntoView.as_view(), name='eliminar-adjunto'),
+    ############################### Repositorio: Referencias externas ###########################
+    path(r'referencias/<str:tipo_objeto>/<int:objeto_id>/', ReferenciaListView.as_view(), name='referencias-list'),
+    path(r'referencias/', ReferenciaSingleView.as_view(), name='referencia-create'),
+    path(r'referencias/bulk/', ReferenciaBulkView.as_view(), name='referencia-bulk'),
+    path(r'referencias/<int:referencia_id>/', ReferenciaDeleteView.as_view(), name='referencia-delete'),
 ]  
 
 urlpatterns += router.urls

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from spme_repositorio.models import Archivo, Adjunto
+from spme_repositorio.models import Archivo, Adjunto, ReferenciaExterna
 
 
 @admin.register(Archivo)
@@ -15,4 +15,13 @@ class AdjuntoAdmin(admin.ModelAdmin):
     list_display = ['id', 'archivo', 'content_type', 'object_id', 'descripcion', 'orden', 'creado_por', 'creado_en']
     list_filter = ['content_type', 'creado_en']
     search_fields = ['descripcion']
+    readonly_fields = ['creado_en']
+
+
+
+@admin.register(ReferenciaExterna)
+class ReferenciaExternaAdmin(admin.ModelAdmin):
+    list_display = ['id', 'nombre', 'categoria', 'url', 'content_type', 'object_id', 'orden', 'creado_por', 'creado_en']
+    list_filter = ['categoria', 'content_type', 'creado_en']
+    search_fields = ['nombre', 'url', 'descripcion']
     readonly_fields = ['creado_en']
