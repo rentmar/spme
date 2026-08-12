@@ -1,3 +1,4 @@
+#spme/apptran/proyecto/repositories/proyecto_repository.py
 from django.db.models import Prefetch
 from spme_actividades.models import Actividad, TareaActividad
 from spme_estructuracion_proyecto.models import Proyecto

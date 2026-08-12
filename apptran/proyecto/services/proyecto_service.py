@@ -1,3 +1,4 @@
+# spme/apptran/proyecto/services/proyecto_service.py
 from ..repositories.proyecto_repository import ProyectoRepository
 from ..serializers.proyecto_serializers import (
     ProyectoConActividadesSerializer,

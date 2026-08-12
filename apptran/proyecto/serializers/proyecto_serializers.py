@@ -1,3 +1,4 @@
+#spme/apptran/proyecto/serializers/proyecto_serializers.py
 from rest_framework import serializers
 from spme_estructuracion_proyecto.models import (
     Proyecto, InstanciaGestora, ProcedenciaFondos

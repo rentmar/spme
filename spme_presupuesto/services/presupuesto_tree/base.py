@@ -69,10 +69,21 @@ class BasePresupuestoBuilder(ABC):
 
     def _calcular_ejecutado(self, formularios: List[Dict[str, Any]]) -> float:
         """
-        Calcula el presupuesto ejecutado sumando formularios aprobados.
+        Calcula el presupuesto ejecutado sumando:
+        - Rendiciones de cuentas aprobadas
+        - Solicitudes de reembolso aprobadas
         """
+        TIPOS_EJECUTADO = {'rendicion_cuentas', 'solicitud_reembolso'}
+
         return sum(
             f.get('monto', 0)
             for f in formularios
             if f.get('estado') == 'aprobado'
+            and f.get('tipo') in TIPOS_EJECUTADO
         )
+
+        # return sum(
+        #     f.get('monto', 0)
+        #     for f in formularios
+        #     if f.get('estado') == 'aprobado'
+        # )
