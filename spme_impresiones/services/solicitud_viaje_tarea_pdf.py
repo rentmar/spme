@@ -70,7 +70,7 @@ class SolicitudViajeTareaPDFGenerator(BasePDFGenerator):
             'numero_formulario': obj.numeroFormulario or f"SV-{obj.id:04d}",
             'fecha_emision': fecha_solicitud,
             'fecha_solicitud': fecha_solicitud,
-            'tipo_documento': 'SOLICITUD DE VIAJE - TAREA',
+            'tipo_documento': 'SOLICITUD DE VIAJE - SUBACTIVIDAD',
             'subtipo_documento': 'SV-T',
             
             # Solicitante (desde el servicio)

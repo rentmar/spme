@@ -85,7 +85,7 @@ class SolicitudReembolsoPDFGenerator(BasePDFGenerator):
             
             'fuentes_financiamiento': self._procesar_fuentes_financiamiento(obj),
             
-            'tipo_documento': 'SOLICITUD DE REEMBOLSO',
+            'tipo_documento': 'SOLICITUD DE REPOSICION',
             'subtipo_documento': 'F-02',
         }
         

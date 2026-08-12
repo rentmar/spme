@@ -103,7 +103,7 @@ class SolicitudFondosTareaPDFGenerator(BasePDFGenerator):
         
         context = {
             # Documento
-            'tipo_documento': 'SOLICITUD DE FONDOS - TAREA',
+            'tipo_documento': 'SOLICITUD DE FONDOS - SUBACTIVIDAD',
             'subtipo_documento': 'F-01-T',
             'numero_formulario': obj.numeroFormulario or f"SF-T-{obj.id:04d}",
             'fecha_emision': fecha_solicitud,

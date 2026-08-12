@@ -2,128 +2,66 @@
 
 {% block content %}
     <!-- SECCIÓN 1: INFORMACIÓN GENERAL -->
-    <div class="seccion compact-section">
-        <div class="seccion-titulo">📋 INFORMACIÓN GENERAL</div>
-        
+    <div class="seccion compact-section" style="padding: 6px 10px; margin-bottom: 6px;">
+        <div class="seccion-titulo" style="margin-bottom: 2px; padding-bottom: 2px;">📋 INFORMACIÓN GENERAL</div>
         <div class="grid-3">
-            <div class="campo">
-                <div class="etiqueta">N° Formulario:</div>
-                <div class="valor">{{ numero_formulario|default:"-" }}</div>
-            </div>
-            
-            <div class="campo">
-                <div class="etiqueta">Cpte. Diario:</div>
-                <div class="valor">{{ cpte_diario|default:"-" }}</div>
-            </div>
-            
-            <div class="campo">
-                <div class="etiqueta">F. Rendición:</div>
-                <div class="valor">{{ fecha_rendicion|default:"-" }}</div>
-            </div>
+            <div class="campo"><div class="etiqueta">N° Formulario:</div><div class="valor">{{ numero_formulario|default:"-" }}</div></div>
+            <div class="campo"><div class="etiqueta">Cpte. Diario:</div><div class="valor">{{ cpte_diario|default:"-" }}</div></div>
+            <div class="campo"><div class="etiqueta">F. Rendición:</div><div class="valor">{{ fecha_rendicion|default:"-" }}</div></div>
         </div>
     </div>
     
     <!-- SECCIÓN 2: RESPONSABLE DE RENDICIÓN -->
-    <div class="seccion compact-section">
-        <div class="seccion-titulo">👤 RESPONSABLE DE RENDICIÓN</div>
-        
+    <div class="seccion compact-section" style="padding: 6px 10px; margin-bottom: 6px;">
+        <div class="seccion-titulo" style="margin-bottom: 2px; padding-bottom: 2px;">👤 RESPONSABLE DE RENDICIÓN</div>
         <div class="grid-3">
-            <div class="campo">
-                <div class="etiqueta">Nombre:</div>
-                <div class="valor texto-largo">{{ solicitante.nombre }}</div>
-            </div>
-            
-            <div class="campo">
-                <div class="etiqueta">C.I.:</div>
-                <div class="valor">{{ solicitante.documento_identidad }}</div>
-            </div>
-            
-            <div class="campo">
-                <div class="etiqueta">Cargo:</div>
-                <div class="valor">{{ solicitante.cargo }}</div>
-            </div>
+            <div class="campo"><div class="etiqueta">Nombre:</div><div class="valor texto-largo">{{ solicitante.nombre }}</div></div>
+            <div class="campo"><div class="etiqueta">C.I.:</div><div class="valor">{{ solicitante.documento_identidad }}</div></div>
+            <div class="campo"><div class="etiqueta">Cargo:</div><div class="valor">{{ solicitante.cargo }}</div></div>
         </div>
     </div>
     
     <!-- SECCIÓN 3: ACTIVIDAD Y ORIGEN -->
-    <div class="seccion compact-section">
-        <div class="seccion-titulo">📅 ACTIVIDAD Y ORIGEN</div>
-        
+    <div class="seccion compact-section" style="padding: 6px 10px; margin-bottom: 6px;">
+        <div class="seccion-titulo" style="margin-bottom: 2px; padding-bottom: 2px;">📅 ACTIVIDAD Y ORIGEN</div>
         <div class="grid-3">
-            <div class="campo">
-                <div class="etiqueta">Actividad:</div>
-                <div class="valor texto-largo">{{ nombre_actividad|truncatechars:30 }}</div>
-            </div>
-            
-            <div class="campo">
-                <div class="etiqueta">Código:</div>
-                <div class="valor">{{ codigo_actividad|default:"-" }}</div>
-            </div>
-            
-            <div class="campo">
-                <div class="etiqueta">F. Actividad:</div>
-                <div class="valor">{{ fecha_actividad|default:"-" }}</div>
-            </div>
+            <div class="campo"><div class="etiqueta">Actividad:</div><div class="valor texto-largo">{{ nombre_actividad }}</div></div>
+            <div class="campo"><div class="etiqueta">Código:</div><div class="valor">{{ codigo_actividad|default:"-" }}</div></div>
+            <div class="campo"><div class="etiqueta">F. Actividad:</div><div class="valor">{{ fecha_actividad|default:"-" }}</div></div>
         </div>
-        
         {% if tipo_solicitud_origen != "No aplica" %}
-        <div class="campo" style="margin-top: 5px;">
-            <div class="etiqueta">Origen:</div>
-            <div class="valor">
-                <strong>{{ tipo_solicitud_origen }}</strong> - N° {{ solicitud_origen_numero }}
-            </div>
-        </div>
+        <div class="campo" style="margin-top: 2px;"><div class="etiqueta">Origen:</div><div class="valor"><strong>{{ tipo_solicitud_origen }}</strong> - N° {{ solicitud_origen_numero }}</div></div>
         {% endif %}
-        
-        <div class="grid-2" style="margin-top: 5px;">
-            <div class="campo">
-                <div class="etiqueta">F. Desembolso:</div>
-                <div class="valor">{{ fecha_desembolso|default:"-" }}</div>
-            </div>
-            
-            <div class="campo">
-                <div class="etiqueta">Lugar:</div>
-                <div class="valor">{{ lugar_actividad|default:"-"|truncatechars:25 }}</div>
-            </div>
+        <div class="grid-2" style="margin-top: 2px;">
+            <div class="campo"><div class="etiqueta">F. Desembolso:</div><div class="valor">{{ fecha_desembolso|default:"-" }}</div></div>
+            <div class="campo"><div class="etiqueta">Lugar:</div><div class="valor">{{ lugar_actividad|default:"-" }}</div></div>
         </div>
     </div>
     
     <!-- SECCIÓN 4: RESUMEN FINANCIERO -->
-    <div class="seccion compact-section">
-        <div class="seccion-titulo">💵 RESUMEN FINANCIERO</div>
-        
+    <div class="seccion compact-section" style="padding: 6px 10px; margin-bottom: 6px;">
+        <div class="seccion-titulo" style="margin-bottom: 2px; padding-bottom: 2px;">💵 RESUMEN FINANCIERO</div>
         <div class="grid-3">
             <div class="campo" style="text-align: center;">
                 <div class="etiqueta">MONTO ASIGNADO</div>
-                <div class="valor" style="font-size: 11px; font-weight: bold; color: #1976d2;">
-                    Bs. {{ monto_asignado|floatformat:2 }}
-                </div>
+                <div class="valor" style="font-size: 11px; font-weight: bold; color: #1976d2;">Bs. {{ monto_asignado|floatformat:2 }}</div>
             </div>
-            
             <div class="campo" style="text-align: center;">
                 <div class="etiqueta">MONTO RENDIDO</div>
-                <div class="valor" style="font-size: 11px; font-weight: bold; color: #2e7d32;">
-                    Bs. {{ monto_descargado|floatformat:2 }}
-                </div>
+                <div class="valor" style="font-size: 11px; font-weight: bold; color: #2e7d32;">Bs. {{ monto_descargado|floatformat:2 }}</div>
             </div>
-            
             <div class="campo" style="text-align: center;">
-                <div class="etiqueta">
-                    {% if tiene_saldo_favor %}SALDO A FAVOR{% elif tiene_saldo_debito %}SALDO PENDIENTE{% else %}SALDO{% endif %}
-                </div>
-                <div class="valor" style="font-size: 11px; font-weight: bold; color: {% if tiene_saldo_favor %}#2e7d32{% elif tiene_saldo_debito %}#d32f2f{% else %}#666{% endif %};">
-                    Bs. {{ saldo|floatformat:2 }}
-                </div>
+                <div class="etiqueta">{% if tiene_saldo_favor %}SALDO A FAVOR{% elif tiene_saldo_debito %}SALDO PENDIENTE{% else %}SALDO{% endif %}</div>
+                <div class="valor" style="font-size: 11px; font-weight: bold; color: {% if tiene_saldo_favor %}#2e7d32{% elif tiene_saldo_debito %}#d32f2f{% else %}#666{% endif %};">Bs. {{ saldo|floatformat:2 }}</div>
             </div>
         </div>
     </div>
     
     <!-- SECCIÓN 5: DETALLE DE GASTOS -->
-    <div class="seccion">
-        <div class="seccion-titulo">💰 DETALLE DE GASTOS</div>
-        
+    <div class="seccion" style="padding: 6px 10px; margin-bottom: 6px;">
+        <div class="seccion-titulo" style="margin-bottom: 2px; padding-bottom: 2px;">💰 DETALLE DE GASTOS</div>
         {% if tiene_gastos %}
-        <table class="tabla tabla-gastos">
+        <table class="tabla tabla-gastos" style="margin-top: 2px;">
             <thead>
                 <tr>
                     <th style="width: 3%;">#</th>
@@ -144,109 +82,89 @@
                     <td>{{ gasto.partida|default:"-" }}</td>
                     <td>{{ gasto.fuente|default:"-" }}</td>
                     <td>{{ gasto.factura_recibo|default:"-" }}</td>
-                    <td class="texto-largo">{{ gasto.descripcion_gasto|truncatechars:35|default:"-" }}</td>
-                    <td>{{ gasto.proveedor|truncatechars:15|default:"-" }}</td>
+                    <td class="texto-largo">{{ gasto.descripcion_gasto|default:"-" }}</td>
+                    <td>{{ gasto.proveedor|default:"-" }}</td>
                     <td style="text-align: right;">{{ gasto.monto|floatformat:2 }}</td>
                 </tr>
                 {% endfor %}
-                
                 <tr class="total-row">
                     <td colspan="7" style="text-align: right; font-weight: bold;">TOTAL GASTOS JUSTIFICADOS:</td>
-                    <td style="text-align: right; font-weight: bold; font-size: 9px;">
-                        Bs. {{ monto_descargado|floatformat:2 }}
-                    </td>
+                    <td style="text-align: right; font-weight: bold; font-size: 9px;">Bs. {{ monto_descargado|floatformat:2 }}</td>
                 </tr>
             </tbody>
         </table>
-        
-        <div style="margin-top: 5px; font-size: 8px; color: #666; text-align: right;">
-            Total de {{ cantidad_gastos }} comprobante{{ cantidad_gastos|pluralize:"s" }}
-        </div>
+        <div style="margin-top: 1px; font-size: 8px; color: #666; text-align: right;">{{ cantidad_gastos }} comprobante{{ cantidad_gastos|pluralize:"s" }}</div>
         {% else %}
-        <div style="text-align: center; padding: 8px; color: #999; font-size: 8px;">
-            No se registraron gastos para esta rendición
-        </div>
+        <div style="text-align: center; padding: 2px; color: #999; font-size: 8px;">No se registraron gastos para esta rendición</div>
         {% endif %}
     </div>
     
     <!-- SECCIÓN 6: FIRMAS Y VALIDACIONES -->
-    <div class="seccion">
-        <div class="seccion-titulo">✍️ FIRMAS Y VALIDACIONES</div>
-        
+    <div class="seccion" style="padding: 6px 10px; margin-bottom: 6px;">
+        <div class="seccion-titulo" style="margin-bottom: 2px; padding-bottom: 2px;">✍️ FIRMAS Y VALIDACIONES</div>
         {% if estado_documento == 'SIN_REVISORES' %}
-        <div style="text-align: center; padding: 8px; margin-bottom: 10px; background: #f5f5f5; border-left: 3px solid #9e9e9e; font-size: 9px; color: #666;">
-            ⚠️ Este documento no tiene revisores asignados
-        </div>
+        <div style="text-align: center; padding: 2px 4px; margin-bottom: 3px; background: #f5f5f5; border-left: 3px solid #9e9e9e; font-size: 9px; color: #666;">⚠️ Este documento no tiene revisores asignados</div>
         {% endif %}
-        
         <div class="grid-firmas" style="display: flex; justify-content: space-around; text-align: center;">
-            <!-- SOLICITANTE -->
-            <div class="firma-columna" style="flex: 1; padding: 0 8px;">
+            <!-- RRCF -->
+            <div class="firma-columna" style="flex: 1; padding: 0 6px;">
                 <div class="firma-area">
-                    <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 30px 0 5px 0;"></div>
-                    <div class="nombre-firma" style="font-size: 12px; font-weight: bold;">
-                        {{ solicitante.nombre }}
-                    </div>
-                    <div class="cargo-firma" style="font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">
-                        RESPONSABLE
-                    </div>
+                    <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 8px 0 2px 0;"></div>
+                    <div class="nombre-firma" style="font-size: 10px; font-weight: bold; color: #999;">&nbsp;</div>
+                    <div class="cargo-firma" style="font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">REVISOR-RESPONSABLE-CONTABLE-FINANCIERO</div>
                 </div>
             </div>
-            
-            <!-- REVISORES (3 para rendiciones) -->
+            <!-- SOLICITANTE -->
+            <div class="firma-columna" style="flex: 1; padding: 0 6px;">
+                <div class="firma-area">
+                    <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 8px 0 2px 0;"></div>
+                    <div class="nombre-firma" style="font-size: 10px; font-weight: bold;">{{ solicitante.nombre }}</div>
+                    <div class="cargo-firma" style="font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">RESPONSABLE</div>
+                </div>
+            </div>
+            <!-- REVISORES -->
             {% if estado_documento == 'SIN_REVISORES' %}
-                <div class="firma-columna" style="flex: 1; padding: 0 8px;">
+                <div class="firma-columna" style="flex: 1; padding: 0 6px;">
                     <div class="firma-area">
-                        <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 30px 0 5px 0;"></div>
-                        <div class="nombre-firma" style="font-size: 12px; font-weight: bold; color: #999;">_________________</div>
+                        <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 8px 0 2px 0;"></div>
+                        <div class="nombre-firma" style="font-size: 10px; font-weight: bold; color: #999;">_________________</div>
                         <div class="cargo-firma" style="font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">REVISOR</div>
                     </div>
                 </div>
-                <div class="firma-columna" style="flex: 1; padding: 0 8px;">
+                <div class="firma-columna" style="flex: 1; padding: 0 6px;">
                     <div class="firma-area">
-                        <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 30px 0 5px 0;"></div>
-                        <div class="nombre-firma" style="font-size: 12px; font-weight: bold; color: #999;">_________________</div>
+                        <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 8px 0 2px 0;"></div>
+                        <div class="nombre-firma" style="font-size: 10px; font-weight: bold; color: #999;">_________________</div>
                         <div class="cargo-firma" style="font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">REVISOR</div>
                     </div>
                 </div>
-                <div class="firma-columna" style="flex: 1; padding: 0 8px;">
+                <div class="firma-columna" style="flex: 1; padding: 0 6px;">
                     <div class="firma-area">
-                        <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 30px 0 5px 0;"></div>
-                        <div class="nombre-firma" style="font-size: 12px; font-weight: bold; color: #999;">_________________</div>
+                        <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 8px 0 2px 0;"></div>
+                        <div class="nombre-firma" style="font-size: 10px; font-weight: bold; color: #999;">_________________</div>
                         <div class="cargo-firma" style="font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">REVISOR</div>
                     </div>
                 </div>
             {% else %}
                 {% for validador in validadores %}
-                <div class="firma-columna" style="flex: 1; padding: 0 8px;">
+                <div class="firma-columna" style="flex: 1; padding: 0 6px;">
                     <div class="firma-area">
-                        <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 30px 0 5px 0;"></div>
-                        <div class="nombre-firma" style="font-size: 12px; font-weight: bold;">
-                            {{ validador.nombre }}
-                        </div>
-                        <div class="cargo-firma" style="font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">
-                            {{ validador.etiqueta_cargo }}
-                        </div>
+                        <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 8px 0 2px 0;"></div>
+                        <div class="nombre-firma" style="font-size: 10px; font-weight: bold;">{{ validador.nombre }}</div>
+                        <div class="cargo-firma" style="font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">{{ validador.etiqueta_cargo }}</div>
                         {% if validador.estado != 'PENDIENTE' %}
-                        <div class="estado-firma" style="font-size: 7px; margin-top: 2px; {% if validador.estado == 'APROBADO' %}color: #28a745;{% elif validador.estado == 'RECHAZADO' %}color: #dc3545;{% endif %}">
-                            {{ validador.estado_display }}
-                        </div>
+                        <div class="estado-firma" style="font-size: 7px; margin-top: 1px; {% if validador.estado == 'APROBADO' %}color: #28a745;{% elif validador.estado == 'RECHAZADO' %}color: #dc3545;{% endif %}">{{ validador.estado_display }}</div>
                         {% endif %}
                     </div>
                 </div>
                 {% endfor %}
             {% endif %}
         </div>
-        
         <!-- Alerta de saldo -->
-        <div style="margin-top: 10px; padding: 6px 8px; font-size: 8px; border-radius: 3px; {% if tiene_saldo_favor %}background: #e8f5e9; border-left: 3px solid #2e7d32;{% elif tiene_saldo_debito %}background: #ffebee; border-left: 3px solid #d32f2f;{% else %}background: #e3f2fd; border-left: 3px solid #1976d2;{% endif %}">
-            {% if tiene_saldo_favor %}
-            <strong>SALDO A FAVOR:</strong> Bs. {{ saldo|floatformat:2 }} - Devolver a caja.
-            {% elif tiene_saldo_debito %}
-            <strong>SALDO PENDIENTE:</strong> Bs. {{ saldo_absoluto|floatformat:2 }} - Complementar.
-            {% else %}
-            <strong>RENDICIÓN CUADRADA:</strong> No hay saldos pendientes.
-            {% endif %}
+        <div style="margin-top: 4px; padding: 3px 6px; font-size: 8px; border-radius: 3px; {% if tiene_saldo_favor %}background: #e8f5e9; border-left: 3px solid #2e7d32;{% elif tiene_saldo_debito %}background: #ffebee; border-left: 3px solid #d32f2f;{% else %}background: #e3f2fd; border-left: 3px solid #1976d2;{% endif %}">
+            {% if tiene_saldo_favor %}<strong>SALDO A FAVOR:</strong> Bs. {{ saldo|floatformat:2 }} - Devolver a caja.
+            {% elif tiene_saldo_debito %}<strong>SALDO PENDIENTE:</strong> Bs. {{ saldo_absoluto|floatformat:2 }} - Complementar.
+            {% else %}<strong>RENDICIÓN CUADRADA:</strong> No hay saldos pendientes.{% endif %}
         </div>
     </div>
 {% endblock %}

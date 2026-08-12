@@ -66,7 +66,7 @@ class SolicitudReembolsoTareaPDFGenerator(BasePDFGenerator):
             'numero_formulario': obj.numeroFormulario or f"SR-{obj.id:04d}",
             'fecha_emision': fecha_solicitud,
             'fecha_solicitud': fecha_solicitud,
-            'tipo_documento': 'SOLICITUD DE REEMBOLSO - SUBACTIVIDAD',
+            'tipo_documento': 'SOLICITUD DE REPOSICION - SUBACTIVIDAD',
             'subtipo_documento': 'SR-T',
             
             'solicitante': contexto_validacion['solicitante'],

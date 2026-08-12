@@ -30,7 +30,7 @@
         <div class="grid-3">
             <div class="campo">
                 <div class="etiqueta">Actividad:</div>
-                <div class="valor texto-largo">{{ nombre_actividad|truncatechars:30 }}</div>
+                <div class="valor texto-largo">{{ nombre_actividad }}</div>
             </div>
             
             <div class="campo">
@@ -45,21 +45,24 @@
         </div>
         
         <div class="grid-3">
+
             <div class="campo">
-                <div class="etiqueta">Descripción:</div>
-                <div class="valor texto-largo">{{ descripcion_actividad|truncatechars:35 }}</div>
+                <div class="etiqueta">Objetivo:</div>
+                <div class="valor texto-largo">{{ objetivo_actividad }}</div>
             </div>
             
             <div class="campo">
-                <div class="etiqueta">Objetivo:</div>
-                <div class="valor texto-largo">{{ objetivo_actividad|truncatechars:35 }}</div>
+                <div class="etiqueta">Descripción:</div>
+                <div class="valor texto-largo">{{ descripcion_actividad }}</div>
             </div>
+            
+            
             
             <div class="campo">
                 <div class="etiqueta">Financiamiento:</div>
                 <div class="valor texto-largo">
                     {% for fuente in fuentes_financiamiento|slice:":2" %}
-                        {{ fuente.nombre|truncatechars:12 }}: Bs.{{ fuente.monto|floatformat:0 }}{% if not forloop.last %}, {% endif %}
+                        {{ fuente.nombre }}: Bs.{{ fuente.monto|floatformat:0 }}{% if not forloop.last %}, {% endif %}
                     {% empty %}
                         No especificado
                     {% endfor %}
@@ -89,9 +92,9 @@
                     <td>{{ gasto.indice|default:forloop.counter }}</td>
                     <td>{{ gasto.partida|default:"-" }}</td>
                     <td>{{ gasto.fuente|default:"-" }}</td>
-                    <td class="texto-largo">{{ gasto.descripcion_gasto|truncatechars:40|default:"-" }}</td>
+                    <td class="texto-largo">{{ gasto.descripcion_gasto|default:"-" }}</td>
                     <td style="text-align: right;">{{ gasto.monto|floatformat:2 }}</td>
-                    <td>{{ gasto.observaciones|truncatechars:20|default:"-" }}</td>
+                    <td>{{ gasto.observaciones|default:"-" }}</td>
                 </tr>
                 {% empty %}
                 <tr>
@@ -125,7 +128,7 @@
         <div class="grid-3">
             <div class="campo">
                 <div class="etiqueta">Lugar:</div>
-                <div class="valor">{{ lugar_solicitud|default:"-"|truncatechars:20 }}</div>
+                <div class="valor">{{ lugar_solicitud|default:"-" }}</div>
             </div>
             
             <div class="campo">
@@ -158,7 +161,7 @@
                 <div class="campo">
                     <div class="etiqueta">Nombre:</div>
                     <div class="valor texto-largo">
-                        {{ datos_transferencia.transferencia.nombre_transferencia|default:"-"|truncatechars:25 }}
+                        {{ datos_transferencia.transferencia.nombre_transferencia|default:"-" }}
                     </div>
                 </div>
                 
@@ -169,7 +172,7 @@
                 
                 <div class="campo">
                     <div class="etiqueta">Banco/Entidad:</div>
-                    <div class="valor">{{ datos_transferencia.transferencia.entidad_bancaria|default:"-"|truncatechars:15 }}</div>
+                    <div class="valor">{{ datos_transferencia.transferencia.entidad_bancaria|default:"-" }}</div>
                 </div>
                 
                 <div class="campo">
@@ -179,7 +182,7 @@
                 
                 <div class="campo" style="grid-column: span 2;">
                     <div class="etiqueta">Número de Cuenta:</div>
-                    <div class="valor">{{ datos_transferencia.transferencia.numero_cuenta|default:"-"|truncatechars:20 }}</div>
+                    <div class="valor">{{ datos_transferencia.transferencia.numero_cuenta|default:"-" }}</div>
                 </div>
             </div>
         </div>
@@ -194,7 +197,7 @@
                 <div class="campo">
                     <div class="etiqueta">Nombre:</div>
                     <div class="valor texto-largo">
-                        {{ datos_transferencia.cheque.nombre_cheque|default:"-"|truncatechars:25 }}
+                        {{ datos_transferencia.cheque.nombre_cheque|default:"-" }}
                     </div>
                 </div>
                 
@@ -215,7 +218,7 @@
                 <div class="campo">
                     <div class="etiqueta">Nombre:</div>
                     <div class="valor texto-largo">
-                        {{ datos_transferencia.otros.nombre_otros|default:"-"|truncatechars:25 }}
+                        {{ datos_transferencia.otros.nombre_otros|default:"-" }}
                     </div>
                 </div>
                 
@@ -228,9 +231,9 @@
         {% endif %}
     </div>
     
-    <!-- SECCIÓN 5: FIRMAS Y VALIDACIONES -->
+        <!-- SECCIÓN 5: FIRMAS Y VALIDACIONES -->
     <div class="seccion">
-        <div class="seccion-titulo">✍️ FIRMAS Y VALIDACIONES</div>
+        <div class="seccion-titulo" style="margin-bottom: 0px;" >✍️ FIRMAS Y VALIDACIONES</div>
         
         {% if estado_documento == 'SIN_REVISORES' %}
         <div style="text-align: center; padding: 8px; margin-bottom: 10px; background: #f5f5f5; border-left: 3px solid #9e9e9e; font-size: 9px; color: #666;">
@@ -239,10 +242,24 @@
         {% endif %}
         
         <div class="grid-firmas" style="display: flex; justify-content: space-around; text-align: center;">
+            
+            <!-- 🆕 RRCF (AL INICIO) -->
+            <div class="firma-columna" style="flex: 1; padding: 0 10px;">
+                <div class="firma-area">
+                    <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 15px 0 5px 0;"></div>
+                    <div class="nombre-firma" style="font-size: 12px; font-weight: bold; color: #999;">
+                        &nbsp;
+                    </div>
+                    <div class="cargo-firma" style="font-size: 7px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">
+                        REVISOR-RESPONSABLE-CONTABLE-FINANCIERO
+                    </div>
+                </div>
+            </div>
+            
             <!-- SOLICITANTE -->
             <div class="firma-columna" style="flex: 1; padding: 0 10px;">
                 <div class="firma-area">
-                    <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 30px 0 5px 0;"></div>
+                    <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 15px 0 5px 0;"></div>
                     <div class="nombre-firma" style="font-size: 12px; font-weight: bold;">
                         {{ solicitante.nombre }}
                     </div>
@@ -256,7 +273,7 @@
             {% if estado_documento == 'SIN_REVISORES' %}
                 <div class="firma-columna" style="flex: 1; padding: 0 10px;">
                     <div class="firma-area">
-                        <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 30px 0 5px 0;"></div>
+                        <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 15px 0 5px 0;"></div>
                         <div class="nombre-firma" style="font-size: 12px; font-weight: bold; color: #999;">
                             _________________
                         </div>
@@ -267,7 +284,7 @@
                 </div>
                 <div class="firma-columna" style="flex: 1; padding: 0 10px;">
                     <div class="firma-area">
-                        <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 30px 0 5px 0;"></div>
+                        <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 15px 0 5px 0;"></div>
                         <div class="nombre-firma" style="font-size: 12px; font-weight: bold; color: #999;">
                             _________________
                         </div>
@@ -280,7 +297,7 @@
                 {% for validador in validadores %}
                 <div class="firma-columna" style="flex: 1; padding: 0 10px;">
                     <div class="firma-area">
-                        <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 30px 0 5px 0;"></div>
+                        <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 15px 0 5px 0;"></div>
                         <div class="nombre-firma" style="font-size: 12px; font-weight: bold;">
                             {{ validador.nombre }}
                         </div>
@@ -296,6 +313,7 @@
                 </div>
                 {% endfor %}
             {% endif %}
+            
         </div>
     </div>
 {% endblock %}
