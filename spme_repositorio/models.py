@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from spme_autenticacion.models import Usuario
+#Auditlogs
+from auditlog.registry import auditlog
 
 class Archivo(models.Model):
     """
@@ -147,6 +149,11 @@ class ReferenciaExterna(models.Model):
 
     def __str__(self):
         return f"{self.categoria}: {self.nombre}"
+
+
+auditlog.register(Archivo)
+auditlog.register(Adjunto)
+auditlog.register(ReferenciaExterna)
 
 
 

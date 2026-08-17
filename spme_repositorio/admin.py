@@ -1,5 +1,11 @@
 from django.contrib import admin
 from spme_repositorio.models import Archivo, Adjunto, ReferenciaExterna
+#Log entryes
+from auditlog.models import LogEntry
+from auditlog.admin import LogEntryAdmin
+
+#Registrar logentry de auditlog
+#admin.site.register(LogEntry, LogEntryAdmin)
 
 
 @admin.register(Archivo)

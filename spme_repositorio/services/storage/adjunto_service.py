@@ -1,4 +1,3 @@
-# spme/spme_repositorio/services/storage/adjunto_service.py
 """
 Servicio de aplicación para la gestión de Adjuntos.
 
@@ -26,19 +25,9 @@ from django.db import transaction
 
 from spme_repositorio.models import Archivo, Adjunto
 from spme_repositorio.services.storage.archivo_service import ArchivoService
-from spme_repositorio.repositories.garage.exceptions import GarageError
 from .exceptions import AdjuntoCreationError
 
 logger = logging.getLogger(__name__)
-
-CLASE_TO_TIPO = {
-    'indicadorobjetivogeneral': 'indicador_og',
-    'indicadorresultadoobjgral': 'indicador_rog',
-    'indicadorobjetivoespecifico': 'indicador_oe',
-    'indicadorresultadoobjespecifico': 'indicador_roe',
-    'actividad': 'actividad',
-    'tareaactividad': 'tarea',
-}
 
 
 @dataclass
@@ -66,10 +55,6 @@ class AdjuntoService:
     def __init__(self):
         self._archivo_service = ArchivoService()
 
-    def _get_tipo_objeto(self, content_object) -> str:
-        clase_nombre = content_object.__class__.__name__.lower()
-        return CLASE_TO_TIPO.get(clase_nombre, 'otros')
-
     @transaction.atomic
     def subir_y_asociar(
         self,
@@ -84,11 +69,10 @@ class AdjuntoService:
         Sube un archivo a Garage, crea el Archivo en MySQL
         y lo asocia al objeto de negocio.
 
+        El tipo_objeto viene de la vista (validado con nodos_config.py).
         Si falla la creación del Adjunto, intenta compensar eliminando
         el Archivo. Si la compensación falla, registra el error crítico.
         """
-        tipo_objeto = self._get_tipo_objeto(content_object)
-
         # 1. Subir archivo (Garage + MySQL)
         archivo = self._archivo_service.subir(
             file_obj=file_obj,
@@ -107,16 +91,12 @@ class AdjuntoService:
                 creado_por=creado_por,
             )
         except Exception as e:
-            # Compensación: eliminar Archivo (Garage + MySQL)
             self._archivo_service._compensar_garage(archivo.key, e)
             try:
                 archivo.delete()
             except Exception:
                 logger.error(f"No se pudo eliminar Archivo {archivo.id} durante compensación")
-            logger.error(
-                f"Compensación: Archivo {archivo.id} eliminado "
-                f"por fallo al crear Adjunto"
-            )
+            logger.error(f"Compensación: Archivo {archivo.id} eliminado por fallo al crear Adjunto")
             raise AdjuntoCreationError("No se pudo crear el adjunto") from e
 
         logger.info(

@@ -7,6 +7,9 @@ Para agregar un nuevo nodo, solo agregar una entrada aquí.
 
 from spme_actividades.models import Actividad, TareaActividad
 from spme_estructuracion_proyecto.models import IndicadorProyecto
+from spme_monitoreo.models import (
+    SolicitudFondos,
+)
 
 NODOS_CONFIG = {
     # Indicadores
@@ -38,6 +41,15 @@ NODOS_CONFIG = {
     'tarea': {
         'modelo': TareaActividad,
         'carpeta': 'tareas',
+    },
+    #Solicitudes de fondos
+    'solicitud_fondos_actividad': {
+        'modelo': SolicitudFondos,
+        'carpeta': 'solicitudes_fondos_actividad',
+    },
+    'solicitud_fondos_tarea':{
+        'modelo': SolicitudFondos,
+        'carpeta': 'solicitudes_fondos_tarea',
     },
 }
 

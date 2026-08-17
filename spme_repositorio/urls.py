@@ -18,6 +18,8 @@ from .views.referencia_views import (
     ReferenciaBulkView,
     ReferenciaDeleteView,
 )
+#Arbol repositorio
+from .views.repo_tree_views import RepoTreeView
 
 router = DefaultRouter()
 
@@ -43,6 +45,8 @@ urlpatterns = [
     path(r'referencias/', ReferenciaSingleView.as_view(), name='referencia-create'),
     path(r'referencias/bulk/', ReferenciaBulkView.as_view(), name='referencia-bulk'),
     path(r'referencias/<int:referencia_id>/', ReferenciaDeleteView.as_view(), name='referencia-delete'),
+    ############################## Arbol Repositorio ###########################################
+    path(r'repositorio/repo-tree/', RepoTreeView.as_view(), name='arbol_repositorio'),
 ]  
 
 urlpatterns += router.urls

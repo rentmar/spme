@@ -12,6 +12,7 @@ class TareaActividadSerializer(serializers.ModelSerializer):
     """
     Serializador para el modelo TareaActividad
     """
+    totalReportado = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = TareaActividad
         fields = [
@@ -26,7 +27,23 @@ class TareaActividadSerializer(serializers.ModelSerializer):
             'presupuesto',
             'presupuestoDesglose',
             'actividad',
+            'totalReportado', #Campo calculado
         ]
+        read_only_fields = ['totalReportado']
+
+    def get_totalReportado(self, obj):
+        """
+        Calcula dinámicamente el total reportado de la tarea
+        """
+        try:
+            from spme_presupuesto.services.presupuesto_tree.calculos_presupuestos_ejecutados import (
+                obtener_totales_tarea
+            )
+            totales = obtener_totales_tarea(obj.id)
+            return float(totales.get('presupuesto_ejecutado', 0))
+        except Exception:
+            return 0.0
+
 
 
 class ActividadConTareasSerializer(serializers.ModelSerializer):
@@ -38,6 +55,8 @@ class ActividadConTareasSerializer(serializers.ModelSerializer):
     tipo_actividad_id = serializers.IntegerField(source='tipo.id', read_only=True)
     responsable = serializers.StringRelatedField()  
     responsable_id = serializers.IntegerField(source='responsable.id', read_only=True) 
+    totalReportado = serializers.SerializerMethodField(read_only=True)
+
     class Meta: 
         model = Actividad
         fields = [
@@ -62,8 +81,25 @@ class ActividadConTareasSerializer(serializers.ModelSerializer):
             'supuestos',
             'riesgos',
             'responsable',
-            'tareas'
+            'tareas',
+            'totalReportado',
         ]
+        read_only_fields = ['totalReportado'] 
+
+    def get_totalReportado(self, obj):
+        """
+        Calcula dinámicamente el total reportado de la actividad
+        Este campo se calcula en el servicio, no se almacena
+        """
+        try:
+            from spme_presupuesto.services.presupuesto_tree.calculos_presupuestos_ejecutados import (
+                obtener_totales_actividad
+            )
+            totales = obtener_totales_actividad(obj.id)
+            return float(totales.get('presupuesto_ejecutado', 0))
+        except Exception:
+            return 0.0
+
 
 
 class InstanciaGestoraSerializer(serializers.ModelSerializer):
