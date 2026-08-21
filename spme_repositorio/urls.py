@@ -20,6 +20,8 @@ from .views.referencia_views import (
 )
 #Arbol repositorio
 from .views.repo_tree_views import RepoTreeView
+#lista de proyectos
+from .views.proyecto_resumen_views import ProyectosResumenView
 
 router = DefaultRouter()
 
@@ -47,6 +49,8 @@ urlpatterns = [
     path(r'referencias/<int:referencia_id>/', ReferenciaDeleteView.as_view(), name='referencia-delete'),
     ############################## Arbol Repositorio ###########################################
     path(r'repositorio/repo-tree/', RepoTreeView.as_view(), name='arbol_repositorio'),
+    ############################## Listado de proyectos ########################################
+    path(r'repositorio/proyectos-resumen/', ProyectosResumenView.as_view(), name='proyectos-resumen'),
 ]  
 
 urlpatterns += router.urls
