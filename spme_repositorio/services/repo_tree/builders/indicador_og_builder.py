@@ -39,7 +39,8 @@ class IndicadorOGRepoBuilder(BaseRepoNodeBuilder):
             title=obj.descripcion or f"Indicador OG {obj.id}",
             nodo_tipo=self.node_type,
             nodo_id=obj.id,
-            upload_enabled=True,
+            upload_enabled=self.registry.get_acceso_repositorio(self.node_type),
+            acceso_repositorio=self.registry.get_acceso_repositorio(self.node_type),
             children=[],
         )
 
@@ -50,6 +51,6 @@ class IndicadorOGRepoBuilder(BaseRepoNodeBuilder):
     def _extract_data(self, obj: Any) -> dict:
         return {
             'id': obj.id,
-            'nombre': obj.nombre,
+            'codigo': obj.codigo,
             'descripcion': getattr(obj, 'descripcion', None),
         }

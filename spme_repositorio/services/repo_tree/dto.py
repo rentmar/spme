@@ -5,15 +5,14 @@ from typing import Optional, List, Dict, Any
 
 @dataclass
 class RepoTreeNode:
-    """
-    Nodo del árbol de repositorio.
-    """
+    """Nodo del árbol de repositorio."""
 
     id: str
     title: str
     nodo_tipo: str
     nodo_id: Optional[int] = None
     upload_enabled: Optional[bool] = None
+    acceso_repositorio: Optional[bool] = None
     tipo_archivo: Optional[str] = None
     archivo_id: Optional[int] = None
     adjunto_id: Optional[int] = None
@@ -25,9 +24,6 @@ class RepoTreeNode:
     children: List['RepoTreeNode'] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
-        """
-        Convierte el nodo a diccionario para JSON.
-        """
         result = {
             'id': self.id,
             'title': self.title,
@@ -39,6 +35,9 @@ class RepoTreeNode:
 
         if self.upload_enabled is not None:
             result['upload_enabled'] = self.upload_enabled
+
+        if self.acceso_repositorio is not None:
+            result['acceso_repositorio'] = self.acceso_repositorio
 
         if self.tipo_archivo is not None:
             result['tipo_archivo'] = self.tipo_archivo
@@ -74,9 +73,8 @@ class RepoTreeNode:
 
 @dataclass
 class RepoTreeResponse:
-    """
-    Respuesta completa del árbol de repositorio.
-    """
+    """Respuesta completa del árbol de repositorio."""
+
     proyecto_id: int
     proyecto_nombre: str
     tree: List[RepoTreeNode]

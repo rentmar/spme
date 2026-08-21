@@ -1,42 +1,41 @@
-# spme/spme_repositorio/services/repo_tree/builders/solicitud_viaje_act_builder.py
+# spme/spme_repositorio/services/repo_tree/builders/producto_oe_builder.py
 from typing import List, Optional, Any
-from spme_monitoreo.models import SolicitudViaje
+from spme_estructuracion_proyecto.models import ProductoOE
 
 from ..enums import RepoNodeType
 from ..dto import RepoTreeNode
 from ..base import BaseRepoNodeBuilder
 
 
-class SolicitudViajeActRepoBuilder(BaseRepoNodeBuilder):
-    """Builder para el nodo Solicitud de Viaje de Actividad."""
+class ProductoOERepoBuilder(BaseRepoNodeBuilder):
+    """Builder para el nodo Producto OE."""
 
-    node_type = RepoNodeType.SOLICITUD_VIAJE_ACT.value
+    node_type = RepoNodeType.PRODUCTO_OE.value
 
     def get_node_type(self) -> str:
         return self.node_type
 
     def get_ids_by_parent(self, parent_id: int, parent_type: str) -> List[int]:
-        if parent_type != RepoNodeType.ACTIVIDAD.value:
+        if parent_type != RepoNodeType.OBJETIVO_ESPECIFICO_OG.value:
             return []
 
         return list(
-            SolicitudViaje.objects.filter(
-                actividad_id=parent_id,
-                tarea__isnull=True,
+            ProductoOE.objects.filter(
+                objetivo_especifico_id=parent_id
             ).values_list('id', flat=True)
         )
 
     def get_parent_id(self, child_id: int, parent_type: str) -> Optional[int]:
         try:
-            obj = SolicitudViaje.objects.get(id=child_id)
-            return obj.actividad_id
-        except SolicitudViaje.DoesNotExist:
+            obj = ProductoOE.objects.get(id=child_id)
+            return obj.objetivo_especifico_id
+        except ProductoOE.DoesNotExist:
             return None
 
     def build(self, node_id: int, **kwargs) -> RepoTreeNode:
-        obj = SolicitudViaje.objects.get(id=node_id)
+        obj = ProductoOE.objects.get(id=node_id)
 
-        titulo = obj.numeroFormulario or f"SV-{obj.id:04d}"
+        titulo = obj.descripcion or obj.codigo or f"Producto OE {obj.id}"
 
         nodo = RepoTreeNode(
             id=f"{self.node_type}-{obj.id}",
@@ -48,12 +47,14 @@ class SolicitudViajeActRepoBuilder(BaseRepoNodeBuilder):
             children=[],
         )
 
-        nodo.children = self._build_repository_children(obj, nodo.id)
+        if nodo.acceso_repositorio:
+            nodo.children = self._build_repository_children(obj, nodo.id)
 
         return nodo
 
     def _extract_data(self, obj: Any) -> dict:
         return {
             'id': obj.id,
-            'numero_formulario': obj.numeroFormulario,
+            'codigo': obj.codigo,
+            'descripcion': obj.descripcion,
         }

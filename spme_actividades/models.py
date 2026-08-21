@@ -251,4 +251,4 @@ class TareaActividad(models.Model):
             numero_formateado = f"{self.pk:04d}"
             self.codigo = f"SACT-{numero_formateado}/{self.actividad.codigo}"
             # Guardar nuevamente con el código generado
-            super().save(update_fields=['codigo'])
+            super().save(update_fields=['codigo']) 

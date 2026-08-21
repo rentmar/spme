@@ -29,6 +29,7 @@ class RepoNodeRegistry:
                 'model': 'Proyecto',
                 'app': 'spme_estructuracion_proyecto',
                 'fk_field': None,
+                'acceso_repositorio': False,
             },
             RepoNodeType.OBJETIVO_GENERAL.value: {
                 'children': [
@@ -41,6 +42,7 @@ class RepoNodeRegistry:
                 'model': 'ObjetivoGeneralProyecto',
                 'app': 'spme_estructuracion_proyecto',
                 'fk_field': 'proyecto_id',
+                'acceso_repositorio': False,
             },
             RepoNodeType.INDICADOR_OG.value: {
                 'children': [],
@@ -49,6 +51,7 @@ class RepoNodeRegistry:
                 'model': 'IndicadorObjetivoGeneral',
                 'app': 'spme_estructuracion_proyecto',
                 'fk_field': 'objetivo_general_id',
+                'acceso_repositorio': True,
             },
             RepoNodeType.RESULTADO_OG.value: {
                 'children': [
@@ -59,6 +62,7 @@ class RepoNodeRegistry:
                 'model': 'ResultadoOG',
                 'app': 'spme_estructuracion_proyecto',
                 'fk_field': 'objetivo_general_id',
+                'acceso_repositorio': True,
             },
             RepoNodeType.INDICADOR_ROG.value: {
                 'children': [],
@@ -67,17 +71,20 @@ class RepoNodeRegistry:
                 'model': 'IndicadorResultadoObjGral',
                 'app': 'spme_estructuracion_proyecto',
                 'fk_field': 'resultado_og_id',
+                'acceso_repositorio': True,
             },
             RepoNodeType.OBJETIVO_ESPECIFICO_OG.value: {
                 'children': [
                     RepoNodeType.INDICADOR_OE.value,
                     RepoNodeType.RESULTADO_OE.value,
+                    RepoNodeType.PRODUCTO_OE.value,
                 ],
                 'parent': RepoNodeType.OBJETIVO_GENERAL.value,
                 'label': 'Objetivo Específico',
                 'model': 'ObjetivoEspecificoProyecto',
                 'app': 'spme_estructuracion_proyecto',
                 'fk_field': 'objetivo_general_id',
+                'acceso_repositorio': False,
             },
             RepoNodeType.INDICADOR_OE.value: {
                 'children': [],
@@ -86,16 +93,19 @@ class RepoNodeRegistry:
                 'model': 'IndicadorObjetivoEspecifico',
                 'app': 'spme_estructuracion_proyecto',
                 'fk_field': 'objetivo_especifico_id',
+                'acceso_repositorio': True,
             },
             RepoNodeType.RESULTADO_OE.value: {
                 'children': [
                     RepoNodeType.INDICADOR_ROE.value,
+                    RepoNodeType.PRODUCTO_ROE.value,
                 ],
                 'parent': RepoNodeType.OBJETIVO_ESPECIFICO_OG.value,
                 'label': 'Resultado OE',
                 'model': 'ResultadoOE',
                 'app': 'spme_estructuracion_proyecto',
                 'fk_field': 'objetivo_especifico_id',
+                'acceso_repositorio': True,
             },
             RepoNodeType.INDICADOR_ROE.value: {
                 'children': [],
@@ -104,6 +114,25 @@ class RepoNodeRegistry:
                 'model': 'IndicadorResultadoObjEspecifico',
                 'app': 'spme_estructuracion_proyecto',
                 'fk_field': 'resultado_obj_especifico_id',
+                'acceso_repositorio': True,
+            },
+            RepoNodeType.PRODUCTO_OE.value: {
+                'children': [],
+                'parent': RepoNodeType.OBJETIVO_ESPECIFICO_OG.value,
+                'label': 'Producto OE',
+                'model': 'ProductoOE',
+                'app': 'spme_estructuracion_proyecto',
+                'fk_field': 'objetivo_especifico_id',
+                'acceso_repositorio': True,
+            },
+            RepoNodeType.PRODUCTO_ROE.value: {
+                'children': [],
+                'parent': RepoNodeType.RESULTADO_OE.value,
+                'label': 'Producto ROE',
+                'model': 'ProductoResultadoOE',
+                'app': 'spme_estructuracion_proyecto',
+                'fk_field': 'resultado_oe_id',
+                'acceso_repositorio': True,
             },
 
             # ============================================================
@@ -124,6 +153,7 @@ class RepoNodeRegistry:
                 'model': 'Actividad',
                 'app': 'spme_actividades',
                 'fk_field': 'proyecto_id',
+                'acceso_repositorio': True,
             },
             RepoNodeType.TAREA.value: {
                 'children': [
@@ -139,6 +169,7 @@ class RepoNodeRegistry:
                 'model': 'TareaActividad',
                 'app': 'spme_actividades',
                 'fk_field': 'actividad_id',
+                'acceso_repositorio': True,
             },
             RepoNodeType.SOLICITUD_FONDOS_ACT.value: {
                 'children': [],
@@ -148,6 +179,7 @@ class RepoNodeRegistry:
                 'app': 'spme_monitoreo',
                 'fk_field': 'actividad_id',
                 'filter_extra': {'tarea__isnull': True},
+                'acceso_repositorio': True,
             },
             RepoNodeType.SOLICITUD_FONDOS_TAREA.value: {
                 'children': [],
@@ -156,6 +188,7 @@ class RepoNodeRegistry:
                 'model': 'SolicitudFondos',
                 'app': 'spme_monitoreo',
                 'fk_field': 'tarea_id',
+                'acceso_repositorio': True,
             },
             RepoNodeType.SOLICITUD_REEMBOLSO_ACT.value: {
                 'children': [],
@@ -165,6 +198,7 @@ class RepoNodeRegistry:
                 'app': 'spme_monitoreo',
                 'fk_field': 'actividad_id',
                 'filter_extra': {'tarea__isnull': True},
+                'acceso_repositorio': True,
             },
             RepoNodeType.SOLICITUD_REEMBOLSO_TAREA.value: {
                 'children': [],
@@ -173,6 +207,7 @@ class RepoNodeRegistry:
                 'model': 'SolicitudReembolso',
                 'app': 'spme_monitoreo',
                 'fk_field': 'tarea_id',
+                'acceso_repositorio': True,
             },
             RepoNodeType.SOLICITUD_VIAJE_ACT.value: {
                 'children': [],
@@ -182,6 +217,7 @@ class RepoNodeRegistry:
                 'app': 'spme_monitoreo',
                 'fk_field': 'actividad_id',
                 'filter_extra': {'tarea__isnull': True},
+                'acceso_repositorio': True,
             },
             RepoNodeType.SOLICITUD_VIAJE_TAREA.value: {
                 'children': [],
@@ -190,6 +226,7 @@ class RepoNodeRegistry:
                 'model': 'SolicitudViaje',
                 'app': 'spme_monitoreo',
                 'fk_field': 'tarea_id',
+                'acceso_repositorio': True,
             },
             RepoNodeType.SOLICITUD_PAGO_DIRECTO_ACT.value: {
                 'children': [],
@@ -199,6 +236,7 @@ class RepoNodeRegistry:
                 'app': 'spme_monitoreo',
                 'fk_field': 'actividad_id',
                 'filter_extra': {'tarea__isnull': True},
+                'acceso_repositorio': True,
             },
             RepoNodeType.SOLICITUD_PAGO_DIRECTO_TAREA.value: {
                 'children': [],
@@ -207,6 +245,7 @@ class RepoNodeRegistry:
                 'model': 'SolicitudPagoDirecto',
                 'app': 'spme_monitoreo',
                 'fk_field': 'tarea_id',
+                'acceso_repositorio': True,
             },
             RepoNodeType.RENDICION_CUENTAS_ACT.value: {
                 'children': [],
@@ -216,6 +255,7 @@ class RepoNodeRegistry:
                 'app': 'spme_monitoreo',
                 'fk_field': 'actividad_id',
                 'filter_extra': {'tarea__isnull': True},
+                'acceso_repositorio': True,
             },
             RepoNodeType.RENDICION_CUENTAS_TAREA.value: {
                 'children': [],
@@ -224,6 +264,7 @@ class RepoNodeRegistry:
                 'model': 'RendicionCuentas',
                 'app': 'spme_monitoreo',
                 'fk_field': 'tarea_id',
+                'acceso_repositorio': True,
             },
             RepoNodeType.INFORME_ACTIVIDAD.value: {
                 'children': [],
@@ -232,6 +273,7 @@ class RepoNodeRegistry:
                 'model': 'InformeActividadPrincipal',
                 'app': 'spme_monitoreo',
                 'fk_field': 'actividad_id',
+                'acceso_repositorio': True,
             },
             RepoNodeType.INFORME_TAREA.value: {
                 'children': [],
@@ -240,6 +282,7 @@ class RepoNodeRegistry:
                 'model': 'InformeTareaPrincipal',
                 'app': 'spme_monitoreo',
                 'fk_field': 'tarea_id',
+                'acceso_repositorio': True,
             },
         }
 
@@ -276,6 +319,11 @@ class RepoNodeRegistry:
     def get_label(self, nodo_tipo: str) -> str:
         config = self._structure.get(nodo_tipo)
         return config.get('label', nodo_tipo) if config else nodo_tipo
+
+    def get_acceso_repositorio(self, nodo_tipo: str) -> bool:
+        """Retorna si el nodo tiene acceso al repositorio."""
+        config = self._structure.get(nodo_tipo)
+        return config.get('acceso_repositorio', False) if config else False
 
     def get_registered_types(self) -> List[str]:
         return list(self._structure.keys())

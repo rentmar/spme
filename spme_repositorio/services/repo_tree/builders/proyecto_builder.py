@@ -1,3 +1,4 @@
+# spme/spme_repositorio/services/repo_tree/builders/proyecto_builder.py
 from typing import List, Optional, Any
 from spme_estructuracion_proyecto.models import Proyecto
 
@@ -30,7 +31,8 @@ class ProyectoRepoBuilder(BaseRepoNodeBuilder):
             title=proyecto.titulo or f"Proyecto {proyecto.id}",
             nodo_tipo=self.node_type,
             nodo_id=proyecto.id,
-            upload_enabled=False,
+            upload_enabled=self.registry.get_acceso_repositorio(self.node_type),
+            acceso_repositorio=self.registry.get_acceso_repositorio(self.node_type),
             children=[],
         )
 
@@ -39,6 +41,6 @@ class ProyectoRepoBuilder(BaseRepoNodeBuilder):
     def _extract_data(self, obj: Any) -> dict:
         return {
             'id': obj.id,
-            'nombre': obj.nombre,
+            'titulo': obj.titulo,
             'codigo': getattr(obj, 'codigo', None),
         }

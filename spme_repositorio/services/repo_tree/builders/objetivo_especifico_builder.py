@@ -1,3 +1,4 @@
+# spme/spme_repositorio/services/repo_tree/builders/objetivo_especifico_builder.py
 from typing import List, Optional, Any
 from spme_estructuracion_proyecto.models import ObjetivoEspecificoProyecto
 
@@ -30,7 +31,7 @@ class ObjetivoEspecificoRepoBuilder(BaseRepoNodeBuilder):
             return obj.objetivo_general_id
         except ObjetivoEspecificoProyecto.DoesNotExist:
             return None
-        
+
     def build(self, node_id: int, **kwargs) -> RepoTreeNode:
         obj = ObjetivoEspecificoProyecto.objects.get(id=node_id)
 
@@ -39,7 +40,8 @@ class ObjetivoEspecificoRepoBuilder(BaseRepoNodeBuilder):
             title=obj.descripcion or f"Objetivo Específico {obj.id}",
             nodo_tipo=self.node_type,
             nodo_id=obj.id,
-            upload_enabled=False,
+            upload_enabled=self.registry.get_acceso_repositorio(self.node_type),
+            acceso_repositorio=self.registry.get_acceso_repositorio(self.node_type),
             children=[],
         )
 
@@ -48,6 +50,6 @@ class ObjetivoEspecificoRepoBuilder(BaseRepoNodeBuilder):
     def _extract_data(self, obj: Any) -> dict:
         return {
             'id': obj.id,
-            'nombre': obj.nombre,
+            'codigo': obj.codigo,
             'descripcion': getattr(obj, 'descripcion', None),
         }

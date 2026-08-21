@@ -21,6 +21,8 @@ from .rendicion_cuentas_act_builder import RendicionCuentasActRepoBuilder
 from .rendicion_cuentas_tarea_builder import RendicionCuentasTareaRepoBuilder
 from .informe_actividad_builder import InformeActividadRepoBuilder
 from .informe_tarea_builder import InformeTareaRepoBuilder
+from .producto_oe_builder import ProductoOERepoBuilder
+from .producto_roe_builder import ProductoROERepoBuilder
 
 __all__ = [
     'ProyectoRepoBuilder',
@@ -46,4 +48,6 @@ __all__ = [
     'RendicionCuentasTareaRepoBuilder',
     'InformeActividadRepoBuilder',
     'InformeTareaRepoBuilder',
+    'ProductoOERepoBuilder',
+    'ProductoROERepoBuilder',
 ]

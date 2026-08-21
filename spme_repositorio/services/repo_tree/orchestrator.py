@@ -29,6 +29,8 @@ from .builders import (
     RendicionCuentasTareaRepoBuilder,
     InformeActividadRepoBuilder,
     InformeTareaRepoBuilder,
+    ProductoOERepoBuilder,
+    ProductoROERepoBuilder,
 )
 
 logger = logging.getLogger(__name__)
@@ -59,6 +61,8 @@ class RepoTreeOrchestrator:
         RepoNodeType.INFORME_ACTIVIDAD.value: 'Informes',
         RepoNodeType.INFORME_TAREA.value: 'Informes',
         RepoNodeType.TAREA.value: 'Tareas',
+        RepoNodeType.PRODUCTO_OE.value: 'Productos de Objetivo Específico',
+        RepoNodeType.PRODUCTO_ROE.value: 'Productos de Resultado de Objetivo Especifico',
     }
 
     TIPOS_CON_CONTENEDOR = [
@@ -83,6 +87,8 @@ class RepoTreeOrchestrator:
         RepoNodeType.INFORME_ACTIVIDAD.value,
         RepoNodeType.INFORME_TAREA.value,
         RepoNodeType.TAREA.value,
+        RepoNodeType.PRODUCTO_OE.value,
+        RepoNodeType.PRODUCTO_ROE.value,
     ]
 
     def __init__(self):
@@ -114,6 +120,8 @@ class RepoTreeOrchestrator:
             RendicionCuentasTareaRepoBuilder(self.registry),
             InformeActividadRepoBuilder(self.registry),
             InformeTareaRepoBuilder(self.registry),
+            ProductoOERepoBuilder(self.registry),
+            ProductoROERepoBuilder(self.registry),
         ]
 
         for builder in builders:

@@ -1,3 +1,4 @@
+# spme/spme_repositorio/services/repo_tree/builders/objetivo_general_builder.py
 from typing import List, Optional, Any
 from spme_estructuracion_proyecto.models import ObjetivoGeneralProyecto
 
@@ -39,7 +40,8 @@ class ObjetivoGeneralRepoBuilder(BaseRepoNodeBuilder):
             title=obj.descripcion or f"Objetivo General {obj.id}",
             nodo_tipo=self.node_type,
             nodo_id=obj.id,
-            upload_enabled=False,
+            upload_enabled=self.registry.get_acceso_repositorio(self.node_type),
+            acceso_repositorio=self.registry.get_acceso_repositorio(self.node_type),
             children=[],
         )
 
@@ -48,6 +50,6 @@ class ObjetivoGeneralRepoBuilder(BaseRepoNodeBuilder):
     def _extract_data(self, obj: Any) -> dict:
         return {
             'id': obj.id,
-            'nombre': obj.nombre,
+            'codigo': obj.codigo,
             'descripcion': getattr(obj, 'descripcion', None),
         }

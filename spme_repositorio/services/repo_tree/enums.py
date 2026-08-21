@@ -15,6 +15,8 @@ class RepoNodeType(str, Enum):
     INDICADOR_OE = 'indicadoroe'
     RESULTADO_OE = 'resultadooe'
     INDICADOR_ROE = 'indicadorroe'
+    PRODUCTO_OE = 'productooe'                    
+    PRODUCTO_ROE = 'productoroe'                  
 
     # Actividad y jerarquía
     ACTIVIDAD = 'actividad'
