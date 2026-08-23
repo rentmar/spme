@@ -62,7 +62,7 @@ class RepoNodeRegistry:
                 'model': 'ResultadoOG',
                 'app': 'spme_estructuracion_proyecto',
                 'fk_field': 'objetivo_general_id',
-                'acceso_repositorio': True,
+                'acceso_repositorio': False,
             },
             RepoNodeType.INDICADOR_ROG.value: {
                 'children': [],
@@ -105,7 +105,7 @@ class RepoNodeRegistry:
                 'model': 'ResultadoOE',
                 'app': 'spme_estructuracion_proyecto',
                 'fk_field': 'objetivo_especifico_id',
-                'acceso_repositorio': True,
+                'acceso_repositorio': False,
             },
             RepoNodeType.INDICADOR_ROE.value: {
                 'children': [],

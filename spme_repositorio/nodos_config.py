@@ -13,6 +13,8 @@ from spme_estructuracion_proyecto.models import (
     IndicadorResultadoObjEspecifico,
     ProductoOE,
     ProductoResultadoOE,
+    ResultadoOG, 
+    ResultadoOE,
 )
 from spme_monitoreo.models import (
     SolicitudFondos,
@@ -86,6 +88,20 @@ NODOS_CONFIG = {
         'carpeta': 'productos_roe',
         'acceso_repositorio': True,
     },
+    # ================================================================
+    # RESULTADOS
+    # ================================================================
+    'resultadoog':{
+        'modelo':ResultadoOG,
+        'carpeta': 'resultado_og',
+        'acceso_repositorio': False,
+    },
+    'resultadooe':{
+            'modelo':ResultadoOE,
+            'carpeta': 'resultado_oe',
+            'acceso_repositorio': False,
+    },
+        
 }
 
 # ================================================================

@@ -101,13 +101,49 @@ class ObjectRepository:
 
         logger.info(f"Objeto eliminado: {bucket}/{key}")
 
-    def generate_presigned_url(self, bucket: str, key: str, expiration: int = 3600) -> str:
-        """Genera URL prefirmada para acceso temporal."""
+    def generate_presigned_url(
+        self,
+        bucket: str,
+        key: str,
+        expiration: int = 3600,
+        response_content_disposition: Optional[str] = None,
+    ) -> str:
+        """
+        Genera URL prefirmada para acceso temporal.
+        
+        Args:
+            bucket: Nombre del bucket
+            key: Ruta del archivo en Garage
+            expiration: Tiempo de expiración en segundos
+            response_content_disposition: Header Content-Disposition
+                (ej: 'attachment; filename="archivo.xlsx"')
+        
+        Returns:
+            URL prefirmada firmada
+        """
         try:
+            params = {'Bucket': bucket, 'Key': key}
+            
+            if response_content_disposition:
+                params['ResponseContentDisposition'] = response_content_disposition
+            
             return self._client.generate_presigned_url(
                 'get_object',
-                Params={'Bucket': bucket, 'Key': key},
+                Params=params,
                 ExpiresIn=expiration,
             )
         except Exception as e:
             raise GarageConnectionError(f"Error al generar URL: {e}") from e
+
+    # def generate_presigned_url(self, bucket: str, key: str, expiration: int = 3600) -> str:
+    #     """
+    #     Genera URL prefirmada para acceso temporal.
+    #     """
+    #     try:
+    #         return self._client.generate_presigned_url(
+    #             'get_object',
+    #             Params={'Bucket': bucket, 'Key': key},
+    #             ExpiresIn=expiration,
+    #         )
+    #     except Exception as e:
+    #         raise GarageConnectionError(f"Error al generar URL: {e}") from e

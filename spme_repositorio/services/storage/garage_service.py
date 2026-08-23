@@ -117,3 +117,39 @@ class GarageService:
         DeleteObject es idempotente. Si hay error real, se propaga.
         """
         self._repo.delete(self._bucket, key)
+
+    def generar_url_descarga(self, archivo, expiration: int = 900):
+        """
+        Genera una URL prefirmada para descargar un archivo.
+        
+        Args:
+            archivo: Instancia Archivo (debe tener bucket, key, nombre_original)
+            expiration: Tiempo de expiración en segundos (default 15 min)
+        
+        Returns:
+            URL prefirmada para descarga directa desde Garage
+        """
+        response_disposition = f'attachment; filename="{archivo.nombre_original}"'
+        
+        return self._repo.generate_presigned_url(
+            archivo.bucket,
+            archivo.key,
+            expiration=expiration,
+            response_content_disposition=response_disposition,
+        )
+
+    # def generar_url_descarga(self, archivo, expiration: int = 900):
+    #     """
+    #     Genera una URL prefirmada para descargar un archivo.
+    #     Args:
+    #         archivo: Instancia Archivo (debe tener bucket y key)
+    #         expiration: Tiempo de expiración en segundos (default 15 min)
+        
+    #     Returns:
+    #         URL prefirmada para descarga directa desde Garage
+    #     """
+    #     return self._repo.generate_presigned_url(
+    #         archivo.bucket,
+    #         archivo.key,
+    #         expiration=expiration,
+    #     )

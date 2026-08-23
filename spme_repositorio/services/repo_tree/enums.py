@@ -13,7 +13,7 @@ class RepoNodeType(str, Enum):
     RESULTADO_OG = 'resultadoog'
     INDICADOR_ROG = 'indicadorrog'
     INDICADOR_OE = 'indicadoroe'
-    RESULTADO_OE = 'resultadooe'
+    RESULTADO_OE = 'resultadooe' 
     INDICADOR_ROE = 'indicadorroe'
     PRODUCTO_OE = 'productooe'                    
     PRODUCTO_ROE = 'productoroe'                  
