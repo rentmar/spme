@@ -39,6 +39,7 @@ class IndicadorROGRepoBuilder(BaseRepoNodeBuilder):
             title=obj.descripcion or f"Indicador ROG {obj.id}",
             nodo_tipo=self.node_type,
             nodo_id=obj.id,
+            codigo=obj.codigo,
             upload_enabled=self.registry.get_acceso_repositorio(self.node_type),
             acceso_repositorio=self.registry.get_acceso_repositorio(self.node_type),
             children=[],

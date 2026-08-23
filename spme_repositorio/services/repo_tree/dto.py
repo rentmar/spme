@@ -13,6 +13,7 @@ class RepoTreeNode:
     nodo_id: Optional[int] = None
     upload_enabled: Optional[bool] = None
     acceso_repositorio: Optional[bool] = None
+    codigo: Optional[str] = None  
     tipo_archivo: Optional[str] = None
     archivo_id: Optional[int] = None
     adjunto_id: Optional[int] = None
@@ -38,6 +39,9 @@ class RepoTreeNode:
 
         if self.acceso_repositorio is not None:
             result['acceso_repositorio'] = self.acceso_repositorio
+
+        if self.codigo is not None:                  
+            result['codigo'] = self.codigo
 
         if self.tipo_archivo is not None:
             result['tipo_archivo'] = self.tipo_archivo

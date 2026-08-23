@@ -31,6 +31,7 @@ class ProyectoRepoBuilder(BaseRepoNodeBuilder):
             title=proyecto.titulo or f"Proyecto {proyecto.id}",
             nodo_tipo=self.node_type,
             nodo_id=proyecto.id,
+            codigo=proyecto.codigo, 
             upload_enabled=self.registry.get_acceso_repositorio(self.node_type),
             acceso_repositorio=self.registry.get_acceso_repositorio(self.node_type),
             children=[],

@@ -1,6 +1,7 @@
 # spme/spme_repositorio/nodos_config.py
 """
 Configuración centralizada de nodos habilitados para adjuntos.
+Claves uniformadas con el campo `nodo_tipo` del árbol de repositorio.
 """
 
 from spme_actividades.models import Actividad, TareaActividad
@@ -18,33 +19,37 @@ from spme_monitoreo.models import (
 )
 
 NODOS_CONFIG = {
-    # Indicadores
+    # ================================================================
+    # INDICADORES
+    # ================================================================
     'indicador': {
         'modelo': IndicadorProyecto,
         'carpeta': 'indicadores',
         'acceso_repositorio': True,
     },
-    'indicador_og': {
+    'indicadorog': {
         'modelo': IndicadorObjetivoGeneral,
         'carpeta': 'indicador_og',
         'acceso_repositorio': True,
     },
-    'indicador_rog': {
+    'indicadorrog': {
         'modelo': IndicadorResultadoObjGral,
         'carpeta': 'indicador_rog',
         'acceso_repositorio': True,
     },
-    'indicador_oe': {
+    'indicadoroe': {
         'modelo': IndicadorObjetivoEspecifico,
         'carpeta': 'indicador_oe',
         'acceso_repositorio': True,
     },
-    'indicador_roe': {
+    'indicadorroe': {
         'modelo': IndicadorResultadoObjEspecifico,
         'carpeta': 'indicador_roe',
         'acceso_repositorio': True,
     },
-    # Actividad y Tarea
+    # ================================================================
+    # ACTIVIDAD Y TAREA
+    # ================================================================
     'actividad': {
         'modelo': Actividad,
         'carpeta': 'actividades',
@@ -55,30 +60,37 @@ NODOS_CONFIG = {
         'carpeta': 'tareas',
         'acceso_repositorio': True,
     },
-    # Solicitudes de fondos
-    'solicitud_fondos_actividad': {
+    # ================================================================
+    # SOLICITUDES
+    # ================================================================
+    'solicitudfondosact': {
         'modelo': SolicitudFondos,
         'carpeta': 'solicitudes_fondos_actividad',
         'acceso_repositorio': True,
     },
-    'solicitud_fondos_tarea': {
+    'solicitudfondostarea': {
         'modelo': SolicitudFondos,
         'carpeta': 'solicitudes_fondos_tarea',
         'acceso_repositorio': True,
     },
-    # Productos
-    'producto_oe': {
+    # ================================================================
+    # PRODUCTOS
+    # ================================================================
+    'productooe': {
         'modelo': ProductoOE,
         'carpeta': 'productos_oe',
         'acceso_repositorio': True,
     },
-    'producto_roe': {
+    'productoroe': {
         'modelo': ProductoResultadoOE,
         'carpeta': 'productos_roe',
         'acceso_repositorio': True,
     },
 }
 
+# ================================================================
+# FUNCIONES AUXILIARES
+# ================================================================
 
 def get_modelo(tipo_objeto: str):
     """Retorna la clase del modelo para un tipo_objeto."""

@@ -42,11 +42,11 @@ class RepoTreeOrchestrator:
     CONTENEDOR_LABELS = {
         RepoNodeType.INDICADOR_OG.value: 'Indicadores de Objetivo General',
         RepoNodeType.RESULTADO_OG.value: 'Resultados de Objetivo General',
-        RepoNodeType.INDICADOR_ROG.value: 'Indicadores de Resultado',
+        RepoNodeType.INDICADOR_ROG.value: 'Indicadores de Resultado Objetivo General',
         RepoNodeType.OBJETIVO_ESPECIFICO_OG.value: 'Objetivos Específicos',
         RepoNodeType.INDICADOR_OE.value: 'Indicadores de Objetivo Específico',
         RepoNodeType.RESULTADO_OE.value: 'Resultados de Objetivo Específico',
-        RepoNodeType.INDICADOR_ROE.value: 'Indicadores de Resultado',
+        RepoNodeType.INDICADOR_ROE.value: 'Indicadores de Resultado Objetivo Especifico',
         RepoNodeType.ACTIVIDAD.value: 'Actividades',
         RepoNodeType.SOLICITUD_FONDOS_ACT.value: 'Solicitudes de Fondos',
         RepoNodeType.SOLICITUD_FONDOS_TAREA.value: 'Solicitudes de Fondos',

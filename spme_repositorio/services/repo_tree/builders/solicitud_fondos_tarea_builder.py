@@ -42,6 +42,7 @@ class SolicitudFondosTareaRepoBuilder(BaseRepoNodeBuilder):
             title=titulo,
             nodo_tipo=self.node_type,
             nodo_id=obj.id,
+            codigo=obj.numeroFormulario,
             upload_enabled=self.registry.get_acceso_repositorio(self.node_type),
             acceso_repositorio=self.registry.get_acceso_repositorio(self.node_type),
             children=[],
