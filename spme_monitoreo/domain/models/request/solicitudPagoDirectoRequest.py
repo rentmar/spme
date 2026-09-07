@@ -12,7 +12,7 @@ class CrearSolicitudPagoDirectoRequest(serializers.Serializer):
     forma_pago = serializers.IntegerField(required=True)
     lugar_solicitud = serializers.CharField(required=True)
     fecha_solicitud = serializers.DateField(required=True)
-    monto_solicitado = serializers.DecimalField(max_digits=6, decimal_places=2, required=True)
+    monto_solicitado = serializers.DecimalField(max_digits=12, decimal_places=2, required=True)
     
     # Validaciones
     validacion_responsable = serializers.BooleanField(default=False)

@@ -21,7 +21,7 @@ class SolicitudFondosCreateSerializer(serializers.ModelSerializer):
         allow_null=True
     )    
     monto_solicitado = serializers.DecimalField(
-        max_digits=6, 
+        max_digits=12, 
         decimal_places=2, 
         source='montoSolicitado'
     )

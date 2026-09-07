@@ -29,7 +29,7 @@ class SolicitudFondos(models.Model):
     )
     lugarSolicitud = models.TextField(blank=True, null=True)
     fechaSolicitud = models.DateField(verbose_name='Fecha de la solicitud', blank=True, null=True)
-    montoSolicitado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Monto Solicitado', blank=True, null=True)
+    montoSolicitado = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Monto Solicitado', blank=True, null=True)
     #Actividad
     fechaRealizacionActividad = models.DateField(verbose_name="Fecha de realizacion del actividad", blank=True, null=True)
 
@@ -263,7 +263,7 @@ class SolicitudReembolso(models.Model):
     )
     lugarSolicitud = models.CharField(max_length=50, verbose_name='Lugar solicitud', blank=True, null=True)
     fechaSolicitud = models.DateField(verbose_name='Fecha solicitud', blank=True, null=True)
-    montoSolicitado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Monto solicitado', blank=True, null=True)
+    montoSolicitado = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Monto solicitado', blank=True, null=True)
     descripcion_actividad = models.TextField(blank=True, null=True, verbose_name='Descripción de la actividad')
     objetivo_actividad = models.TextField(blank=True, null=True, verbose_name='Objetivo de la actividad')
     datos_forma_pago = models.JSONField(blank=True, null=True, verbose_name='Datos de forma de pago')
@@ -659,7 +659,7 @@ class SolicitudPagoDirecto(models.Model):
     )
     lugarSolicitud = models.TextField(blank=True, null=True)
     fechaSolicitud = models.DateField(verbose_name='fecha_solicitud', blank=True, null=True)
-    montoSolicitado = models.DecimalField(max_digits=6,decimal_places=2,verbose_name ='monto_solicitado',blank=True, null=True)
+    montoSolicitado = models.DecimalField(max_digits=12,decimal_places=2,verbose_name ='monto_solicitado',blank=True, null=True)
     #Actividad
     fechaRealizacionActividad = models.DateField(verbose_name="Fecha de realizacion del actividad", blank=True, null=True)
 
@@ -831,9 +831,9 @@ class RendicionCuentas(models.Model):
     numeroFormulario = models.CharField(max_length=150, blank=True, null=True)
     cpteDiario = models.CharField(max_length=100, blank=True, null=True)
     fechaDesembolso = models.DateField(verbose_name='Fecha de desembolso', blank=True, null=True)
-    montoAsignado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Monto asignado', blank=True, null=True)
-    montoDescargado = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Monto Descargado', blank=False, null=True)
-    saldo = models.DecimalField(max_digits=6, decimal_places=2, verbose_name='Saldo', blank=True, null=True)
+    montoAsignado = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Monto asignado', blank=True, null=True)
+    montoDescargado = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Monto Descargado', blank=False, null=True)
+    saldo = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Saldo', blank=True, null=True)
     detalleDestinoFondos = models.JSONField(verbose_name='Detalle destino de fondos', blank=True, null=True)
     #Informacion sobre Actividades y Tareas
     actividad = models.ForeignKey(
