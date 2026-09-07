@@ -227,12 +227,19 @@ class VotarSolicitudViajeViewSet(viewsets.ViewSet):
                 #     solicitud=solicitud,
                 #     validador=request.user
                 # )
+
+                #Agregar la notificacion al tercer usuario
+                destinatarios_ids.append(57)
+                destinatarios_ids = list(set(destinatarios_ids))
+                logger.info(f"Destinatarios de aprobación: {destinatarios_ids}")
+
+
                 respmensaje = enviar_notificacion_mensajeria_interna(
                     'viaje', 
                     'aprobacion',
                     solicitud,
                     destinatarios_ids,
-                request.headers.get('Origin', '')
+                    request.headers.get('Origin', '')
                 )
 
                 #Notificacion por email

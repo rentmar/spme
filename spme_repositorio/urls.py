@@ -22,6 +22,10 @@ from .views.referencia_views import (
 from .views.repo_tree_views import RepoTreeView
 #lista de proyectos
 from .views.proyecto_resumen_views import ProyectosResumenView
+#BUscador de archivos y referencias externas
+from .views.busqueda_views import BuscadorGlobalView
+
+
 
 router = DefaultRouter()
 
@@ -51,6 +55,8 @@ urlpatterns = [
     path(r'repositorio/repo-tree/', RepoTreeView.as_view(), name='arbol_repositorio'),
     ############################## Listado de proyectos ########################################
     path(r'repositorio/proyectos-resumen/', ProyectosResumenView.as_view(), name='proyectos-resumen'),
+    ############################## Busqueda de Adjuntos y Referencias Externas #################
+    path(r'repositorio/buscar/', BuscadorGlobalView.as_view(), name='buscar-global'),
 ]  
 
 urlpatterns += router.urls

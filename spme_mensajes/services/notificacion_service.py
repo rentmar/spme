@@ -1173,7 +1173,7 @@ def _crear_mensaje_aprobacion(tipo, solicitud, revisor_id):
         )
         # ─── Crear mensaje ───
         mensaje = MensajeUsuario.objects.create(
-            destinatario=solicitud.usuario,
+            destinatario=redactor,
             remitente=None,
             tipo=TipoMensaje.ALERTA,
             asunto=f"✅ Solicitud APROBADA - {codigo}",

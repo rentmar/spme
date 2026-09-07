@@ -21,6 +21,8 @@ from .views.validaciones_solicitud_fondos_views import (
     HistorialValidacionSolicitudFondosAPIView,
     MisValidacionesPendientesSolicitudFondosAPIView,
     AsignarValidadoresSolicitudFondosSinNotificacionViewSet,
+    ListarRevisoresSolicitudFondosAPIView,
+    ActualizarRevisoresSolicitudFondosAPIView,
 )
 
 #Importaciones para solicitud de viajes
@@ -105,6 +107,8 @@ urlpatterns = [
     path(r'solicitud-fondos/<int:solicitud_id>/historial/', HistorialValidacionSolicitudFondosAPIView.as_view(), name='historial-solicitud-fondos'),
     path(r'solicitud-fondos/mis-pendientes/', MisValidacionesPendientesSolicitudFondosAPIView.as_view(), name='mis-pendientes-solicitud-fondos'),
     path(r'solicitud-fondos/<int:solicitud_id>/asignar-validadores-sin-notificacion/', AsignarValidadoresSolicitudFondosSinNotificacionViewSet.as_view({'post': 'create'}), name='asignar-validadores-solicitud-fondos-sin-notificacion'),
+    path(r'solicitud-fondos/<int:solicitud_id>/revisores/', ListarRevisoresSolicitudFondosAPIView.as_view(), name='listar-revisores-solicitud-fondos' ),
+    path(r'solicitud-fondos/<int:solicitud_id>/revisores/actualizar/', ActualizarRevisoresSolicitudFondosAPIView.as_view(), name='actualizar-revisores-solicitud-fondos' ),
     ################################ Validaciones de Solicitud de Viajes ######################################################
     path(r'solicitud-viajes/<int:solicitud_id>/asignar-validadores/', AsignarValidadoresSolicitudViajeViewSet.as_view({'post': 'create'}), name='asignar-validadores-solicitud-viaje'),
     path(r'solicitud-viajes/<int:solicitud_id>/votar/', VotarSolicitudViajeViewSet.as_view({'post': 'create'}), name='votar-solicitud-viaje'),

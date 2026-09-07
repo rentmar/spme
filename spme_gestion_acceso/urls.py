@@ -10,6 +10,9 @@ from .views.permisos_views import (
 from .views.usuario_instancia_views import UserInstanciaGestoraViewSet, PermisoProyectoEspecificoViewSet
 from .views.lista_usuarios_views import UsuarioListAPIView
 
+#Usuarios
+from .views.usuario_views import UsuarioSolicitanteView
+
 
 router = DefaultRouter()
 
@@ -29,6 +32,8 @@ urlpatterns = [
     path(r'user-instancias/mis-instancias/', UserInstanciaGestoraViewSet.as_view({'get': 'mis_instancias'}), name='mis_instancias'),
     path(r'permisos-especificos/mis-permisos/', PermisoProyectoEspecificoViewSet.as_view({'get': 'mis_permisos_especificos'}), name='mis_permisos_especificos'),
     path(r'lista-usuarios/', UsuarioListAPIView.as_view(), name='lista-usuarios' ),
+    #Endpoint Usuarios
+    path(r'usuario/<int:id_usuario>/', UsuarioSolicitanteView.as_view(), name='usuario-detalle' ),
 
 ]
 

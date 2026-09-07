@@ -53,6 +53,7 @@ class UsuarioAdmin(UserAdmin):
     
     # Personalización de la lista principal
     list_display = (
+        'id',
         'username',
         'ci',
         'nombre_completo',

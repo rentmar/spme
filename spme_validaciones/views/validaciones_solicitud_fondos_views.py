@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.db import transaction
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils import timezone
 
 #models
@@ -18,6 +18,9 @@ from ..serializers.validaciones_solicitud_fondos_serializers import (
     ValidacionSolicitudFondosSerializer,
     AsignarValidadoresSolicitudFondosSerializer,
     ResetearValidacionesSolicitudFondosSerializer,
+    ListarRevisoresResponseSerializer,
+    ActualizarRevisoresSerializer,
+    ActualizarRevisoresResponseSerializer,
 )
 
 #Services - Sol de Fondos
@@ -51,9 +54,12 @@ from spme_monitor_estados.utils.encolar import (
     encolar_confirmacion_validador_sf,
     encolar_revision_solicitud_fondos,
 )
+#mensajeria interna
+from spme_mensajes.services.notificacion_service import enviar_notificacion_mensajeria_interna
 
 #Notificacion email - celery
 from spme_email.services.notificacion_service import NotificacionService
+
 
 import logging
 
@@ -215,12 +221,33 @@ class VotarSolicitudFondosViewSet(viewsets.ViewSet):
                 validaciones_aprobadas = ValidacionSolicitudFondos.objects.filter(
                     solicitud=solicitud, estado='APROBADO'
                 )
-                crear_mensaje_solicitud_aprobada(solicitud, validaciones_aprobadas)
+
+                #Agregar la notificacion al tercer usuario
+                destinatarios_ids.append(57)
+                destinatarios_ids = list(set(destinatarios_ids))
+                logger.info(f"Destinatarios de aprobación: {destinatarios_ids}")
+
+                respmensaje = enviar_notificacion_mensajeria_interna(
+                    'fondos', 
+                    'aprobacion',
+                    solicitud,
+                    destinatarios_ids,
+                    request.headers.get('Origin', '')
+                )
+
+
+                #crear_mensaje_solicitud_aprobada(solicitud, validaciones_aprobadas)
                 # encolar_validacion_aprobada_sf(    # ← BIEN
                 #     solicitud=solicitud,
                 #     validador=request.user
                 # )
-                respuesta = self.servicio.enviar('fondos', solicitud.id, 'aprobacion', destinatarios_ids, request.headers.get('Origin', ''))
+                respuesta = self.servicio.enviar(
+                    'fondos', 
+                    solicitud.id, 
+                    'aprobacion', 
+                    destinatarios_ids, 
+                    request.headers.get('Origin', '')
+                )
 
 
         elif voto == 'RECHAZADO':
@@ -420,6 +447,8 @@ class AsignarValidadoresSolicitudFondosSinNotificacionViewSet(viewsets.ViewSet):
     - Doble protección anti-duplicados: clean() en modelo + UniqueConstraint en BD
     """
     permission_classes = [IsAuthenticated]
+    
+    @transaction.atomic
     def create(self, request, solicitud_id=None):
         serializer = AsignarValidadoresSolicitudFondosSerializer(data=request.data)
         if not serializer.is_valid():
@@ -476,4 +505,137 @@ class AsignarValidadoresSolicitudFondosSinNotificacionViewSet(viewsets.ViewSet):
             'mensaje': f'Creadas {len(resultados)} validaciones (sin notificación)',
             'resultados': resultados
         }, status=status.HTTP_201_CREATED)
+
+# ===================================================================
+# LISTAR REVISORES DE UNA SOLICITUD
+# ===================================================================
+class ListarRevisoresSolicitudFondosAPIView(APIView):
+    """
+    GET /api/solicitud-fondos/{solicitud_id}/revisores/
     
+    Lista todos los revisores de una solicitud de fondos.
+    No se filtra por estado, se muestran todos.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, solicitud_id):
+        try:
+            service = ValidacionSolicitudFondosService()
+            resultado = service.listar_revisores(solicitud_id)
+
+            solicitud = resultado['solicitud']
+
+            # Determinar tipo de solicitud
+            if solicitud.actividad_id and not solicitud.tarea_id:
+                tipo = 'ACTIVIDAD'
+            elif solicitud.actividad_id and solicitud.tarea_id:
+                tipo = 'TAREA'
+            else:
+                tipo = 'GENERAL'
+
+            response_data = {
+                'solicitud_id': solicitud.id,
+                'solicitud_codigo': solicitud.numeroFormulario or f"SF-{solicitud.id}",
+                'monto_solicitud': str(solicitud.montoSolicitado),
+                'tipo_solicitud': tipo,
+                'total_revisores': len(resultado['revisores']),
+                'resumen': resultado['resumen'],
+                'revisores': resultado['revisores']
+            }
+
+            return Response(response_data, status=status.HTTP_200_OK)
+
+        except ValueError as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        except Exception as e:
+            logger.error(f"Error al listar revisores: {e}", exc_info=True)
+            return Response(
+                {'error': 'Error interno del servidor'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+# ===================================================================
+# ACTUALIZAR REVISORES DE UNA SOLICITUD
+# ===================================================================
+class ActualizarRevisoresSolicitudFondosAPIView(APIView):
+    """
+    PUT/PATCH /api/solicitud-fondos/{solicitud_id}/revisores/actualizar/
+    
+    Actualiza los revisores de una solicitud (cambio total).
+    SOLO el redactor puede hacerlo.
+    
+    Payload:
+    {
+        "cambios": [
+            {"validacion_id": 351, "nuevo_validador_id": 46},
+            {"validacion_id": 352, "nuevo_validador_id": 68}
+        ],
+        "motivo": "Error en asignación inicial"
+    }
+    """
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic
+    def put(self, request, solicitud_id):
+        return self._procesar_actualizacion(request, solicitud_id)
+
+    @transaction.atomic
+    def patch(self, request, solicitud_id):
+        return self._procesar_actualizacion(request, solicitud_id)
+
+    def _procesar_actualizacion(self, request, solicitud_id):
+        serializer = ActualizarRevisoresSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            service = ValidacionSolicitudFondosService()
+            resultado = service.actualizar_revisores(
+                solicitud_id=solicitud_id,
+                cambios=serializer.validated_data['cambios'],
+                usuario_editor=request.user,
+                motivo=serializer.validated_data.get('motivo', '')
+            )
+            
+            solicitud = resultado['solicitud']
+            
+            response_data = {
+                'mensaje': f"Revisores actualizados exitosamente. Nueva versión: {resultado['nueva_version']}",
+                'solicitud_id': solicitud.id,
+                'solicitud_codigo': solicitud.numeroFormulario or f"SF-{solicitud.id}",
+                'nueva_version': resultado['nueva_version'],
+                'total_actualizados': resultado['total_actualizados'],
+                'resultados': resultado['resultados'],
+                'notificaciones': resultado.get('notificaciones', {}),
+            }
+            
+            if resultado.get('errores'):
+                response_data['errores'] = resultado['errores']
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+            
+        except PermissionDenied as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        except ValidationError as e:
+            return Response(
+                {'error': str(e) if isinstance(e, str) else e.messages},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except ValueError as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"Error al actualizar revisores: {e}", exc_info=True)
+            return Response(
+                {'error': 'Error interno del servidor'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

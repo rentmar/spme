@@ -225,6 +225,13 @@ class VotarSolicitudPagoDirectoViewSet(viewsets.ViewSet):
                 #     solicitud=solicitud,
                 #     validador=request.user
                 # )
+
+                #Agregar la notificacion al 3er usuario
+                destinatarios_ids.append(57)
+                destinatarios_ids = list(set(destinatarios_ids))
+                logger.info(f"Destinatarios de aprobación: {destinatarios_ids}")
+
+
                 respmensaje = enviar_notificacion_mensajeria_interna(
                     'pago_directo', 
                     'aprobacion',
