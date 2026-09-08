@@ -6,6 +6,11 @@ from spme_fonfosc.views.institucion_crud_basico_views import (
     InstitucionDetailView,
 )
 
+from spme_fonfosc.views.usuario_fonfosc_views import (
+    VerificarUsernameView,
+    RegistroUsuarioFonFoscView,
+)
+
 # from .views.fonfosc_crud_basico_views import ProyectoFonFoscViews
 # from .views.institucion_crud_basico_views import InstitucionViews
 # from .views.estructura_fonfosc_views import ProyectoFonFoscViewSet
@@ -23,6 +28,9 @@ urlpatterns = [
     #Instituciones
     path(r'instituciones/', InstitucionListView.as_view(), name='institucion-list'),
     path(r'instituciones/<int:institucion_id>/', InstitucionDetailView.as_view(), name='institucion-detail'),
+    #Usuario
+    path(r'usuarios/verificar/', VerificarUsernameView.as_view(), name='verificar-username'),
+    path(r'registro/', RegistroUsuarioFonFoscView.as_view(), name='registro-usuario-fonfosc'),
 
 ]
 
