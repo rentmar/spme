@@ -8,10 +8,13 @@ from django.contrib import admin
 #     IndicadorFonFosc,
 #     DepartamentoBolivia,
 #     )
+from .models import (
+    Institucion
+)
 
 # Register your models here.
 # admin.site.register(ProyectoFonFosc)
-# admin.site.register(Institucion)
+admin.site.register(Institucion)
 # admin.site.register(ObjetivoFonfosc)
 # admin.site.register(IndicadorObjetivoFonFosc),
 # admin.site.register(ResultadoFonfosc)

@@ -1,6 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
+from spme_fonfosc.views.institucion_crud_basico_views import (
+    InstitucionListView,
+    InstitucionDetailView,
+)
+
 # from .views.fonfosc_crud_basico_views import ProyectoFonFoscViews
 # from .views.institucion_crud_basico_views import InstitucionViews
 # from .views.estructura_fonfosc_views import ProyectoFonFoscViewSet
@@ -15,9 +20,10 @@ router = DefaultRouter()
 # router.register(r'departamentos-bolivia', DepBoliviaViews, basename='departamentos-bolivia')
 
 urlpatterns = [
-    #path(r'planes/<int:plan_id>/crear-revision/', ProyectoPlanViewSet.as_view({'post': 'create_revision'}), name='plan-crear-revision'), 
-    #path(r'proyectos/<int:proyectoId>/planificacion/', LatestProjectPlanAPIView.as_view(), name='proyecto-planificacion-ultimo'),
-    # path(r'proyectos-fonfosc/<int:pk>/estructura/',  ProyectoFonFoscViewSet.as_view({'get': 'estructura_completa'}),  name='proyecto-fonfosc-estructura'),
+    #Instituciones
+    path(r'instituciones/', InstitucionListView.as_view(), name='institucion-list'),
+    path(r'instituciones/<int:institucion_id>/', InstitucionDetailView.as_view(), name='institucion-detail'),
+
 ]
 
 urlpatterns += router.urls

@@ -1,8 +1,24 @@
+# spme/spme_fonfosc/serializers/institucion_crud_basico_serializer.py
 from rest_framework import serializers
-from ..models import Institucion
+
+from spme_fonfosc.models import Institucion
+
 
 class InstitucionSerializer(serializers.ModelSerializer):
-    #codigo = serializers.CharField(read_only=True)
+    """Serializer para listar instituciones"""
+
+    departamento = serializers.StringRelatedField(many=True, read_only=True)
+
     class Meta:
         model = Institucion
-        fields = '__all__'
+        fields = [
+            'id',
+            'nombre',
+            'sigla',
+            'emailInstitucion',
+            'telefono',
+            'direccion',
+            'casillaPostal',
+            'webSite',
+            'departamento',
+        ]
