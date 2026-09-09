@@ -9,12 +9,16 @@ from django.contrib import admin
 #     DepartamentoBolivia,
 #     )
 from .models import (
-    Institucion
+    Institucion,
+    UsuarioFonFosc,
+    Formulario,
 )
 
 # Register your models here.
 # admin.site.register(ProyectoFonFosc)
 admin.site.register(Institucion)
+admin.site.register(UsuarioFonFosc)
+admin.site.register(Formulario)
 # admin.site.register(ObjetivoFonfosc)
 # admin.site.register(IndicadorObjetivoFonFosc),
 # admin.site.register(ResultadoFonfosc)

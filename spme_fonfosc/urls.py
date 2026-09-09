@@ -1,14 +1,18 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-
+#Instituciones
 from spme_fonfosc.views.institucion_crud_basico_views import (
     InstitucionListView,
     InstitucionDetailView,
 )
-
+#Usuarios fonfosc
 from spme_fonfosc.views.usuario_fonfosc_views import (
     VerificarUsernameView,
     RegistroUsuarioFonFoscView,
+)
+#Formularios
+from spme_fonfosc.views.formulario_view import (
+    FormularioViewSet,
 )
 
 # from .views.fonfosc_crud_basico_views import ProyectoFonFoscViews
@@ -18,6 +22,7 @@ from spme_fonfosc.views.usuario_fonfosc_views import (
 
 router = DefaultRouter()
 
+router.register(r'formularios', FormularioViewSet, basename='formulario')
 #router.register(r'planes', ProyectoPlanViewSet, basename='proyecto-plan')
 #router.register(r'revisiones', PlanRevisionViewSet, basename='plan-revision')
 # router.register(r'fon-fosc-proyectos', ProyectoFonFoscViews, basename='plan-revision')
