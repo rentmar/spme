@@ -207,7 +207,10 @@ class SolicitudPagoDirectoTareaPDFGenerator(BasePDFGenerator):
                 )
                 
                 if isinstance(fuente_raw, dict):
-                    fuente = fuente_raw.get('sigla', str(fuente_raw))
+                    sigla = fuente_raw.get('sigla')
+                    financiera = fuente_raw.get('financiera')
+                    fuente = sigla + '-' + financiera
+                    # fuente = fuente_raw.get('sigla', str(fuente_raw))
                 else:
                     fuente = str(fuente_raw)
                 

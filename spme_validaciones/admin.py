@@ -392,6 +392,7 @@ class ValidacionSolicitudFondosAdmin(admin.ModelAdmin):
         'usuarioValidador',
         'estado_coloreado',
         'versionDocumento',
+        'comentarios',
         'fechaAsignacion_corta'
     ]
     
@@ -1411,6 +1412,7 @@ class HistorialValidacionAdmin(admin.ModelAdmin):
         'id',
         'validacion_codigo',
         'tipo_documento',
+        'comentario',
         'usuario',
         'cambio_estado',
         'versionDocumento',
