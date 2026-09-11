@@ -67,6 +67,8 @@ from .solactividad.views.solicitud_fondos_crud_views import SolicitudFondosCrudV
 #Solicitudes para los formularios de validacion (EDICION)
 from .monitoreo.views.sol_viaje_form_validacion_view import SolicitudViajeFormValidarViewSet
 from .monitoreo.views.sol_pago_directo_form_validacion_view import  SolicitudPagoDirectoFormValidacionViewSet
+from .monitoreo.views.sol_reposicion_form_validacion_view import SolicitudReembolsoFormValidacionViewSet
+from .monitoreo.views.rendicion_cuentas_form_validacion_view import RendicionCuentasFormValidacionViewSet
 #PEI
 from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
 from .pei.views.detalles_vista_pei_views import PeiDashboardEstructuraSimpleView
@@ -217,7 +219,8 @@ router.register(r'vinculacion-sv-iap', VinculacionInformeViewSet, basename='vinc
 #Edicion de formularios
 router.register(r'solicitud-viaje-form-validar', SolicitudViajeFormValidarViewSet, basename='sol_viaje_form_validar')
 router.register(r'solicitud-pago-directo-form-validar', SolicitudPagoDirectoFormValidacionViewSet, basename='sol_pago_directo_form_validar')
-
+router.register(r'solicitud-reembolso-form-validar', SolicitudReembolsoFormValidacionViewSet, basename='sol_reembolso_form_validar')
+router.register(r'rendicion-cuentas-form-validar', RendicionCuentasFormValidacionViewSet, basename='rendcion_cuentas_form_validar')
 
 urlpatterns =[
     #PEI
