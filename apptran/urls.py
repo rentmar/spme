@@ -64,6 +64,9 @@ from .solreposicion.views.lista_sol_reposicion_por_tarea_pei_views import Solici
 from .solrendicioncuentas.views.lista_rendicion_cuentas_por_tarea_pei_views import RendicionesCuentasPeiPorActividadYTareaView
 from .informeactividadprincipal.views.lista_de_informes_actividad_tarea_por_idact_views import ActividadDetalladaView
 from .solactividad.views.solicitud_fondos_crud_views import SolicitudFondosCrudViews
+#Solicitudes para los formularios de validacion (EDICION)
+from .monitoreo.views.sol_viaje_form_validacion_view import SolicitudViajeFormValidarViewSet
+from .monitoreo.views.sol_pago_directo_form_validacion_view import  SolicitudPagoDirectoFormValidacionViewSet
 #PEI
 from .pei.views.viewsfactorescriticosporpei import factores_criticos_por_pei
 from .pei.views.detalles_vista_pei_views import PeiDashboardEstructuraSimpleView
@@ -210,6 +213,11 @@ router.register(r'actividades-pei-principal', ActividadPeiPrincipalViewSet, base
 #Actividades de Proyecto
 #Vinculacion de sol de viaje a informe de actividad
 router.register(r'vinculacion-sv-iap', VinculacionInformeViewSet, basename='vinculacion_soldeviajes_infactividadprin')
+
+#Edicion de formularios
+router.register(r'solicitud-viaje-form-validar', SolicitudViajeFormValidarViewSet, basename='sol_viaje_form_validar')
+router.register(r'solicitud-pago-directo-form-validar', SolicitudPagoDirectoFormValidacionViewSet, basename='sol_pago_directo_form_validar')
+
 
 urlpatterns =[
     #PEI
