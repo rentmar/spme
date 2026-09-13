@@ -18,6 +18,7 @@ from spme_estructuracion_proyecto.models import (
 )
 from spme_monitoreo.models import (
     SolicitudFondos,
+    SolicitudViaje,
 )
 
 NODOS_CONFIG = {
@@ -73,6 +74,16 @@ NODOS_CONFIG = {
     'solicitudfondostarea': {
         'modelo': SolicitudFondos,
         'carpeta': 'solicitudes_fondos_tarea',
+        'acceso_repositorio': True,
+    },
+    'solicitudviajeact': {
+        'modelo': SolicitudViaje,
+        'carpeta': 'solicitudes_viaje_actividad',
+        'acceso_repositorio': True,
+    },
+    'solicitudviajetarea': {
+        'modelo': SolicitudViaje,
+        'carpeta': 'solicitudes_viaje_tarea',
         'acceso_repositorio': True,
     },
     # ================================================================
