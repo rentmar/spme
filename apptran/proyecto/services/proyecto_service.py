@@ -2,7 +2,8 @@
 from ..repositories.proyecto_repository import ProyectoRepository
 from ..serializers.proyecto_serializers import (
     ProyectoConActividadesSerializer,
-    ActividadConTareasSerializer
+    ActividadConTareasSerializer,
+    ProyectoResumenSerializer,
 )
 from rest_framework.exceptions import NotFound
 #importacion del servicio para el calculo de los press ejecutados
@@ -218,30 +219,32 @@ class ProyectoService:
         
         return actividad
 
-    def _enriquecer_actividad(self, actividad):
+    def obtener_resumen(self, proyecto_id):
         """
-        Enriquece una actividad individual con el total reportado
+        Obtiene el resumen del proyecto para el endpoint /proyecto-resumen/{id}/.
+
+        Args:
+            proyecto_id (int): ID del proyecto
+
+        Returns:
+            dict: Diccionario con los datos del resumen
+
+        Raises:
+            NotFound: Si el proyecto no existe o no está habilitado
         """
-        if not isinstance(actividad, dict):
-            return actividad
-        
-        actividad_id = actividad.get('id')
-        
-        if actividad_id:
-            try:
-                totales = obtener_totales_actividad(actividad_id)
-                actividad['totalReportado'] = float(totales.get('presupuesto_ejecutado', 0))
-                logger.info(f"Actividad {actividad_id}: totalReportado={totales.get('presupuesto_ejecutado', 0)}")
-            except Exception as e:
-                logger.warning(f"No se pudieron obtener totales para actividad {actividad_id}: {str(e)}")
-                if 'totalReportado' not in actividad:
-                    actividad['totalReportado'] = 0.0
-        
-        tareas = actividad.get('tareas', [])
-        if tareas:
-            actividad['tareas'] = [
-                self._enriquecer_tarea(tarea) 
-                for tarea in tareas
-            ]
-        
-        return actividad
+        proyecto = self.proyecto_repository.get_proyecto_resumen(proyecto_id)
+
+        if not proyecto:
+            raise NotFound(
+                detail=f"Proyecto con ID {proyecto_id} no encontrado o no está habilitado"
+            )
+
+        serializer = ProyectoResumenSerializer(proyecto)
+
+        return {
+            'success': True,
+            'data': serializer.data,
+        }
+
+
+    

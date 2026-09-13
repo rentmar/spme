@@ -86,6 +86,7 @@ from .actividadespei.views.actividades_tareas_pei_views import ActividadPeiConTa
 #Proyecto
 from .viewdiagramaporidproyecto import DiagramaPorProyectoView
 from .proyectos.views.lista_proyectos_habilitados_views import ProyectoHabilitadoViewSet
+from .proyecto.views.proyecto_views import ProyectoResumenView
 #Informe de actividad
 from .monitoreo.views.crear_informe_actividad_views import InformeActividadView
 from .actividades.views.informe_act_principal_crud_view import InformeActividadPrincipalCrudView
@@ -248,6 +249,7 @@ urlpatterns =[
     path('usr/usuarios/<str:username>/', UsuarioDetailAdminView.as_view(), name='usuario-detail-admin'),
     path('usr/usuario/<int:id>/', UsuarioPorIdView.as_view(), name='usuario-por-id'),
     ###################### PROYECTOS ############################################
+    path(r'proyecto-resumen/<int:proyecto_id>/', ProyectoResumenView.as_view(),name='proyecto-resumen',),
     path(r'proyectos/planificacion/<int:pei_id>/', ProyectoPlanificacionView.as_view(), name='proyectos-planificacion'  ),
     path(r'proyectos/<int:proyecto_id>/objetivo-general/', ObjetivoGeneralPorProyectoView.as_view(), name='obj-general-por-proyecto'),
     path(r'proyecto-estructura-nodos/<int:id>/', ProyectoEstructuraView.as_view(), name='proyecto-estructura' ),

@@ -51,7 +51,7 @@ class ProyectoRepository:
         """
         try:
             return Proyecto.objects.get(
-                id=proyecto_id, 
+                id=proyecto_id,
                 esta_habilitado=True
             )
         except Proyecto.DoesNotExist:
@@ -77,3 +77,27 @@ class ProyectoRepository:
         ).order_by('fecha_programada', 'codigo')
         
         return actividades
+
+    @staticmethod
+    def get_proyecto_resumen(proyecto_id):
+        """
+        Obtiene un proyecto con las relaciones necesarias para el resumen.
+        Optimizado para el endpoint /proyecto-resumen/{id}/
+        """
+        try:
+            proyecto = Proyecto.objects.select_related(
+                'propietario',
+                'pei',
+                'programa'
+            ).prefetch_related(
+                'instancia_gestora',
+                'procedencia_fondos'
+            ).get(
+                id=proyecto_id,
+                esta_habilitado=True
+            )
+            
+            return proyecto
+            
+        except Proyecto.DoesNotExist:
+            return None

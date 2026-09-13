@@ -3,10 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from ..services.proyecto_service import ProyectoService, ActividadConTareasSerializer
+from ..services.proyecto_service import ProyectoService
 import logging
-
-from spme_estructuracion_proyecto.models import Proyecto
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +89,53 @@ class ProyectoActividadesInactivasView(APIView):
                 {
                     'success': False,
                     'error': 'Error al obtener las actividades inactivas',
+                    'message': str(e)
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+class ProyectoResumenView(APIView):
+    """
+    Endpoint para obtener el resumen del proyecto.
+
+    GET /api/proyecto-resumen/{id}/
+    """
+    # permission_classes = [IsAuthenticated]
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.proyecto_service = ProyectoService()
+
+    def get(self, request, proyecto_id):
+        """
+        Retorna el resumen del proyecto (datos esenciales + relaciones clave).
+
+        Args:
+            request: Request HTTP
+            proyecto_id (int): ID del proyecto
+
+        Returns:
+            Response: Respuesta HTTP con el resumen del proyecto
+        """
+        try:
+            logger.info(f"Obteniendo resumen del proyecto {proyecto_id}")
+
+            resultado = self.proyecto_service.obtener_resumen(proyecto_id)
+
+            logger.info(f"Resumen del proyecto {proyecto_id} obtenido exitosamente")
+
+            return Response(
+                resultado,
+                status=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            logger.error(f"Error al obtener resumen del proyecto {proyecto_id}: {str(e)}")
+
+            return Response(
+                {
+                    'success': False,
+                    'error': 'Error al obtener el resumen del proyecto',
                     'message': str(e)
                 },
                 status=status.HTTP_404_NOT_FOUND

@@ -7,6 +7,9 @@ from spme_actividades.models import (
     Actividad,
     TareaActividad,
 )
+from spme_autenticacion.models import Usuario
+from spme_estructuracion_pei.models import Pei
+from spme_programas.models import Programa
 
 class TareaActividadSerializer(serializers.ModelSerializer):
     """
@@ -173,3 +176,73 @@ class ProyectoConActividadesSerializer(serializers.ModelSerializer):
         ).prefetch_related('tareas').order_by('fecha_programada', 'codigo')
         
         return ActividadConTareasSerializer(actividades, many=True).data
+
+
+# ─────────────────────────────────────────────────────────────
+# Serializers para el endpoint /proyecto-resumen/{id}/
+# ─────────────────────────────────────────────────────────────
+
+class PeiResumenSerializer(serializers.ModelSerializer):
+    """Serializador reducido de PEI."""
+    class Meta:
+        model = Pei
+        fields = ['id', 'titulo']
+
+
+class ProgramaResumenSerializer(serializers.ModelSerializer):
+    """Serializador reducido de Programa."""
+    class Meta:
+        model = Programa
+        fields = ['id', 'nombre']
+
+
+class UsuarioResumenSerializer(serializers.ModelSerializer):
+    """Serializador reducido de Usuario."""
+    nombre_completo = serializers.CharField(source='get_full_name', read_only=True)
+
+    class Meta:
+        model = Usuario
+        fields = ['id', 'nombre_completo']
+
+
+class ProyectoResumenSerializer(serializers.ModelSerializer):
+    """
+    Serializador del proyecto para el endpoint /proyecto-resumen/{id}/.
+    Devuelve solo los datos esenciales más las relaciones clave.
+    """
+    estado_display = serializers.CharField(source='get_estado_display', read_only=True)
+
+    pei = PeiResumenSerializer(read_only=True)
+    programa = ProgramaResumenSerializer(read_only=True)
+    propietario = UsuarioResumenSerializer(read_only=True)
+
+    instancias_gestoras = InstanciaGestoraSerializer(
+        source='instancia_gestora',
+        many=True,
+        read_only=True,
+    )
+    procedencias_fondos = ProcedenciaFondosSerializer(
+        source='procedencia_fondos',
+        many=True,
+        read_only=True,
+    )
+
+    class Meta:
+        model = Proyecto
+        fields = [
+            'id',
+            'codigo',
+            'titulo',
+            'descripcion',
+            'estado',
+            'estado_display',
+            'esta_habilitado',
+            'presupuesto',
+            'fecha_inicio',
+            'fecha_finalizacion',
+            'pei',
+            'programa',
+            'propietario',
+            'instancias_gestoras',
+            'procedencias_fondos',
+        ]
