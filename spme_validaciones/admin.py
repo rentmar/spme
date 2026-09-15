@@ -1,9 +1,11 @@
 # spme_validaciones/admin.py
 from django.contrib import admin
 from django.utils.html import format_html
+from django.urls import reverse
+from django.utils import timezone
 from .models import (
-    Validacion, 
-    ValidacionInformeActividad, 
+    Validacion,
+    ValidacionInformeActividad,
     ValidacionInformeTarea,
     HistorialValidacion,
     ValidacionSolicitudFondos,
@@ -12,9 +14,7 @@ from .models import (
     ValidacionSolicitudReembolso,
     ValidacionRendicionCuentas,
 )
-from django.urls import reverse
-from django.db import models
-from django.utils import timezone
+
 
 # -------------------------------------------------------------------
 # ADMIN PARA VALIDACION BASE (SOLO LECTURA)
@@ -34,28 +34,28 @@ class ValidacionAdmin(admin.ModelAdmin):
         'fechaAsignacion_corta',
         'fechaResolucion_corta'
     ]
-    
+
     list_filter = [
         'estado',
         'versionDocumento',
         'fechaAsignacion',
     ]
-    
+
     search_fields = [
         'codigoSeguimiento',
         'usuarioValidador__username',
-        'usuarioValidador__email',
+        'usuarioValidador__correo',
         'usuarioRedactor__username',
         'comentarios'
     ]
-    
+
     readonly_fields = [
         'codigoSeguimiento',
         'fechaAsignacion',
         'fechaResolucion',
         'polymorphic_ctype'
     ]
-    
+
     fieldsets = (
         ('Información General', {
             'fields': (
@@ -75,7 +75,7 @@ class ValidacionAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
-    
+
     def estado_coloreado(self, obj):
         """Muestra el estado con colores"""
         colors = {
@@ -91,23 +91,23 @@ class ValidacionAdmin(admin.ModelAdmin):
         )
     estado_coloreado.short_description = 'Estado'
     estado_coloreado.admin_order_field = 'estado'
-    
+
     def fechaAsignacion_corta(self, obj):
         """Fecha en formato corto"""
         return obj.fechaAsignacion.strftime('%d/%m/%Y %H:%M') if obj.fechaAsignacion else '-'
     fechaAsignacion_corta.short_description = 'Asignación'
     fechaAsignacion_corta.admin_order_field = 'fechaAsignacion'
-    
+
     def fechaResolucion_corta(self, obj):
         """Fecha en formato corto"""
         return obj.fechaResolucion.strftime('%d/%m/%Y %H:%M') if obj.fechaResolucion else '-'
     fechaResolucion_corta.short_description = 'Resolución'
     fechaResolucion_corta.admin_order_field = 'fechaResolucion'
-    
+
     def get_queryset(self, request):
         """Optimizar consultas"""
         return super().get_queryset(request).select_related(
-            'usuarioValidador', 
+            'usuarioValidador',
             'usuarioRedactor',
             'polymorphic_ctype'
         )
@@ -130,30 +130,30 @@ class ValidacionInformeActividadAdmin(admin.ModelAdmin):
         'versionDocumento',
         'fechaAsignacion_corta'
     ]
-    
+
     list_filter = [
         'estado',
         'versionDocumento',
         'fechaAsignacion',
         'informe__actividad'
     ]
-    
+
     search_fields = [
         'codigoSeguimiento',
         'informe__numeroInforme',
         'usuarioValidador__username',
         'comentarios'
     ]
-    
+
     raw_id_fields = ['informe', 'usuarioValidador', 'usuarioRedactor']
-    
+
     readonly_fields = [
         'codigoSeguimiento',
         'fechaAsignacion',
         'fechaResolucion',
         'informe_detalle'
     ]
-    
+
     fieldsets = (
         ('Validación', {
             'fields': (
@@ -175,14 +175,17 @@ class ValidacionInformeActividadAdmin(admin.ModelAdmin):
             )
         }),
     )
-    
+
     def informe_link(self, obj):
         """Link al informe en admin"""
-        url = f"/admin/spme_monitoreo/informeactividadprincipal/{obj.informe.id}/change/"
+        url = reverse(
+            'admin:spme_monitoreo_informeactividadprincipal_change',
+            args=[obj.informe.id]
+        )
         return format_html('<a href="{}">{}</a>', url, obj.informe.numeroInforme)
     informe_link.short_description = 'Informe'
     informe_link.admin_order_field = 'informe__numeroInforme'
-    
+
     def informe_detalle(self, obj):
         """Muestra detalles del informe"""
         if obj.informe:
@@ -196,7 +199,7 @@ class ValidacionInformeActividadAdmin(admin.ModelAdmin):
             )
         return '-'
     informe_detalle.short_description = 'Detalles del Informe'
-    
+
     def estado_coloreado(self, obj):
         """Muestra el estado con colores"""
         colors = {
@@ -212,12 +215,12 @@ class ValidacionInformeActividadAdmin(admin.ModelAdmin):
         )
     estado_coloreado.short_description = 'Estado'
     estado_coloreado.admin_order_field = 'estado'
-    
+
     def fechaAsignacion_corta(self, obj):
         """Fecha en formato corto"""
         return obj.fechaAsignacion.strftime('%d/%m/%Y %H:%M') if obj.fechaAsignacion else '-'
     fechaAsignacion_corta.short_description = 'Asignación'
-    
+
     def get_queryset(self, request):
         """Optimizar consultas"""
         return super().get_queryset(request).select_related(
@@ -226,9 +229,9 @@ class ValidacionInformeActividadAdmin(admin.ModelAdmin):
             'usuarioValidador',
             'usuarioRedactor'
         )
-    
+
     actions = ['marcar_como_aprobado', 'marcar_como_rechazado']
-    
+
     def marcar_como_aprobado(self, request, queryset):
         """Action para aprobar validaciones"""
         for v in queryset:
@@ -236,7 +239,7 @@ class ValidacionInformeActividadAdmin(admin.ModelAdmin):
             v.save()
         self.message_user(request, f"{queryset.count()} validaciones marcadas como APROBADAS")
     marcar_como_aprobado.short_description = "Marcar como APROBADO"
-    
+
     def marcar_como_rechazado(self, request, queryset):
         """Action para rechazar validaciones"""
         for v in queryset:
@@ -263,29 +266,29 @@ class ValidacionInformeTareaAdmin(admin.ModelAdmin):
         'versionDocumento',
         'fechaAsignacion_corta'
     ]
-    
+
     list_filter = [
         'estado',
         'versionDocumento',
         'fechaAsignacion',
     ]
-    
+
     search_fields = [
         'codigoSeguimiento',
         'informeTarea__numeroInforme',
         'usuarioValidador__username',
         'comentarios'
     ]
-    
+
     raw_id_fields = ['informeTarea', 'usuarioValidador', 'usuarioRedactor']
-    
+
     readonly_fields = [
         'codigoSeguimiento',
         'fechaAsignacion',
         'fechaResolucion',
         'informe_detalle'
     ]
-    
+
     fieldsets = (
         ('Validación', {
             'fields': (
@@ -307,14 +310,17 @@ class ValidacionInformeTareaAdmin(admin.ModelAdmin):
             )
         }),
     )
-    
+
     def informe_link(self, obj):
         """Link al informe en admin"""
-        url = f"/admin/spme_monitoreo/informetareaprincipal/{obj.informeTarea.id}/change/"
+        url = reverse(
+            'admin:spme_monitoreo_informetareaprincipal_change',
+            args=[obj.informeTarea.id]
+        )
         return format_html('<a href="{}">{}</a>', url, obj.informeTarea.numeroInforme)
     informe_link.short_description = 'Informe Tarea'
     informe_link.admin_order_field = 'informeTarea__numeroInforme'
-    
+
     def informe_detalle(self, obj):
         """Muestra detalles del informe"""
         if obj.informeTarea:
@@ -328,7 +334,7 @@ class ValidacionInformeTareaAdmin(admin.ModelAdmin):
             )
         return '-'
     informe_detalle.short_description = 'Detalles del Informe'
-    
+
     def estado_coloreado(self, obj):
         """Muestra el estado con colores"""
         colors = {
@@ -343,12 +349,12 @@ class ValidacionInformeTareaAdmin(admin.ModelAdmin):
             obj.get_estado_display()
         )
     estado_coloreado.short_description = 'Estado'
-    
+
     def fechaAsignacion_corta(self, obj):
         """Fecha en formato corto"""
         return obj.fechaAsignacion.strftime('%d/%m/%Y %H:%M') if obj.fechaAsignacion else '-'
     fechaAsignacion_corta.short_description = 'Asignación'
-    
+
     def get_queryset(self, request):
         """Optimizar consultas"""
         return super().get_queryset(request).select_related(
@@ -357,9 +363,9 @@ class ValidacionInformeTareaAdmin(admin.ModelAdmin):
             'usuarioValidador',
             'usuarioRedactor'
         )
-    
+
     actions = ['marcar_como_aprobado', 'marcar_como_rechazado']
-    
+
     def marcar_como_aprobado(self, request, queryset):
         """Action para aprobar validaciones"""
         for v in queryset:
@@ -367,7 +373,7 @@ class ValidacionInformeTareaAdmin(admin.ModelAdmin):
             v.save()
         self.message_user(request, f"{queryset.count()} validaciones marcadas como APROBADAS")
     marcar_como_aprobado.short_description = "Marcar como APROBADO"
-    
+
     def marcar_como_rechazado(self, request, queryset):
         """Action para rechazar validaciones"""
         for v in queryset:
@@ -395,29 +401,29 @@ class ValidacionSolicitudFondosAdmin(admin.ModelAdmin):
         'comentarios',
         'fechaAsignacion_corta'
     ]
-    
+
     list_filter = [
         'estado',
         'versionDocumento',
         'fechaAsignacion',
     ]
-    
+
     search_fields = [
         'codigoSeguimiento',
         'solicitud__numeroFormulario',
         'usuarioValidador__username',
         'comentarios'
     ]
-    
+
     raw_id_fields = ['solicitud', 'usuarioValidador', 'usuarioRedactor']
-    
+
     readonly_fields = [
         'codigoSeguimiento',
         'fechaAsignacion',
         'fechaResolucion',
         'solicitud_detalle'
     ]
-    
+
     fieldsets = (
         ('Validación', {
             'fields': (
@@ -439,14 +445,17 @@ class ValidacionSolicitudFondosAdmin(admin.ModelAdmin):
             )
         }),
     )
-    
+
     def solicitud_link(self, obj):
         """Link a la solicitud en admin"""
-        url = f"/admin/spme_fondos/solicitudfondos/{obj.solicitud.id}/change/"
-        return format_html('<a href="{}">{}</a>', url, obj.solicitud.numeroFormulario)
+        url = reverse(
+            'admin:spme_monitoreo_solicitudfondos_change',
+            args=[obj.solicitud.id]
+        )
+        return format_html('<a href="{}">💵 {}</a>', url, obj.solicitud.numeroFormulario)
     solicitud_link.short_description = 'Solicitud'
     solicitud_link.admin_order_field = 'solicitud__numeroFormulario'
-    
+
     def solicitud_detalle(self, obj):
         """Muestra detalles de la solicitud"""
         if obj.solicitud:
@@ -462,7 +471,7 @@ class ValidacionSolicitudFondosAdmin(admin.ModelAdmin):
             )
         return '-'
     solicitud_detalle.short_description = 'Detalles de la Solicitud'
-    
+
     def estado_coloreado(self, obj):
         """Muestra el estado con colores"""
         colors = {
@@ -478,12 +487,12 @@ class ValidacionSolicitudFondosAdmin(admin.ModelAdmin):
         )
     estado_coloreado.short_description = 'Estado'
     estado_coloreado.admin_order_field = 'estado'
-    
+
     def fechaAsignacion_corta(self, obj):
         """Fecha en formato corto"""
         return obj.fechaAsignacion.strftime('%d/%m/%Y %H:%M') if obj.fechaAsignacion else '-'
     fechaAsignacion_corta.short_description = 'Asignación'
-    
+
     def get_queryset(self, request):
         """Optimizar consultas"""
         return super().get_queryset(request).select_related(
@@ -491,9 +500,9 @@ class ValidacionSolicitudFondosAdmin(admin.ModelAdmin):
             'usuarioValidador',
             'usuarioRedactor'
         )
-    
+
     actions = ['marcar_como_aprobado', 'marcar_como_rechazado']
-    
+
     def marcar_como_aprobado(self, request, queryset):
         """Action para aprobar validaciones"""
         for v in queryset:
@@ -501,7 +510,7 @@ class ValidacionSolicitudFondosAdmin(admin.ModelAdmin):
             v.save()
         self.message_user(request, f"{queryset.count()} validaciones marcadas como APROBADAS")
     marcar_como_aprobado.short_description = "Marcar como APROBADO"
-    
+
     def marcar_como_rechazado(self, request, queryset):
         """Action para rechazar validaciones"""
         for v in queryset:
@@ -509,6 +518,7 @@ class ValidacionSolicitudFondosAdmin(admin.ModelAdmin):
             v.save()
         self.message_user(request, f"{queryset.count()} validaciones marcadas como RECHAZADAS")
     marcar_como_rechazado.short_description = "Marcar como RECHAZADO"
+
 
 # -------------------------------------------------------------------
 # ADMIN PARA VALIDACIONES DE SOLICITUD DE VIAJE
@@ -528,32 +538,32 @@ class ValidacionSolicitudViajeAdmin(admin.ModelAdmin):
         'versionDocumento',
         'fechaAsignacion_corta'
     ]
-    
+
     list_filter = [
         'estado',
         'versionDocumento',
         'fechaAsignacion',
-        'solicitud__actividad',  # Para filtrar por actividad
+        'solicitud__actividad',
     ]
-    
+
     search_fields = [
         'codigoSeguimiento',
         'solicitud__numeroFormulario',
         'usuarioValidador__username',
-        'usuarioValidador__first_name',
-        'usuarioValidador__last_name',
+        'usuarioValidador__nombre',
+        'usuarioValidador__paterno',
         'comentarios'
     ]
-    
+
     raw_id_fields = ['solicitud', 'usuarioValidador', 'usuarioRedactor']
-    
+
     readonly_fields = [
         'codigoSeguimiento',
         'fechaAsignacion',
         'fechaResolucion',
         'solicitud_detalle'
     ]
-    
+
     fieldsets = (
         ('Validación', {
             'fields': (
@@ -575,25 +585,23 @@ class ValidacionSolicitudViajeAdmin(admin.ModelAdmin):
             )
         }),
     )
-    
+
     def solicitud_link(self, obj):
         """Link a la solicitud de viaje en admin"""
-        url = f"/admin/spme_viajes/solicitudviaje/{obj.solicitud.id}/change/"
+        url = reverse(
+            'admin:spme_monitoreo_solicitudviaje_change',
+            args=[obj.solicitud.id]
+        )
         return format_html('<a href="{}">✈️ {}</a>', url, obj.codigo_solicitud)
     solicitud_link.short_description = 'Solicitud de Viaje'
     solicitud_link.admin_order_field = 'solicitud__numeroFormulario'
-    
+
     def solicitud_detalle(self, obj):
         """Muestra detalles de la solicitud de viaje"""
         if obj.solicitud:
             detalles = []
-            
-            # Código de formulario
-            detalles.append(
-                f'<strong>Formulario:</strong> {obj.codigo_solicitud}'
-            )
-            
-            # Tipo de solicitud
+            detalles.append(f'<strong>Formulario:</strong> {obj.codigo_solicitud}')
+
             tipo = obj.tipo_solicitud
             tipo_colores = {
                 'ACTIVIDAD': '#3498db',
@@ -604,57 +612,32 @@ class ValidacionSolicitudViajeAdmin(admin.ModelAdmin):
             detalles.append(
                 f'<strong>Tipo:</strong> <span style="color: {color_tipo}; font-weight: bold;">{tipo}</span>'
             )
-            
-            # Monto
+
             detalles.append(
                 f'<strong>Monto:</strong> {obj.monto_solicitud:,.2f}' if obj.monto_solicitud else '<strong>Monto:</strong> -'
             )
-            
-            # Actividad o Tarea relacionada
+
             if obj.solicitud.actividad:
-                detalles.append(
-                    f'<strong>Actividad:</strong> {obj.solicitud.actividad}'
-                )
+                detalles.append(f'<strong>Actividad:</strong> {obj.solicitud.actividad}')
             if obj.solicitud.tarea:
-                detalles.append(
-                    f'<strong>Tarea:</strong> {obj.solicitud.tarea}'
-                )
-            
-            # Solicitante
+                detalles.append(f'<strong>Tarea:</strong> {obj.solicitud.tarea}')
+
             if hasattr(obj.solicitud, 'usuario') and obj.solicitud.usuario:
                 detalles.append(
                     f'<strong>Solicitante:</strong> {obj.solicitud.usuario.get_full_name() or obj.solicitud.usuario.username}'
                 )
-            
-            # Destino si existe
-            if hasattr(obj.solicitud, 'destino') and obj.solicitud.destino:
-                detalles.append(
-                    f'<strong>Destino:</strong> {obj.solicitud.destino}'
-                )
-            
-            # Fechas del viaje si existen
-            if hasattr(obj.solicitud, 'fechaInicio') and obj.solicitud.fechaInicio:
-                fecha_fin = obj.solicitud.fechaFin if hasattr(obj.solicitud, 'fechaFin') and obj.solicitud.fechaFin else None
-                if fecha_fin:
-                    detalles.append(
-                        f'<strong>Viaje:</strong> {obj.solicitud.fechaInicio.strftime("%d/%m/%Y")} - {fecha_fin.strftime("%d/%m/%Y")}'
-                    )
-                else:
-                    detalles.append(
-                        f'<strong>Fecha:</strong> {obj.solicitud.fechaInicio.strftime("%d/%m/%Y")}'
-                    )
-            
+
             return format_html('<br>'.join(detalles))
         return '-'
     solicitud_detalle.short_description = 'Detalles de la Solicitud'
-    
+
     def tipo_solicitud_coloreado(self, obj):
         """Muestra el tipo de solicitud con colores"""
         tipo = obj.tipo_solicitud
         colores = {
-            'ACTIVIDAD': '#3498db',  # Azul
-            'TAREA': '#9b59b6',      # Púrpura
-            'GENERAL': '#95a5a6'     # Gris
+            'ACTIVIDAD': '#3498db',
+            'TAREA': '#9b59b6',
+            'GENERAL': '#95a5a6'
         }
         iconos = {
             'ACTIVIDAD': '📋',
@@ -670,7 +653,7 @@ class ValidacionSolicitudViajeAdmin(admin.ModelAdmin):
             tipo
         )
     tipo_solicitud_coloreado.short_description = 'Tipo'
-    
+
     def estado_coloreado(self, obj):
         """Muestra el estado con colores"""
         colors = {
@@ -693,13 +676,13 @@ class ValidacionSolicitudViajeAdmin(admin.ModelAdmin):
         )
     estado_coloreado.short_description = 'Estado'
     estado_coloreado.admin_order_field = 'estado'
-    
+
     def fechaAsignacion_corta(self, obj):
         """Fecha en formato corto"""
         return obj.fechaAsignacion.strftime('%d/%m/%Y %H:%M') if obj.fechaAsignacion else '-'
     fechaAsignacion_corta.short_description = 'Asignación'
     fechaAsignacion_corta.admin_order_field = 'fechaAsignacion'
-    
+
     def get_queryset(self, request):
         """Optimizar consultas incluyendo las relaciones necesarias"""
         return super().get_queryset(request).select_related(
@@ -709,9 +692,9 @@ class ValidacionSolicitudViajeAdmin(admin.ModelAdmin):
             'usuarioValidador',
             'usuarioRedactor'
         )
-    
+
     actions = ['marcar_como_aprobado', 'marcar_como_rechazado']
-    
+
     def marcar_como_aprobado(self, request, queryset):
         """Action para aprobar validaciones de viaje"""
         contador = 0
@@ -721,7 +704,7 @@ class ValidacionSolicitudViajeAdmin(admin.ModelAdmin):
             contador += 1
         self.message_user(request, f"✈️ {contador} validaciones de viaje marcadas como APROBADAS")
     marcar_como_aprobado.short_description = "✅ Marcar como APROBADO"
-    
+
     def marcar_como_rechazado(self, request, queryset):
         """Action para rechazar validaciones de viaje"""
         contador = 0
@@ -731,6 +714,7 @@ class ValidacionSolicitudViajeAdmin(admin.ModelAdmin):
             contador += 1
         self.message_user(request, f"✈️ {contador} validaciones de viaje marcadas como RECHAZADAS")
     marcar_como_rechazado.short_description = "❌ Marcar como RECHAZADO"
+
 
 # -------------------------------------------------------------------
 # ADMIN PARA VALIDACIONES DE SOLICITUD DE PAGO DIRECTO
@@ -750,32 +734,32 @@ class ValidacionSolicitudPagoDirectoAdmin(admin.ModelAdmin):
         'versionDocumento',
         'fechaAsignacion_corta'
     ]
-    
+
     list_filter = [
         'estado',
         'versionDocumento',
         'fechaAsignacion',
-        'solicitud__actividad',  # Para filtrar por actividad
+        'solicitud__actividad',
     ]
-    
+
     search_fields = [
         'codigoSeguimiento',
         'solicitud__numeroFormulario',
         'usuarioValidador__username',
-        'usuarioValidador__first_name',
-        'usuarioValidador__last_name',
+        'usuarioValidador__nombre',
+        'usuarioValidador__paterno',
         'comentarios'
     ]
-    
+
     raw_id_fields = ['solicitud', 'usuarioValidador', 'usuarioRedactor']
-    
+
     readonly_fields = [
         'codigoSeguimiento',
         'fechaAsignacion',
         'fechaResolucion',
         'solicitud_detalle'
     ]
-    
+
     fieldsets = (
         ('Validación', {
             'fields': (
@@ -797,25 +781,23 @@ class ValidacionSolicitudPagoDirectoAdmin(admin.ModelAdmin):
             )
         }),
     )
-    
+
     def solicitud_link(self, obj):
         """Link a la solicitud de pago directo en admin"""
-        url = f"/admin/spme_viajes/solicitudpagodirecto/{obj.solicitud.id}/change/"
+        url = reverse(
+            'admin:spme_monitoreo_solicitudpagodirecto_change',
+            args=[obj.solicitud.id]
+        )
         return format_html('<a href="{}">💳 {}</a>', url, obj.codigo_solicitud)
     solicitud_link.short_description = 'Solicitud de Pago Directo'
     solicitud_link.admin_order_field = 'solicitud__numeroFormulario'
-    
+
     def solicitud_detalle(self, obj):
         """Muestra detalles de la solicitud de pago directo"""
         if obj.solicitud:
             detalles = []
-            
-            # Código de formulario
-            detalles.append(
-                f'<strong>Formulario:</strong> {obj.codigo_solicitud}'
-            )
-            
-            # Tipo de solicitud
+            detalles.append(f'<strong>Formulario:</strong> {obj.codigo_solicitud}')
+
             tipo = obj.tipo_solicitud
             tipo_colores = {
                 'ACTIVIDAD': '#3498db',
@@ -826,57 +808,32 @@ class ValidacionSolicitudPagoDirectoAdmin(admin.ModelAdmin):
             detalles.append(
                 f'<strong>Tipo:</strong> <span style="color: {color_tipo}; font-weight: bold;">{tipo}</span>'
             )
-            
-            # Monto
+
             detalles.append(
                 f'<strong>Monto:</strong> {obj.monto_solicitud:,.2f}' if obj.monto_solicitud else '<strong>Monto:</strong> -'
             )
-            
-            # Actividad o Tarea relacionada
+
             if obj.solicitud.actividad:
-                detalles.append(
-                    f'<strong>Actividad:</strong> {obj.solicitud.actividad}'
-                )
+                detalles.append(f'<strong>Actividad:</strong> {obj.solicitud.actividad}')
             if obj.solicitud.tarea:
-                detalles.append(
-                    f'<strong>Tarea:</strong> {obj.solicitud.tarea}'
-                )
-            
-            # Solicitante
+                detalles.append(f'<strong>Tarea:</strong> {obj.solicitud.tarea}')
+
             if hasattr(obj.solicitud, 'usuario') and obj.solicitud.usuario:
                 detalles.append(
                     f'<strong>Solicitante:</strong> {obj.solicitud.usuario.get_full_name() or obj.solicitud.usuario.username}'
                 )
-            
-            # Beneficiario si existe
-            if hasattr(obj.solicitud, 'beneficiario') and obj.solicitud.beneficiario:
-                detalles.append(
-                    f'<strong>Beneficiario:</strong> {obj.solicitud.beneficiario}'
-                )
-            
-            # Concepto si existe
-            if hasattr(obj.solicitud, 'concepto') and obj.solicitud.concepto:
-                detalles.append(
-                    f'<strong>Concepto:</strong> {obj.solicitud.concepto}'
-                )
-            
-            # Fecha de la solicitud si existe
-            if hasattr(obj.solicitud, 'fechaSolicitud') and obj.solicitud.fechaSolicitud:
-                detalles.append(
-                    f'<strong>Fecha Solicitud:</strong> {obj.solicitud.fechaSolicitud.strftime("%d/%m/%Y")}'
-                )
-            
+
             return format_html('<br>'.join(detalles))
         return '-'
     solicitud_detalle.short_description = 'Detalles de la Solicitud'
-    
+
     def tipo_solicitud_coloreado(self, obj):
         """Muestra el tipo de solicitud con colores"""
         tipo = obj.tipo_solicitud
         colores = {
-            'ACTIVIDAD': '#3498db',  # Azul
-            'TAREA': '#9b59b6',      # Púrpura
-            'GENERAL': '#95a5a6'     # Gris
+            'ACTIVIDAD': '#3498db',
+            'TAREA': '#9b59b6',
+            'GENERAL': '#95a5a6'
         }
         iconos = {
             'ACTIVIDAD': '📋',
@@ -892,7 +849,7 @@ class ValidacionSolicitudPagoDirectoAdmin(admin.ModelAdmin):
             tipo
         )
     tipo_solicitud_coloreado.short_description = 'Tipo'
-    
+
     def estado_coloreado(self, obj):
         """Muestra el estado con colores"""
         colors = {
@@ -915,13 +872,13 @@ class ValidacionSolicitudPagoDirectoAdmin(admin.ModelAdmin):
         )
     estado_coloreado.short_description = 'Estado'
     estado_coloreado.admin_order_field = 'estado'
-    
+
     def fechaAsignacion_corta(self, obj):
         """Fecha en formato corto"""
         return obj.fechaAsignacion.strftime('%d/%m/%Y %H:%M') if obj.fechaAsignacion else '-'
     fechaAsignacion_corta.short_description = 'Asignación'
     fechaAsignacion_corta.admin_order_field = 'fechaAsignacion'
-    
+
     def get_queryset(self, request):
         """Optimizar consultas incluyendo las relaciones necesarias"""
         return super().get_queryset(request).select_related(
@@ -931,9 +888,9 @@ class ValidacionSolicitudPagoDirectoAdmin(admin.ModelAdmin):
             'usuarioValidador',
             'usuarioRedactor'
         )
-    
+
     actions = ['marcar_como_aprobado', 'marcar_como_rechazado']
-    
+
     def marcar_como_aprobado(self, request, queryset):
         """Action para aprobar validaciones de pago directo"""
         contador = 0
@@ -943,7 +900,7 @@ class ValidacionSolicitudPagoDirectoAdmin(admin.ModelAdmin):
             contador += 1
         self.message_user(request, f"💳 {contador} validaciones de pago directo marcadas como APROBADAS")
     marcar_como_aprobado.short_description = "✅ Marcar como APROBADO"
-    
+
     def marcar_como_rechazado(self, request, queryset):
         """Action para rechazar validaciones de pago directo"""
         contador = 0
@@ -973,32 +930,32 @@ class ValidacionSolicitudReembolsoAdmin(admin.ModelAdmin):
         'versionDocumento',
         'fechaAsignacion_corta'
     ]
-    
+
     list_filter = [
         'estado',
         'versionDocumento',
         'fechaAsignacion',
-        'solicitud__actividad',  # Para filtrar por actividad
+        'solicitud__actividad',
     ]
-    
+
     search_fields = [
         'codigoSeguimiento',
         'solicitud__numeroFormulario',
         'usuarioValidador__username',
-        'usuarioValidador__first_name',
-        'usuarioValidador__last_name',
+        'usuarioValidador__nombre',
+        'usuarioValidador__paterno',
         'comentarios'
     ]
-    
+
     raw_id_fields = ['solicitud', 'usuarioValidador', 'usuarioRedactor']
-    
+
     readonly_fields = [
         'codigoSeguimiento',
         'fechaAsignacion',
         'fechaResolucion',
         'solicitud_detalle'
     ]
-    
+
     fieldsets = (
         ('Validación', {
             'fields': (
@@ -1020,25 +977,23 @@ class ValidacionSolicitudReembolsoAdmin(admin.ModelAdmin):
             )
         }),
     )
-    
+
     def solicitud_link(self, obj):
         """Link a la solicitud de reembolso en admin"""
-        url = f"/admin/spme_viajes/solicitudreembolso/{obj.solicitud.id}/change/"
+        url = reverse(
+            'admin:spme_monitoreo_solicitudreembolso_change',
+            args=[obj.solicitud.id]
+        )
         return format_html('<a href="{}">♻️ {}</a>', url, obj.codigo_solicitud)
     solicitud_link.short_description = 'Solicitud de Reembolso'
     solicitud_link.admin_order_field = 'solicitud__numeroFormulario'
-    
+
     def solicitud_detalle(self, obj):
         """Muestra detalles de la solicitud de reembolso"""
         if obj.solicitud:
             detalles = []
-            
-            # Código de formulario
-            detalles.append(
-                f'<strong>Formulario:</strong> {obj.codigo_solicitud}'
-            )
-            
-            # Tipo de solicitud
+            detalles.append(f'<strong>Formulario:</strong> {obj.codigo_solicitud}')
+
             tipo = obj.tipo_solicitud
             tipo_colores = {
                 'ACTIVIDAD': '#3498db',
@@ -1049,60 +1004,33 @@ class ValidacionSolicitudReembolsoAdmin(admin.ModelAdmin):
             detalles.append(
                 f'<strong>Tipo:</strong> <span style="color: {color_tipo}; font-weight: bold;">{tipo}</span>'
             )
-            
-            # Monto
+
             if obj.monto_solicitud:
-                detalles.append(
-                    f'<strong>Monto:</strong> {obj.monto_solicitud:,.2f}'
-                )
+                detalles.append(f'<strong>Monto:</strong> {obj.monto_solicitud:,.2f}')
             else:
                 detalles.append('<strong>Monto:</strong> -')
-            
-            # Actividad o Tarea relacionada
+
             if obj.solicitud.actividad:
-                detalles.append(
-                    f'<strong>Actividad:</strong> {obj.solicitud.actividad}'
-                )
+                detalles.append(f'<strong>Actividad:</strong> {obj.solicitud.actividad}')
             if obj.solicitud.tarea:
-                detalles.append(
-                    f'<strong>Tarea:</strong> {obj.solicitud.tarea}'
-                )
-            
-            # Solicitante
+                detalles.append(f'<strong>Tarea:</strong> {obj.solicitud.tarea}')
+
             if hasattr(obj.solicitud, 'usuario') and obj.solicitud.usuario:
                 detalles.append(
                     f'<strong>Solicitante:</strong> {obj.solicitud.usuario.get_full_name() or obj.solicitud.usuario.username}'
                 )
-            
-            # Beneficiario si existe
-            if hasattr(obj.solicitud, 'beneficiario') and obj.solicitud.beneficiario:
-                detalles.append(
-                    f'<strong>Beneficiario:</strong> {obj.solicitud.beneficiario}'
-                )
-            
-            # Concepto si existe
-            if hasattr(obj.solicitud, 'concepto') and obj.solicitud.concepto:
-                detalles.append(
-                    f'<strong>Concepto:</strong> {obj.solicitud.concepto}'
-                )
-            
-            # Fecha de la solicitud si existe
-            if hasattr(obj.solicitud, 'fechaSolicitud') and obj.solicitud.fechaSolicitud:
-                detalles.append(
-                    f'<strong>Fecha Solicitud:</strong> {obj.solicitud.fechaSolicitud.strftime("%d/%m/%Y")}'
-                )
-            
+
             return format_html('<br>'.join(detalles))
         return '-'
     solicitud_detalle.short_description = 'Detalles de la Solicitud'
-    
+
     def tipo_solicitud_coloreado(self, obj):
         """Muestra el tipo de solicitud con colores"""
         tipo = obj.tipo_solicitud
         colores = {
-            'ACTIVIDAD': '#3498db',  # Azul
-            'TAREA': '#9b59b6',      # Púrpura
-            'GENERAL': '#95a5a6'     # Gris
+            'ACTIVIDAD': '#3498db',
+            'TAREA': '#9b59b6',
+            'GENERAL': '#95a5a6'
         }
         iconos = {
             'ACTIVIDAD': '📋',
@@ -1118,7 +1046,7 @@ class ValidacionSolicitudReembolsoAdmin(admin.ModelAdmin):
             tipo
         )
     tipo_solicitud_coloreado.short_description = 'Tipo'
-    
+
     def estado_coloreado(self, obj):
         """Muestra el estado con colores"""
         colors = {
@@ -1141,13 +1069,13 @@ class ValidacionSolicitudReembolsoAdmin(admin.ModelAdmin):
         )
     estado_coloreado.short_description = 'Estado'
     estado_coloreado.admin_order_field = 'estado'
-    
+
     def fechaAsignacion_corta(self, obj):
         """Fecha en formato corto"""
         return obj.fechaAsignacion.strftime('%d/%m/%Y %H:%M') if obj.fechaAsignacion else '-'
     fechaAsignacion_corta.short_description = 'Asignación'
     fechaAsignacion_corta.admin_order_field = 'fechaAsignacion'
-    
+
     def get_queryset(self, request):
         """Optimizar consultas incluyendo las relaciones necesarias"""
         return super().get_queryset(request).select_related(
@@ -1157,9 +1085,9 @@ class ValidacionSolicitudReembolsoAdmin(admin.ModelAdmin):
             'usuarioValidador',
             'usuarioRedactor'
         )
-    
+
     actions = ['marcar_como_aprobado', 'marcar_como_rechazado']
-    
+
     def marcar_como_aprobado(self, request, queryset):
         """Action para aprobar validaciones de reembolso"""
         contador = 0
@@ -1169,7 +1097,7 @@ class ValidacionSolicitudReembolsoAdmin(admin.ModelAdmin):
             contador += 1
         self.message_user(request, f"♻️ {contador} validaciones de reembolso marcadas como APROBADAS")
     marcar_como_aprobado.short_description = "✅ Marcar como APROBADO"
-    
+
     def marcar_como_rechazado(self, request, queryset):
         """Action para rechazar validaciones de reembolso"""
         contador = 0
@@ -1199,32 +1127,32 @@ class ValidacionRendicionCuentasAdmin(admin.ModelAdmin):
         'versionDocumento',
         'fechaAsignacion_corta'
     ]
-    
+
     list_filter = [
         'estado',
         'versionDocumento',
         'fechaAsignacion',
-        'rendicion__actividad',  # Para filtrar por actividad
+        'rendicion__actividad',
     ]
-    
+
     search_fields = [
         'codigoSeguimiento',
         'rendicion__numeroFormulario',
         'usuarioValidador__username',
-        'usuarioValidador__first_name',
-        'usuarioValidador__last_name',
+        'usuarioValidador__nombre',
+        'usuarioValidador__paterno',
         'comentarios'
     ]
-    
+
     raw_id_fields = ['rendicion', 'usuarioValidador', 'usuarioRedactor']
-    
+
     readonly_fields = [
         'codigoSeguimiento',
         'fechaAsignacion',
         'fechaResolucion',
         'rendicion_detalle'
     ]
-    
+
     fieldsets = (
         ('Validación', {
             'fields': (
@@ -1246,25 +1174,23 @@ class ValidacionRendicionCuentasAdmin(admin.ModelAdmin):
             )
         }),
     )
-    
+
     def rendicion_link(self, obj):
         """Link a la rendición de cuentas en admin"""
-        url = f"/admin/spme_viajes/rendicioncuentas/{obj.rendicion.id}/change/"
+        url = reverse(
+            'admin:spme_monitoreo_rendicioncuentas_change',
+            args=[obj.rendicion.id]
+        )
         return format_html('<a href="{}">📊 {}</a>', url, obj.codigo_rendicion)
     rendicion_link.short_description = 'Rendición de Cuentas'
     rendicion_link.admin_order_field = 'rendicion__numeroFormulario'
-    
+
     def rendicion_detalle(self, obj):
         """Muestra detalles de la rendición de cuentas"""
         if obj.rendicion:
             detalles = []
-            
-            # Código de formulario
-            detalles.append(
-                f'<strong>Formulario:</strong> {obj.codigo_rendicion}'
-            )
-            
-            # Tipo de rendición
+            detalles.append(f'<strong>Formulario:</strong> {obj.codigo_rendicion}')
+
             tipo = obj.tipo_rendicion
             tipo_colores = {
                 'ACTIVIDAD': '#3498db',
@@ -1275,54 +1201,36 @@ class ValidacionRendicionCuentasAdmin(admin.ModelAdmin):
             detalles.append(
                 f'<strong>Tipo:</strong> <span style="color: {color_tipo}; font-weight: bold;">{tipo}</span>'
             )
-            
-            # Monto asignado
+
             if obj.monto_rendicion:
-                detalles.append(
-                    f'<strong>Monto Asignado:</strong> {obj.monto_rendicion:,.2f}'
-                )
+                detalles.append(f'<strong>Monto Asignado:</strong> {obj.monto_rendicion:,.2f}')
             else:
                 detalles.append('<strong>Monto Asignado:</strong> -')
-            
-            # Saldo si existe
+
             if obj.saldo_rendicion is not None:
-                detalles.append(
-                    f'<strong>Saldo:</strong> {obj.saldo_rendicion:,.2f}'
-                )
-            
-            # Actividad o Tarea relacionada
+                detalles.append(f'<strong>Saldo:</strong> {obj.saldo_rendicion:,.2f}')
+
             if obj.rendicion.actividad:
-                detalles.append(
-                    f'<strong>Actividad:</strong> {obj.rendicion.actividad}'
-                )
+                detalles.append(f'<strong>Actividad:</strong> {obj.rendicion.actividad}')
             if obj.rendicion.tarea:
-                detalles.append(
-                    f'<strong>Tarea:</strong> {obj.rendicion.tarea}'
-                )
-            
-            # Solicitante
+                detalles.append(f'<strong>Tarea:</strong> {obj.rendicion.tarea}')
+
             if hasattr(obj.rendicion, 'usuario') and obj.rendicion.usuario:
                 detalles.append(
                     f'<strong>Solicitante:</strong> {obj.rendicion.usuario.get_full_name() or obj.rendicion.usuario.username}'
                 )
-            
-            # Fecha de la rendición si existe
-            if hasattr(obj.rendicion, 'fechaRendicion') and obj.rendicion.fechaRendicion:
-                detalles.append(
-                    f'<strong>Fecha Rendición:</strong> {obj.rendicion.fechaRendicion.strftime("%d/%m/%Y")}'
-                )
-            
+
             return format_html('<br>'.join(detalles))
         return '-'
     rendicion_detalle.short_description = 'Detalles de la Rendición'
-    
+
     def tipo_rendicion_coloreado(self, obj):
         """Muestra el tipo de rendición con colores"""
         tipo = obj.tipo_rendicion
         colores = {
-            'ACTIVIDAD': '#3498db',  # Azul
-            'TAREA': '#9b59b6',      # Púrpura
-            'GENERAL': '#95a5a6'     # Gris
+            'ACTIVIDAD': '#3498db',
+            'TAREA': '#9b59b6',
+            'GENERAL': '#95a5a6'
         }
         iconos = {
             'ACTIVIDAD': '📋',
@@ -1338,7 +1246,7 @@ class ValidacionRendicionCuentasAdmin(admin.ModelAdmin):
             tipo
         )
     tipo_rendicion_coloreado.short_description = 'Tipo'
-    
+
     def estado_coloreado(self, obj):
         """Muestra el estado con colores"""
         colors = {
@@ -1361,13 +1269,13 @@ class ValidacionRendicionCuentasAdmin(admin.ModelAdmin):
         )
     estado_coloreado.short_description = 'Estado'
     estado_coloreado.admin_order_field = 'estado'
-    
+
     def fechaAsignacion_corta(self, obj):
         """Fecha en formato corto"""
         return obj.fechaAsignacion.strftime('%d/%m/%Y %H:%M') if obj.fechaAsignacion else '-'
     fechaAsignacion_corta.short_description = 'Asignación'
     fechaAsignacion_corta.admin_order_field = 'fechaAsignacion'
-    
+
     def get_queryset(self, request):
         """Optimizar consultas incluyendo las relaciones necesarias"""
         return super().get_queryset(request).select_related(
@@ -1377,9 +1285,9 @@ class ValidacionRendicionCuentasAdmin(admin.ModelAdmin):
             'usuarioValidador',
             'usuarioRedactor'
         )
-    
+
     actions = ['marcar_como_aprobado', 'marcar_como_rechazado']
-    
+
     def marcar_como_aprobado(self, request, queryset):
         """Action para aprobar validaciones de rendición"""
         contador = 0
@@ -1389,7 +1297,7 @@ class ValidacionRendicionCuentasAdmin(admin.ModelAdmin):
             contador += 1
         self.message_user(request, f"📊 {contador} validaciones de rendición marcadas como APROBADAS")
     marcar_como_aprobado.short_description = "✅ Marcar como APROBADO"
-    
+
     def marcar_como_rechazado(self, request, queryset):
         """Action para rechazar validaciones de rendición"""
         contador = 0
@@ -1399,6 +1307,7 @@ class ValidacionRendicionCuentasAdmin(admin.ModelAdmin):
             contador += 1
         self.message_user(request, f"📊 {contador} validaciones de rendición marcadas como RECHAZADAS")
     marcar_como_rechazado.short_description = "❌ Marcar como RECHAZADO"
+
 
 # -------------------------------------------------------------------
 # ADMIN PARA HISTORIAL
@@ -1418,19 +1327,19 @@ class HistorialValidacionAdmin(admin.ModelAdmin):
         'versionDocumento',
         'fechaCambio_corta'
     ]
-    
+
     list_filter = [
         'fechaCambio',
         'estado_nuevo',
         'versionDocumento'
     ]
-    
+
     search_fields = [
         'validacion__codigoSeguimiento',
         'usuario__username',
         'comentario'
     ]
-    
+
     readonly_fields = [
         'validacion',
         'usuario',
@@ -1441,7 +1350,7 @@ class HistorialValidacionAdmin(admin.ModelAdmin):
         'fechaCambio',
         'validacion_detalle'
     ]
-    
+
     fieldsets = (
         ('Información del Cambio', {
             'fields': (
@@ -1455,22 +1364,36 @@ class HistorialValidacionAdmin(admin.ModelAdmin):
             )
         }),
     )
-    
+
     def validacion_codigo(self, obj):
         """Código de la validación"""
         return obj.validacion.codigoSeguimiento
     validacion_codigo.short_description = 'Validación'
     validacion_codigo.admin_order_field = 'validacion__codigoSeguimiento'
-    
+
     def tipo_documento(self, obj):
         """Tipo de documento"""
-        if hasattr(obj.validacion, 'informe'):
-            return 'Actividad'
-        elif hasattr(obj.validacion, 'informeTarea'):
-            return 'Tarea'
+        v = obj.validacion
+        if hasattr(v, 'informe'):
+            return 'Informe Actividad'
+        elif hasattr(v, 'informeTarea'):
+            return 'Informe Tarea'
+        elif hasattr(v, 'solicitud'):
+            nombre = type(v).__name__
+            if 'Fondos' in nombre:
+                return 'Solicitud Fondos'
+            elif 'Viaje' in nombre:
+                return 'Solicitud Viaje'
+            elif 'PagoDirecto' in nombre:
+                return 'Pago Directo'
+            elif 'Reembolso' in nombre:
+                return 'Reembolso'
+            return 'Solicitud'
+        elif hasattr(v, 'rendicion'):
+            return 'Rendición Cuentas'
         return '-'
     tipo_documento.short_description = 'Tipo'
-    
+
     def cambio_estado(self, obj):
         """Muestra el cambio de estado con flecha"""
         return format_html(
@@ -1479,17 +1402,16 @@ class HistorialValidacionAdmin(admin.ModelAdmin):
             obj.get_estado_nuevo_display()
         )
     cambio_estado.short_description = 'Cambio'
-    
+
     def fechaCambio_corta(self, obj):
         """Fecha en formato corto con zona horaria local"""
         if obj.fechaCambio:
-            # Convierte automáticamente a la zona horaria configurada en TIME_ZONE
             local_time = timezone.localtime(obj.fechaCambio)
             return local_time.strftime('%d/%m/%Y %H:%M')
         return '-'
     fechaCambio_corta.short_description = 'Fecha'
     fechaCambio_corta.admin_order_field = 'fechaCambio'
-    
+
     def validacion_detalle(self, obj):
         """Detalle de la validación"""
         v = obj.validacion
@@ -1507,21 +1429,35 @@ class HistorialValidacionAdmin(admin.ModelAdmin):
                 v.usuarioValidador,
                 v.usuarioRedactor
             )
+        elif hasattr(v, 'solicitud'):
+            return format_html(
+                'Solicitud: {}<br>Validador: {}<br>Redactor: {}',
+                v.solicitud.numeroFormulario or f"ID-{v.solicitud.id}",
+                v.usuarioValidador,
+                v.usuarioRedactor
+            )
+        elif hasattr(v, 'rendicion'):
+            return format_html(
+                'Rendición: {}<br>Validador: {}<br>Redactor: {}',
+                v.rendicion.numeroFormulario or f"ID-{v.rendicion.id}",
+                v.usuarioValidador,
+                v.usuarioRedactor
+            )
         return '-'
     validacion_detalle.short_description = 'Detalle de Validación'
-    
+
     def has_add_permission(self, request):
         """No permitir crear historial manualmente"""
         return False
-    
+
     def has_change_permission(self, request, obj=None):
         """No permitir editar historial"""
         return False
-    
+
     def has_delete_permission(self, request, obj=None):
-        """No permitir eliminar historial"""
+        """Permitir borrado en cascada desde otros admins"""
         return True
-    
+
     def get_queryset(self, request):
         """Optimizar consultas"""
         return super().get_queryset(request).select_related(
