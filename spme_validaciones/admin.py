@@ -1520,7 +1520,7 @@ class HistorialValidacionAdmin(admin.ModelAdmin):
     
     def has_delete_permission(self, request, obj=None):
         """No permitir eliminar historial"""
-        return False
+        return True
     
     def get_queryset(self, request):
         """Optimizar consultas"""

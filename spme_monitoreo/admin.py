@@ -1,3 +1,9 @@
+from django.db import transaction
+from django.contrib import messages
+import logging
+
+logger = logging.getLogger(__name__)
+
 from django.contrib import admin
 from .models import (
     SolicitudFondos, 
@@ -10,7 +16,7 @@ from .models import (
     InfActividad, 
     InfTarea,
 
-    )
+    ) 
 from .models import (
     SolicitudFondosActPei,
     RendicionCuentasActPei,
@@ -806,7 +812,9 @@ admin.site.register(InfTarea)
 
 #admin.site.register(InformeActividadPrincipal)
 
-
+# ====================================================================
+# ⬅️ NUEVO: SolicitudFondosAdmin con borrado en cascada manual
+# ====================================================================
 @admin.register(SolicitudFondos)
 class SolicitudFondosAdmin(admin.ModelAdmin):
     # Campos a mostrar en la lista principal
@@ -872,6 +880,115 @@ class SolicitudFondosAdmin(admin.ModelAdmin):
     
     # Campos para ordenar
     ordering = ['-fechaSolicitud', '-id']
+    
+    # ================================================================
+    # ⬅️ NUEVO: BORRADO EN CASCADA MANUAL
+    # ================================================================
+    
+    def delete_model(self, request, obj):
+        """
+        Borrado individual desde el admin.
+        Elimina: solicitud → validaciones → historiales
+        """
+        numero = obj.numeroFormulario or f"ID-{obj.id}"
+        total_val = 0
+        total_hist = 0
+        
+        try:
+            with transaction.atomic():
+                # 1. Obtener validaciones asociadas
+                validaciones = list(obj.validaciones.all())
+                total_val = len(validaciones)
+                
+                # 2. Borrar historiales de cada validación
+                for v in validaciones:
+                    historiales = list(v.historial.all())
+                    total_hist += len(historiales)
+                    for h in historiales:
+                        h.delete()
+                
+                # 3. Borrar las validaciones (hijas polimórficas)
+                for v in validaciones:
+                    v.delete()
+                
+                # 4. Borrar la solicitud
+                obj.delete()
+                
+                logger.warning(
+                    f"BORRADO: SolicitudFondos {numero} por {request.user}. "
+                    f"Validaciones={total_val}, Historiales={total_hist}"
+                )
+                
+                messages.success(
+                    request,
+                    f"✅ Solicitud {numero} borrada correctamente. "
+                    f"Validaciones eliminadas: {total_val}, "
+                    f"Historiales eliminados: {total_hist}"
+                )
+        
+        except Exception as e:
+            logger.exception(f"Error borrando SolicitudFondos {obj.id}")
+            messages.error(
+                request,
+                f"❌ Error al borrar la solicitud {numero}: "
+                f"{type(e).__name__}: {e}"
+            )
+            raise
+    
+    def delete_queryset(self, request, queryset):
+        """
+        Borrado masivo desde el admin.
+        Elimina cada solicitud con sus validaciones e historiales.
+        """
+        total_val = 0
+        total_hist = 0
+        total_ok = 0
+        errores = []
+        
+        for obj in queryset:
+            try:
+                with transaction.atomic():
+                    validaciones = list(obj.validaciones.all())
+                    total_val += len(validaciones)
+                    
+                    for v in validaciones:
+                        historiales = list(v.historial.all())
+                        total_hist += len(historiales)
+                        for h in historiales:
+                            h.delete()
+                    
+                    for v in validaciones:
+                        v.delete()
+                    
+                    obj.delete()
+                    total_ok += 1
+            
+            except Exception as e:
+                errores.append(f"ID {obj.id}: {type(e).__name__}")
+                logger.exception(f"Error borrando SolicitudFondos {obj.id}")
+        
+        if total_ok:
+            messages.success(
+                request,
+                f"✅ {total_ok} solicitudes borradas. "
+                f"Validaciones: {total_val}, Historiales: {total_hist}"
+            )
+        
+        if errores:
+            messages.error(
+                request,
+                f"❌ Errores en {len(errores)}: {', '.join(errores[:5])}"
+            )
+    
+    def has_delete_permission(self, request, obj=None):
+        """Forzar permiso de borrado."""
+        return True
+    # ⬅️ FIN NUEVO
+
+
+
+
+
 
 @admin.register(SolicitudPagoDirecto)
 class SolicitudPagoDirectoAdmin(admin.ModelAdmin):

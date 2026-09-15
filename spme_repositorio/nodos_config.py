@@ -19,6 +19,9 @@ from spme_estructuracion_proyecto.models import (
 from spme_monitoreo.models import (
     SolicitudFondos,
     SolicitudViaje,
+    SolicitudPagoDirecto,
+    SolicitudReembolso,
+    RendicionCuentas,
 )
 
 NODOS_CONFIG = {
@@ -86,6 +89,38 @@ NODOS_CONFIG = {
         'carpeta': 'solicitudes_viaje_tarea',
         'acceso_repositorio': True,
     },
+    'solicitudpagodirectoact': {
+        'modelo': SolicitudPagoDirecto,
+        'carpeta': 'solicitudes_pago_directo_actividad',
+        'acceso_repositorio': True,
+    },
+    'solicitudpagodirectotarea': {
+        'modelo': SolicitudPagoDirecto,
+        'carpeta': 'solicitudes_pago_directo_tarea',
+        'acceso_repositorio': True,
+    },
+    'solicitudreembolsoact': {
+        'modelo': SolicitudReembolso,
+        'carpeta': 'solicitudes_reembolso_actividad',
+        'acceso_repositorio': True,
+    },
+    'solicitudreembolsotarea': {
+        'modelo': SolicitudReembolso,
+        'carpeta': 'solicitudes_reembolso_tarea',
+        'acceso_repositorio': True,
+    },
+    'rendicioncuentasact': {
+        'modelo': RendicionCuentas,   
+        'carpeta': 'rendiciones_cuentas_actividad',
+        'acceso_repositorio': True,
+    },
+    'rendicioncuentastarea': {
+        'modelo': RendicionCuentas,
+        'carpeta': 'rendiciones_cuentas_tarea',
+        'acceso_repositorio': True,
+    },
+
+
     # ================================================================
     # PRODUCTOS
     # ================================================================
