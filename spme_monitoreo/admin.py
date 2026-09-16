@@ -868,7 +868,7 @@ class SolicitudFondosAdmin(admin.ModelAdmin):
         'objetivo_actividad',
         'lugarSolicitud',
         'usuario__username',
-        'usuario__email',
+        'usuario__correo',
         'actividad__id',
         'tarea__id',
         'contador__username',
@@ -987,9 +987,6 @@ class SolicitudFondosAdmin(admin.ModelAdmin):
 
 
 
-
-
-
 @admin.register(SolicitudPagoDirecto)
 class SolicitudPagoDirectoAdmin(admin.ModelAdmin):
     # Campos a mostrar en la lista principal
@@ -1036,10 +1033,104 @@ class SolicitudPagoDirectoAdmin(admin.ModelAdmin):
         'objetivo_actividad',
         'lugarSolicitud',
         'usuario__username',
-        'usuario__email',
+        'usuario__correo',
         'actividad__id',
         'tarea__id'
     ]
+    
+    # ================================================================
+    # BORRADO EN CASCADA MANUAL
+    # ================================================================
+    
+    def delete_model(self, request, obj):
+        """Borrado individual desde el admin."""
+        numero = obj.numeroFormulario or f"ID-{obj.id}"
+        total_val = 0
+        total_hist = 0
+        
+        try:
+            with transaction.atomic():
+                validaciones = list(obj.validaciones.all())
+                total_val = len(validaciones)
+                
+                for v in validaciones:
+                    historiales = list(v.historial.all())
+                    total_hist += len(historiales)
+                    for h in historiales:
+                        h.delete()
+                
+                for v in validaciones:
+                    v.delete()
+                
+                obj.delete()
+                
+                logger.warning(
+                    f"BORRADO: SolicitudPagoDirecto {numero} por {request.user}. "
+                    f"Validaciones={total_val}, Historiales={total_hist}"
+                )
+                
+                messages.success(
+                    request,
+                    f"✅ Pago Directo {numero} borrado correctamente. "
+                    f"Validaciones eliminadas: {total_val}, "
+                    f"Historiales eliminados: {total_hist}"
+                )
+        
+        except Exception as e:
+            logger.exception(f"Error borrando SolicitudPagoDirecto {obj.id}")
+            messages.error(
+                request,
+                f"❌ Error al borrar la solicitud {numero}: "
+                f"{type(e).__name__}: {e}"
+            )
+            raise
+    
+    def delete_queryset(self, request, queryset):
+        """Borrado masivo desde el admin."""
+        total_val = 0
+        total_hist = 0
+        total_ok = 0
+        errores = []
+        
+        for obj in queryset:
+            try:
+                with transaction.atomic():
+                    validaciones = list(obj.validaciones.all())
+                    total_val += len(validaciones)
+                    
+                    for v in validaciones:
+                        historiales = list(v.historial.all())
+                        total_hist += len(historiales)
+                        for h in historiales:
+                            h.delete()
+                    
+                    for v in validaciones:
+                        v.delete()
+                    
+                    obj.delete()
+                    total_ok += 1
+            
+            except Exception as e:
+                errores.append(f"ID {obj.id}: {type(e).__name__}")
+                logger.exception(f"Error borrando SolicitudPagoDirecto {obj.id}")
+        
+        if total_ok:
+            messages.success(
+                request,
+                f"✅ {total_ok} pagos directos borrados. "
+                f"Validaciones: {total_val}, Historiales: {total_hist}"
+            )
+        
+        if errores:
+            messages.error(
+                request,
+                f"❌ Errores en {len(errores)}: {', '.join(errores[:5])}"
+            )
+    
+    def has_delete_permission(self, request, obj=None):
+        return True
+
+
 
 
 @admin.register(SolicitudReembolso)
@@ -1096,7 +1187,7 @@ class SolicitudReembolsoAdmin(admin.ModelAdmin):
         'objetivo_actividad',
         'lugarSolicitud',
         'usuario__username',
-        'usuario__email',
+        'usuario__correo',
         'actividad__id',
         'tarea__id'
     ]
@@ -1106,6 +1197,99 @@ class SolicitudReembolsoAdmin(admin.ModelAdmin):
     
     # Campos para ordenar
     ordering = ['-fechaSolicitud', '-id']
+    
+    # ================================================================
+    # BORRADO EN CASCADA MANUAL
+    # ================================================================
+    
+    def delete_model(self, request, obj):
+        """Borrado individual desde el admin."""
+        numero = obj.numeroFormulario or f"ID-{obj.id}"
+        total_val = 0
+        total_hist = 0
+        
+        try:
+            with transaction.atomic():
+                validaciones = list(obj.validaciones.all())
+                total_val = len(validaciones)
+                
+                for v in validaciones:
+                    historiales = list(v.historial.all())
+                    total_hist += len(historiales)
+                    for h in historiales:
+                        h.delete()
+                
+                for v in validaciones:
+                    v.delete()
+                
+                obj.delete()
+                
+                logger.warning(
+                    f"BORRADO: SolicitudReembolso {numero} por {request.user}. "
+                    f"Validaciones={total_val}, Historiales={total_hist}"
+                )
+                
+                messages.success(
+                    request,
+                    f"✅ Solicitud de Reembolso {numero} borrada correctamente. "
+                    f"Validaciones eliminadas: {total_val}, "
+                    f"Historiales eliminados: {total_hist}"
+                )
+        
+        except Exception as e:
+            logger.exception(f"Error borrando SolicitudReembolso {obj.id}")
+            messages.error(
+                request,
+                f"❌ Error al borrar la solicitud {numero}: "
+                f"{type(e).__name__}: {e}"
+            )
+            raise
+    
+    def delete_queryset(self, request, queryset):
+        """Borrado masivo desde el admin."""
+        total_val = 0
+        total_hist = 0
+        total_ok = 0
+        errores = []
+        
+        for obj in queryset:
+            try:
+                with transaction.atomic():
+                    validaciones = list(obj.validaciones.all())
+                    total_val += len(validaciones)
+                    
+                    for v in validaciones:
+                        historiales = list(v.historial.all())
+                        total_hist += len(historiales)
+                        for h in historiales:
+                            h.delete()
+                    
+                    for v in validaciones:
+                        v.delete()
+                    
+                    obj.delete()
+                    total_ok += 1
+            
+            except Exception as e:
+                errores.append(f"ID {obj.id}: {type(e).__name__}")
+                logger.exception(f"Error borrando SolicitudReembolso {obj.id}")
+        
+        if total_ok:
+            messages.success(
+                request,
+                f"✅ {total_ok} solicitudes de reembolso borradas. "
+                f"Validaciones: {total_val}, Historiales: {total_hist}"
+            )
+        
+        if errores:
+            messages.error(
+                request,
+                f"❌ Errores en {len(errores)}: {', '.join(errores[:5])}"
+            )
+    
+    def has_delete_permission(self, request, obj=None):
+        return True
+
 
 @admin.register(RendicionCuentas)
 class RendicionCuentasAdmin(admin.ModelAdmin):
@@ -1185,7 +1369,7 @@ class RendicionCuentasAdmin(admin.ModelAdmin):
         'lugarActividad',
         'lugarRendicion',
         'usuario__username',
-        'usuario__email',
+        'usuario__correo',
         'actividad__id',
         'tarea__id',
         'solicitudFondos__numeroFormulario',
@@ -1199,6 +1383,98 @@ class RendicionCuentasAdmin(admin.ModelAdmin):
     
     # Campos para ordenar
     ordering = ['-fechaRendicion', '-id']    
+
+    # ================================================================
+    # BORRADO EN CASCADA MANUAL
+    # ================================================================
+    
+    def delete_model(self, request, obj):
+        """Borrado individual desde el admin."""
+        numero = obj.numeroFormulario or f"ID-{obj.id}"
+        total_val = 0
+        total_hist = 0
+        
+        try:
+            with transaction.atomic():
+                validaciones = list(obj.validaciones.all())
+                total_val = len(validaciones)
+                
+                for v in validaciones:
+                    historiales = list(v.historial.all())
+                    total_hist += len(historiales)
+                    for h in historiales:
+                        h.delete()
+                
+                for v in validaciones:
+                    v.delete()
+                
+                obj.delete()
+                
+                logger.warning(
+                    f"BORRADO: RendicionCuentas {numero} por {request.user}. "
+                    f"Validaciones={total_val}, Historiales={total_hist}"
+                )
+                
+                messages.success(
+                    request,
+                    f"✅ Rendición de Cuentas {numero} borrada correctamente. "
+                    f"Validaciones eliminadas: {total_val}, "
+                    f"Historiales eliminados: {total_hist}"
+                )
+        
+        except Exception as e:
+            logger.exception(f"Error borrando RendicionCuentas {obj.id}")
+            messages.error(
+                request,
+                f"❌ Error al borrar la rendición {numero}: "
+                f"{type(e).__name__}: {e}"
+            )
+            raise
+    
+    def delete_queryset(self, request, queryset):
+        """Borrado masivo desde el admin."""
+        total_val = 0
+        total_hist = 0
+        total_ok = 0
+        errores = []
+        
+        for obj in queryset:
+            try:
+                with transaction.atomic():
+                    validaciones = list(obj.validaciones.all())
+                    total_val += len(validaciones)
+                    
+                    for v in validaciones:
+                        historiales = list(v.historial.all())
+                        total_hist += len(historiales)
+                        for h in historiales:
+                            h.delete()
+                    
+                    for v in validaciones:
+                        v.delete()
+                    
+                    obj.delete()
+                    total_ok += 1
+            
+            except Exception as e:
+                errores.append(f"ID {obj.id}: {type(e).__name__}")
+                logger.exception(f"Error borrando RendicionCuentas {obj.id}")
+        
+        if total_ok:
+            messages.success(
+                request,
+                f"✅ {total_ok} rendiciones borradas. "
+                f"Validaciones: {total_val}, Historiales: {total_hist}"
+            )
+        
+        if errores:
+            messages.error(
+                request,
+                f"❌ Errores en {len(errores)}: {', '.join(errores[:5])}"
+            )
+    
+    def has_delete_permission(self, request, obj=None):
+        return True
 
 
 
@@ -1362,6 +1638,98 @@ class SolicitudViajeAdmin(admin.ModelAdmin):
             'actividad',
             'tarea'
         )
+    # ================================================================
+    # BORRADO EN CASCADA MANUAL
+    # ================================================================
+    
+    def delete_model(self, request, obj):
+        """Borrado individual desde el admin."""
+        numero = obj.numeroFormulario or f"ID-{obj.id}"
+        total_val = 0
+        total_hist = 0
+        
+        try:
+            with transaction.atomic():
+                validaciones = list(obj.validaciones.all())
+                total_val = len(validaciones)
+                
+                for v in validaciones:
+                    historiales = list(v.historial.all())
+                    total_hist += len(historiales)
+                    for h in historiales:
+                        h.delete()
+                
+                for v in validaciones:
+                    v.delete()
+                
+                obj.delete()
+                
+                logger.warning(
+                    f"BORRADO: SolicitudViaje {numero} por {request.user}. "
+                    f"Validaciones={total_val}, Historiales={total_hist}"
+                )
+                
+                messages.success(
+                    request,
+                    f"✅ Solicitud de Viaje {numero} borrada correctamente. "
+                    f"Validaciones eliminadas: {total_val}, "
+                    f"Historiales eliminados: {total_hist}"
+                )
+        
+        except Exception as e:
+            logger.exception(f"Error borrando SolicitudViaje {obj.id}")
+            messages.error(
+                request,
+                f"❌ Error al borrar la solicitud {numero}: "
+                f"{type(e).__name__}: {e}"
+            )
+            raise
+    
+    def delete_queryset(self, request, queryset):
+        """Borrado masivo desde el admin."""
+        total_val = 0
+        total_hist = 0
+        total_ok = 0
+        errores = []
+        
+        for obj in queryset:
+            try:
+                with transaction.atomic():
+                    validaciones = list(obj.validaciones.all())
+                    total_val += len(validaciones)
+                    
+                    for v in validaciones:
+                        historiales = list(v.historial.all())
+                        total_hist += len(historiales)
+                        for h in historiales:
+                            h.delete()
+                    
+                    for v in validaciones:
+                        v.delete()
+                    
+                    obj.delete()
+                    total_ok += 1
+            
+            except Exception as e:
+                errores.append(f"ID {obj.id}: {type(e).__name__}")
+                logger.exception(f"Error borrando SolicitudViaje {obj.id}")
+        
+        if total_ok:
+            messages.success(
+                request,
+                f"✅ {total_ok} solicitudes de viaje borradas. "
+                f"Validaciones: {total_val}, Historiales: {total_hist}"
+            )
+        
+        if errores:
+            messages.error(
+                request,
+                f"❌ Errores en {len(errores)}: {', '.join(errores[:5])}"
+            )
+    
+    def has_delete_permission(self, request, obj=None):
+        return True
+
     
 
 # spme_monitoreo/admin.py
