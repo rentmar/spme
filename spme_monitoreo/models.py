@@ -844,7 +844,7 @@ class RendicionCuentas(models.Model):
         blank=True,
     )
     fechaActividad = models.DateField(verbose_name='Fecha de la actividad', blank=True, null=True)
-    fechaRendicion = models.DateField(verbose_name='Fecha de Rendición', auto_now_add=True, blank=True, null=True)
+    fechaRendicion = models.DateField(verbose_name='Fecha de Rendición', blank=True, null=True)
     descripcionActividad = models.TextField(blank=True, null=True)
     lugarActividad = models.TextField(blank=True, null=True)
     lugarRendicion = models.TextField(blank=True, null=True)
@@ -1042,6 +1042,15 @@ class RendicionCuentas(models.Model):
     class Meta:
         verbose_name = 'Rendicion de cuentas'
         verbose_name_plural = 'Rendiciones de cuentas'
+
+    def save(self, *args, **kwargs):
+        # Si es nuevo y no tiene número, generarlo después de tener ID
+        is_new = self._state.adding
+        super().save(*args, **kwargs)   # ← primer save para obtener ID
+        if is_new and not self.numeroFormulario:
+            self.numeroFormulario = f"FRC-{self.id}"
+            # Evitar recursión: solo actualizar ese campo
+            super().save(update_fields=['numeroFormulario'])
 
 
 
