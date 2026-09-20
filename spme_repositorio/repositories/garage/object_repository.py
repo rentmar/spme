@@ -10,7 +10,10 @@ import logging
 from typing import BinaryIO, Optional, Dict
 
 from botocore.exceptions import ClientError
-from .client import crear_cliente_garage
+from .client import (
+    crear_cliente_garage,
+    crear_cliente_garage_publico,
+)
 from .exceptions import (
     GarageConnectionError,
     GarageObjectNotFoundError,
@@ -122,12 +125,14 @@ class ObjectRepository:
             URL prefirmada firmada
         """
         try:
+            client = crear_cliente_garage_publico()
+
             params = {'Bucket': bucket, 'Key': key}
             
             if response_content_disposition:
                 params['ResponseContentDisposition'] = response_content_disposition
             
-            return self._client.generate_presigned_url(
+            return client.generate_presigned_url(
                 'get_object',
                 Params=params,
                 ExpiresIn=expiration,

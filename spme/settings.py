@@ -338,4 +338,8 @@ GARAGE_CONFIG = {
     'verify': False,
 }
 
+# Desarrollo
+GARAGE_PUBLIC_ENDPOINT = 'http://localhost:3900'
+# Producción
+#GARAGE_PUBLIC_ENDPOINT = 'https://spme.redunitas.org/storage'
 GARAGE_BUCKET = 'spme-files'

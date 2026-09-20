@@ -45,6 +45,29 @@ def crear_cliente_garage():
         config=config,
     )
 
+def crear_cliente_garage_publico():
+    """
+    Crea un cliente boto3 para generar URLs prefirmadas públicas.
+
+    El cliente interno sigue usando localhost:3900.
+    Este cliente firma las URLs usando el dominio público.
+    """
+    garage_config = settings.GARAGE_CONFIG
+
+    config = Config(
+        signature_version='s3v4',
+        s3={'addressing_style': 'path'},
+    )
+
+    return boto3.client(
+        's3',
+        endpoint_url=settings.GARAGE_PUBLIC_ENDPOINT,
+        aws_access_key_id=garage_config['aws_access_key_id'],
+        aws_secret_access_key=garage_config['aws_secret_access_key'],
+        region_name=garage_config['region_name'],
+        config=config,
+    )
+
 # import boto3
 # from botocore.config import Config
 # from django.conf import settings
