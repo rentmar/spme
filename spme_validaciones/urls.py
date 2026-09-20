@@ -80,6 +80,7 @@ from .views.solicitudes_viaje_usuario_views import SolicitudesViajeUsuarioView
 from .views.solicitudes_pago_directo_usuario_views import SolicitudesPagoDirectoUsuarioView
 from .views.solicitudes_reembolso_usuario_views import SolicitudesReembolsoUsuarioView
 from .views.rendicion_cuentas_usuario_views import RendicionCuentasUsuarioView
+from .views.permisos_documento_views import DocumentoPermisosView
 
 router = DefaultRouter()
 
@@ -150,6 +151,13 @@ urlpatterns = [
     path(r'mis-solicitudes-pago-directo/', SolicitudesPagoDirectoUsuarioView.as_view(), name='solicitudes-pago-directo-usuario'),
     path(r'mis-solicitudes-reembolso/', SolicitudesReembolsoUsuarioView.as_view(), name='solicitudes-reembolso-usuario'),
     path(r'mis-rendiciones-cuentas/', RendicionCuentasUsuarioView.as_view(), name='rendicion-cuentas-usuario'),
+    ################################ Permisos de Documentos ##############################################
+    # Endpoint unificado: devuelve estado, permisos y revisores de cualquier documento validable
+    path(
+        r'documentos/<str:tipo>/<int:documento_id>/permisos/',
+        DocumentoPermisosView.as_view(),
+        name='documento-permisos',
+    ),
 ]  
 
 urlpatterns += router.urls
