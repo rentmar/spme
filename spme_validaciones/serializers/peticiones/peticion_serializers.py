@@ -72,8 +72,8 @@ class PeticionCrearSerializer(serializers.Serializer):
       - payload: dict (opcional, según tipo)
     """
     tipo = serializers.CharField()
-    content_type = serializers.CharField()
-    object_id = serializers.IntegerField()
+    documento_tipo = serializers.CharField()
+    documento_id = serializers.IntegerField()
     justificativo = serializers.CharField()
     payload = serializers.JSONField(required=False, default=dict)
 

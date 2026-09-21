@@ -5,6 +5,8 @@ from spme_monitoreo.models import (
     SolicitudPagoDirecto,
     SolicitudReembolso,
     RendicionCuentas,
+    InformeActividadPrincipal,
+    InformeTareaPrincipal,
 )
 from .repositories.validacion_solicitud_fondos_repository import (
     ValidacionSolicitudFondosRepository,
@@ -21,6 +23,8 @@ from .repositories.validacion_solicitud_reembolso_repository import (
 from .repositories.validacion_rendicion_cuentas_repository import (
     ValidacionRendicionCuentasRepository,
 )
+
+
 
 
 # ===================================================================
@@ -52,6 +56,16 @@ TIPOS_DOCUMENTO = {
         'repository': ValidacionRendicionCuentasRepository,
         'campo_fk': 'rendicion',
     },
+    # 'informe-actividad-principal': {
+    #     'modelo': InformeActividadPrincipal,
+    #     'repository': ValidacionInformeActividadPrincipalRepository,
+    #     'campo_fk': 'informe',
+    # },
+    # 'informe-tarea-principal': {
+    #     'modelo': InformeTareaPrincipal,
+    #     'repository': ValidacionInformeTareaPrincipalRepository,
+    #     'campo_fk': 'informe',
+    # },
 }
 
 # ===================================================================

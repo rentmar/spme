@@ -52,8 +52,8 @@ class PeticionListCreateView(APIView):
         try:
             peticion = svc.crear_peticion(
                 tipo_codigo=data['tipo'],
-                content_type_str=data['content_type'],
-                object_id=data['object_id'],
+                documento_tipo=data['documento_tipo'],
+                documento_id=data['documento_id'],  
                 solicitante=request.user,
                 justificativo=data['justificativo'],
                 payload=data.get('payload') or {},

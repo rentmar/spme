@@ -14,10 +14,13 @@ from .models import (
     ValidacionSolicitudReembolso,
     ValidacionRendicionCuentas,
     TipoPeticionModificacion,
+    PeticionModificacion,
+    DocumentoVersion,
 )
 
 admin.site.register(TipoPeticionModificacion)
-
+admin.site.register(PeticionModificacion),
+admin.site.register(DocumentoVersion)
 
 
 
