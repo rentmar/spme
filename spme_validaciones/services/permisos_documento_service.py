@@ -58,7 +58,9 @@ def _tiene_peticion_abierta(documento) -> bool:
     consulta real. Único lugar a tocar.
     """
     # TODO: implementar cuando PeticionModificacion esté listo
-    return False
+    # return False
+    from spme_validaciones.services.peticiones.peticion_service import PeticionService
+    return PeticionService().tiene_peticion_abierta(documento)
 
 
 def _puede_solicitar(documento, usuario: Usuario) -> bool:
@@ -67,7 +69,9 @@ def _puede_solicitar(documento, usuario: Usuario) -> bool:
     HOY: devuelve False.
     """
     # TODO: implementar cuando PeticionModificacion esté listo
-    return False
+    # return False
+    from spme_validaciones.services.peticiones.peticion_service import PeticionService
+    return PeticionService().puede_solicitar_modificacion(documento, usuario)
 
 
 # ===================================================================

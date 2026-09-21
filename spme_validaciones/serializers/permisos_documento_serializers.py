@@ -73,4 +73,11 @@ class PermisosDocumentoSerializer(serializers.Serializer):
     def get_peticionesModificacion(self, obj):
         # TODO: cuando exista PeticionModificacion, serializar la lista.
         # El contrato ya expone [] para que el frontend no cambie.
-        return []
+        # return []
+        from spme_validaciones.services.peticiones.peticion_service import PeticionService
+        from spme_validaciones.serializers.peticiones.peticion_serializers import (
+            PeticionModificacionSerializer,
+        )
+        svc = PeticionService()
+        peticiones = svc.listar_por_documento(obj['documento'])
+        return PeticionModificacionSerializer(peticiones, many=True).data

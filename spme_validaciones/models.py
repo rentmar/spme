@@ -644,4 +644,10 @@ class HistorialValidacion(models.Model):
     #     tipo = "Actividad" if hasattr(self.validacion, 'informe') else "Tarea"
     #     return f"{tipo} - {self.validacion.codigoSeguimiento} - {self.estado_anterior}→{self.estado_nuevo}"
     
-    
+
+# Importar modelos de peticiones para que Django los registre
+from .models_peticiones import (  # noqa
+    TipoPeticionModificacion,
+    PeticionModificacion,
+    DocumentoVersion,
+)

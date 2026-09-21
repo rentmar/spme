@@ -82,6 +82,16 @@ from .views.solicitudes_reembolso_usuario_views import SolicitudesReembolsoUsuar
 from .views.rendicion_cuentas_usuario_views import RendicionCuentasUsuarioView
 from .views.permisos_documento_views import DocumentoPermisosView
 
+#Peticiones de Modificacion
+from .views.peticiones.peticion_views import (
+    PeticionListCreateView,
+    PeticionDetailView,
+    PeticionEjecutarView,
+    PeticionAnularView,
+    PeticionPorDocumentoView,
+)
+
+
 router = DefaultRouter()
 
 #Validadores Informes Actividad/Tarea
@@ -157,6 +167,16 @@ urlpatterns = [
         r'documentos/<str:tipo>/<int:documento_id>/permisos/',
         DocumentoPermisosView.as_view(),
         name='documento-permisos',
+    ),
+    ################################ Peticiones de modificacion ########################333
+    path(r'peticiones/', PeticionListCreateView.as_view(), name='peticion-list-create'),
+    path(r'peticiones/<int:peticion_id>/', PeticionDetailView.as_view(), name='peticion-detail'),
+    path(r'peticiones/<int:peticion_id>/ejecutar/', PeticionEjecutarView.as_view(), name='peticion-ejecutar'),
+    path(r'peticiones/<int:peticion_id>/anular/', PeticionAnularView.as_view(), name='peticion-anular'),
+    path(
+        r'documentos/<str:tipo>/<int:documento_id>/peticiones/',
+        PeticionPorDocumentoView.as_view(),
+        name='peticiones-por-documento',
     ),
 ]  
 

@@ -13,7 +13,12 @@ from .models import (
     ValidacionSolicitudPagoDirecto,
     ValidacionSolicitudReembolso,
     ValidacionRendicionCuentas,
+    TipoPeticionModificacion,
 )
+
+admin.site.register(TipoPeticionModificacion)
+
+
 
 
 # -------------------------------------------------------------------
