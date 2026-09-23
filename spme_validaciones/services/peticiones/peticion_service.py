@@ -21,6 +21,10 @@ from spme_validaciones.repositories.peticiones.peticion_repository import (
 )
 from spme_validaciones.services.peticiones.handlers import registry
 
+from spme_validaciones.services.peticiones.documento_version_service import (
+    DocumentoVersionService
+)
+
 
 class PeticionService:
     """
@@ -30,6 +34,7 @@ class PeticionService:
     def __init__(self):
         self.repo = PeticionRepository()
         self.repo_tipo = TipoPeticionRepository()
+        self.version_service = DocumentoVersionService()
 
     # ==================================================================
     # Autorización
@@ -226,14 +231,33 @@ class PeticionService:
         # 8. Crear petición
         # --------------------------------------------------------------
 
-        peticion = self.repo.crear(
-            tipo=tipo,
-            objetivo_content_type=content_type,
-            objetivo_object_id=documento_id,
-            solicitante=solicitante,
-            justificativo=justificativo,
-            payload=payload,
-        )
+        # peticion = self.repo.crear(
+        #     tipo=tipo,
+        #     objetivo_content_type=content_type,
+        #     objetivo_object_id=documento_id,
+        #     solicitante=solicitante,
+        #     justificativo=justificativo,
+        #     payload=payload,
+        # )
+
+        # return peticion
+        with transaction.atomic():
+
+            peticion = self.repo.crear(
+                tipo=tipo,
+                objetivo_content_type=content_type,
+                objetivo_object_id=documento_id,
+                solicitante=solicitante,
+                justificativo=justificativo,
+                payload=payload,
+            )
+
+            if tipo.requiere_versionado:
+                self.version_service.crear_snapshot(
+                    documento=documento,
+                    peticion=peticion,
+                    aprobado_por=solicitante,
+                )
 
         return peticion
 
@@ -288,9 +312,12 @@ class PeticionService:
 
             handler(peticion, documento)
 
+            ahora = timezone.now()
+
             peticion.estado = ESTADO_RESUELTA_EJECUTADA
-            peticion.fecha_resolucion = timezone.now()
+            peticion.fecha_resolucion = ahora
             peticion.resuelto_por = usuario
+            peticion.fecha_consumo = ahora
 
             self.repo.guardar(
                 peticion,
@@ -298,6 +325,7 @@ class PeticionService:
                     'estado',
                     'fecha_resolucion',
                     'resuelto_por',
+                    'fecha_consumo',
                 ],
             )
 

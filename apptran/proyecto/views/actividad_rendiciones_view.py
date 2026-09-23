@@ -12,7 +12,7 @@ class ActividadRendicionesView(APIView):
     def get(self, request):
         try:
             page = int(request.query_params.get('page', 1))
-            page_size = min(int(request.query_params.get('page_size', 20)), 100)
+            page_size = min(int(request.query_params.get('page_size', 20)), 10000)
             filtros = {}
             search = request.query_params.get('search', '').strip()
             estado = request.query_params.get('estado', '').strip()

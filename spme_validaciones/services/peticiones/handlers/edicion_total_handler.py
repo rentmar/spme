@@ -26,9 +26,10 @@ def ejecutar_edicion_total(peticion, documento):
         peticion: instancia de PeticionModificacion ya validada.
         documento: instancia del modelo objetivo resuelta.
     """
-    service = DocumentoVersionService()
-    service.crear_snapshot(
-        documento=documento,
-        peticion=peticion,
-        aprobado_por=peticion.solicitante,
-    )
+    # service = DocumentoVersionService()
+    # service.crear_snapshot(
+    #     documento=documento,
+    #     peticion=peticion,
+    #     aprobado_por=peticion.solicitante,
+    # )
+    return None

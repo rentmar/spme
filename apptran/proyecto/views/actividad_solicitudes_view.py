@@ -32,7 +32,7 @@ class ActividadSolicitudesView(APIView):
             page = int(request.query_params.get('page', 1))
             page_size = min(
                 int(request.query_params.get('page_size', 20)),
-                100  # Límite máximo
+                10000  # Límite máximo
             )
 
             # Filtros

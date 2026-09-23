@@ -120,7 +120,8 @@ def calcular_permisos(documento, usuario: Usuario, resumen: dict) -> PermisosDoc
         return PermisosDocumento(
             puede_editar=True,
             es_redactor=True,
-            puede_solicitar_modificacion=False,
+            puede_solicitar_modificacion=_puede_solicitar(documento, usuario),
+            # puede_solicitar_modificacion=False,
             motivo_bloqueo=None,
             estado_documento=ESTADO_SIN_REVISORES,
         )
@@ -160,7 +161,8 @@ def calcular_permisos(documento, usuario: Usuario, resumen: dict) -> PermisosDoc
     return PermisosDocumento(
         puede_editar=True,
         es_redactor=True,
-        puede_solicitar_modificacion=False,
+        puede_solicitar_modificacion=_puede_solicitar(documento, usuario),
+        # puede_solicitar_modificacion=False,
         motivo_bloqueo=None,
         estado_documento=ESTADO_PENDIENTE,
     )
