@@ -21,7 +21,7 @@ class RendicionCuentasPDFGenerator(BasePDFGenerator):
         USAR_ETIQUETAS_GENERICAS = False → Muestra el cargo real
     """
     
-    USAR_ETIQUETAS_GENERICAS = True
+    USAR_ETIQUETAS_GENERICAS = True 
     
     def __init__(self):
         super().__init__()

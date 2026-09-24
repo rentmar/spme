@@ -934,7 +934,7 @@ class RendicionCuentas(models.Model):
         related_name='usuario_coordinador_rendicion',
         null=True,
         blank=True,
-    )
+    ) 
 
     validacionContador = models.BooleanField(default=False)
     contador = models.ForeignKey(

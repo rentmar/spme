@@ -39,8 +39,30 @@ class ActividadSubActividadViewSet(viewsets.ModelViewSet):
                 {'error': f'Error al obtener actividades: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+    #Endpoint 2: Actividades filtradas por ID de Proyecto
+    @action(detail=False, methods=['get'], url_path='por-proyecto/(?P<proyecto_id>\d+)')
+    def actividades_por_proyecto(self, request, proyecto_id=None):
+        try:
+            #Filtrar actividades que pertenecen al proyecto y precargar sus tareas
+            actividades = Actividad.objects.filter(
+                proyecto_id=proyecto_id
+            ).prefetch_related('tareas')
+
+            serializer = self.get_serializer(actividades, many=True)
+            
+            return Response({
+                'proyecto_id': int(proyecto_id),
+                'cantidad_actividades': actividades.count(),
+                'actividades': serializer.data
+            })
+        except Exception as e:
+            return Response(
+                {'error': f'Error al obtener actividades del proyecto: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
     
-    # Endpoint 2: Todas las actividades con sus tareas
+    # Endpoint 3: Todas las actividades con sus tareas
     @action(detail=False, methods=['get'], url_path='todas')
     def todas_actividades(self, request):
         try:
