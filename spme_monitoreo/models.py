@@ -4,6 +4,8 @@ from spme_autenticacion.models import Usuario
 from spme_actividades.models import Actividad, TareaActividad
 from spme_estructuracion_pei.models import ActividadPei, TareaActividadPei
 from polymorphic.models import PolymorphicModel
+import datetime
+import uuid
 
 class FormaPago(models.Model):
     codigo = models.CharField(max_length=10, blank=True, null=True)
@@ -243,6 +245,20 @@ class SolicitudFondos(models.Model):
     
     def __str__(self):
         return f"{self.numeroFormulario}"
+
+    def save(self, *args, **kwargs):
+        # Determinar si es un registro nuevo 
+        is_new = self._state.adding
+        # Primer guardado para obtener el ID
+        super().save(*args, **kwargs)
+        # Generar numeroFormulario únicamente para registros nuevos
+        if is_new and not self.numeroFormulario and self.actividad_id:
+            numero_formateado = f"{self.id:04d}" 
+            self.numeroFormulario = ( 
+                f"{self.actividad.codigo} - SF {numero_formateado}" 
+            ) 
+            # Actualizar únicamente el numeroFormulario 
+            super().save(update_fields=["numeroFormulario"])
 
     class Meta:
         verbose_name = 'Solicitud de Fondos'
@@ -642,6 +658,29 @@ class SolicitudViaje (models.Model):
     def __str__(self):
         return f"{self.numeroFormulario}"
 
+    def save(self, *args, **kwargs):
+        # Determinar si es un registro nuevo
+        is_new = self._state.adding
+
+        # Primer guardado
+        super().save(*args, **kwargs)
+
+        # Generar número únicamente para nuevos registros
+        # que todavía no tengan numeroFormulario.
+        if is_new and not self.numeroFormulario:
+            # Generar número de formulario único con UUID
+            today = datetime.date.today()
+            unique_id = str(uuid.uuid4())[:8].upper()
+
+            numero_formulario = f"SV-{today.year}{today.month:02d}-{unique_id}"
+
+            self.numeroFormulario = numero_formulario
+
+            # Actualizar únicamente el numeroFormulario
+            super().save(update_fields=["numeroFormulario"])
+
+
+
     class Meta:
         verbose_name = 'Solicitud de Viaje'
         verbose_name_plural = 'Solicitudes de Viaje'
@@ -819,6 +858,28 @@ class SolicitudPagoDirecto(models.Model):
     
     def __str__(self):
         return f"{self.numeroFormulario}"
+
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+
+        # Primer guardado para obtener el ID
+        super().save(*args, **kwargs)
+
+        # Generar número únicamente al crear el registro
+        # y si todavía no tiene uno asignado.
+        if is_new and not self.numeroFormulario:
+            codigo_actividad = (
+                self.actividad.codigo
+                if self.actividad_id
+                else "SN"
+            )
+
+            self.numeroFormulario = (
+                f"{codigo_actividad} - SPD {self.id:05d}"
+            )
+
+            # Guardar únicamente el número generado
+            super().save(update_fields=["numeroFormulario"])
 
     class Meta:
         verbose_name = 'Solicitud de Pago Directo'
