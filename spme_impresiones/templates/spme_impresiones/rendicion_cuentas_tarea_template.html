@@ -149,11 +149,11 @@
                 {% for gasto in detalle_fondos %}
                 <tr>
                     <td style="text-align: center;">{{ forloop.counter }}</td>
-                    <td>{{ gasto.fecha_gasto_formateada|default:"-" }}</td>
+                    <td>{{ gasto.fecha|default:"-" }}</td>
                     <td>{{ gasto.partida|default:"-" }}</td>
                     <td>{{ gasto.fuente|default:"-" }}</td>
                     <td>{{ gasto.factura_recibo|default:"-" }}</td>
-                    <td class="texto-largo">{{ gasto.descripcion_gasto|default:"-" }}</td>
+                    <td class="texto-largo">{{ gasto.descripcion|default:"-" }}</td>
                     <td style="text-align: right;">{{ gasto.monto|floatformat:2 }}</td>
                 </tr>
                 {% endfor %}
@@ -185,7 +185,7 @@
 
         <div class="grid-firmas" style="display: flex; justify-content: space-around; text-align: center;">
             <!-- RRCF -->
-            <div class="firma-columna" style="flex: 1; padding: 0 6px;">
+            <!-- <div class="firma-columna" style="flex: 1; padding: 0 6px;">
                 <div class="firma-area">
                     <div class="linea-firma" style="border-top: 1px solid #000; width: 100%; margin: 8px 0 2px 0;"></div>
                     <div class="nombre-firma" style="font-size: 10px; font-weight: bold; color: #999;">&nbsp;</div>
@@ -193,7 +193,7 @@
                         REVISOR-RESPONSABLE-CONTABLE-FINANCIERO
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <!-- SOLICITANTE -->
             <div class="firma-columna" style="flex: 1; padding: 0 6px;">
