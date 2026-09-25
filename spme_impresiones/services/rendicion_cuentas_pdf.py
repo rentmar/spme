@@ -66,9 +66,15 @@ class RendicionCuentasPDFGenerator(BasePDFGenerator):
         
         solicitante = self.validacion_service.obtener_solicitante(obj)
         estado = self.validacion_service.calcular_estado_documento(validadores)
+
+        validadores_filtrados = [
+                    v for v in validadores 
+                    if v.get('cargo', '').lower() != 'coordinador'
+                ]
+        
         
         contexto_validacion = {
-            'validadores': validadores,
+            'validadores': validadores_filtrados,
             'solicitante': solicitante,
             'estado_documento': estado,
             'total_validadores': len(validadores),

@@ -5,7 +5,7 @@ from spme_monitoreo.models import RendicionCuentas
 from spme_impresiones.services.validadores_documentos_service import ValidadoresDocumentoService
 
 
-class RendicionCuentasTareaPDFGenerator(BasePDFGenerator):
+class RendicionCuentasTareaPDFGenerator(BasePDFGenerator): 
     """
     Generador específico para Rendición de Cuentas (exclusivo para Tareas)
     
@@ -64,9 +64,14 @@ class RendicionCuentasTareaPDFGenerator(BasePDFGenerator):
         
         solicitante = self.validacion_service.obtener_solicitante(obj)
         estado_documento = self.validacion_service.calcular_estado_documento(validadores)
-        
+
+        validadores_filtrados = [
+            v for v in validadores 
+            if v.get('cargo', '').lower() != 'coordinador'
+        ]
+
         contexto_validacion = {
-            'validadores': validadores,
+            'validadores': validadores_filtrados,
             'solicitante': solicitante,
             'estado_documento': estado_documento,
             'total_validadores': len(validadores),
@@ -77,7 +82,7 @@ class RendicionCuentasTareaPDFGenerator(BasePDFGenerator):
         
         # Procesar detalle de fondos
         detalle_fondos, total_calculado = self._procesar_detalle_fondos(obj)
-        
+
         # Cálculos financieros
         monto_asignado = float(obj.montoAsignado) if obj.montoAsignado else 0.0
         monto_descargado = float(obj.montoDescargado) if obj.montoDescargado else 0.0
@@ -93,6 +98,7 @@ class RendicionCuentasTareaPDFGenerator(BasePDFGenerator):
             
             'solicitante': contexto_validacion['solicitante'],
             'tarea': tarea_data,
+            'actividad':tarea_data.get('actividad', {}),
             
             'fecha_desembolso': fecha_desembolso,
             'fecha_actividad': fecha_actividad,
@@ -123,18 +129,34 @@ class RendicionCuentasTareaPDFGenerator(BasePDFGenerator):
             'tiene_detalle': len(detalle_fondos) > 0,
             'cantidad_items': len(detalle_fondos),
         }
-        
+
         return context
     
     def _get_tarea_data(self, obj):
         if not obj.tarea:
             return {}
+
+        #Obtener la actividad asociada a la tarea
+        actividad = obj.tarea.actividad
+        actividad_data = {}
+
+        if actividad:
+            actividad_data = {
+                'codigo': actividad.codigo or "No asignado",
+                'nombre_corto': actividad.nombreCorto or "Sin nombre",
+                'descripcion': actividad.descripcion or "",
+                'estado': actividad.get_estado_display() if hasattr(actividad, 'get_estado_display') else actividad.estado,
+                'presupuesto': float(actividad.presupuesto) if actividad.presupuesto else 0.0,
+            }
+        
         return {
             'codigo': obj.tarea.codigo or "No asignado",
             'titulo': obj.tarea.titulo or "Sin título",
             'fecha_creacion': obj.tarea.fecha_creacion.strftime('%d/%m/%Y') if obj.tarea.fecha_creacion else "No especificada",
             'fecha_limite': obj.tarea.fecha_limite.strftime('%d/%m/%Y') if obj.tarea.fecha_limite else "No especificada",
             'presupuesto': float(obj.tarea.presupuesto) if obj.tarea.presupuesto else 0.0,
+            #Incluyo la actividad en la tarea
+            'actividad': actividad_data,
         }
     
     def _procesar_detalle_fondos(self, obj):

@@ -4,18 +4,22 @@
     <!-- SECCIÓN 1: INFORMACIÓN GENERAL -->
     <div class="seccion compact-section" style="padding: 6px 10px; margin-bottom: 6px;">
         <div class="seccion-titulo" style="margin-bottom: 2px; padding-bottom: 2px;">📋 INFORMACIÓN GENERAL</div>
-        <div class="grid-3">
-            <div class="campo">
+        <div class="grid-4" style="display: flex; flex-direction: row; justify-content: space-between; align-items: flex-start; gap: 8px;" >
+            <div class="campo" style="flex: 1; min-width: 0;" >
                 <div class="etiqueta">N° Formulario:</div>
                 <div class="valor">{{ numero_formulario|default:"-" }}</div>
             </div>
-            <div class="campo">
+            <div class="campo" style="flex: 1; min-width: 0;" >
                 <div class="etiqueta">Cpte. Diario:</div>
                 <div class="valor">{{ cpte_diario|default:"-" }}</div>
             </div>
-            <div class="campo">
-                <div class="etiqueta">F. Rendición:</div>
+            <div class="campo" style="flex: 1; min-width: 0;">
+                <div class="etiqueta">Fecha de la Rendición:</div>
                 <div class="valor">{{ fecha_rendicion|default:"-" }}</div>
+            </div>
+            <div class="campo" style="flex: 1; min-width: 0;">
+                <div class="etiqueta">Lugar de la Rendición:</div>
+                <div class="valor">{{ lugar_rendicion|default:"-" }}</div>
             </div>
         </div>
     </div>
@@ -42,19 +46,15 @@
     <!-- SECCIÓN 3: ACTIVIDAD Y ORIGEN -->
     <div class="seccion compact-section" style="padding: 6px 10px; margin-bottom: 6px;">
         <div class="seccion-titulo" style="margin-bottom: 2px; padding-bottom: 2px;">📅 ACTIVIDAD Y ORIGEN</div>
-        <div class="grid-3">
+        <div class="grid-2">
             <div class="campo">
-                <div class="etiqueta">Actividad Nombre Corto:</div>
-                <div class="valor texto-largo">{{ nombre_actividad }}</div>
-            </div>
-            <div class="campo">
-                <div class="etiqueta">Código:</div>
+                <div class="etiqueta">Actividad Código:</div>
                 <div class="valor">{{ codigo_actividad|default:"-" }}</div>
             </div>
             <div class="campo">
-                <div class="etiqueta">F. Actividad:</div>
-                <div class="valor">{{ fecha_actividad|default:"-" }}</div>
-            </div>
+                <div class="etiqueta">Actividad Nombre Corto:</div>
+                <div class="valor texto-largo">{{ nombre_actividad }}</div>
+            </div>            
         </div>
         <div class="grid-1">
             <div class="campo">
@@ -70,14 +70,18 @@
         </div> -->
         {% endif %}
 
-        <div class="grid-2" style="margin-top: 2px;">
+        <div class="grid-3" style="margin-top: 2px;">
             <div class="campo">
-                <div class="etiqueta">F. Desembolso:</div>
-                <div class="valor">{{ fecha_desembolso|default:"-" }}</div>
+                <div class="etiqueta">Lugar donde se realizo la actividad:</div>
+                <div class="valor">{{ lugar_actividad|default:"-" }}</div>
             </div>
             <div class="campo">
-                <div class="etiqueta">Lugar:</div>
-                <div class="valor">{{ lugar_actividad|default:"-" }}</div>
+                <div class="etiqueta">Fecha de la realizacion de la actividad:</div>
+                <div class="valor">{{ fecha_actividad |default:"-" }}</div>
+            </div>
+            <div class="campo">
+                <div class="etiqueta">Fecha de desembolso:</div>
+                <div class="valor">{{ fecha_desembolso |default:"-" }}</div>
             </div>
         </div>
     </div>
