@@ -53,12 +53,18 @@ from spme_email.services.notificacion_service import NotificacionService
 #Notificacion via mensajeria interna
 from spme_mensajes.services.notificacion_service import enviar_notificacion_mensajeria_interna
 
+from spme_validaciones.services.consolidacion.service import (
+    ConsolidacionValidacionService,
+)
+from spme_validaciones.services.consolidacion.modelos import (
+    MetodoResolucion,
+)
 
 import logging
 
 logger = logging.getLogger(__name__)
 repo = ValidacionRendicionCuentasRepository()
-
+consolidacion_service = ConsolidacionValidacionService()
 
 # ===================================================================
 # ASIGNAR VALIDADORES
@@ -372,6 +378,13 @@ class EstadoValidacionRendicionCuentasAPIView(APIView):
     def get(self, request, rendicion_id):
         rendicion = get_object_or_404(RendicionCuentas, id=rendicion_id)
         estadisticas = repo.obtener_estadisticas_por_rendicion(rendicion_id)
+        estado_consolidado = consolidacion_service.consolidar(
+            "RENDICION_CUENTAS",
+            rendicion_id,
+            MetodoResolucion.DECISORIO,
+        )
+
+        estadisticas["estado_consolidado"] = estado_consolidado
 
         if rendicion.actividad_id and not rendicion.tarea_id:
             tipo = 'ACTIVIDAD'
@@ -390,7 +403,7 @@ class EstadoValidacionRendicionCuentasAPIView(APIView):
             **estadisticas
         }, status=status.HTTP_200_OK)
 
-
+ 
 # ===================================================================
 # HISTORIAL
 # ===================================================================

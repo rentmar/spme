@@ -10,12 +10,16 @@ class ValidacionRendicionCuentasRepository(BaseValidacionRepository):
     def __init__(self):
         super().__init__(ValidacionRendicionCuentas)
 
+
     def obtener_por_rendicion(self, rendicion_id):
         return self.obtener_por_documento(
             documento_id=rendicion_id,
             campo_fk='rendicion',
             select_related=['usuarioValidador', 'usuarioRedactor', 'rendicion']
         )
+    
+    def obtener_por_solicitud(self, solicitud_id):
+        return self.obtener_por_rendicion(solicitud_id)
     
     def obtener_pendientes_por_rendicion(self, rendicion_id):
         return self.obtener_pendientes_por_documento(
@@ -37,21 +41,21 @@ class ValidacionRendicionCuentasRepository(BaseValidacionRepository):
         if total == 0:
             return {
                 'total': 0,
-                'estado_consolidado': 'SIN_VALIDACIONES',
+                # 'estado_consolidado': 'SIN_VALIDACIONES',
                 'resumen': None,
                 'detalle_validadores': []
             }
         
         resumen = self.obtener_resumen_estado_rendicion(rendicion_id)
         
-        if resumen['rechazado']:
-            estado_consolidado = 'RECHAZADO'
-        elif resumen['pendientes'] > 0:
-            estado_consolidado = 'PENDIENTE'
-        elif resumen['aprobado_totalmente']:
-            estado_consolidado = 'APROBADO'
-        else:
-            estado_consolidado = 'PARCIAL'
+        # if resumen['rechazado']:
+        #     estado_consolidado = 'RECHAZADO'
+        # elif resumen['pendientes'] > 0:
+        #     estado_consolidado = 'PENDIENTE'
+        # elif resumen['aprobado_totalmente']:
+        #     estado_consolidado = 'APROBADO'
+        # else:
+        #     estado_consolidado = 'PARCIAL'
         
         detalle = []
         for v in validaciones:
@@ -77,7 +81,7 @@ class ValidacionRendicionCuentasRepository(BaseValidacionRepository):
         
         return {
             'total': total,
-            'estado_consolidado': estado_consolidado,
+            # 'estado_consolidado': estado_consolidado,
             'resumen': resumen,
             'detalle_validadores': detalle
         }

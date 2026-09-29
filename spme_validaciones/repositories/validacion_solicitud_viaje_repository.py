@@ -38,21 +38,21 @@ class ValidacionSolicitudViajeRepository(BaseValidacionRepository):
         if total == 0:
             return {
                 'total': 0,
-                'estado_consolidado': 'SIN_VALIDACIONES',
+                # 'estado_consolidado': 'SIN_VALIDACIONES',
                 'resumen': None,
                 'detalle_validadores': []
             }
         
         resumen = self.obtener_resumen_estado_solicitud(solicitud_id)
         
-        if resumen['rechazado']:
-            estado_consolidado = 'RECHAZADO'
-        elif resumen['pendientes'] > 0:
-            estado_consolidado = 'PENDIENTE'
-        elif resumen['aprobado_totalmente']:
-            estado_consolidado = 'APROBADO'
-        else:
-            estado_consolidado = 'PARCIAL'
+        # if resumen['rechazado']:
+        #     estado_consolidado = 'RECHAZADO'
+        # elif resumen['pendientes'] > 0:
+        #     estado_consolidado = 'PENDIENTE'
+        # elif resumen['aprobado_totalmente']:
+        #     estado_consolidado = 'APROBADO'
+        # else:
+        #     estado_consolidado = 'PARCIAL'
         
         detalle = []
         for v in validaciones:
@@ -78,7 +78,7 @@ class ValidacionSolicitudViajeRepository(BaseValidacionRepository):
         
         return {
             'total': total,
-            'estado_consolidado': estado_consolidado,
+            # 'estado_consolidado': estado_consolidado,
             'resumen': resumen,
             'detalle_validadores': detalle
         }
