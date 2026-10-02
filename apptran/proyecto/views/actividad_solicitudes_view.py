@@ -9,6 +9,7 @@ from ..serializers.actividad_solicitudes_serializer import (
     ActividadSolicitudesResponseSerializer
 )
 
+
 class ActividadSolicitudesView(APIView):
     """
     Endpoint que devuelve actividades con tareas y badges de solicitudes.
