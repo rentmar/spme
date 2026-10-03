@@ -1,6 +1,11 @@
+
 from rest_framework import serializers
 from spme_monitoreo.models import RendicionCuentas
 from spme_autenticacion.models import Usuario
+
+#Servicio de consolidacion
+from spme_validaciones.services.consolidacion.service import ConsolidacionValidacionService
+from spme_validaciones.services.consolidacion.modelos import MetodoResolucion
 
 class RendicionCuentasSerializer(serializers.ModelSerializer):
     usuario_info = serializers.SerializerMethodField()
@@ -47,10 +52,24 @@ class RendicionCuentasSerializer(serializers.ModelSerializer):
         return None
     
     def get_estado_validacion(self, obj):
-        if (obj.validacionResponsable and obj.validacionCoordinador and 
-            obj.validacionContador and obj.validacionAdministrador):
-            return 'validado_completamente'
-        elif obj.validacionResponsable or obj.validacionCoordinador or obj.validacionContador or obj.validacionAdministrador:
-            return 'validado_parcialmente'
-        else:
-            return 'pendiente'
+        """
+        Calcula el estado de la rendicion
+        """
+        validaciones_memoria = list(obj.validaciones.all())
+        service = ConsolidacionValidacionService()
+
+        return service.consolidar_desde_validaciones(
+            tipo_solicitud="RENDICION_CUENTAS",
+            validaciones=validaciones_memoria,
+            metodo_resolucion=MetodoResolucion.DECISORIO
+        )
+
+
+
+        # if (obj.validacionResponsable and obj.validacionCoordinador and 
+        #     obj.validacionContador and obj.validacionAdministrador):
+        #     return 'validado_completamente'
+        # elif obj.validacionResponsable or obj.validacionCoordinador or obj.validacionContador or obj.validacionAdministrador:
+        #     return 'validado_parcialmente'
+        # else:
+        #     return 'pendiente'

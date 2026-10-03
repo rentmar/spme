@@ -1,8 +1,12 @@
-# serializers.py (en la misma carpeta)
+# serializers.py (en la misma carpeta) 
+# spme/apptran/solrendicioncuentas/serializer/lista_rendicion_cuentas_por_actividad_serializer.py
 from rest_framework import serializers
 from spme_monitoreo.models import RendicionCuentas
 from spme_autenticacion.models import Usuario
 from ..services.estado_solicitud_service import EstadoSolicitudService
+
+from spme_validaciones.services.consolidacion.service import ConsolidacionValidacionService
+from spme_validaciones.services.consolidacion.modelos import MetodoResolucion
 
 
 class RendicionCuentasSimpleSerializer(serializers.ModelSerializer):
@@ -54,5 +58,15 @@ class RendicionCuentasSimpleSerializer(serializers.ModelSerializer):
         return None
     
     def get_estado_validacion(self, obj):
-        estado = EstadoSolicitudService.get_estado_actual(obj)
-        return EstadoSolicitudService.get_estado_display(estado)
+        """
+        Calcula el estado de las rendiciones
+        """
+        validaciones_memoria = list(obj.validaciones.all())
+        service = ConsolidacionValidacionService()
+        return service.consolidar_desde_validaciones(
+            tipo_solicitud="RENDICION_CUENTAS",
+            validaciones=validaciones_memoria,
+            metodo_resolucion=MetodoResolucion.DECISORIO
+        )
+        # estado = EstadoSolicitudService.get_estado_actual(obj)
+        # return EstadoSolicitudService.get_estado_display(estado)
