@@ -1,3 +1,4 @@
+# spme/apptran/proyecto/repositories/actividad_rendiciones_repository.py
 from django.db.models import Q
 from spme_actividades.models import Actividad
 from spme_monitoreo.models import RendicionCuentas

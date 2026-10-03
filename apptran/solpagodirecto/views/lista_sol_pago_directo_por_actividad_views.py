@@ -11,7 +11,7 @@ from ..services.estado_solicitud_service import EstadoSolicitudService
 
 
 class SolicitudesPagoDirectoSinTareaPorActividadView(APIView):
-    """Endpoint para obtener solicitudes de PAGO DIRECTO por idActividad (sin tarea)."""
+    """Endpoint para obtener solicitudes de PAGO DIRECTO por idActividad (sin tarea).""" 
     
     ESTADOS_VALIDOS = ['pendiente', 'aprobado', 'rechazada', 'sin_revisores']
     

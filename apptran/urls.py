@@ -303,11 +303,17 @@ urlpatterns =[
     path(r'actividades-pei-con-tareas/', ActividadPeiConTareasListView.as_view(), name='actividades-pei-con-tareas'),
     path(r'tarea-detalles/<int:tarea_id>/', obtener_tarea_detalle, name='obtener_tarea_detalle'),     
     path(r'actividades-con-tareas/<int:pk>/', ActividadConTareasDetailView.as_view(), name='actividad-detalle-con-tareas'),
+    #Lista de solicitudes - Badges
     path(r'actividades/tareas/solicitudes/',
         ActividadSolicitudesView.as_view(),
         name='actividad-solicitudes'
     ),
-    path(r'actividades/tareas/rendiciones/', ActividadRendicionesView.as_view(), name='actividad-rendiciones'),
+    #Lista de rendiciones - Badges
+    path(
+        r'actividades/tareas/rendiciones/', 
+        ActividadRendicionesView.as_view(), 
+        name='actividad-rendiciones'
+    ),
     #Ruta de actividad
     path(r'actividades/<int:actividad_id>/ruta-proyecto/', ruta_actividad_proyecto, name="ruta_actividad_proyecto"),
     #Rutas de actividad

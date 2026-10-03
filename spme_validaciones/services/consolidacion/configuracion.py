@@ -19,6 +19,9 @@ CONFIGURACIONES = {
                 "usuarioDecisorio": 46,
             },
         },
+        MetodoResolucion.TODO_O_NADA:{
+                    "parametros": {},
+                }
     },
 
     "SOLICITUD_PAGO_DIRECTO": {
@@ -27,6 +30,9 @@ CONFIGURACIONES = {
                 "usuarioDecisorio": 46,
             },
         },
+        MetodoResolucion.TODO_O_NADA:{
+                    "parametros": {},
+                }
     },
 
     "SOLICITUD_REEMBOLSO": {
@@ -35,13 +41,19 @@ CONFIGURACIONES = {
                 "usuarioDecisorio": 46,
             },
         },
+        MetodoResolucion.TODO_O_NADA:{
+                    "parametros": {},
+                }
     },
 
     "RENDICION_CUENTAS": {
-      MetodoResolucion.DECISORIO: {
+        MetodoResolucion.DECISORIO: {
             "parametros": {
                 "usuarioDecisorio": 46,
         },
+        MetodoResolucion.TODO_O_NADA:{
+                    "parametros": {},
+                }
     },
 },
 }

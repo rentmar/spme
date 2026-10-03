@@ -1,3 +1,4 @@
+# spme/apptran/proyecto/services/actividad_rendiciones_service.py
 from django.core.paginator import Paginator
 from ..repositories.actividad_rendiciones_repository import ActividadRendicionesRepository
 
