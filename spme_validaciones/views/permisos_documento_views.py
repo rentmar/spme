@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from spme_validaciones.constants import TIPOS_DOCUMENTO
 from spme_validaciones.services.permisos_documento_service import calcular_permisos
 from spme_validaciones.serializers.permisos_documento_serializers import (
-    PermisosDocumentoSerializer,
+    PermisosDocumentoSerializer, 
 )
 
 
@@ -30,7 +30,6 @@ class DocumentoPermisosView(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
         # 2. Verificar existencia del documento (404 real)
         modelo = config['modelo']
         if not modelo.objects.filter(pk=documento_id).exists():
@@ -44,7 +43,7 @@ class DocumentoPermisosView(APIView):
 
         # 3. Obtener el documento
         documento = modelo.objects.get(pk=documento_id)
-
+        
         # 4. Obtener validaciones y resumen vía repository existente
         repository = config['repository']()
         campo_fk = config['campo_fk']

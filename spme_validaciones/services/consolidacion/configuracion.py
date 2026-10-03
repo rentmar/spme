@@ -1,3 +1,4 @@
+# spme/spme_validaciones/services/consolidacion/configuracion.py
 from .modelos import ConfiguracionMetodo, MetodoResolucion
 
 CONFIGURACIONES = {
@@ -7,6 +8,9 @@ CONFIGURACIONES = {
                 "usuarioDecisorio": 46,
             },
         },
+        MetodoResolucion.TODO_O_NADA:{
+            "parametros": {},
+        }
     },
 
     "SOLICITUD_VIAJE": {
