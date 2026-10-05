@@ -19,17 +19,17 @@
             <div class="campo"><div class="etiqueta">Ejecución:</div><div class="valor">{{ fecha_ejecucion }}</div></div>
             <div class="campo"><div class="etiqueta">Código:</div><div class="valor">{{ codigo_actividad|default:"-" }}</div></div>
         </div>
-        <div class="grid-3" style="margin-top: 2px;">
+        <div class="grid-2" style="margin-top: 2px;">
             <div class="campo"><div class="etiqueta">Descripción:</div><div class="valor texto-largo">{{ descripcion_actividad }}</div></div>
             <div class="campo"><div class="etiqueta">Objetivo:</div><div class="valor texto-largo">{{ objetivo_actividad }}</div></div>
-            <div class="campo">
+            <!-- <div class="campo">
                 <div class="etiqueta">Financiamiento:</div>
                 <div class="valor texto-largo">
                     {% for fuente in fuentes_financiamiento|slice:":2" %}
                         {{ fuente.nombre }}: Bs.{{ fuente.monto|floatformat:0 }}{% if not forloop.last %}, {% endif %}
                     {% empty %}No especificado{% endfor %}
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
     
