@@ -38,7 +38,7 @@
         </div>
     </div>
     
-    <!-- ACTIVIDAD PADRE + DETALLE -->
+    <!-- ACTIVIDAD PADRE + DETALLE --> 
     <div style="display: flex; gap: 1px; margin-bottom: 1px;">
         {% if actividad and actividad.codigo %}
         <div class="seccion compact-section" style="flex: 1; margin-bottom: 0; padding: 3px 8px;">
@@ -121,27 +121,31 @@
         <table class="tabla tabla-gastos" style="margin-top: 1px;">
             <thead>
                 <tr>
-                    <th style="width: 12%; padding: 2px;">FECHA</th>
-                    <th style="width: 12%; padding: 2px;">PARTIDA</th>
-                    <th style="width: 14%; padding: 2px;">FACTURA</th>
-                    <th style="width: 42%; padding: 2px;">CONCEPTO</th>
+                    <th style="width: 4%;">N°</th>
+                    <th style="width: 10%; padding: 2px;">FECHA</th>
+                    <th style="width: 10%; padding: 2px;">PARTIDA</th>
+                    <th style="width: 12%; padding: 2px;">FUENTE</th>
+                    <th style="width: 12%; padding: 2px;">FACTURA</th>
+                    <th style="width: 32%; padding: 2px;">CONCEPTO</th>
                     <th style="width: 20%; text-align: right; padding: 2px;">MONTO (Bs.)</th>
                 </tr>
             </thead>
             <tbody>
                 {% for gasto in detalle_fondos %}
                 <tr>
+                    <td style="text-align: center; padding: 1px 2px;">{{ gasto.numero|default:"-" }}</td>
                     <td style="padding: 1px 2px;">{{ gasto.fecha|default:"-" }}</td>
                     <td style="padding: 1px 2px;">{{ gasto.partida|default:"-" }}</td>
+                    <td style="padding: 1px 2px;">{{ gasto.fuente|default:"-" }}</td>
                     <td style="padding: 1px 2px;">{{ gasto.factura_recibo|default:"-" }}</td>
                     <td class="texto-largo" style="padding: 1px 2px;">{{ gasto.concepto|default:"-" }}</td>
                     <td style="text-align: right; padding: 1px 2px;">{{ gasto.monto|floatformat:2 }}</td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="5" style="text-align: center; padding: 2px; color: #999; font-size: 8px;">Sin gastos registrados</td></tr>
+                <tr><td colspan="7" style="text-align: center; padding: 2px; color: #999; font-size: 8px;">Sin gastos registrados</td></tr>
                 {% endfor %}
                 <tr class="total-row">
-                    <td colspan="4" style="text-align: right; font-weight: bold; padding: 1px 2px;">TOTAL:</td>
+                    <td colspan="6" style="text-align: right; font-weight: bold; padding: 1px 2px;">TOTAL:</td>
                     <td style="text-align: right; font-weight: bold; font-size: 9px; padding: 1px 2px;">Bs. {{ monto_solicitado|floatformat:2 }}</td>
                 </tr>
             </tbody>

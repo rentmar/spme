@@ -59,7 +59,7 @@ class SolicitudReembolsoTareaPDFGenerator(BasePDFGenerator):
         
         detalle_fondos, total_calculado = self._procesar_detalle_fondos(obj)
         monto_solicitado = float(obj.montoSolicitado) if obj.montoSolicitado else total_calculado
-        
+
         datos_transferencia = self._procesar_datos_transferencia(obj)
         
         context = {
