@@ -1,5 +1,6 @@
 # spme/spme_presupuesto/services/presupuesto_tree_v3/depth_strategy.py
 from typing import Union
+from .enums import Profundidad
 
 class DepthStrategy:
     """
@@ -7,24 +8,23 @@ class DepthStrategy:
     """
     
     @staticmethod
-    def can_expand(nivel_actual: int, depth: Union[str, int]) -> bool:
-        """
-        Determina si se puede expandir un nivel.
-        
-        Args:
-            nivel_actual: Nivel actual del nodo.
-            depth: Profundidad solicitada ('self', 'all', o número).
-        
-        Returns:
-            True si se puede expandir, False en caso contrario.
-        """
-        if depth == 'self':
-            return False
-        
-        if depth == 'all':
+    def can_expand(
+        nivel_nodo_objetivo: int,
+        nivel_actual: int,
+        depth: Union[str, int] = Profundidad.ALL,
+    ) -> bool:
+        # Si depth es 'all', siempre expande
+        if depth == Profundidad.ALL or depth == 'all':
             return True
-        
-        if isinstance(depth, int):
-            return nivel_actual < depth
-        
-        return False
+
+        # Si depth es 'self', no se expande ningún nivel descendiente
+        if depth == Profundidad.SELF or depth == 'self':
+            return False
+
+        # Si depth es un entero (ej. 1, 2)
+        try:
+            depth_int = int(depth)
+            diferencia_nivel = nivel_actual - nivel_nodo_objetivo
+            return diferencia_nivel <= depth_int
+        except (ValueError, TypeError):
+            return True

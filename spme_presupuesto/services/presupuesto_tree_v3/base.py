@@ -11,8 +11,9 @@ class BaseBuilderV3(ABC):
     Builder base abstracto para V3.
     """
     
-    def __init__(self, calculos: CalculosPresupuestariosV3):
+    def __init__(self, calculos: CalculosPresupuestariosV3, repository=None):
         self.calculos = calculos
+        self.repository = repository
     
     @abstractmethod
     def get_tipo_nodo(self) -> str:

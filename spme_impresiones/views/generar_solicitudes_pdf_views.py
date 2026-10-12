@@ -27,7 +27,7 @@ from ..services import (
 
 class ReportesViewSet(viewsets.ViewSet):
     """
-    ViewSet para generar reportes de diferentes tipos
+    ViewSet para generar reportes de diferentes tipos 
     """
     # permission_classes = [IsAuthenticated]
     

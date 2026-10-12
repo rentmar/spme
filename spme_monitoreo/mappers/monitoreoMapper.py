@@ -123,6 +123,9 @@ class ReponseMapper:
                     "actividad_id": getattr(solicitud, 'actividad_id', None),
                     "tarea_id": getattr(solicitud, 'tarea_id', None),
                     "fechaRealizacionActividad": str(getattr(solicitud, 'fechaRealizacionActividad', '')) if getattr(solicitud, 'fechaRealizacionActividad', None) else None,
+                    # 🆕 NUEVOS CAMPOS AÑADIDOS:
+                    "fechaInicio": str(getattr(solicitud, 'fechaInicio', '')) if getattr(solicitud, 'fechaInicio', None) else None,
+                    "fechaFin": str(getattr(solicitud, 'fechaFin', '')) if getattr(solicitud, 'fechaFin', None) else None,
                     "bloquearIconosSolFondos": getattr(solicitud, 'bloquearIconosSolFondos', True),
                     "descripcion_actividad": getattr(solicitud, 'descripcion_actividad', None),
                     "objetivo_actividad": getattr(solicitud, 'objetivo_actividad', None),

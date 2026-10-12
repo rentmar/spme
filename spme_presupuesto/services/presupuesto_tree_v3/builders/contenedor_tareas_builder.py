@@ -1,23 +1,23 @@
 # spme_presupuesto/services/presupuesto_tree_v3/builders/contenedor_tareas_builder.py
 
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Union
 
 from ..dto import TreeNodeV3
 from ..base import BaseBuilderV3
-from spme_presupuesto.repositories.presupuesto_tree_v3_repository import PresupuestoTreeV3Repository
+from ..depth_strategy import DepthStrategy
+from ..enums import TipoNodo, Profundidad
 from .tarea_builder import TareaBuilderV3
 
 
 class ContenedorTareasBuilderV3(BaseBuilderV3):
     """Builder para el contenedor de tareas de una actividad."""
     
-    def __init__(self, calculos):
-        super().__init__(calculos)
-        self.repository = PresupuestoTreeV3Repository()
-        self.tarea_builder = TareaBuilderV3(calculos)
+    def __init__(self, calculos, repository=None):
+        super().__init__(calculos, repository)
+        self.tarea_builder = TareaBuilderV3(calculos, repository)
     
     def get_tipo_nodo(self) -> str:
-        return 'contenedor_tareas'
+        return TipoNodo.CONTENEDOR_TAREAS.value
     
     def get_ids_by_parent(self, parent_id: int) -> List[int]:
         """Un contenedor no tiene IDs, se accede por actividad padre."""
@@ -32,6 +32,8 @@ class ContenedorTareasBuilderV3(BaseBuilderV3):
         actividad_id: Optional[int] = None,
         nivel: int = 3,
         es_nodo_objetivo: bool = False,
+        depth: Union[str, int] = Profundidad.ALL,
+        nivel_nodo_objetivo: int = 0,
     ) -> TreeNodeV3:
         """
         Construye el contenedor de tareas de una actividad.
@@ -44,51 +46,46 @@ class ContenedorTareasBuilderV3(BaseBuilderV3):
         5. Crear nodo contenedor
         """
         if actividad_id is None:
-            raise ValueError("Se requiere un ID de actividad para construir el contenedor de tareas")
-        
-        # 1. Obtener IDs de tareas
-        tareas_ids = self.repository.obtener_tareas_actividad(actividad_id)
-        
-        # 2. Construir cada tarea
+            raise ValueError("Se requiere un ID de actividad para el contenedor de tareas")
+
+        tareas_ids = self.repository.obtener_tareas_actividad(actividad_id) if self.repository else []
         tareas_nodos = []
-        for tarea_id in tareas_ids:
-            try:
-                tarea_nodo = self.tarea_builder.build(
-                    id=tarea_id,
-                    nivel=nivel + 1,  # Las tareas están un nivel más abajo
-                    es_nodo_objetivo=False,
-                )
-                tareas_nodos.append(tarea_nodo)
-            except ValueError as e:
-                # Si una tarea no existe, la omitimos
-                continue
-        
-        # 3. Consolidar planificación
+        nivel_hijos = nivel + 1  # Nivel 4 (Tareas)
+
+        if DepthStrategy.can_expand(nivel_nodo_objetivo, nivel_hijos, depth):
+            for tarea_id in tareas_ids:
+                try:
+                    tarea_nodo = self.tarea_builder.build(
+                        id=tarea_id,
+                        nivel=nivel_hijos,
+                        es_nodo_objetivo=False,
+                        depth=depth,
+                        nivel_nodo_objetivo=nivel_nodo_objetivo,
+                    )
+                    tareas_nodos.append(tarea_nodo)
+                except Exception:
+                    continue
+
         planificacion_total = sum(
-            tarea.datos.get('planificacion', {}).get('total', 0)
-            for tarea in tareas_nodos
+            t.datos.get('planificacion', {}).get('total', 0.0) for t in tareas_nodos
         )
-        
-        # 4. Consolidar ejecución
         ejecucion_total = sum(
-            tarea.datos.get('ejecucion', {}).get('total', 0)
-            for tarea in tareas_nodos
+            t.datos.get('ejecucion', {}).get('total', 0.0) for t in tareas_nodos
         )
-        
-        # 5. Calcular porcentaje
         porcentaje = self._calcular_porcentaje(ejecucion_total, planificacion_total)
-        
-        # 6. Consolidar desglose de financiadores
-        desglose_financiadores = self._consolidar_desglose_tareas(tareas_nodos)
-        tiene_desglose = len(desglose_financiadores) > 0
-        
-        # 7. Construir datos del contenedor
+
+        desgloses_tareas = [
+            t.datos.get('planificacion', {}).get('desglose_financiadores', [])
+            for t in tareas_nodos
+        ]
+        desglose_financiadores = self.calculos.consolidar_por_financiador(desgloses_tareas)
+
         datos = {
             'nombre': 'Tareas',
-            'cantidad': len(tareas_nodos),
+            'cantidad': len(tareas_ids),
             'planificacion': {
                 'total': planificacion_total,
-                'tiene_desglose': tiene_desglose,
+                'tiene_desglose': len(desglose_financiadores) > 0,
                 'desglose_financiadores': desglose_financiadores,
             },
             'ejecucion': {
@@ -96,9 +93,8 @@ class ContenedorTareasBuilderV3(BaseBuilderV3):
                 'porcentaje': porcentaje,
             },
         }
-        
-        # 8. Crear nodo contenedor
-        nodo = TreeNodeV3(
+
+        return TreeNodeV3(
             tipo_nodo=self.get_tipo_nodo(),
             id=None,
             nivel=nivel,
@@ -109,9 +105,6 @@ class ContenedorTareasBuilderV3(BaseBuilderV3):
             formularios=[],
             hijos=tareas_nodos,
         )
-        
-        return nodo
-    
     def _consolidar_desglose_tareas(self, tareas_nodos: List[TreeNodeV3]) -> List[Dict[str, Any]]:
         """
         Consolida el desglose de financiadores de todas las tareas.

@@ -1,5 +1,6 @@
 # spme/spme_presupuesto/services/presupuesto_tree_v3/dto.py
 from typing import Optional, List, Dict, Any
+from dataclasses import dataclass, field, asdict
 
 
 class TreeNodeV3:

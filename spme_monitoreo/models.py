@@ -34,6 +34,16 @@ class SolicitudFondos(models.Model):
     montoSolicitado = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Monto Solicitado', blank=True, null=True)
     #Actividad
     fechaRealizacionActividad = models.DateField(verbose_name="Fecha de realizacion del actividad", blank=True, null=True)
+    fechaInicio = models.DateField(
+        verbose_name='Fecha Inicio',
+        blank=True,
+        null=True,
+    )
+    fechaFin = models.DateField(
+        verbose_name='Fecha Fin',
+        blank=True,
+        null=True,
+    )
 
     descripcion_actividad = models.TextField(verbose_name='Descripción de la actividad', blank=True, null=True)
     objetivo_actividad = models.TextField(verbose_name='Objetivo de la actividad', blank=True, null=True)
@@ -500,6 +510,16 @@ class SolicitudViaje (models.Model):
     #Campos extra
     fechaEvento = models.DateField(blank=True, null=True)
     detalleGasto = models.JSONField(blank=True, null=True)
+    fechaInicio = models.DateField(
+            verbose_name='Fecha Inicio',
+            blank=True,
+            null=True,
+        )
+    fechaFin = models.DateField(
+            verbose_name='Fecha Fin',
+            blank=True,
+            null=True,
+        )
 
     #Validaciones
     validacionResponsable = models.BooleanField(default=False)
