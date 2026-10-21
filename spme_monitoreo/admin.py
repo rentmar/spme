@@ -1530,6 +1530,8 @@ class SolicitudViajeAdmin(admin.ModelAdmin):
                 'fechaSolicitud',
                 'lugarSolicitud',
                 'montoSolicitado',
+                'fechaInicio',
+                'fechaFin',
             )
         }),
         ('Información del Solicitante', {

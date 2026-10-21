@@ -184,6 +184,9 @@ class ReponseMapper:
                     "objetivo_actividad": getattr(solicitud, 'objetivo_actividad', None),
                     "datos_forma_pago": getattr(solicitud, 'datos_forma_pago', None),
                     "fechaRealizacionActividad": str(getattr(solicitud, 'fechaRealizacionActividad', '')) if getattr(solicitud, 'fechaRealizacionActividad', None) else None,
+                    # 🆕 NUEVOS CAMPOS AÑADIDOS:
+                    "fechaInicio": str(getattr(solicitud, 'fechaInicio', '')) if getattr(solicitud, 'fechaInicio', None) else None,
+                    "fechaFin": str(getattr(solicitud, 'fechaFin', '')) if getattr(solicitud, 'fechaFin', None) else None,
                     # "validacionContador": getattr(solicitud, 'validacionContador', False),
                     "validacionResponsable": getattr(solicitud, 'validacionResponsable', False),
                     # "contador_id": getattr(solicitud, 'contador_id', None),
@@ -329,6 +332,9 @@ class ReponseMapper:
                 "descripcion_actividad": getattr(solicitud, 'descripcion_actividad', None),
                 "fecha_realizacion": str(getattr(solicitud, 'fecha_realizacion', '')) if getattr(solicitud, 'fecha_realizacion', None) else None,
                 "fechaRealizacionActividad": str(getattr(solicitud, 'fechaRealizacionActividad', '')) if getattr(solicitud, 'fechaRealizacionActividad', None) else None,
+                # 🆕 NUEVOS CAMPOS AÑADIDOS:
+                "fechaInicio": str(getattr(solicitud, 'fechaInicio', '')) if getattr(solicitud, 'fechaInicio', None) else None,
+                "fechaFin": str(getattr(solicitud, 'fechaFin', '')) if getattr(solicitud, 'fechaFin', None) else None,
                 "objetivo_actividad": getattr(solicitud, 'objetivo_actividad', None),
                 "fuente_financiamiento": getattr(solicitud, 'fuente_financiamiento', None),
                 "detalleDestinoFondos": getattr(solicitud, 'detalleDestinoFondos', None),

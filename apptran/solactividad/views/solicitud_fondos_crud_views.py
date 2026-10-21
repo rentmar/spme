@@ -1,3 +1,4 @@
+# spme/apptran/solactividad/views/solicitud_fondos_crud_views.py
 from rest_framework import viewsets
 from spme_monitoreo.models import SolicitudFondos
 from ..serializer.solicitud_fondos_crud_serializer import SolicitudFondosCrudSerializer
