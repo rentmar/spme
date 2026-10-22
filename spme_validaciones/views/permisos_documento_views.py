@@ -9,7 +9,7 @@ from spme_validaciones.services.permisos_documento_service import calcular_permi
 from spme_validaciones.serializers.permisos_documento_serializers import (
     PermisosDocumentoSerializer, 
 )
-
+from spme_validaciones.services.consolidacion.service import ConsolidacionValidacionService
 
 class DocumentoPermisosView(APIView):
     """
@@ -32,7 +32,9 @@ class DocumentoPermisosView(APIView):
             )
         # 2. Verificar existencia del documento (404 real)
         modelo = config['modelo']
-        if not modelo.objects.filter(pk=documento_id).exists():
+        try:
+            documento = modelo.objects.get(pk=documento_id)
+        except modelo.DoesNotExist:
             return Response(
                 {
                     'error': 'DOCUMENTO_NO_ENCONTRADO',
@@ -40,26 +42,31 @@ class DocumentoPermisosView(APIView):
                 },
                 status=status.HTTP_404_NOT_FOUND,
             )
-
-        # 3. Obtener el documento
-        documento = modelo.objects.get(pk=documento_id)
         
-        # 4. Obtener validaciones y resumen vía repository existente
+        # 3. Obtener validaciones via repository existente
         repository = config['repository']()
         campo_fk = config['campo_fk']
-
         validaciones = repository.obtener_por_documento(
             documento_id=documento_id,
             campo_fk=campo_fk,
             select_related=['usuarioValidador', 'usuarioRedactor'],
         )
-        resumen = repository.obtener_resumen_estado(
-            documento_id=documento_id,
-            campo_fk=campo_fk,
+        
+        # 4. Fuente de verdad absoluta: El servicio de consolidacion
+        consolidacion_svc = ConsolidacionValidacionService()
+        # tipo_solicitud = config.get('tipo_solicitud_key', tipo.upper())
+        tipo_solicitud = tipo.upper().replace('-', '_')
+        metodo_resolucion = getattr(documento, 'metodo_resolucion', 'DECISORIO')
+        # El motor dictamina el estado oficial
+        estado_consolidado = consolidacion_svc.consolidar_desde_validaciones(
+            tipo_solicitud=tipo_solicitud,
+            validaciones=validaciones,
+            metodo_resolucion=metodo_resolucion,
         )
 
         # 5. Calcular permisos
-        permisos = calcular_permisos(documento, request.user, resumen)
+        #permisos = calcular_permisos(documento, request.user, resumen)
+        permisos = calcular_permisos(documento, request.user, estado_consolidado, validaciones)
 
         # 6. Serializar
         serializer = PermisosDocumentoSerializer({
