@@ -1043,6 +1043,51 @@ class RendicionCuentas(models.Model):
         blank=True,
     )
 
+    #Guardar el detalle de las solicitudes vinculadas
+    solicitudesVinculadas = models.JSONField(
+        verbose_name='Solicitudes vinculadas a la rendicion',
+        default=dict, #Por defecto un diccionario vacio
+        blank=True,
+        null=True,
+    )
+
+    # ===================================================================
+    # MÉTODOS IMPRESION VINCULACIONES
+    # ===================================================================
+    def get_solicitud_vinculada_activa(self):
+        """
+        Retorna un diccionario resumido con la información clave de la solicitud 
+        que esté vinculada actualmente (sea fondos o viaje), ideal para la cabecera del PDF.
+        """
+        if not self.solicitudesVinculadas:
+            return None
+
+        for tipo, data in self.solicitudesVinculadas.items():
+            if data.get('vinculada'):
+                return {
+                    'tipo': tipo,
+                    'id': data.get('id'),
+                    'numero_formulario': data.get('numeroFormulario'),
+                    'monto_solicitado': data.get('montoSolicitado', 0),
+                    'detalle_original': data.get('detalleOriginal'),
+                    'detalle_descargado': data.get('detalleDescargado', [])
+                }
+            
+        return None
+
+    def get_items_para_impresion(self):
+        """
+        Devuelve el detalle de gastos descargados de la solicitud vinculada 
+        o, en su defecto, el detalle general de fondos de la rendición.
+        Útil para listar las filas en la tabla del reporte impreso.
+        """
+        vinculacion = self.get_solicitud_vinculada_activa()
+        if vinculacion and vinculacion['detalle_descargado']:
+            return vinculacion['detalle_descargado']
+        
+        # Si no hay vinculación, retorna el detalle general de fondos guardado
+        return self.detalleDestinoFondos or []
+
 
     
     # ===================================================================
