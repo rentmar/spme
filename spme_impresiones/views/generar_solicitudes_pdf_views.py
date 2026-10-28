@@ -25,6 +25,12 @@ from ..services import (
     RendicionCuentasTareaPDFGenerator,
     )
 
+from ..services.rendicion_consolidada_pdf import (
+    RendicionConsolidadaPDFGenerator,
+)
+
+
+
 class ReportesViewSet(viewsets.ViewSet):
     """
     ViewSet para generar reportes de diferentes tipos 
@@ -779,5 +785,22 @@ class ReportesViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {'error': f'Error al generar PDF: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def rendicion_cuentas_actividad_v2(self, request, pk=None):
+        """
+        Generar reporte de rendicion de cuentas consolidado
+        Rendicion de cuentas general + Sol de fondos y Sol de viaje
+        """
+        try:
+            rendicion = get_object_or_404(RendicionCuentas, pk=pk)
+            
+            # Instanciamos el generador consolidado directamente y generamos el PDF
+            generator = RendicionConsolidadaPDFGenerator()
+            return generator.generate(rendicion) 
+        except Exception as e:
+            return Response(
+                {'error': f'Error al generar reporte consolidado v2: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

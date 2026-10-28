@@ -1077,14 +1077,9 @@ class RendicionCuentas(models.Model):
 
     def get_items_para_impresion(self):
         """
-        Devuelve el detalle de gastos descargados de la solicitud vinculada 
-        o, en su defecto, el detalle general de fondos de la rendición.
+        Devuelve el detalle de gastos descargados de la rendición.
         Útil para listar las filas en la tabla del reporte impreso.
         """
-        vinculacion = self.get_solicitud_vinculada_activa()
-        if vinculacion and vinculacion['detalle_descargado']:
-            return vinculacion['detalle_descargado']
-        
         # Si no hay vinculación, retorna el detalle general de fondos guardado
         return self.detalleDestinoFondos or []
 
@@ -1143,20 +1138,35 @@ class RendicionCuentas(models.Model):
             'subtipo_documento': self.subtipo_documento,
             'subtipo_display': self.subtipo_display,
             'detalle_subtipo': self.get_detalle_subtipo(),
+            #Datos de la actividad
             'actividad_id': self.actividad_id,
-            'actividad_nombre': self._get_actividad_nombre(),
+            'codigo_actividad': self._get_actividad_codigo() or '-',
+            'actividad_nombre': self._get_actividad_nombre() or 'Sin Actividad',
+            'descripcion_actividad': self.descripcionActividad,
+            'fecha_actividad': self.fechaActividad.strftime('%d/%m/%Y') if self.fechaActividad else '-',
+            'lugar_actividad': self.lugarActividad,
+            'fecha_inicio': self.fechaInicio.strftime('%d/%m/%Y') if self.fechaInicio else '-',
+            'fecha_fin': self.fechaFin.strftime('%d/%m/%Y') if self.fechaFin else '-',
+
+            #Datos de la tarea
             'tarea_id': self.tarea_id,
             'tarea_nombre': self._get_tarea_nombre(),
+
+            #Solicitante y fechas
             'solicitante_id': self.usuario_id,
             'solicitante_nombre': self.usuario.get_full_name() if self.usuario else 'Sistema',
             'fecha_solicitud': (
-                self.fechaRendicion.strftime('%Y-%m-%d') 
+                self.fechaRendicion.strftime('%d/%m/%Y') 
                 if self.fechaRendicion 
-                else None
+                else '-'
             ),
             'proyecto_id': self._get_proyecto_id(),
             'accion_url': self.get_accion_url(),
             'accion_url_texto': self.get_accion_url_texto(),
+            'lugar_rendicion': self.lugarRendicion,
+            'fecha_desembolso': self.fechaDesembolso.strftime('%d/%m/%Y') if self.fechaDesembolso else '-',
+            'monto_descargado': str(self.montoDescargado) if self.montoDescargado else '0.00',
+            'saldo': str(self.saldo) if self.saldo else '0.00',
         }
     
     # ===================================================================
@@ -1178,6 +1188,11 @@ class RendicionCuentas(models.Model):
     # ===================================================================
     # HELPERS PRIVADOS
     # ===================================================================
+
+    def _get_actividad_codigo(self):
+        if self.actividad_id:
+            return getattr(self.actividad, 'codigo', None)
+        return None
     
     def _get_actividad_nombre(self):
         if self.actividad_id:

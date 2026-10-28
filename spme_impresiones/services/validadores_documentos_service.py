@@ -215,6 +215,33 @@ class ValidadoresDocumentoService:
             'cargo': usuario.cargo or 'No especificado',
             'documento_identidad': usuario.ci or 'No asignado',
         }
+
+    def calcular_estado_documento_rendicion(self, documento: Any, validadores: List[Dict[str, Any]]) -> str:
+        """
+        Calcula el estado global del documento utilizando el motor de consolidación oficial.
+        """
+        if not validadores:
+            return self.ESTADO_SIN_REVISORES
+        
+        # 1. Normalizar el tipo de solicitud al formato esperado por CONFIGURACIONES (ej. RENDICION_CUENTAS)
+        nombre_modelo = documento.__class__.__name__ # 'RendicionCuentas'
+        import re
+        tipo_solicitud = re.sub(r'(?<!^)(?=[A-Z])', '_', nombre_modelo).upper() # 'RENDICION_CUENTAS'
+        
+        # 2. Obtener el método de resolución configurado en el documento (ajusta el atributo según tu modelo)
+        metodo_resolucion = getattr(documento, 'metodoResolucion', getattr(documento, 'metodo_resolucion', 'TODO_O_NADA'))
+        
+        try:
+            # 3. Invocar al servicio de consolidación
+            resultado = self.consolidacion_service.consolidar(
+                tipo_solicitud=tipo_solicitud,
+                solicitud_id=documento.id,
+                metodo_resolucion=metodo_resolucion,
+            )
+            return getattr(resultado, 'estado', resultado)
+        except Exception as e:
+            print(f"Error al consolidar estado: {e}")
+            return self.ESTADO_PENDIENTE
     
     def calcular_estado_documento(self, validadores: List[Dict[str, Any]]) -> str:
         """
@@ -284,3 +311,43 @@ class ValidadoresDocumentoService:
             'estado_documento': estado,
             **conteo,
         }
+
+    def preparar_contexto_rendicion_pdf(
+            self, 
+            documento: Any, 
+            etiquetas_personalizadas: Optional[Dict[str, str]] = None
+        ) -> Dict[str, Any]:
+            """
+            Prepara el contexto completo de validaciones para inyectar en el PDF 
+            utilizando el motor de consolidación vigente.
+            
+            Args:
+                documento: Instancia del documento
+                etiquetas_personalizadas: Diccionario opcional para etiquetas de cargos
+                
+            Returns:
+                Diccionario listo para incluir en el contexto del PDF.
+            """
+            # 1. Obtenemos los validadores pasando las etiquetas opcionales
+            validadores = self.obtener_validadores(documento, etiquetas_personalizadas)
+            
+            # 2. Obtenemos los datos del solicitante
+            solicitante = self.obtener_solicitante(documento)
+            
+            # 3. Calculamos el estado pasando el documento y los validadores al motor consolidado
+            estado = self.calcular_estado_documento_rendicion(documento, validadores)
+            
+            # 4. Generamos el conteo de estados
+            conteo = {
+                'total_validadores': len(validadores),
+                'aprobados': sum(1 for v in validadores if v['estado'] == self.ESTADO_APROBADO),
+                'pendientes': sum(1 for v in validadores if v['estado'] == self.ESTADO_PENDIENTE),
+                'rechazados': sum(1 for v in validadores if v['estado'] == self.ESTADO_RECHAZADO),
+            }
+            
+            return {
+                'validadores': validadores,
+                'solicitante': solicitante,
+                'estado_documento': estado,
+                **conteo,
+            }
