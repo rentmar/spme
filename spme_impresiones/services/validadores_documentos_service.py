@@ -229,7 +229,7 @@ class ValidadoresDocumentoService:
         tipo_solicitud = re.sub(r'(?<!^)(?=[A-Z])', '_', nombre_modelo).upper() # 'RENDICION_CUENTAS'
         
         # 2. Obtener el método de resolución configurado en el documento (ajusta el atributo según tu modelo)
-        metodo_resolucion = getattr(documento, 'metodoResolucion', getattr(documento, 'metodo_resolucion', 'TODO_O_NADA'))
+        metodo_resolucion = getattr(documento, 'metodoResolucion', getattr(documento, 'metodo_resolucion', 'DECISORIO'))
         
         try:
             # 3. Invocar al servicio de consolidación

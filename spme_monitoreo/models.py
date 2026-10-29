@@ -6,6 +6,7 @@ from spme_estructuracion_pei.models import ActividadPei, TareaActividadPei
 from polymorphic.models import PolymorphicModel
 import datetime
 import uuid
+from decimal import Decimal
 
 class FormaPago(models.Model):
     codigo = models.CharField(max_length=10, blank=True, null=True)
@@ -1054,6 +1055,90 @@ class RendicionCuentas(models.Model):
     # ===================================================================
     # MÉTODOS IMPRESION VINCULACIONES
     # ===================================================================
+    def tiene_vinculacion_fondos(self):
+        """
+        Verifica si la rendición está vinculada a una solicitud de fondos,
+        revisando la FK directa y el respaldo en el JSON de solicitudes vinculadas.
+        """
+        if self.solicitudFondos_id is not None:
+            return True
+            
+        if self.solicitudesVinculadas:
+            for tipo, data in self.solicitudesVinculadas.items():
+                if ('fondo' in tipo.lower() or 'fondos' in tipo.lower()) and data.get('vinculada'):
+                    return True
+                    
+        return False
+
+    def tiene_vinculacion_viaje(self):
+        """
+        Verifica si la rendición está vinculada a una solicitud de viaje,
+        revisando la FK directa y el respaldo en el JSON de solicitudes vinculadas.
+        """
+        if self.solicitudViaje_id is not None:
+            return True
+            
+        if self.solicitudesVinculadas:
+            for tipo, data in self.solicitudesVinculadas.items():
+                if ('viaje' in tipo.lower() or 'viatico' in tipo.lower()) and data.get('vinculada'):
+                    return True
+                    
+        return False
+
+    def obtener_datos_vinculacion(self, tipo_solicitud):
+        """
+        Retorna un diccionario completo con la información de la solicitud vinculada 
+        extraída del JSON 'solicitudesVinculadas', calculando además el monto 
+        descargado total a partir del detalle y el saldo resultante.
+        """
+        if not self.solicitudesVinculadas:
+            return None
+
+        # Determinar la clave exacta según el tipo solicitado
+        key_json = None
+        if tipo_solicitud.lower() in ['fondos', 'solicitud_fondos']:
+            key_json = 'solicitud_fondos'
+        elif tipo_solicitud.lower() in ['viaje', 'solicitud_viaje']:
+            key_json = 'solicitud_viaje'
+
+        # Función auxiliar interna para procesar y calcular los montos
+        def procesar_datos_solicitud(data):
+            monto_solicitado = Decimal(str(data.get('montoSolicitado', 0) or 0))
+            detalle_descargado = data.get('detalleDescargado', [])
+            
+            # Calcular el monto descargado sumando el campo 'monto' de cada ítem del detalle
+            monto_descargado = sum(
+                Decimal(str(item.get('monto', 0) or 0)) 
+                for item in detalle_descargado
+            )
+            
+            # Calcular el saldo (Monto Solicitado - Monto Descargado)
+            saldo = monto_solicitado - monto_descargado
+
+            return {
+                'id': data.get('id'),
+                'numero_formulario': data.get('numeroFormulario', '-'),
+                'monto': monto_solicitado,
+                'monto_descargado': monto_descargado,
+                'saldo': saldo,
+                'detalle_original': data.get('detalleOriginal', []),
+                'detalle_descargado': detalle_descargado,
+            }
+
+        # Extraer los datos si la clave existe y está marcada como vinculada
+        if key_json and key_json in self.solicitudesVinculadas:
+            data = self.solicitudesVinculadas[key_json]
+            if data.get('vinculada'):
+                return procesar_datos_solicitud(data)
+
+        # Búsqueda secundaria de respaldo por coincidencia parcial de texto
+        for tipo, data in self.solicitudesVinculadas.items():
+            if tipo_solicitud.lower() in tipo.lower() and data.get('vinculada'):
+                return procesar_datos_solicitud(data)
+                
+        return None
+
+    
     def get_solicitud_vinculada_activa(self):
         """
         Retorna un diccionario resumido con la información clave de la solicitud 
@@ -1167,6 +1252,14 @@ class RendicionCuentas(models.Model):
             'fecha_desembolso': self.fechaDesembolso.strftime('%d/%m/%Y') if self.fechaDesembolso else '-',
             'monto_descargado': str(self.montoDescargado) if self.montoDescargado else '0.00',
             'saldo': str(self.saldo) if self.saldo else '0.00',
+
+            # ===================================================
+            # BANDERAS Y DATOS DE VINCULACIÓN
+            # ===================================================
+            'tiene_vinculacion_fondos': self.tiene_vinculacion_fondos(),
+            'tiene_vinculacion_viaje': self.tiene_vinculacion_viaje(),
+            'datos_vinculacion_fondos': self.obtener_datos_vinculacion('fondos'),
+            'datos_vinculacion_viaje': self.obtener_datos_vinculacion('viaje'),
         }
     
     # ===================================================================
