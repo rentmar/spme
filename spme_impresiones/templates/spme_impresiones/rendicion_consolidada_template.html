@@ -308,6 +308,26 @@
             </div>
         </div>
 
+        <!-- ========================================== -->
+        <!-- SECCIÓN: DOCUMENTO VINCULADO Y REFERENCIA    -->
+        <!-- ========================================== -->
+        <div class="seccion compact-section" style="padding: 4px 8px; margin-bottom: 4px; border-top: 3px solid #1976d2;">
+            <div class="seccion-titulo" style="margin-bottom: 3px; padding-bottom: 1px;">🔗 INFORMACIÓN DE VINCULACIÓN</div>
+            
+            <div class="grid-2">
+                <div class="campo">
+                    <div class="etiqueta">Código de Solicitud Vinculada:</div>
+                    <div class="valor"><strong>{{ datos_vinculacion_fondos.numero_formulario }}</strong></div>
+                </div>
+                <div class="campo">
+                    <div class="etiqueta">Monto Solicitado:</div>
+                    <div class="valor" style="color: #1976d2; font-weight: bold;">
+                        Bs. {{ datos_vinculacion_fondos.monto|floatformat:2 }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Sección 2: Responsable de la Solicitud -->
         <div class="seccion compact-section" style="padding: 4px 8px; margin-bottom: 4px;">
             <div class="seccion-titulo" style="margin-bottom: 3px; padding-bottom: 1px;">👤 RESPONSABLE DE RENDICION</div>
