@@ -77,6 +77,24 @@ class RendicionConsolidadaPDFGenerator(BasePDFGenerator):
         ]
 
         # =========================================================================
+        # PROCESAMIENTO Y AGRUPACIÓN DE DESGLOSES DE LA RENDICIÓN PRINCIPAL POR HOJA
+        # =========================================================================
+        detalle_gastos_principal = obj.get_items_para_impresion() or []
+        hojas_dict_principal = defaultdict(lambda: {'hoja_id': None, 'hoja_titulo': '', 'items': [], 'total': Decimal('0.00')})
+        
+        for item in detalle_gastos_principal:
+            h_id = item.get('hoja_id', 1)
+            h_titulo = item.get('hoja_titulo', 'Detalle de Gastos')
+            
+            hojas_dict_principal[h_id]['hoja_id'] = h_id
+            hojas_dict_principal[h_id]['hoja_titulo'] = h_titulo
+            hojas_dict_principal[h_id]['items'].append(item)
+            hojas_dict_principal[h_id]['total'] += Decimal(str(item.get('monto', 0) or 0))
+
+        lista_hojas_principal = list(hojas_dict_principal.values())
+        # =========================================================================
+
+        # =========================================================================
         # PROCESAMIENTO Y AGRUPACIÓN DE DESGLOSES DE FONDOS POR HOJA (NUEVO)
         # =========================================================================
         datos_fondos_original = base_context.get('datos_vinculacion_fondos') or {}
@@ -146,7 +164,9 @@ class RendicionConsolidadaPDFGenerator(BasePDFGenerator):
             },
 
             #Datos para la seccion detalle de gastos
-            'detalle_gastos': obj.get_items_para_impresion(),
+            # 'detalle_gastos': obj.get_items_para_impresion(),
+            'detalle_gastos': detalle_gastos_principal,
+            'hojas_desglose_principal': lista_hojas_principal,
 
             # Variables inyectadas para la sección de Firmas y Validaciones
             'validadores': validadores_filtrados,

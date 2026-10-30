@@ -149,53 +149,68 @@
         <!-- ========================================== -->
         <!-- SECCIÓN 5: DETALLE DE GASTOS               -->
         <!-- ========================================== -->
+        <!-- ========================================== -->
+        <!-- SECCIÓN 5: DETALLE DE GASTOS PRINCIPAL     -->
+        <!-- ========================================== -->
         <div class="seccion" style="padding: 4px 8px; margin-bottom: 4px;">
-            <div class="seccion-titulo" style="margin-bottom: 2px; padding-bottom: 1px;">💰 DETALLE DE GASTOS</div>
+            <div class="seccion-titulo" style="margin-bottom: 2px; padding-bottom: 1px;">
+                💰 DETALLE DE GASTOS - RENDICIÓN GENERAL
+            </div>
             
-            {% if detalle_gastos %}
-            <table class="tabla tabla-gastos tabla-gastos-compacta" style="margin-top: 1px; width: 100%;">
-                <thead>
-                    <tr>
-                        <th style="width: 4%;">#</th>
-                        <th style="width: 12%;">FECHA</th>
-                        <th style="width: 10%;">PARTIDA</th>
-                        <th style="width: 10%;">FUENTE</th>
-                        <th style="width: 14%;">FACTURA</th>
-                        <th style="width: 35%;">DESCRIPCIÓN</th>
-                        <th style="width: 15%; text-align: right;">MONTO (Bs.)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in detalle_gastos %}
-                    <tr>
-                        <td style="text-align: center;">{{ forloop.counter }}</td>
-                        <td>{{ item.fecha|default:"-" }}</td>
-                        <td>{{ item.partida|default:"-" }}</td>
-                        <td>
-                            {% if item.fuente %}
-                                {{ item.fuente.sigla }}{% if item.fuente.financiera %}-{{ item.fuente.financiera }}{% endif %}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                        <td>{{ item.factura_recibo|default:"-" }}</td>
-                        <td class="texto-largo">{{ item.descripcion|default:"-" }}</td>
-                        <td style="text-align: right;">{{ item.monto|floatformat:2 }}</td>
-                    </tr>
-                    {% endfor %}
-                    <tr class="total-row">
-                        <td colspan="6" style="text-align: right; font-weight: bold;">TOTAL GASTOS JUSTIFICADOS:</td>
-                        <td style="text-align: right; font-weight: bold; font-size: 8.5px;">Bs. {{ monto_descargado|floatformat:2 }}</td>
-                    </tr>
-                </tbody>
-            </table>
-            <div style="margin-top: 1px; font-size: 7.5px; color: #666; text-align: right;">
-                {{ detalle_gastos|length }} comprobante{{ detalle_gastos|length|pluralize:"s" }}
-            </div>
+            {% if hojas_desglose_principal %}
+                {% for hoja in hojas_desglose_principal %}
+                    <!-- Contenedor individual por hoja: evita que se rompa a la mitad si no entra en el espacio -->
+                    <div class="hoja-desglose-container" style="margin-bottom: 6px; padding: 4px; border: 1px solid #ddd; border-radius: 3px; break-inside: avoid; page-break-inside: avoid;">
+                        
+                        <!-- Cabecera de la Hoja Correlativa -->
+                        <div style="font-size: 8px; font-weight: bold; background: #e3f2fd; padding: 2px 4px; margin-bottom: 2px; border-left: 3px solid #1976d2; display: flex; justify-content: space-between;">
+                            <span>Hoja N° {{ forloop.counter }}: {{ hoja.hoja_titulo }} (ID: {{ hoja.hoja_id }})</span>
+                            <span>Subtotal Hoja: Bs. {{ hoja.total|floatformat:2 }}</span>
+                        </div>
+
+                        <!-- Tabla de Gastos de la Hoja -->
+                        <table class="tabla tabla-gastos tabla-gastos-compacta" style="width: 100%; margin-bottom: 2px;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 4%;">#</th>
+                                    <th style="width: 12%;">FECHA</th>
+                                    <th style="width: 10%;">PARTIDA</th>
+                                    <th style="width: 10%;">FUENTE</th>
+                                    <th style="width: 14%;">FACTURA</th>
+                                    <th style="width: 35%;">DESCRIPCIÓN</th>
+                                    <th style="width: 15%; text-align: right;">MONTO (Bs.)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in hoja.items %}
+                                <tr>
+                                    <td style="text-align: center;">{{ forloop.counter }}</td>
+                                    <td>{{ item.fecha|default:"-" }}</td>
+                                    <td>{{ item.partida|default:"-" }}</td>
+                                    <td>
+                                        {% if item.fuente %}
+                                            {{ item.fuente.sigla }}{% if item.fuente.financiera %}-{{ item.fuente.financiera }}{% endif %}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ item.factura_recibo|default:"-" }}</td>
+                                    <td class="texto-largo">{{ item.descripcion|default:"-" }}</td>
+                                    <td style="text-align: right;">{{ item.monto|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr class="total-row">
+                                    <td colspan="6" style="text-align: right; font-weight: bold;">TOTAL HOJA {{ forloop.counter }}:</td>
+                                    <td style="text-align: right; font-weight: bold; font-size: 8.5px;">Bs. {{ hoja.total|floatformat:2 }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                {% endfor %}
             {% else %}
-            <div style="text-align: center; padding: 2px; color: #999; font-size: 8px;">
-                No se registraron gastos para esta rendición
-            </div>
+                <div style="text-align: center; padding: 2px; color: #999; font-size: 8px;">
+                    No se registraron desgloses de gastos para esta rendición general.
+                </div>
             {% endif %}
         </div>
 
@@ -280,7 +295,7 @@
             <div class="grid-3">
                 <div class="campo">
                     <div class="etiqueta">N° de Formulario:</div>
-                    <div class="valor"><strong>{{ datos_vinculacion_fondos.numero_formulario }}</strong></div>
+                    <div class="valor"><strong>{{ rendicion.numero_formulario }}</strong></div>
                 </div>
                 <div class="campo">
                     <div class="etiqueta">Fecha de Solicitud:</div>
@@ -295,7 +310,7 @@
 
         <!-- Sección 2: Responsable de la Solicitud -->
         <div class="seccion compact-section" style="padding: 4px 8px; margin-bottom: 4px;">
-            <div class="seccion-titulo" style="margin-bottom: 3px; padding-bottom: 1px;">👤 SOLICITANTE DE FONDOS</div>
+            <div class="seccion-titulo" style="margin-bottom: 3px; padding-bottom: 1px;">👤 RESPONSABLE DE RENDICION</div>
             
             <div class="grid-3">
                 <div class="campo">
@@ -382,7 +397,7 @@
         <!-- ========================================== -->
         <div class="seccion" style="padding: 4px 8px; margin-bottom: 4px;">
             <div class="seccion-titulo" style="margin-bottom: 2px; padding-bottom: 1px;">
-                💰 DETALLE DE GASTOS - SOLICITUD DE FONDOS (POR HOJAS)
+                💰 DETALLE DE GASTOS - RENDICION DE CUENTAS SOLICITUD DE FONDOS
             </div>
             
             {% if datos_vinculacion_fondos.hojas_desglose %}
