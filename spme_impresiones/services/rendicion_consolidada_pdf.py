@@ -95,7 +95,7 @@ class RendicionConsolidadaPDFGenerator(BasePDFGenerator):
         # =========================================================================
 
         # =========================================================================
-        # PROCESAMIENTO Y AGRUPACIÓN DE DESGLOSES DE FONDOS POR HOJA (NUEVO)
+        # PROCESAMIENTO Y AGRUPACIÓN DE DESGLOSES DE FONDOS POR HOJA 
         # =========================================================================
         datos_fondos_original = base_context.get('datos_vinculacion_fondos') or {}
         detalle_descargado_fondos = datos_fondos_original.get('detalle_descargado', [])
@@ -118,6 +118,31 @@ class RendicionConsolidadaPDFGenerator(BasePDFGenerator):
         datos_fondos_procesados = {
             **datos_fondos_original,
             'hojas_desglose': lista_hojas_desglose
+        }
+
+        # =========================================================================
+        # PROCESAMIENTO Y AGRUPACIÓN DE DESGLOSES DE VIAJE POR HOJA 
+        # =========================================================================
+        datos_viaje_original = base_context.get('datos_vinculacion_viaje') or {}
+        detalle_descargado_viaje = datos_viaje_original.get('detalle_descargado', [])
+        
+        hojas_dict_viaje = defaultdict(lambda: {'hoja_id': None, 'hoja_titulo': '', 'items': [], 'total': Decimal('0.00')})
+        
+        for item in detalle_descargado_viaje:
+            h_id = item.get('hoja_id', 1)
+            h_titulo = item.get('hoja_titulo', 'Detalle de Gastos')
+            
+            hojas_dict_viaje[h_id]['hoja_id'] = h_id
+            hojas_dict_viaje[h_id]['hoja_titulo'] = h_titulo
+            hojas_dict_viaje[h_id]['items'].append(item)
+            hojas_dict_viaje[h_id]['total'] += Decimal(str(item.get('monto', 0) or 0))
+
+        lista_hojas_viaje = list(hojas_dict_viaje.values())
+        
+        # Inyectar la estructura procesada en el diccionario de datos de viaje
+        datos_viaje_procesados = {
+            **datos_viaje_original,
+            'hojas_desglose': lista_hojas_viaje
         }
 
 
@@ -187,11 +212,11 @@ class RendicionConsolidadaPDFGenerator(BasePDFGenerator):
             },
             'doc_solicitud_viaje': {
                 'activo': base_context.get('tiene_vinculacion_viaje', False),
-                'datos': base_context.get('datos_vinculacion_viaje') or {}
+                'datos': datos_viaje_procesados
             },
 
             'datos_vinculacion_fondos': datos_fondos_procesados,
-            
+            'datos_vinculacion_viaje': datos_viaje_procesados,
             # Aquí iremos agregando los diccionarios de cada sección uno por uno
             
         }
@@ -205,6 +230,16 @@ class RendicionConsolidadaPDFGenerator(BasePDFGenerator):
         return f"Rendicion_Consolidada_{numero_limpio}.pdf"
 
     def render_to_pdf(self, template_name, context):
+        #Evalua el monto asignado de la rendicion general
+        resumen_fin = context.get('resumen_financiero', {})
+        monto_asignado_str = resumen_fin.get('monto_asignado', '0.00')
+
+        try:
+            monto_asig_val = Decimal(str(monto_asignado_str))
+        except (ValueError, TypeError):
+            monto_asig_val = Decimal('0.00')
+
+
         full_context = {**self.get_common_context(), **context}
         font_config = FontConfiguration()
         temp_files = []
@@ -212,15 +247,16 @@ class RendicionConsolidadaPDFGenerator(BasePDFGenerator):
         try:
             writer = PdfWriter()
             num_form = context.get('numero_formulario', 'S/N')
+            paginas_agregadas = 0
 
             # 1. FORMULARIO COMPLETO: Rendición de Cuentas General
-            if context.get('doc_rendicion_general', {}).get('activo'):
+            if context.get('doc_rendicion_general', {}).get('activo') and monto_asig_val > 0:
                 ctx_rendicion = {
                     **full_context, 
                     'numero_formulario': num_form,
                     'documento_activo': 'rendicion_general',
                     'tipo_documento': 'RENDICIÓN DE CUENTAS',
-                    'subtipo_documento': f'N° {num_form}',
+                    'subtipo_documento': f'{num_form}',
                 }
                 html_str = render_to_string(template_name, ctx_rendicion)
                 
@@ -230,6 +266,7 @@ class RendicionConsolidadaPDFGenerator(BasePDFGenerator):
                 
                 HTML(string=html_str, base_url=settings.BASE_DIR).write_pdf(tmp_rendicion.name, font_config=font_config)
                 writer.append(PdfReader(tmp_rendicion.name, 'rb'))
+                paginas_agregadas += 1
 
             #2. Documento adicional: SOlicitud de fondos vinculado
             doc_fondos = context.get('doc_solicitud_fondos', {})
@@ -239,7 +276,7 @@ class RendicionConsolidadaPDFGenerator(BasePDFGenerator):
                     'numero_formulario': num_form,
                     'documento_activo': 'solicitud_fondos', # Identificador para la plantilla HTML
                     'tipo_documento': 'RENDICION DE CUENTAS - SOLICITUD DE FONDOS',
-                    'subtipo_documento': f"Ref. Rendición: {num_form}",
+                    'subtipo_documento': f"{num_form}",
                     'info_general_solicitud': {
                         'numero_formulario': num_form,
                         'fecha_solicitud': context.get('fecha_solicitud', '-'),
@@ -254,6 +291,7 @@ class RendicionConsolidadaPDFGenerator(BasePDFGenerator):
 
                 HTML(string=html_str_fondos, base_url=settings.BASE_DIR).write_pdf(tmp_fondos.name, font_config=font_config)
                 writer.append(PdfReader(tmp_fondos.name, 'rb'))
+                paginas_agregadas += 1
 
             #3. DOCUMENTO ADICIONAL: Solicitude de viajes vinculada
             doc_viaje = context.get('doc_solicitud_viaje', {})
@@ -262,6 +300,8 @@ class RendicionConsolidadaPDFGenerator(BasePDFGenerator):
                     **full_context,
                     'numero_formulario': num_form,
                     'documento_activo': 'solicitud_viaje', # Identificador para la plantilla HTML
+                    'tipo_documento': 'RENDICION DE CUENTAS - SOLICITUD DE VIAJE',
+                    'subtipo_documento': f"{num_form}",
                 }
                 html_str_viaje = render_to_string(template_name, ctx_viaje)
 
@@ -271,6 +311,12 @@ class RendicionConsolidadaPDFGenerator(BasePDFGenerator):
 
                 HTML(string=html_str_viaje, base_url=settings.BASE_DIR).write_pdf(tmp_viaje.name, font_config=font_config)
                 writer.append(PdfReader(tmp_viaje.name, 'rb'))
+                paginas_agregadas += 1
+
+            # Si no se agregó ninguna página (ni rendición general ni vinculaciones), se interrumpe
+            if paginas_agregadas == 0:
+                print(f"Generación cancelada: La rendición N° {num_form} no posee monto asignado ni documentos vinculados activos.")
+                return None
 
             final_tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.pdf')
             temp_files.append(final_tmp.name)

@@ -1105,6 +1105,11 @@ class RendicionCuentas(models.Model):
         def procesar_datos_solicitud(data):
             monto_solicitado = Decimal(str(data.get('montoSolicitado', 0) or 0))
             detalle_descargado = data.get('detalleDescargado', [])
+
+            # ---> AÑADE ESTE BUCLE AQUÍ <---
+            for item in detalle_descargado:
+                if 'fecha' in item:
+                    item['fecha'] = self._formatear_fecha(item.get('fecha'))
             
             # Calcular el monto descargado sumando el campo 'monto' de cada ítem del detalle
             monto_descargado = sum(
@@ -1166,7 +1171,15 @@ class RendicionCuentas(models.Model):
         Útil para listar las filas en la tabla del reporte impreso.
         """
         # Si no hay vinculación, retorna el detalle general de fondos guardado
-        return self.detalleDestinoFondos or []
+        # return self.detalleDestinoFondos or []
+        items = self.detalleDestinoFondos or []
+        items_formateados = []
+        for item in items:
+            item_copia = dict(item)
+            if 'fecha' in item_copia:
+                item_copia['fecha'] = self._formatear_fecha(item_copia.get('fecha'))
+            items_formateados.append(item_copia)
+        return items_formateados
 
 
     
@@ -1281,6 +1294,21 @@ class RendicionCuentas(models.Model):
     # ===================================================================
     # HELPERS PRIVADOS
     # ===================================================================
+
+    def _formatear_fecha(self, fecha_val):
+        """Convierte una fecha (string 'YYYY-MM-DD', date o datetime) a 'DD/MM/YYYY'."""
+        if not fecha_val or fecha_val == '-':
+            return '-'
+        from datetime import datetime
+        if isinstance(fecha_val, str):
+            try:
+                dt = datetime.strptime(fecha_val, '%Y-%m-%d')
+                return dt.strftime('%d/%m/%Y')
+            except ValueError:
+                return fecha_val  # Si ya viene en otro formato, la retorna tal cual
+        elif hasattr(fecha_val, 'strftime'):
+            return fecha_val.strftime('%d/%m/%Y')
+        return str(fecha_val)
 
     def _get_actividad_codigo(self):
         if self.actividad_id:
