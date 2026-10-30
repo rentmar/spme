@@ -2,7 +2,7 @@
 
 from django.apps import apps
 from typing import List, Dict, Optional, Any
-
+from spme_validaciones.services.consolidacion.service import ConsolidacionValidacionService
 
 class ValidadoresDocumentoService:
     """
@@ -49,6 +49,11 @@ class ValidadoresDocumentoService:
     ESTADO_APROBADO = 'APROBADO'
     ESTADO_RECHAZADO = 'RECHAZADO'
     ESTADO_SIN_REVISORES = 'SIN_REVISORES'
+
+    def __init__(self):
+        #Inicializacion del servicio de consolidacion
+        self.consolidacion_service = ConsolidacionValidacionService() if ConsolidacionValidacionService else None
+    
     
     # ------------------------------------------------------------------
     # MÉTODOS PRIVADOS
