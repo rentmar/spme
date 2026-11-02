@@ -1248,6 +1248,7 @@ class RendicionCuentas(models.Model):
 
             #Datos de la tarea
             'tarea_id': self.tarea_id,
+            'codigo_tarea': self._get_tarea_codigo(),
             'tarea_nombre': self._get_tarea_nombre(),
 
             #Solicitante y fechas
@@ -1319,10 +1320,15 @@ class RendicionCuentas(models.Model):
         if self.actividad_id:
             return getattr(self.actividad, 'nombreCorto', None) or str(self.actividad)
         return None
+
+    def _get_tarea_codigo(self):
+        if self.tarea_id:
+            return getattr(self.tarea, 'codigo', None) or str(self.tarea)
+        return None
     
     def _get_tarea_nombre(self):
         if self.tarea_id:
-            return getattr(self.tarea, 'descripcionTarea', None) or str(self.tarea)
+            return getattr(self.tarea, 'titulo', None) or str(self.tarea)
         return None
     
     def _get_proyecto_id(self):

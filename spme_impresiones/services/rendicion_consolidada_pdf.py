@@ -247,6 +247,7 @@ class RendicionConsolidadaPDFGenerator(BasePDFGenerator):
         try:
             writer = PdfWriter()
             num_form = context.get('numero_formulario', 'S/N')
+            subtipo = context.get('subtipo_documento', 'S/S')
             paginas_agregadas = 0
 
             # 1. FORMULARIO COMPLETO: Rendición de Cuentas General
@@ -256,7 +257,7 @@ class RendicionConsolidadaPDFGenerator(BasePDFGenerator):
                     'numero_formulario': num_form,
                     'documento_activo': 'rendicion_general',
                     'tipo_documento': 'RENDICIÓN DE CUENTAS',
-                    'subtipo_documento': f'{num_form}',
+                    'subtipo_documento': f'{num_form} - {subtipo}',
                 }
                 html_str = render_to_string(template_name, ctx_rendicion)
                 
@@ -276,7 +277,7 @@ class RendicionConsolidadaPDFGenerator(BasePDFGenerator):
                     'numero_formulario': num_form,
                     'documento_activo': 'solicitud_fondos', # Identificador para la plantilla HTML
                     'tipo_documento': 'RENDICION DE CUENTAS - SOLICITUD DE FONDOS',
-                    'subtipo_documento': f"{num_form}",
+                    'subtipo_documento': f"{num_form} - {subtipo}",
                     'info_general_solicitud': {
                         'numero_formulario': num_form,
                         'fecha_solicitud': context.get('fecha_solicitud', '-'),
@@ -301,7 +302,7 @@ class RendicionConsolidadaPDFGenerator(BasePDFGenerator):
                     'numero_formulario': num_form,
                     'documento_activo': 'solicitud_viaje', # Identificador para la plantilla HTML
                     'tipo_documento': 'RENDICION DE CUENTAS - SOLICITUD DE VIAJE',
-                    'subtipo_documento': f"{num_form}",
+                    'subtipo_documento': f"{num_form} - {subtipo}",
                 }
                 html_str_viaje = render_to_string(template_name, ctx_viaje)
 

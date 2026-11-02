@@ -28,7 +28,9 @@ from ..services import (
 from ..services.rendicion_consolidada_pdf import (
     RendicionConsolidadaPDFGenerator,
 )
-
+from ..services.rendicion_consolidada_tarea_pdf import (
+    RendicionConsolidadaTareaPDFGenerator,
+)
 
 
 class ReportesViewSet(viewsets.ViewSet):
@@ -81,7 +83,7 @@ class ReportesViewSet(viewsets.ViewSet):
                 {'error': f'Error al generar reporte: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-     
+        
     @action(detail=False, methods=['get'], url_path='solicitud-pago-directo/(?P<pk>[^/.]+)')
     def solicitud_pago_directo(self, request, pk=None):
         """
@@ -802,5 +804,38 @@ class ReportesViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response(
                 {'error': f'Error al generar reporte consolidado v2: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+    @action(detail=False, methods=['get'], url_path='rendicion-cuentas-tarea-v2/(?P<pk>[^/.]+)')
+    def rendicion_cuentas_tarea_v2(self, request, pk=None):
+        """
+        Generar reporte de rendición de cuentas consolidado exclusivo para TAREA (v2)
+        (Rendición general de tarea + Solicitud de Fondos de Tarea / Solicitud de Viaje de Tarea)
+        """
+        try:
+            rendicion = get_object_or_404(RendicionCuentas, pk=pk)
+
+            #Validar que corresponda a una rendicion de cuentas del tipo tarea
+            if rendicion.subtipo_documento != RendicionCuentas.SubTipoDocumento.TAREA:
+                return Response(
+                    {
+                        'error': 'Tipo de documento incorrecto',
+                        'message': 'Esta rendición no corresponde a una Tarea.',
+                        'recomendacion': f'/api/impresiones/rendicion-cuentas/{pk}/pdf/'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            #Instanciar el generador consolidado de tareas y retorna el pdf
+            generator = RendicionConsolidadaTareaPDFGenerator()
+            return generator.generate(rendicion)
+        
+        except Exception as e:
+            return Response(
+                {
+                    'error': 'Error al generar reporte consolidado de tarea v2',
+                    'message': str(e),
+                },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
