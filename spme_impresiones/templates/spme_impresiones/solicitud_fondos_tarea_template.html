@@ -1,6 +1,52 @@
 {% extends "spme_impresiones/base_template.html" %}
 
 {% block content %}
+    <style>
+        /* Configuración de página y optimización vertical */
+        @page {
+            size: letter;
+            margin: 1cm;
+        }
+        .seccion {
+            margin-bottom: 4px !important;
+            padding: 4px 8px !important;
+        }
+        .seccion-titulo {
+            font-size: 9px !important;
+            margin-bottom: 2px !important;
+            padding-bottom: 1px !important;
+        }
+        .campo {
+            margin-bottom: 2px !important;
+        }
+        .etiqueta {
+            font-size: 7px !important;
+        }
+        .valor {
+            font-size: 8px !important;
+        }
+        .tabla-gastos th, .tabla-gastos td {
+            padding: 3px 5px !important;
+            font-size: 8px !important;
+        }
+        .forma-pago-detalle {
+            margin-top: 2px !important;
+            padding: 3px !important;
+        }
+        .firma-area {
+            margin-top: 4px !important;
+        }
+
+        /* Reglas para evitar cortes en la tabla de gastos y repetir encabezados */
+        .tabla-gastos tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+        .tabla-gastos thead {
+            display: table-header-group;
+        }
+    </style>
+
     <!-- ENCABEZADO -->
     <div class="seccion compact-section" style="background: linear-gradient(to right, #1976d2, #2196f3); color: white; text-align: center; margin-bottom: 2px; padding: 2px 10px;">
         <div style="font-size: 11px; font-weight: bold;">SOLICITUD DE FONDOS - SUBACTIVIDAD</div>
@@ -41,6 +87,11 @@
             <div class="seccion-titulo" style="background: #ff9800; margin-bottom: 1px; padding-bottom: 1px;">📅 ACTIVIDAD RAIZ</div>
             <div class="campo"><div class="etiqueta">Código:</div><div class="valor">{{ codigo_actividad|default:"-" }}</div></div>
             <div class="campo"><div class="etiqueta">Nombre:</div><div class="valor texto-largo">{{ nombre_actividad|default:"-" }}</div></div>
+            <div class="grid-3" style="margin-top: 3px;">
+                <div class="campo"><div class="etiqueta">Ejecución:</div><div class="valor">{{ fecha_ejecucion|default:"-" }}</div></div>
+                <div class="campo"><div class="etiqueta">Inicio:</div><div class="valor">{{ fecha_inicio|default:"-" }}</div></div>
+                <div class="campo"><div class="etiqueta">Fin:</div><div class="valor">{{ fecha_fin|default:"-" }}</div></div>
+            </div>
         </div>
         {% endif %}
         

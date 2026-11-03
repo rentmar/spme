@@ -36,6 +36,8 @@ class SolicitudViajeTareaPDFGenerator(BasePDFGenerator):
         # Fechas
         fecha_solicitud = obj.fechaSolicitud.strftime('%d/%m/%Y') if obj.fechaSolicitud else "No especificada"
         fecha_evento = obj.fechaEvento.strftime('%d/%m/%Y') if obj.fechaEvento else "No especificada"
+        fecha_inicio = obj.fechaInicio.strftime('%d/%m/%Y') if obj.fechaInicio else "-"
+        fecha_fin = obj.fechaFin.strftime('%d/%m/%Y') if obj.fechaFin else "-"
         
         # Datos de la tarea
         tarea_data = self._get_tarea_data(obj)
@@ -83,6 +85,8 @@ class SolicitudViajeTareaPDFGenerator(BasePDFGenerator):
             'evento': obj.evento or "No especificado",
             'lugar_evento': obj.lugarEvento or "No especificado",
             'fecha_evento': fecha_evento,
+            'fecha_inicio': fecha_inicio,
+            'fecha_fin': fecha_fin,
             'instituciones_participantes': obj.institucionesParticipantes or "No especificado",
             'organizador': obj.organizador or "No especificado",
             'quien_cubre_gastos': obj.quienCubreGastos or "No especificado",

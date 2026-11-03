@@ -74,6 +74,8 @@ class SolicitudViajePDFGenerator(BasePDFGenerator):
             'fecha_evento': obj.fechaEvento.strftime('%d/%m/%Y') if obj.fechaEvento else "No especificada",
             'instituciones_participantes': obj.institucionesParticipantes or "No especificado",
             'organizador': obj.organizador or "No especificado",
+            'fecha_inicio': obj.fechaInicio.strftime('%d/%m/%Y') if obj.fechaInicio else '-' ,
+            'fecha_fin': obj.fechaFin.strftime('%d/%m/%Y') if obj.fechaFin else '-' ,
             
             # Justificación y fondos
             'quien_cubre_gastos': obj.quienCubreGastos or "No especificado",

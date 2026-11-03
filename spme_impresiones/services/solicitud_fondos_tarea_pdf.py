@@ -125,6 +125,9 @@ class SolicitudFondosTareaPDFGenerator(BasePDFGenerator):
             'nombre_actividad': nombre_actividad,
             'estado_actividad': estado_actividad,
             'tiene_actividad_asociada': bool(actividad),
+            'fecha_ejecucion': obj.fechaRealizacionActividad.strftime('%d/%m/%Y') if obj.fechaRealizacionActividad else '-',
+            'fecha_inicio': obj.fechaInicio.strftime('%d/%m/%Y') if obj.fechaInicio else '-' ,
+            'fecha_fin': obj.fechaFin.strftime('%d/%m/%Y') if obj.fechaFin else '-' ,
             
             # Solicitante (desde el servicio)
             'nombre_solicitante': contexto_validacion['solicitante']['nombre'],

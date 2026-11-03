@@ -68,6 +68,8 @@ class SolicitudPagoDirectoPDFGenerator(BasePDFGenerator):
             'nombre_actividad': obj.actividad.nombreCorto if obj.actividad else "No especificado",
             'estado_actividad': self._get_estado_actividad(obj),
             'fecha_ejecucion': obj.fechaRealizacionActividad.strftime('%d/%m/%Y') if obj.fechaRealizacionActividad else "No especificada",
+            'fecha_inicio': obj.fechaInicio.strftime('%d/%m/%Y') if obj.fechaInicio else '-',
+            'fecha_fin': obj.fechaFin.strftime('%d/%m/%Y') if obj.fechaInicio else '-',
             'descripcion_actividad': obj.descripcion_actividad or "No especificada",
             'objetivo_actividad': obj.objetivo_actividad or "No especificado",
             

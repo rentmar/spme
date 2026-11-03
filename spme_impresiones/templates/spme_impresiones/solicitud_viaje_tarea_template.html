@@ -1,6 +1,33 @@
 {% extends "spme_impresiones/base_template.html" %}
 
 {% block content %}
+    <style>
+        /* Configuración de página y tamaño Carta */
+        @page {
+            size: letter;
+            margin: 1cm;
+        }
+
+        /* Evitar que las tarjetas e información general se fragmenten entre páginas */
+        .seccion, .info-card {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        /* Reglas para evitar cortes en la tabla de gastos y repetir encabezados */
+        .tabla-gastos {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .tabla-gastos tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+        .tabla-gastos thead {
+            display: table-header-group;
+        }
+    </style>
+
     <!-- ENCABEZADO -->
     <div class="seccion compact-section" style="background: linear-gradient(to right, #1976d2, #2196f3); color: white; text-align: center; margin-bottom: 1px; padding: 2px 10px;">
         <div style="font-size: 11px; font-weight: bold;">SOLICITUD DE VIAJE - SUBACTIVIDAD</div>
@@ -46,11 +73,15 @@
                 <div class="campo"><div class="etiqueta">Evento:</div><div class="valor texto-largo">{{ evento|default:"-" }}</div></div>
                 <div class="campo"><div class="etiqueta">Lugar:</div><div class="valor">{{ lugar_evento|default:"-" }}</div></div>
             </div>
-            <div class="grid-2">
-                <div class="campo"><div class="etiqueta">Fecha:</div><div class="valor">{{ fecha_evento|default:"-" }}</div></div>
-                <div class="campo"><div class="etiqueta">Organizador:</div><div class="valor">{{ organizador|default:"-" }}</div></div>
+            <div class="grid-3" style="margin-top: 2px;">
+                <div class="campo"><div class="etiqueta">Fecha Evento:</div><div class="valor">{{ fecha_evento|default:"-" }}</div></div>
+                <div class="campo"><div class="etiqueta">Fecha Inicio:</div><div class="valor">{{ fecha_inicio|default:"-" }}</div></div>
+                <div class="campo"><div class="etiqueta">Fecha Fin:</div><div class="valor">{{ fecha_fin|default:"-" }}</div></div>
             </div>
-            <div class="campo"><div class="etiqueta">Instituciones:</div><div class="valor texto-largo">{{ instituciones_participantes|default:"-" }}</div></div>
+            <div class="grid-2" style="margin-top: 2px;">
+                <div class="campo"><div class="etiqueta">Organizador:</div><div class="valor">{{ organizador|default:"-" }}</div></div>
+                <div class="campo"><div class="etiqueta">Instituciones:</div><div class="valor texto-largo">{{ instituciones_participantes|default:"-" }}</div></div>
+            </div>
         </div>
         
         <!-- JUSTIFICACIÓN -->

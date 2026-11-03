@@ -191,8 +191,24 @@ class SolicitudFondos(models.Model):
             'solicitante_id': self.usuario_id,
             'solicitante_nombre': self.usuario.get_full_name() if self.usuario else 'Sistema',
             'fecha_solicitud': (
-                self.fechaSolicitud.strftime('%Y-%m-%d') 
+                self.fechaSolicitud.strftime('%d/%m/%Y')
                 if self.fechaSolicitud 
+                else None
+            ),
+            #Fechas de la actividad
+            'fecha_ejecucion': (
+                self.fechaRealizacionActividad.strftime('%d/%m/%Y')
+                if self.fechaRealizacionActividad
+                else None           
+            ),
+            'fecha_inicio': (
+                self.fechaInicio.strftime('%d/%m/%Y')
+                if self.fechaInicio
+                else None
+            ),
+            'fecha_fin': (
+                self.fechaFin.strftime('%d/%m/%Y')
+                if self.self.fechaFin
                 else None
             ),
             'proyecto_id': self._get_proyecto_id(),

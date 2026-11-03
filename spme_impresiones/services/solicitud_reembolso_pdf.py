@@ -67,6 +67,8 @@ class SolicitudReembolsoPDFGenerator(BasePDFGenerator):
             'codigo_actividad': obj.actividad.codigo if obj.actividad else "No asignado",
             'nombre_actividad': obj.actividad.nombreCorto if obj.actividad else "No especificado",
             'fecha_ejecucion': obj.fechaRealizacionActividad.strftime('%d/%m/%Y') if obj.fechaRealizacionActividad else "No especificada",
+            'fecha_inicio': obj.fechaInicio.strftime('%d/%m/%Y') if obj.fechaInicio else '-',
+            'fecha_fin': obj.fechaFin.strftime('%d/%m/%Y') if obj.fechaFin else '-',
             'descripcion_actividad': obj.descripcion_actividad or "No especificada",
             'objetivo_actividad': obj.objetivo_actividad or "No especificado",
             

@@ -35,6 +35,8 @@ class SolicitudPagoDirectoTareaPDFGenerator(BasePDFGenerator):
         
         fecha_solicitud = obj.fechaSolicitud.strftime('%d/%m/%Y') if obj.fechaSolicitud else "No especificada"
         fecha_realizacion = obj.fechaRealizacionActividad.strftime('%d/%m/%Y') if obj.fechaRealizacionActividad else "No especificada"
+        fecha_inicio = obj.fechaInicio.strftime('%d/%m/%Y') if obj.fechaInicio else '-'
+        fecha_fin = obj.fechaFin.strftime('%d/%m/%Y') if obj.fechaFin else '-'
         
         tarea_data = self._get_tarea_data(obj)
         actividad_data = self._get_actividad_data(obj)
@@ -75,6 +77,8 @@ class SolicitudPagoDirectoTareaPDFGenerator(BasePDFGenerator):
             
             'lugar_solicitud': obj.lugarSolicitud or "No especificado",
             'fecha_realizacion': fecha_realizacion,
+            'fecha_inicio': fecha_inicio,
+            'fecha_fin': fecha_fin,
             'descripcion_actividad': obj.descripcion_actividad or "No especificada",
             'objetivo_actividad': obj.objetivo_actividad or "No especificado",
             'monto_solicitado': monto_solicitado,

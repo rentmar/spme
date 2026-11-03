@@ -2,12 +2,24 @@
 
 {% block content %}
 <style>
+    /* Configuración de página y tamaño Carta */
+    @page {
+        size: letter;
+        margin: 1cm;
+    }
+
+    /* Evitar que las tarjetas e información general se fragmenten entre páginas */
+    .seccion, .info-card {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
     .solicitud-header {
         background: linear-gradient(to right, #1976d2, #2196f3);
         color: white;
-        padding: 8px 12px;
+        padding: 6px 10px;
         border-radius: 4px;
-        margin-bottom: 10px;
+        margin-bottom: 6px;
         text-align: center;
     }
     
@@ -17,29 +29,29 @@
     }
     
     .seccion {
-        margin-bottom: 8px;
+        margin-bottom: 6px;
     }
     
     .seccion-titulo {
         background-color: #1976d2;
         color: white;
-        padding: 5px 8px;
+        padding: 4px 6px;
         font-size: 9px;
         font-weight: bold;
         border-radius: 3px;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
     }
     
     .info-card {
         border: 1px solid #e0e0e0;
         border-radius: 4px;
-        padding: 8px;
-        margin-bottom: 8px;
+        padding: 6px 8px;
+        margin-bottom: 6px;
         background: #fafafa;
     }
     
     .campo-fila {
-        margin-bottom: 4px;
+        margin-bottom: 3px;
     }
     
     .etiqueta-card {
@@ -47,28 +59,40 @@
         font-weight: bold;
         color: #555;
         display: inline-block;
-        min-width: 55px;
+        min-width: 65px;
     }
     
     .valor-card {
-        font-size: 9px;
+        font-size: 8.5px;
         background: #f8f9fa;
-        padding: 2px 6px;
+        padding: 2px 5px;
         border-radius: 2px;
         border: 1px solid #e0e0e0;
     }
     
+    /* Configuración limpia de la tabla de gastos (sin propiedades desconocidas) */
     .tabla-gastos {
         width: 100%;
         border-collapse: collapse;
         font-size: 8px;
-        margin: 6px 0;
+        margin: 4px 0;
+    }
+
+    /* Evita que una fila individual se corte a la mitad si cae al final de la hoja */
+    .tabla-gastos tr {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    /* Repite automáticamente los encabezados de la tabla en la nueva página */
+    .tabla-gastos thead {
+        display: table-header-group;
     }
     
     .tabla-gastos th {
         background: #1976d2;
         color: white;
-        padding: 4px 3px;
+        padding: 3px;
         font-size: 8px;
         font-weight: bold;
         text-align: left;
@@ -76,7 +100,7 @@
     }
     
     .tabla-gastos td {
-        padding: 3px;
+        padding: 2.5px 3px;
         border: 1px solid #ddd;
         font-size: 8px;
         vertical-align: top;
@@ -92,8 +116,8 @@
     }
     
     .alerta-pago {
-        padding: 5px 8px;
-        margin-top: 6px;
+        padding: 4px 6px;
+        margin-top: 4px;
         font-size: 8px;
     }
     
@@ -118,7 +142,9 @@
     }
     
     .firma-seccion {
-        margin-top: 12px;
+        margin-top: 8px;
+        page-break-inside: avoid;
+        break-inside: avoid;
     }
     
     .firma-grid {
@@ -127,31 +153,31 @@
     
     .firma-grid td {
         text-align: center;
-        padding: 0 8px;
+        padding: 0 6px;
         vertical-align: bottom;
     }
     
     .firma-nombre-persona {
-        font-size: 10px;
+        font-size: 9.5px;
         font-weight: bold;
-        margin-bottom: 2px;
+        margin-bottom: 1px;
     }
     
     .firma-info {
-        font-size: 8px;
+        font-size: 7.5px;
         color: #1976d2;
-        margin-bottom: 2px;
+        margin-bottom: 1px;
     }
     
     .firma-linea {
         border-top: 1px solid #333;
         width: 85%;
-        margin: 12px auto 0 auto;
-        padding-top: 3px;
+        margin: 10px auto 0 auto;
+        padding-top: 2px;
     }
     
     .firma-cargo-etiqueta {
-        font-size: 7px;
+        font-size: 6.5px;
         color: #888;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -161,7 +187,7 @@
         text-align: center;
         color: #999;
         font-style: italic;
-        padding: 8px;
+        padding: 6px;
     }
 </style>
 
@@ -172,7 +198,7 @@
 
 <!-- SECCIÓN 1: DATOS DEL SOLICITANTE -->
 <div class="info-card">
-    <div class="seccion-titulo" style="margin-bottom: 6px;">DATOS DEL SOLICITANTE</div>
+    <div class="seccion-titulo" style="margin-bottom: 4px;">DATOS DEL SOLICITANTE</div>
     
     <table style="width: 100%;">
         <tr>
@@ -200,9 +226,9 @@
 
 <!-- SECCIÓN 2: INFORMACIÓN DEL VIAJE -->
 <div class="info-card">
-    <div class="seccion-titulo" style="background: #ff9800; margin-bottom: 6px;">INFORMACIÓN DEL VIAJE</div>
+    <div class="seccion-titulo" style="background: #ff9800; margin-bottom: 4px;">INFORMACIÓN DEL VIAJE</div>
     
-    <table style="width: 100%; margin-bottom: 4px;">
+    <table style="width: 100%; margin-bottom: 3px;">
         <tr>
             <td style="width: 50%;">
                 <div class="campo-fila">
@@ -220,7 +246,7 @@
         <tr>
             <td style="width: 50%;">
                 <div class="campo-fila">
-                    <span class="etiqueta-card">Fecha:</span>
+                    <span class="etiqueta-card">Fecha Evento:</span>
                     <span class="valor-card">{{ fecha_evento|default:"-" }}</span>
                 </div>
             </td>
@@ -228,6 +254,20 @@
                 <div class="campo-fila">
                     <span class="etiqueta-card">Organizador:</span>
                     <span class="valor-card">{{ organizador|default:"-" }}</span>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 50%;">
+                <div class="campo-fila">
+                    <span class="etiqueta-card">Fecha Inicio:</span>
+                    <span class="valor-card">{{ fecha_inicio|default:"-" }}</span>
+                </div>
+            </td>
+            <td style="width: 50%;">
+                <div class="campo-fila">
+                    <span class="etiqueta-card">Fecha Fin:</span>
+                    <span class="valor-card">{{ fecha_fin|default:"-" }}</span>
                 </div>
             </td>
         </tr>
@@ -241,9 +281,9 @@
 
 <!-- SECCIÓN 3: JUSTIFICACIÓN Y FINANCIAMIENTO -->
 <div class="info-card">
-    <div class="seccion-titulo" style="background: #9c27b0; margin-bottom: 6px;">JUSTIFICACIÓN Y FINANCIAMIENTO</div>
+    <div class="seccion-titulo" style="background: #9c27b0; margin-bottom: 4px;">JUSTIFICACIÓN Y FINANCIAMIENTO</div>
     
-    <table style="width: 100%; margin-bottom: 4px;">
+    <table style="width: 100%; margin-bottom: 3px;">
         <tr>
             <td style="width: 50%;">
                 <div class="campo-fila">
@@ -312,9 +352,9 @@
 
 <!-- SECCIÓN 5: FORMA DE PAGO -->
 <div class="info-card">
-    <div class="seccion-titulo" style="background: #607d8b; margin-bottom: 6px;">FORMA DE PAGO</div>
+    <div class="seccion-titulo" style="background: #607d8b; margin-bottom: 4px;">FORMA DE PAGO</div>
     
-    <table style="width: 100%; margin-bottom: 4px;">
+    <table style="width: 100%; margin-bottom: 3px;">
         <tr>
             <td style="width: 50%;">
                 <div class="campo-fila">
@@ -324,7 +364,7 @@
             </td>
             <td style="width: 50%;">
                 <div class="campo-fila">
-                    <span class="etiqueta-card">Fecha:</span>
+                    <span class="etiqueta-card">Fecha Solicitud:</span>
                     <span class="valor-card">{{ fecha_solicitud|default:"-" }}</span>
                 </div>
             </td>
@@ -333,7 +373,7 @@
     
     <div class="campo-fila">
         <span class="etiqueta-card">Forma de Pago:</span>
-        <span style="background: #e3f2fd; padding: 3px 8px; border-radius: 3px; font-size: 9px; font-weight: bold;">
+        <span style="background: #e3f2fd; padding: 2px 6px; border-radius: 3px; font-size: 8.5px; font-weight: bold;">
             {{ forma_pago|default:"No especificada" }}
         </span>
     </div>
@@ -349,7 +389,7 @@
     {% if datos_transferencia.mostrar_transferencia %}
     <div class="alerta-pago alerta-transferencia">
         <strong>Transferencia Bancaria:</strong>
-        <table style="width: 100%; margin-top: 3px; font-size: 8px;">
+        <table style="width: 100%; margin-top: 2px; font-size: 8px;">
             <tr>
                 <td style="width: 50%;"><span class="etiqueta-card">Titular:</span> {{ datos_transferencia.transferencia.nombre_transferencia|default:"-" }}</td>
                 <td style="width: 50%;"><span class="etiqueta-card">C.I.:</span> {{ datos_transferencia.transferencia.ci_transferencia|default:"-" }}</td>
@@ -370,7 +410,7 @@
     {% if datos_transferencia.mostrar_cheque %}
     <div class="alerta-pago alerta-cheque">
         <strong>Cheque:</strong>
-        <table style="width: 100%; margin-top: 3px; font-size: 8px;">
+        <table style="width: 100%; margin-top: 2px; font-size: 8px;">
             <tr>
                 <td style="width: 50%;"><span class="etiqueta-card">Beneficiario:</span> {{ datos_transferencia.cheque.nombre_cheque|default:solicitante.nombre }}</td>
                 <td style="width: 50%;"><span class="etiqueta-card">C.I.:</span> {{ datos_transferencia.cheque.ci_cheque|default:solicitante.documento_identidad }}</td>
@@ -383,7 +423,7 @@
     {% if datos_transferencia.mostrar_otros %}
     <div class="alerta-pago alerta-otros">
         <strong>Pago a Tercero:</strong>
-        <table style="width: 100%; margin-top: 3px; font-size: 8px;">
+        <table style="width: 100%; margin-top: 2px; font-size: 8px;">
             <tr>
                 <td style="width: 50%;"><span class="etiqueta-card">Nombre:</span> {{ datos_transferencia.otros.nombre_otros|default:"-" }}</td>
                 <td style="width: 50%;"><span class="etiqueta-card">C.I.:</span> {{ datos_transferencia.otros.ci_otros|default:"-" }}</td>
@@ -398,7 +438,7 @@
     <div class="seccion-titulo">FIRMAS DE APROBACIÓN</div>
     
     {% if estado_documento == 'SIN_REVISORES' %}
-    <div class="alerta-pago alerta-otros" style="text-align: center; margin-bottom: 8px;">
+    <div class="alerta-pago alerta-otros" style="text-align: center; margin-bottom: 6px;">
         <strong>⚠️ Este documento no tiene revisores asignados</strong>
     </div>
     {% endif %}
@@ -434,7 +474,7 @@
     </table>
     
     {% if codigo_actividad != "No asignado" %}
-    <div style="margin-top: 8px; font-size: 8px; text-align: center; color: #666;">
+    <div style="margin-top: 6px; font-size: 8px; text-align: center; color: #666;">
         Actividad: {{ nombre_actividad }} ({{ codigo_actividad }})
     </div>
     {% endif %}
