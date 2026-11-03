@@ -208,7 +208,7 @@ class SolicitudFondos(models.Model):
             ),
             'fecha_fin': (
                 self.fechaFin.strftime('%d/%m/%Y')
-                if self.self.fechaFin
+                if self.fechaFin
                 else None
             ),
             'proyecto_id': self._get_proyecto_id(),
