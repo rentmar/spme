@@ -1,4 +1,4 @@
-# spme/spme_validaciones/services/consolidacion/configuracion.py
+# spme/spme_validaciones/services/consolidacion/configuracion.py 
 from .modelos import ConfiguracionMetodo, MetodoResolucion
 
 CONFIGURACIONES = {

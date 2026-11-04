@@ -7,6 +7,10 @@ from ..repositories.solicitudes_pago_directo_usuario_repository import (
     SolicitudesPagoDirectoUsuarioRepository
 )
 
+#Motor de consolidacion
+from .consolidacion.lote_consolidacion_service import LoteConsolidacionService
+from .consolidacion.modelos import MetodoResolucion
+
 logger = logging.getLogger(__name__)
 
 
@@ -25,14 +29,30 @@ class SolicitudesPagoDirectoUsuarioService:
     ESTADO_PENDIENTE = 'Pendiente'
     ESTADO_SIN_REVISORES = 'SinRevisores'
     
-    def __init__(self, repository: Optional[SolicitudesPagoDirectoUsuarioRepository] = None):
+    def __init__(
+        self, 
+        repository: Optional[SolicitudesPagoDirectoUsuarioRepository] = None,
+        lote_consolidacion_service: Optional[LoteConsolidacionService] = None,    
+    ):
         self.repository = repository or SolicitudesPagoDirectoUsuarioRepository()
+        self.lote_service = lote_consolidacion_service or LoteConsolidacionService()
     
     def obtener_solicitudes_usuario(self, usuario_id: int) -> Dict[str, Any]:
-        """Método principal que orquesta la obtención y estructuración de datos."""
+        """
+        Método principal que orquesta la obtención y estructuración de datos 
+        calculando los estados de todo el lote en memoria
+        """
         try:
-            solicitudes = self.repository.obtener_solicitudes_por_usuario(usuario_id)
-            
+            # 1. Obtenemos las solicitudes del repositorio asegurando el prefetch de validaciones
+            solicitudes = list(self.repository.obtener_solicitudes_por_usuario(usuario_id))
+
+            # 2. PROCESAMIENTO POR LOTE: Consolidamos todas las solicitudes de golpe en memoria
+            estados_lote = self.lote_service.procesarLoteEnMemoria(
+                tipo_solicitud="SOLICITUD_PAGO_DIRECTO",
+                solicitudes=solicitudes,
+                metodo_resolucion=MetodoResolucion.DECISORIO
+            )
+
             solicitudes_procesadas = []
             contadores = {
                 'como_redactor': 0,
@@ -43,10 +63,14 @@ class SolicitudesPagoDirectoUsuarioService:
                 'rechazadas': 0,
                 'sin_revision': 0
             }
-            
+
+            # 3. Procesamos cada solicitud inyectando el estado ya resuelto por el lote
             for solicitud in solicitudes:
                 try:
-                    registro = self._procesar_solicitud(solicitud, usuario_id)
+                    estado_motor = estados_lote.get(solicitud.id, "PENDIENTE")
+                    estado_consolidado = self._mapear_estado_motor(estado_motor)
+                    
+                    registro = self._procesar_solicitud_con_estado(solicitud, usuario_id, estado_consolidado)
                     solicitudes_procesadas.append(registro)
                     self._actualizar_contadores(registro, contadores)
                 except Exception as e:
@@ -55,15 +79,96 @@ class SolicitudesPagoDirectoUsuarioService:
                         exc_info=True
                     )
                     continue
-            
+
             return self._construir_respuesta(solicitudes_procesadas, contadores)
-            
+
         except Exception as e:
             logger.error(
                 f"Error obteniendo solicitudes pago directo para usuario {usuario_id}: {str(e)}",
                 exc_info=True
             )
             raise
+        # try:
+        #     solicitudes = self.repository.obtener_solicitudes_por_usuario(usuario_id)
+            
+        #     solicitudes_procesadas = []
+        #     contadores = {
+        #         'como_redactor': 0,
+        #         'como_revisor': 0,
+        #         'como_redactor_revisor': 0,
+        #         'pendientes_revision': 0,
+        #         'aprobadas': 0,
+        #         'rechazadas': 0,
+        #         'sin_revision': 0
+        #     }
+            
+        #     for solicitud in solicitudes:
+        #         try:
+        #             registro = self._procesar_solicitud(solicitud, usuario_id)
+        #             solicitudes_procesadas.append(registro)
+        #             self._actualizar_contadores(registro, contadores)
+        #         except Exception as e:
+        #             logger.error(
+        #                 f"Error procesando solicitud pago directo {solicitud.id}: {str(e)}",
+        #                 exc_info=True
+        #             )
+        #             continue
+            
+        #     return self._construir_respuesta(solicitudes_procesadas, contadores)
+            
+        # except Exception as e:
+        #     logger.error(
+        #         f"Error obteniendo solicitudes pago directo para usuario {usuario_id}: {str(e)}",
+        #         exc_info=True
+        #     )
+        #     raise
+
+    def _mapear_estado_motor(self, estado_motor: str) -> str:
+        """Mapea los códigos del motor central al contrato del serializer."""
+        mapeo = {
+            "APROBADO": self.ESTADO_APROBADO,
+            "RECHAZADO": self.ESTADO_RECHAZADO,
+            "PENDIENTE": self.ESTADO_PENDIENTE,
+            "SIN_VALIDACIONES": self.ESTADO_SIN_REVISORES
+        }
+        return mapeo.get(estado_motor, self.ESTADO_PENDIENTE)
+
+    def _procesar_solicitud_con_estado(self, solicitud, usuario_id: int, estado_consolidado: str) -> Dict[str, Any]:
+        """Procesa una solicitud individual usando el estado ya consolidado por lotes."""
+        validaciones = solicitud.validaciones.all()
+        
+        es_redactor = self._es_usuario_redactor(usuario_id, validaciones)
+        es_revisor = self._es_usuario_revisor(usuario_id, validaciones)
+        le_pertenece = (solicitud.usuario_id == usuario_id)
+        rol = self._determinar_rol(es_redactor, es_revisor, le_pertenece)
+        
+        datos_mi_validacion = self._obtener_datos_mi_validacion(
+            usuario_id, validaciones, es_revisor
+        )
+        
+        versiones_como_redactor = self._obtener_versiones_como_redactor(
+            usuario_id, validaciones, es_redactor
+        )
+        
+        stats = self.repository.obtener_estadisticas_validaciones(solicitud.id)
+        revisores = self._construir_info_revisores(validaciones, usuario_id)
+        info_actividad = self._construir_info_actividad(solicitud)
+        info_tarea = self._construir_info_tarea(solicitud)
+        
+        return self._construir_registro_solicitud(
+            solicitud=solicitud,
+            le_pertenece=le_pertenece,
+            rol=rol,
+            es_redactor=es_redactor,
+            es_revisor=es_revisor,
+            estado_consolidado=estado_consolidado,
+            datos_mi_validacion=datos_mi_validacion,
+            versiones_como_redactor=versiones_como_redactor,
+            stats=stats,
+            revisores=revisores,
+            actividad=info_actividad,
+            tarea=info_tarea
+        )
     
     def _procesar_solicitud(self, solicitud, usuario_id: int) -> Dict[str, Any]:
         """Procesa una solicitud individual aplicando reglas de negocio."""
